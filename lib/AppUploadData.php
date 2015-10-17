@@ -7,7 +7,6 @@ class AppUploadData
     private $error = array();
     private $logFile = 'uploadDataLog.txt';
     private $retSuccess = array('code' => 0, 'message' => '');
-    const SUFFIX_REAL_TIME_FILE = '_real_time.txt';
     
     public function run($post)
     {
@@ -33,7 +32,7 @@ class AppUploadData
                 return json_encode($this->error);
             }
             
-            $realTimeFile = $realTimeDir . $id . self::SUFFIX_REAL_TIME_FILE;
+            $realTimeFile = $realTimeDir . $id . SUFFIX_REAL_TIME_FILE;
             $retIO = rename($tmpFile, $realTimeFile);
             if ($retIO === false) {
                 $this->setIOError();

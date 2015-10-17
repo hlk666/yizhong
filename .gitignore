@@ -1,1 +1,7 @@
 /.project
+/.settings/
+/.buildpath
+/try/
+/log/*.txt
+/ECG/*/*.txt
+/RealTime/*/*.txt
