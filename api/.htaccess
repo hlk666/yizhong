@@ -1,2 +1,2 @@
 RewriteEngine on 
-RewriteRule ^UPLOADDATA$ app_upload_data.php
+RewriteRule ^app_set_command.php$ set_command.php

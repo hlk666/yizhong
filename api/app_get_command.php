@@ -8,7 +8,6 @@ if (!isset($_GET['patient_id'])) {
 }
 $patientId = $_GET['patient_id'];
 
-$file = PATH_CACHE_CMD . $patientId . '.php';
 $invigilator = new Invigilator($patientId);
 $command = $invigilator->getCommand();
 

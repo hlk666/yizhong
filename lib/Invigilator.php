@@ -11,12 +11,10 @@ class Invigilator
             'mode3_polycardia', 'mode3_bradycardia', 'mode3_lead', 'mode3_record_time');
     private $commands = array();
     private $file = '';
-    private $id;
     
     public function __construct($patientId, $mode = '0')
     {
-        $this->id = $patientId;
-        $this->file = PATH_CACHE_CMD . $this->id . '.php';
+        $this->file = PATH_CACHE_CMD . $patientId . '.php';
         if (file_exists($this->file)) {
             include $this->file;
             if ($info['status'] == 2) {
@@ -34,7 +32,7 @@ class Invigilator
     public function clearCommand()
     {
         $this->commands = array();
-        $this->create($this->id, array());
+        $this->create(array());
     }
     
     public function getCommand()
@@ -65,6 +63,8 @@ class Invigilator
             $this->setStatuAndEndTime($data['action']);
         }
         
+        $this->clearInfoNotNeed();
+        
         $template = $this->getTemplateInfo() . $this->getTemplateCmd();
         
         $handle = fopen($this->file, 'w');
@@ -74,28 +74,28 @@ class Invigilator
     
     private function setDefaultInfo($mode)
     {
-        $this->$info['mode'] = '0';
-        $this->$info['status'] = ($mode == '3') ? '3' : '0';
-        $this->$info['card'] = 'master';
-        $this->$info['all_time'] = 24;
-        $this->$info['check_info'] = 'off';
-        $this->$info['mode1_polycardia'] = 120;
-        $this->$info['mode1_bradycardia'] = 50;
-        $this->$info['mode1_lead'] = 'V5';
-        $this->$info['mode2_record_time'] = 20;
-        $this->$info['mode2_polycardia'] = 120;
-        $this->$info['mode2_bradycardia'] = 50;
-        $this->$info['mode2_regular_time'] = 1;
-        $this->$info['mode2_premature_beat'] = 8;
-        $this->$info['mode2_arrhythmia'] = 'on';
-        $this->$info['mode2_pacemaker'] = 'on';
-        $this->$info['mode2_lead'] = 'V5';
-        $this->$info['mode3_polycardia'] = 120;
-        $this->$info['mode3_bradycardia'] = 50;
-        $this->$info['mode3_lead'] = 'V5';
-        $this->$info['mode3_record_time'] = 20;
-        $this->$info['start_time'] = '';
-        $this->$info['end_time'] = '';
+        $this->info['mode'] = '0';
+        $this->info['status'] = ($mode == '3') ? '3' : '0';
+        $this->info['card'] = 'master';
+        $this->info['all_time'] = 24;
+        $this->info['check_info'] = 'off';
+        $this->info['mode1_polycardia'] = 120;
+        $this->info['mode1_bradycardia'] = 50;
+        $this->info['mode1_lead'] = 'V5';
+        $this->info['mode2_record_time'] = 20;
+        $this->info['mode2_polycardia'] = 120;
+        $this->info['mode2_bradycardia'] = 50;
+        $this->info['mode2_regular_time'] = 1;
+        $this->info['mode2_premature_beat'] = 8;
+        $this->info['mode2_arrhythmia'] = 'on';
+        $this->info['mode2_pacemaker'] = 'on';
+        $this->info['mode2_lead'] = 'V5';
+        $this->info['mode3_polycardia'] = 120;
+        $this->info['mode3_bradycardia'] = 50;
+        $this->info['mode3_lead'] = 'V5';
+        $this->info['mode3_record_time'] = 20;
+        $this->info['start_time'] = '';
+        $this->info['end_time'] = '';
     }
     
     private function setStatuAndEndTime($action)
@@ -122,7 +122,6 @@ class Invigilator
         $template .= '$info = array();' . "\n";
         
         foreach ($this->info as $key => $value) {
-            $template .= '$info[\'mode\'] = \'' . $this->info['mode'] . "';\n";
             $template .= "\$info['$key'] = '$value';\n";
         }
         $template .= "\n";
@@ -137,5 +136,15 @@ class Invigilator
             $template .= "\$command['$key'] = '$value';\n";
         }
         return $template;
+    }
+    
+    private function clearInfoNotNeed()
+    {
+        if (isset($this->info['patient_id'])) {
+            unset($this->info['patient_id']);
+        }
+        if (isset($this->info['action'])) {
+            unset($this->info['action']);
+        }
     }
 }

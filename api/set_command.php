@@ -6,12 +6,8 @@ if (!isset($_GET['patient_id']) && !isset($_POST['patient_id'])) {
     echo 'param error.';
     exit;
 }
-    
-$data = array_merge($_GET, $_POST);
 
-if (isset($data['status'])) {
-    unset($data['status']);
-}
+$data = array_merge($_GET, $_POST);
 
 $patientId = $data['patient_id'];
 $mode = isset($data['mode']) ? $data['mode'] : '0';
