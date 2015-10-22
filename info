@@ -16,3 +16,16 @@
 非强制报警参数的几个值
 
 收到或者自动判断结束监护时要回复状态数据
+
+郭天海那边的接口
+需要加上医院id，当日的范围限制用yyyymmdd来做就可以
+用监护结束时间来判断
+用表管理监护结束时间的状态
+发送结束命令的时候更新此表(医生端-setCommand接口-getCommand接口自动结束)
+
+app_upload_data
+app_get_patient
+app_get_command
+app_set_command
+app_set_param
+
