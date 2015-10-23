@@ -15,4 +15,5 @@ $mode = isset($data['mode']) ? $data['mode'] : '0';
 $invigilator = new Invigilator($patientId, $mode);
 $invigilator->create($data);
 
+echo json_encode(array('code' => '0'));
 exit;

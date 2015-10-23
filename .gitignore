@@ -5,3 +5,4 @@
 /log/*.txt
 /ECG/*/*.txt
 /RealTime/*/*.txt
+/cache/cmd/*.php

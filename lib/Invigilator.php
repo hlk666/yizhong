@@ -1,4 +1,6 @@
 <?php
+require_once PATH_LIB . 'Logger.php';
+
 class Invigilator
 {
     private $info = array();
@@ -11,6 +13,7 @@ class Invigilator
             'mode3_polycardia', 'mode3_bradycardia', 'mode3_lead', 'mode3_record_time');
     private $commands = array();
     private $file = '';
+    private $logFile = 'cmdLog.txt';
     
     public function __construct($patientId, $mode = '0')
     {
@@ -47,6 +50,7 @@ class Invigilator
     
     public function create(array $data)
     {
+        Logger::writeCommands($this->logFile, $data);
         $commandKeys = array_intersect($this->allowCommands, array_keys($data));
         foreach ($commandKeys as $cmd) {
             $this->commands[$cmd] = $data[$cmd];
