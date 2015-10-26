@@ -1,2 +1,5 @@
 RewriteEngine on 
 RewriteRule ^app_set_command.php$ set_command.php
+RewriteRule ^app_get_patient$ app_get_patient.php
+RewriteRule ^analytics_get_patients$ analytics_get_patients.php
+RewriteRule ^analytics_upload_report$ analytics_upload_report.php

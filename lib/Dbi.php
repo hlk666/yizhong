@@ -54,6 +54,18 @@ class Dbi
         }
     }
     
+    public function getAllData($sql)
+    {
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
     public function getStatus($patientId)
     {
         try {
@@ -67,17 +79,40 @@ class Dbi
         }
     }
     
-//     public function existXXX($patientId) {
-//         try {
-//             $sql = 'select 1 from XXX where p_id = :id limit 1';
-//             $stmt = $this->pdo->prepare($sql);
-//             $stmt->execute([':id' => $patientId]);
-//             return $stmt->rowCount() > 0;
-//         } catch (Exception $e) {
-//             Logger::write($this->logFile, $e->getMessage());
-//             return 0;
-//         }
-//     }
+    public function existData($tableName, $where = array()) {
+        try {
+            $sql = "select 1 from $tableName where 1";
+            foreach ($where as $key => $value) {
+                $sql .= " and $key = \"$value\"";
+            }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return false;
+        }
+    }
+    
+    public function updateHistoryReport($hospitalId, $patientId, $startTime, $endTime)
+    {
+        try {
+            $sql = 'update patient_history set reported = 1, report_path = :path, report_time = :time 
+                    where hospital_id = :h_id and patient_id = :p_id and start_time = :s_time and end_time = :e_time';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                    ':path' => URL_ROOT . 'report/' . $patientId . '/' . $startTime . '_' . $endTime . '.pdf',
+                    ':time' => date('YmdHis'), 
+                    ':h_id' => $hospitalId, 
+                    ':p_id' => $patientId, 
+                    ':s_time' => $startTime, 
+                    ':e_time' => $endTime
+            ]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     
     public function updateCommand($patientId, $status)
     {

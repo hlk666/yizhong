@@ -8,31 +8,26 @@ class AppUploadData
     private $logFile = 'uploadDataLog.txt';
     private $retSuccess = array('code' => 0, 'message' => '');
     
-    public function run($post)
+    public function run($patientId, $mode, $alert = 0, $data = array())
     {
-        $data = $this->validate($post);
-        if ($data === false) {
+        $ret = $this->validate($patientId, $mode, $data);
+        if ($ret === false) {
             return json_encode($this->error);
         }
-    
-        $id = $data['patient_id'];
-        $mode = $data['mode'];
-        $alert = isset($data['alert']) ? $data['alert'] : 0;
-        $ecgData = $data['data'];
 
         if ($mode == 1) {
-            $realTimeDir = PATH_REAL_TIME . $id . '\\';
+            $realTimeDir = PATH_REAL_TIME . $patientId . '\\';
             if (!is_dir($realTimeDir)) {
                 mkdir($realTimeDir);
             }
             $tmpFile = $realTimeDir . date('YmdHis') . '.tmp';
-            $retIO = $this->writeFile($tmpFile, $ecgData);
+            $retIO = $this->writeFile($tmpFile, $data);
             if ($retIO === false) {
                 $this->setIOError();
                 return json_encode($this->error);
             }
             
-            $realTimeFile = $realTimeDir . $id . SUFFIX_REAL_TIME_FILE;
+            $realTimeFile = $realTimeDir . $patientId . SUFFIX_REAL_TIME_FILE;
             $retIO = rename($tmpFile, $realTimeFile);
             if ($retIO === false) {
                 $this->setIOError();
@@ -41,14 +36,14 @@ class AppUploadData
         }
         
         if ($mode == 2 || $mode == 3) {
-            $file = $this->getEcgFile($id);
-            $retIO = $this->writeFile($file, $ecgData);
+            $file = $this->getEcgFile($patientId);
+            $retIO = $this->writeFile($file, $data);
             if ($retIO === false) {
                 $this->setIOError();
                 return json_encode($this->error);
             }
             
-            $retDB = $this->insertData($id, $file, $alert);
+            $retDB = $this->insertData($patientId, $file, $alert);
             if ($retDB <= 0) {
                 $this->setError(7, 'Server DB error.');
                 return json_encode($this->error);
@@ -57,39 +52,25 @@ class AppUploadData
         return json_encode($this->retSuccess);
     }
     
-    private function validate($input)
+    private function validate($patientId, $mode, $data)
     {
-        if (!isset($input['DATA'])) {
-            $this->setError(1, 'Post data is empty.');
-            return false;
-        }
-        
-        $post = trim($input['DATA']);
-        if (empty($post)) {
-            $this->setError(1, 'Post data is empty.');
-            return false;
-        }
-        
-        $data = json_decode($post, true);
-        if ($data === false || $data === null) {
-            $this->setError(2, 'Json formatter error.');
-            return false;
-        }
-        
-        if (!isset($data['patient_id']) || trim($data['patient_id']) == '') {
+        if (!isset($patientId) || trim($patientId) == '') {
             $this->setError(3, 'Patient id is required.');
             return false;
         }
         
-        if (!isset($data['mode']) || trim($data['mode']) == '' || !in_array($data['mode'], [1, 2, 3])) {
+        if (!isset($mode) || trim($mode) == '' || !in_array($mode, [1, 2, 3])) {
             $this->setError(4, 'Mode is empty or wrong.');
             return false;
         }
         
-        if (!isset($data['data']) || trim($data['data']) == '') {
-            $this->setError(5, 'Detail data is empty.');
+        if (!isset($data) || trim($data) == '') {
+            $this->setError(5, 'Detail data error.');
             return false;
         }
+        
+        //@todo check length of $data here.
+        Logger::write($this->logFile, '\r\nlength of data : ' . strlen($data) . '\r\n');
         return $data;
     }
     
