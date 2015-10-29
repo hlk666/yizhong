@@ -11,12 +11,13 @@ $hospitalId = $_GET['hospital_id'];
 
 //@todo change to two tables
 $sql = 'select patient_id, start_time, end_time, name, age, sex, tel, reported 
-        from patient_history where hospital_id = "' . $hospitalId . '"';
+        from guardian_history where hospital_id = "' . $hospitalId . '"';
 
 if (isset($_GET['reported']) && trim($_GET['reported']) != '') {
     $sql .= ' and reported = "' . $_GET['reported'] . '"';
 }
 
+//@todo if I need to change start_time to end_time here?
 if (isset($_GET['start_time']) && trim($_GET['start_time']) != '') {
     $sql .= ' and start_time >= "' . $_GET['start_time'] . '"';
 }

@@ -75,7 +75,7 @@ class AnalyticsUpload
     
     private function checkPatient($hospitalId, $patientId, $startTime, $endTime)
     {
-        $table = 'patient_history';
+        $table = 'guardian_history';
         $where = array(
                 'hospital_id' => $hospitalId,
                 'patient_id' => $patientId,

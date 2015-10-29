@@ -1,5 +1,6 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
+require_once PATH_LIB . 'Dbi.php';
 
 class Invigilator
 {
@@ -14,9 +15,11 @@ class Invigilator
     private $commands = array();
     private $file = '';
     private $logFile = 'cmdLog.txt';
+    private $patientId;
     
     public function __construct($patientId, $mode = '0')
     {
+        $this->patientId = $patientId;
         $this->file = PATH_CACHE_CMD . $patientId . '.php';
         if (file_exists($this->file)) {
             include $this->file;
@@ -43,6 +46,7 @@ class Invigilator
         if (!empty($this->info['end_time'])) {
             if (time() >= $this->info['end_time']) {
                 $this->commands['action'] = 'end';
+                $this->setEnd();
             }
         }
         return $this->commands;
@@ -50,7 +54,7 @@ class Invigilator
     
     public function create(array $data)
     {
-        Logger::writeCommands($this->logFile, $data);
+        Logger::writeCommands($this->logFile, $data);var_dump($data);
         $commandKeys = array_intersect($this->allowCommands, array_keys($data));
         foreach ($commandKeys as $cmd) {
             $this->commands[$cmd] = $data[$cmd];
@@ -114,9 +118,7 @@ class Invigilator
                 + $this->info['all_time'] * 3600;
         }
         if ($action == 'end') {
-            $this->info['status'] = 2;
-            $this->info['start_time'] = '';
-            $this->info['end_time'] = '';
+            $this->setEnd();
         }
     }
     
@@ -150,5 +152,36 @@ class Invigilator
         if (isset($this->info['action'])) {
             unset($this->info['action']);
         }
+    }
+    
+    private function setEnd()
+    {
+        //@todo after end action or afert diagnose??????
+        $dbi = Dbi::getDbi();
+        $data = $dbi->getPatientInfo($this->patientId);
+        if (empty($data)) {
+            Logger::write($this->logFile, 'try to end a data not existed in basic table.');
+            return;
+        }
+        $data['start_time'] = date('YmdHis', $this->info['start_time']);
+        $data['end_time'] = date('YmdHis', $this->info['end_time']);
+        $existed = $dbi->existData('guardian_history', 
+            array(
+                'hospital_id' => $data['hospital_id'],
+                'patient_id' => $data['patient_id'],
+                'start_time' => $data['start_time'],
+                'end_time' => $data['end_time'],
+            )
+        );
+        if (true == $existed) {
+            //@todo need do something here.
+            Logger::write($this->logFile, 'try to add history that already existed.');
+        } else {
+            $ret = $dbi->addHistory($data);
+        }
+        
+        $this->info['status'] = 2;
+        $this->info['start_time'] = '';
+        $this->info['end_time'] = '';
     }
 }

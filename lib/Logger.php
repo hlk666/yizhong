@@ -25,7 +25,7 @@ class Logger
         foreach ($cmd as $key => $value) {
             $command .= $key . ' => ' . $value . ', ';
         }
-        $command .= "end.";
+        $command .= "*****";
         self::write($fileName, $command);
     }
     
