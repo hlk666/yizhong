@@ -82,14 +82,14 @@ function CheckPost() {
         myform.lead.focus();
         return false;
     }    
-    if (myform.pri_dia.value == "") {
+    if (myform.tentative_diagnose.value == "") {
         alert("请填写患者症状！");
-        myform.pri_dia.focus();
+        myform.tentative_diagnose.focus();
         return false;
     }    
-    if (myform.surgery.value == "") {
+    if (myform.medical_history.value == "") {
         alert("请填写病史！");
-        myform.surgery.focus();
+        myform.medical_history.focus();
         return false;
     }    
     if (myform.doctor.value == "") {
@@ -121,13 +121,15 @@ function CheckPost() {
     $blood = $_POST["bloodpress"];
     $lead = $_POST["lead"];
     $sickroom = $_POST["sickroom"];
-    $relative1 = $_POST["relative1"];
-    $rePhone1 = $_POST["rePhone1"];
-    $pri_dia = $_POST['pri_dia'];
-    $surgery = $_POST["surgery"];
+    $family_name = $_POST["family_name"];
+    $family_tel = $_POST["family_tel"];
+    $tentative_diagnose = $_POST['tentative_diagnose'];
+    $medical_history = $_POST["medical_history"];
     $guardHospital = $_POST["guard_hospital"];
     $doctor = $_POST["doctor"];
     $device = $_POST['device'];
+    $mode = $_POST['mode'];
+    $hours = $_POST['hours'];
     
     $guardian = Dbi::getDbi()->getGuardianStatusByDevice($device);
     var_dump($guardian);
@@ -150,7 +152,7 @@ function CheckPost() {
     $result = mysql_query($sql) or die('病人编号查询错误: '.mysql_error());
     $id = mysql_result($result, 0, "p_id");
 
-    $sql = "INSERT INTO `remote_ecg`.`patient_health_info` (p_id, bloodType, DBP, SBP, hypoxemia, height, weight, primartDiagnosis, allergyHistory, operationHistory, hospitalHistory, chronicDisease, geneticDisease, terminalPhone)VALUES ('$id', '$blood', '$relative1', '$rePhone1', '$lead', '$height', '$weight', '$pri_dia', '', '$surgery', '', '', '', '1')";
+    $sql = "INSERT INTO `remote_ecg`.`patient_health_info` (p_id, bloodType, DBP, SBP, hypoxemia, height, weight, primartDiagnosis, allergyHistory, operationHistory, hospitalHistory, chronicDisease, geneticDisease, terminalPhone)VALUES ('$id', '$blood', '$family_name', '$family_tel', '$lead', '$height', '$weight', '$tentative_diagnose', '', '$medical_history', '', '', '', '1')";
     mysql_query($sql) or die('用户健康信息添加错误: '.mysql_error());
     mysql_close($conn);
       echo "<script language='javascript'> 
@@ -211,19 +213,19 @@ function CheckPost() {
   
   <tr class="STYLE3">
     <td height="25"><span class="STYLE4">亲属：</span></td>
-    <td><input name="relative1" type="text" style="width: 80px" id="relative1" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['relative1']?>" /></td>
+    <td><input name="family_name" type="text" style="width: 80px" id="family_name" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['family_name']?>" /></td>
     <td><span class="STYLE4">联系电话：</span></td>
-    <td><input name="rePhone1" type="text" style="width: 80px" id="rePhone1" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['rePhone1']?>" /></td>
+    <td><input name="family_tel" type="text" style="width: 80px" id="family_tel" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['family_tel']?>" /></td>
   </tr>
   
    <tr class="STYLE3">
     <td height="25"><span class="STYLE4">患者症状：<span class="STYLE2">*</span></span></td>
-    <td colspan="3"><input name="pri_dia" type="text" style="width: 250px" id="pri_dia" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['pri_dia']?>" /></td>
+    <td colspan="3"><input name="tentative_diagnose" type="text" style="width: 250px" id="tentative_diagnose" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['tentative_diagnose']?>" /></td>
   </tr>
   
     <tr class="STYLE3">
     <td height="25"><span class="STYLE4">病史：<span class="STYLE2">*</span></span></td>
-    <td colspan="3"><input name="surgery" type="text" style="width: 250px" id="surgery" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['surgery']?>" /></td>
+    <td colspan="3"><input name="medical_history" type="text" style="width: 250px" id="medical_history" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['medical_history']?>" /></td>
   </tr>
   
   <tr class="STYLE3">

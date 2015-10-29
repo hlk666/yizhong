@@ -215,6 +215,70 @@ class Dbi
         }
     }
     
+    public function registUser($name, $age, $tel)
+    {
+        $birthYear = date('Y') - $age;
+        //step1 add patient => create patient_id
+        //step2 add guardian.
+        try {
+            $patienId = $this->getSamePatient($patientName, $birthYear, $tel);
+            
+            $this->pdo->beginTransaction();
+            if (false == $patienId) {
+                $patienId = $this->addPatient($patientName, $sex, $birthYear, $tel, $address, $creator);
+            }
+            $sql = 'insert into guardian(hospital_id, patient_id, start_time, end_time, name, age, sex, tel)'
+                    . ' values(:hid, :pid, :stime, :etime, :name, :age, :sex, :tel)';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(array(
+                    ':hid' => $data['hospital_id'],
+                    ':pid' => $data['patient_id'],
+                    ':stime' => $data['start_time'],
+                    ':etime' => $data['end_time'],
+                    ':name' => $data['p_name'],
+                    ':age' => $data['age'],
+                    ':sex' => $data['sex'],
+                    ':tel' => $data['tel']
+            ));
+            $this->pdo->commit();
+            return $this->pdo->lastInsertId();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
+    private function addPatient($patientName, $sex, $birthYear, $tel, $address, $creator)
+    {
+        $sql = 'insert into patient(patient_name, sex, birth_year, tel, address, creator)'
+                . ' values(:name, :sex, :birth, :tel, :address, :creator)';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(array(
+                ':name' => $patientName,
+                ':sex' => $sex,
+                ':birth' => $birthYear,
+                ':tel' => $tel,
+                ':address' => $address,
+                ':creator' => $creator
+        ));
+        return $this->pdo->lastInsertId();
+    }
+    
+    private function getSamePatient($patientName, $birthYear, $tel)
+    {
+        try {
+            $sql = 'select patient_id from patient 
+                    where patient_name = :name and birth_year = :birth and tel = :tel limit 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(array(':name' => $patientName, ':birth' => $birthYear, ':tel' => $tel));
+            return $stmt->fetchColumn();
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
 //     public function addCommand($patientId, $status)
 //     {
 //         try {
