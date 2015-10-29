@@ -1,5 +1,6 @@
 ﻿<?php
 require '../config/path.php';
+require '../config/value.php';
 require PATH_LIB . 'Dbi.php';
 
 session_start();
@@ -67,14 +68,9 @@ function CheckPost() {
         myform.name.focus();
         return false;
     }
-    if (myform.name.value.length < 2) {
-        alert("输入的姓名太短");
-        myform.name.focus();
-        return false;
-    }
-    if (myform.phone.value == "") {
+    if (myform.tel.value == "") {
         alert("电话号码不能为空！");
-        myform.phone.focus();
+        myform.tel.focus();
         return false;
     }
     if (myform.lead.value == "0") {
@@ -115,10 +111,10 @@ function CheckPost() {
     $name = $_POST["name"];
     $age = $_POST["age"];
     $sex = $_POST["sex"];
-    $phone = $_POST["phone"];
+    $tel = $_POST["tel"];
     $height = $_POST["height"];
     $weight = $_POST["weight"];
-    $blood = $_POST["bloodpress"];
+    $bloodPressure = $_POST["blood_pressure"];
     $lead = $_POST["lead"];
     $sickroom = $_POST["sickroom"];
     $family_name = $_POST["family_name"];
@@ -132,7 +128,7 @@ function CheckPost() {
     $hours = $_POST['hours'];
     
     $guardian = Dbi::getDbi()->getGuardianStatusByDevice($device);
-    var_dump($guardian);
+    var_dump($guardian);exit;
     if (!empty($guardian)) {
         $patientName = $dbi->getPatient($guardian['patient_id']);
         if (0 == $guardian['status']) {
@@ -143,23 +139,17 @@ function CheckPost() {
             echo "<script language=javascript>alert(\"'$patientName'正在使用该设备，请从监护列表结束其监护！\");history.back();</script>";
             exit;
         }
-        
     }
-    $sql = "INSERT INTO `remote_ecg`.`patient_basic_info` (p_id, p_sn, p_name, guardianship, sex, age, phone, peaceMaker, healthState, hospitalNumber,higherhos,starttime,endtime,Doc_name,overapply)VALUES ('', '$uid', '$name', '0', '$sex', '$age', '$phone', '$sickroom','$device', '$registHospital','$high_hos',CURRENT_TIMESTAMP,'','$doctor','0')";    
-    mysql_query($sql) or die('用户基本信息添加错误: '.mysql_error());
-    
-    $sql = "SELECT p_id FROM patient_basic_info WHERE p_sn = '$uid'";
-    $result = mysql_query($sql) or die('病人编号查询错误: '.mysql_error());
-    $id = mysql_result($result, 0, "p_id");
-
-    $sql = "INSERT INTO `remote_ecg`.`patient_health_info` (p_id, bloodType, DBP, SBP, hypoxemia, height, weight, primartDiagnosis, allergyHistory, operationHistory, hospitalHistory, chronicDisease, geneticDisease, terminalPhone)VALUES ('$id', '$blood', '$family_name', '$family_tel', '$lead', '$height', '$weight', '$tentative_diagnose', '', '$medical_history', '', '', '', '1')";
-    mysql_query($sql) or die('用户健康信息添加错误: '.mysql_error());
-    mysql_close($conn);
-      echo "<script language='javascript'> 
-            alert('用户添加成功！');
-            window.location.href='myPatientss.php?id= $registHospital'
-        </script>";
- }
+    $ret = Dbi::getDbi()->registUser($patientName, $age, $tel, $device, 
+        $registHospital, $guardHospital, $patientId, $mode, $hours, $lead, $doctor, $sickRoom, 
+        $bloodPressure, $height, $weight, $familyName, $familyTel, $tentativeDiagnose, $medicalHistory);
+    if (VALUE_DB_ERROR == $ret) {
+        echo '用户注册失败，请重试或联系系统管理员。';
+        echo "<script language=javascript>alert(\"用户注册失败，请重试或联系系统管理员。\");history.back();</script>";
+        exit;
+    }
+    echo "<script language='javascript'> alert('用户添加成功！');window.location.href='myPatientss.php?id= $registHospital'</script>";
+}
 ?>
 <script language="javascript" src="../libraries/PCASClass.js"></script>
 <table width="100%" height="100%" border="0" align="center" cellspacing="1" bordercolor="#000000">
@@ -177,11 +167,11 @@ function CheckPost() {
   </tr>
   
   <tr class="STYLE3">
-    <td height="25"><span class="STYLE4">年龄(岁数)：<span class="STYLE2">*</span></span></td>
+    <td height="25"><span class="STYLE4">年龄(数字)：<span class="STYLE2">*</span></span></td>
     <td><input name="age" type="text" style="width: 80px" id="age" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['age']?>" /> </td>
     
     <td><span class="STYLE4">血压(高压/低压)：</span></td>
-    <td><input name="bloodpress" type="text" style="width: 80px" id="height" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['bloodpress']?>" /></td>
+    <td><input name="blood_pressure" type="text" style="width: 80px" id="height" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['blood_pressure']?>" /></td>
   </tr>
   
   <tr class="STYLE3">
@@ -193,7 +183,7 @@ function CheckPost() {
   
   <tr class="STYLE3">
     <td height="25"><span class="STYLE4">联系电话：<span class="STYLE2">*</span></span></td>
-    <td><input name="phone" type="text" style="width: 80px" id="phone" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['phone']?>" /></td>
+    <td><input name="tel" type="text" style="width: 80px" id="tel" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['tel']?>" /></td>
     <td><span class="STYLE4">胸导位置：<span class="STYLE2">*</span></span></td>
     <td><select name="lead" style="width: 80px" id="lead">
       <option value="0"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['lead'] == '0') echo 'selected="selected"'?>></option>
@@ -232,16 +222,16 @@ function CheckPost() {
     <td height="25"><span class="STYLE4">监护医院：<span class="STYLE2">*</span></span></td>
     <td colspan="3"><select name="guard_hospital" style="width: 252px" id="guard_hospital">
     <option value="<?php echo $registHospital;?>"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['guard_hospital'] == $registHospital) echo 'selected="selected"'?>>本院</option>
-     <?php 
-     $hospitals = Dbi::getDbi()->getParentHospitals($registHospital);
-     foreach ($hospitals as $value) {
-         echo '<option value="' . $value['hospital_id'] . '" ';
-         if (isset($_SESSION['guardian']) && $_SESSION['guardian']['guard_hospital'] == $value['hospital_id']) {
-             echo 'selected="selected" ';
-         }
-         echo '>' . $value['hospital_name'] . '</option>';
-     }
-     ?>
+    <?php 
+    $hospitals = Dbi::getDbi()->getParentHospitals($registHospital);
+    foreach ($hospitals as $value) {
+        echo '<option value="' . $value['hospital_id'] . '" ';
+        if (isset($_SESSION['guardian']) && $_SESSION['guardian']['guard_hospital'] == $value['hospital_id']) {
+            echo 'selected="selected" ';
+        }
+        echo '>' . $value['hospital_name'] . '</option>';
+    }
+    ?>
     </select></td>
   </tr>
   
@@ -249,7 +239,17 @@ function CheckPost() {
     <td height="25"><span class="STYLE4">设备编号：<span class="STYLE2">*</span></span></td>
     <td><input name="device" type="text" style="width: 80px" id="device" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['device']?>" /></td>
     <td><span class="STYLE4">开单医生：<span class="STYLE2">*</span></span></td>
-    <td><input name="doctor" type="text" style="width: 80px" id="doctor" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['doctor']?>" /></td>
+    <td><select name="doctor" style="width: 80px" id="doctor">
+    <?php 
+    $doctors = Dbi::getDbi()->getDoctorsByHospital($registHospital);
+    foreach ($doctors as $value) {
+        echo '<option value="' . $value['account_id'] . '" ';
+        if (isset($_SESSION['guardian']) && $_SESSION['guardian']['doctor'] == $value['account_id']) {
+            echo 'selected="selected" ';
+        }
+        echo '>' . $value['real_name'] . '</option>';
+    }
+    ?>
   </tr>
   
   <tr class="STYLE3">

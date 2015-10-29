@@ -201,6 +201,24 @@ class Dbi
         }
     }
     
+    public function getDoctorsByHospital($hospitalId)
+    {
+        try {
+            $sql = 'select account_id, real_name from account where hospital_id = :hospital_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':hospital_id' => $hospitalId]);
+            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
     public function getGuardianPatientName($deviceId)
     {
         try {
@@ -215,31 +233,20 @@ class Dbi
         }
     }
     
-    public function registUser($name, $age, $tel)
+    public function registUser($patientName, $age, $tel, $device, $registHospital, $guardHospital, 
+            $patientId, $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, 
+            $height, $weight, $familyName, $familyTel, $tentativeDiagnose, $medicalHistory)
     {
         $birthYear = date('Y') - $age;
-        //step1 add patient => create patient_id
-        //step2 add guardian.
         try {
             $patienId = $this->getSamePatient($patientName, $birthYear, $tel);
-            
             $this->pdo->beginTransaction();
             if (false == $patienId) {
                 $patienId = $this->addPatient($patientName, $sex, $birthYear, $tel, $address, $creator);
             }
-            $sql = 'insert into guardian(hospital_id, patient_id, start_time, end_time, name, age, sex, tel)'
-                    . ' values(:hid, :pid, :stime, :etime, :name, :age, :sex, :tel)';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(array(
-                    ':hid' => $data['hospital_id'],
-                    ':pid' => $data['patient_id'],
-                    ':stime' => $data['start_time'],
-                    ':etime' => $data['end_time'],
-                    ':name' => $data['p_name'],
-                    ':age' => $data['age'],
-                    ':sex' => $data['sex'],
-                    ':tel' => $data['tel']
-            ));
+            $this->addGuardian($device, $registHospital, $guardHospital, $patientId, $mode, $hours, 
+                    $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, $familyName, $familyTel, 
+                    $tentativeDiagnose, $medicalHistory);
             $this->pdo->commit();
             return $this->pdo->lastInsertId();
         } catch (Exception $e) {
@@ -261,6 +268,39 @@ class Dbi
                 ':tel' => $tel,
                 ':address' => $address,
                 ':creator' => $creator
+        ));
+        return $this->pdo->lastInsertId();
+    }
+    
+    private function addGuardian($device, $registHospital, $guardHospital, $patientId, 
+            $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height, 
+            $weight, $familyName, $familyTel, $tentativeDiagnose, $medicalHistory)
+    {
+        $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id, 
+                patient_id, mode, guradian_hours, lead, status, doctor_id,
+                sickroom, blood_pressure, height, weight, family_name, family_tel, 
+                tentative_diagnose, medical_history) 
+                values(:device, :regist_hospital, :guard_hospital, :patient, :mode, 
+                :hours, :lead, 0, :doctor, :sickroom, :blood_pressure, :height, 
+                :weight, :family_name, :family_tel, :ten_dia, :medical_history)';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(array(
+                ':device' => $device,
+                ':regist_hospital' => $registHospital,
+                ':guard_hospital' => $guardHospital,
+                ':patient' => $patientId,
+                ':mode' => $mode,
+                ':hours' => $hours,
+                ':lead' => $lead,
+                ':doctor_id' => $doctor,
+                ':sickroom' => $sickRoom,
+                ':blood_pressure' => $bloodPressure,
+                ':height' => $height,
+                ':weight' => $weight,
+                ':family_name' => $familyName,
+                ':family_tel' => $familyTel,
+                ':ten_dia' => $tentativeDiagnose,
+                ':medical_history' => $medicalHistory
         ));
         return $this->pdo->lastInsertId();
     }
