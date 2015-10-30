@@ -166,7 +166,7 @@ class Dbi
     public function getPatient($patientId)
     {
         try {
-            $sql = 'select patient_id, patient_name from patient where patient_id = :patient_id';
+            $sql = 'select patient_id, patient_name from patient where patient_id = :patient_id limit 1';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':patient_id' => $patientId]);
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -201,13 +201,13 @@ class Dbi
         }
     }
     
-    public function getDoctorsByHospital($hospitalId)
+    public function getAcount($loginName)
     {
         try {
-            $sql = 'select account_id, real_name from account where hospital_id = :hospital_id';
+            $sql = 'select account_id, type, password, hospital_id from account where login_name = :user';
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':hospital_id' => $hospitalId]);
-            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->execute([':user' => $loginName]);
+            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
             } else {
@@ -218,6 +218,36 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    
+//     public function getDoctorsByHospital($hospitalId)
+//     {
+//         try {
+//             $sql = 'select account_id, real_name from account where hospital_id = :hospital_id';
+//             $stmt = $this->pdo->prepare($sql);
+//             $stmt->execute([':hospital_id' => $hospitalId]);
+//             $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//             if (false === $ret) {
+//                 return array();
+//             } else {
+//                 return $ret;
+//             }
+//         } catch (Exception $e) {
+//             Logger::write($this->logFile, $e->getMessage());
+//             return VALUE_DB_ERROR;
+//         }
+//     }
+//     <td><select name="doctor" style="width: 80px" id="doctor">
+//     php tag start
+//     $doctors = Dbi::getDbi()->getDoctorsByHospital($registHospital);
+//     foreach ($doctors as $value) {
+//         echo '<option value="' . $value['account_id'] . '" ';
+//         if (isset($_SESSION['guardian']) && $_SESSION['guardian']['doctor'] == $value['account_id']) {
+//             echo 'selected="selected" ';
+//         }
+//         echo '>' . $value['real_name'] . '</option>';
+//     }
+//     php tag end
+//         </select></td>
     
     public function getGuardianPatientName($deviceId)
     {
@@ -233,22 +263,23 @@ class Dbi
         }
     }
     
-    public function registUser($patientName, $age, $tel, $device, $registHospital, $guardHospital, 
-            $patientId, $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, 
-            $height, $weight, $familyName, $familyTel, $tentativeDiagnose, $medicalHistory)
+    public function registUser($patientName, $sex, $age, $tel, $device, $registHospital, $guardHospital, 
+            $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, 
+            $familyName, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
     {
         $birthYear = date('Y') - $age;
         try {
-            $patienId = $this->getSamePatient($patientName, $birthYear, $tel);
+            $patientId = $this->getSamePatient($patientName, $birthYear, $tel);
             $this->pdo->beginTransaction();
-            if (false == $patienId) {
-                $patienId = $this->addPatient($patientName, $sex, $birthYear, $tel, $address, $creator);
+            if (false == $patientId) {
+                $patientId = $this->addPatient($patientName, $sex, $birthYear, $tel, $sickRoom, $doctor);
             }
             $this->addGuardian($device, $registHospital, $guardHospital, $patientId, $mode, $hours, 
                     $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, $familyName, $familyTel, 
-                    $tentativeDiagnose, $medicalHistory);
+                    $tentativeDiagnose, $medicalHistory, $registDoctorName);
             $this->pdo->commit();
             return $this->pdo->lastInsertId();
+            
         } catch (Exception $e) {
             $this->pdo->rollBack();
             Logger::write($this->logFile, $e->getMessage());
@@ -273,16 +304,16 @@ class Dbi
     }
     
     private function addGuardian($device, $registHospital, $guardHospital, $patientId, 
-            $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height, 
-            $weight, $familyName, $familyTel, $tentativeDiagnose, $medicalHistory)
+            $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, 
+            $familyName, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
     {
         $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id, 
-                patient_id, mode, guradian_hours, lead, status, doctor_id,
+                patient_id, mode, guardian_hours, lead, status, doctor_id,
                 sickroom, blood_pressure, height, weight, family_name, family_tel, 
-                tentative_diagnose, medical_history) 
+                tentative_diagnose, medical_history, regist_doctor_name) 
                 values(:device, :regist_hospital, :guard_hospital, :patient, :mode, 
-                :hours, :lead, 0, :doctor, :sickroom, :blood_pressure, :height, 
-                :weight, :family_name, :family_tel, :ten_dia, :medical_history)';
+                :hours, :lead, :doctor_id, 0, :sickroom, :blood_pressure, :height, 
+                :weight, :family_name, :family_tel, :ten_dia, :medical_history, :doctor_name)';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(array(
                 ':device' => $device,
@@ -300,7 +331,8 @@ class Dbi
                 ':family_name' => $familyName,
                 ':family_tel' => $familyTel,
                 ':ten_dia' => $tentativeDiagnose,
-                ':medical_history' => $medicalHistory
+                ':medical_history' => $medicalHistory,
+                ':doctor_name' => $registDoctorName
         ));
         return $this->pdo->lastInsertId();
     }

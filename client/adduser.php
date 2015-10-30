@@ -5,13 +5,7 @@ require PATH_LIB . 'Dbi.php';
 
 session_start();
 
-//@todo for test.
-$_SESSION['isLogin'] = true;
-$_SESSION['loginType'] = 2;
-$_SESSION['hospital'] = 0;
-$_SESSION["loginId"] = 1;
-
-if ($_SESSION["isLogin"] != true || $_SESSION["loginType"] != 2){
+if (!isset($_SESSION["isLogin"]) || $_SESSION["isLogin"] != true || $_SESSION["loginType"] != 2){
     echo "您尚未登录!";
     exit;
 }
@@ -116,38 +110,42 @@ function CheckPost() {
     $weight = $_POST["weight"];
     $bloodPressure = $_POST["blood_pressure"];
     $lead = $_POST["lead"];
-    $sickroom = $_POST["sickroom"];
-    $family_name = $_POST["family_name"];
-    $family_tel = $_POST["family_tel"];
-    $tentative_diagnose = $_POST['tentative_diagnose'];
-    $medical_history = $_POST["medical_history"];
+    $sickRoom = $_POST["sickroom"];
+    $familyName = $_POST["family_name"];
+    $familyTel = $_POST["family_tel"];
+    $tentativeDiagnose = $_POST['tentative_diagnose'];
+    $medicalHistory = $_POST["medical_history"];
     $guardHospital = $_POST["guard_hospital"];
-    $doctor = $_POST["doctor"];
+    $registDoctorName = $_POST["doctor"];
     $device = $_POST['device'];
     $mode = $_POST['mode'];
     $hours = $_POST['hours'];
     
     $guardian = Dbi::getDbi()->getGuardianStatusByDevice($device);
-    var_dump($guardian);exit;
     if (!empty($guardian)) {
-        $patientName = $dbi->getPatient($guardian['patient_id']);
+        $ret = Dbi::getDbi()->getPatient($guardian['patient_id']);
+        if (empty($ret)) {
+            $otherPatient = '其他用户(id:' . $guardian['patient_id'] . ')';
+        } else {
+            $otherPatient = $ret['patient_name'];
+        }
         if (0 == $guardian['status']) {
-            echo "<script language=javascript>alert(\"'$patientName'已注册该设备，请待该用户监护结束后使用此设备！\");history.back();</script>";
+            echo "<script language=javascript>alert(\"'$otherPatient'已注册该设备，请待该用户监护结束后使用此设备！\");history.back();</script>";
             exit;
         }
         if (1 == $guardian['status']) {
-            echo "<script language=javascript>alert(\"'$patientName'正在使用该设备，请从监护列表结束其监护！\");history.back();</script>";
+            echo "<script language=javascript>alert(\"'$otherPatient'正在使用该设备，请从监护列表结束其监护！\");history.back();</script>";
             exit;
         }
     }
-    $ret = Dbi::getDbi()->registUser($patientName, $age, $tel, $device, 
-        $registHospital, $guardHospital, $patientId, $mode, $hours, $lead, $doctor, $sickRoom, 
-        $bloodPressure, $height, $weight, $familyName, $familyTel, $tentativeDiagnose, $medicalHistory);
+    $ret = Dbi::getDbi()->registUser($name, $sex, $age, $tel, $device, $registHospital, $guardHospital, 
+            $mode, $hours, $lead, $doctorId, $sickRoom, $bloodPressure, $height, $weight, $familyName, 
+            $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName);
     if (VALUE_DB_ERROR == $ret) {
-        echo '用户注册失败，请重试或联系系统管理员。';
         echo "<script language=javascript>alert(\"用户注册失败，请重试或联系系统管理员。\");history.back();</script>";
         exit;
     }
+    unset($_SESSION['guardian']);
     echo "<script language='javascript'> alert('用户添加成功！');window.location.href='myPatientss.php?id= $registHospital'</script>";
 }
 ?>
@@ -161,8 +159,8 @@ function CheckPost() {
     <td width="74"><span class="STYLE4">性别：<span class="STYLE2">*</span></span></td>
     <td width="83">
     <select name="sex" style="width: 80px" id="sex">
-      <option value="男" <?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['sex'] == '男') echo 'selected="selected"'?>>男 </option>
-      <option value="女"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['sex'] == '女') echo 'selected="selected"'?>>女 </option>
+      <option value="1" <?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['sex'] == '1') echo 'selected="selected"'?>>男 </option>
+      <option value="2"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['sex'] == '2') echo 'selected="selected"'?>>女 </option>
      </select></td>
   </tr>
   
@@ -239,17 +237,7 @@ function CheckPost() {
     <td height="25"><span class="STYLE4">设备编号：<span class="STYLE2">*</span></span></td>
     <td><input name="device" type="text" style="width: 80px" id="device" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['device']?>" /></td>
     <td><span class="STYLE4">开单医生：<span class="STYLE2">*</span></span></td>
-    <td><select name="doctor" style="width: 80px" id="doctor">
-    <?php 
-    $doctors = Dbi::getDbi()->getDoctorsByHospital($registHospital);
-    foreach ($doctors as $value) {
-        echo '<option value="' . $value['account_id'] . '" ';
-        if (isset($_SESSION['guardian']) && $_SESSION['guardian']['doctor'] == $value['account_id']) {
-            echo 'selected="selected" ';
-        }
-        echo '>' . $value['real_name'] . '</option>';
-    }
-    ?>
+    <td><input name="doctor" type="text" style="width: 80px" id="doctor" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['doctor']?>" /></td>
   </tr>
   
   <tr class="STYLE3">

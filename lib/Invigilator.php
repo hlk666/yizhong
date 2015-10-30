@@ -54,7 +54,7 @@ class Invigilator
     
     public function create(array $data)
     {
-        Logger::writeCommands($this->logFile, $data);var_dump($data);
+        Logger::writeCommands($this->logFile, $data);
         $commandKeys = array_intersect($this->allowCommands, array_keys($data));
         foreach ($commandKeys as $cmd) {
             $this->commands[$cmd] = $data[$cmd];

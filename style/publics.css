@@ -1,0 +1,68 @@
+body,html,div,p,h1,h2,h3,h4,h5,ul,li,span,input,label{
+padding:0px;
+margin:0px;}
+html{
+height:100%;}
+body{
+font-size:12px;
+font-family:"ËÎÌו";
+height:100%;
+background:url(../images/bg.gif);
+}
+.bg{
+width:100%;
+min-height:100%;
+height:auto;
+_height:100%;
+background:url(../images/bg_img.jpg) center top no-repeat;
+}
+.logo{
+width:300px;
+height:40px;
+background:url(../images/logo.png);
+margin:0px auto;
+position:relative;}
+.denglukuang{
+width:300px;
+height:169px;
+background:url(../images/denglu_bg.png);
+margin:10px auto;
+position:relative;}
+.yonghuming,.mima{
+position:absolute;
+width:138px;
+padding:14px 10px;
+font-size:16px;
+font-family:"Microsoft YaHei";
+background:none;
+border:0px;
+
+}
+.yonghuming{
+top:17px;
+left:90px;}
+.mima{
+top:55px;
+left:90px;}
+.btn{
+text-align:center;
+position:absolute;
+top:120px;
+width:100%;
+}
+.dl,.cz{
+display:inline-block;
+border:0px;
+height:25px;
+width:80px;
+margin:0px 15px;
+cursor:pointer;}
+.dl{
+background:url(../images/dl.gif) 0px 0px no-repeat;}
+.dl:hover{
+background-position:0px -28px;}
+.cz{
+background:url(../images/cz.gif) 0px 0px no-repeat;}
+.cz:hover{
+background-position:0px -28px;}
+}
