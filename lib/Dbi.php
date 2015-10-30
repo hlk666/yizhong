@@ -201,6 +201,26 @@ class Dbi
         }
     }
     
+    public function getChildHospitals($hospitalId)
+    {
+        try {
+            $sql = 'select hospital.hospital_id, hospital_name from hospital inner join hospital_relation
+                    on hospital.hospital_id = hospital_relation.hospital_id
+                    where hospital_relation.parent_hospital_id = :hospital_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':hospital_id' => $hospitalId]);
+            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
     public function getAcount($loginName)
     {
         try {
