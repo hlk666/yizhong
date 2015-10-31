@@ -2,10 +2,10 @@
 require '../config/path.php';
 require '../config/value.php';
 require PATH_LIB . 'Dbi.php';
+require PATH_LIB . 'function.php';
 
 session_start();
-
-if (!isset($_SESSION["isLogin"]) || $_SESSION["isLogin"] != true || $_SESSION["loginType"] != 2){
+if (false == checkLogin()) {
     echo "您尚未登录!";
     exit;
 }

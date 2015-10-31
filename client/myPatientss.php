@@ -2,12 +2,17 @@
 require '../config/path.php';
 require '../config/value.php';
 require PATH_LIB . 'Dbi.php';
+require PATH_LIB . 'function.php';
 
 session_start();
+if (false == checkLogin()) {
+    echo "您尚未登录!";
+    exit;
+}
 $hospitalId = $_SESSION["hospital"];
 $ret = Dbi::getDbi()->getChildHospitals($hospitalId);
 if (empty($ret)) {
-    echo "<script language=javascript>window.location.href='myPatientsList.php?id=$hospitalId'</script>";
+    echo "<script language=javascript>window.location.href='patient_list.php?current_flag=1&id=$hospitalId'</script>";
     exit;
 }
 ?>
@@ -31,11 +36,11 @@ if (empty($ret)) {
 <body>
   <?php
 if (isset($_POST['current_hospital']) && $_POST['current_hospital']){
-    echo "<script language=javascript>window.location.href='myPatientsList.php?id=$hospitalId'</script>"; 
+    echo "<script language=javascript>window.location.href='patient_list.php?current_flag=1id=$hospitalId'</script>"; 
     exit;
 }
 if (isset($_POST['child_hospital']) && $_POST['child_hospital']){
-    echo "<script language='javascript'>window.location.href='HosList.php?id=$hospitalId'</script>";
+    echo "<script language='javascript'>window.location.href='select_child.php?id=$hospitalId'</script>";
     exit;
 }
 ?>

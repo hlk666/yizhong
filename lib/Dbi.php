@@ -63,6 +63,19 @@ class Dbi
         }
     }
     
+    public function getRecordCount($table, $where)
+    {
+        try {
+            $sql = "select 1 from $table where $where";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            return $stmt->rowCount();
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
     public function existData($tableName, $where = array()) {
         try {
             $sql = "select 1 from $tableName where 1";
@@ -119,6 +132,26 @@ class Dbi
             return array();
         } else {
             return $data[0];
+        }
+    }
+    
+    public function getPatientList($hospitalId)
+    {
+        try {
+            $sql = 'select p_id as patient_id, p_name, birthYear as age, gender as sex, phone as tel, higherhos as hospital_id
+                from guardian
+                where regist_hostpital_id = :hospital_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':device_id' => $deviceId]);
+            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
         }
     }
     
