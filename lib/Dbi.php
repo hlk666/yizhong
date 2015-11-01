@@ -112,6 +112,35 @@ class Dbi
         }
     }
     
+    public function endThisMedical($guardianId)
+    {
+        try {
+            $sql = 'update guardian set status = 4 where guardian_id = :guardian_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
+    public function getGuardianResult($guardianId)
+    {
+        try {
+            $sql = 'select guardian_result from guardian where guardian_id = :guardian_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId]);
+            $ret = array();
+            while ($row = $stmt->fetchColumn()) {
+                $ret[] = $row;
+            }
+            return $ret;
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
     public function getPatientInfo($patientId)
     {
         $sql = 'select p_id as patient_id, p_name, birthYear as age, gender as sex, phone as tel, higherhos as hospital_id 
@@ -135,20 +164,39 @@ class Dbi
         }
     }
     
-    public function getPatientList($hospitalId)
+    public function getPatientList($hospitalId, $offset = 0, $rows = null)
     {
         try {
-            $sql = 'select p_id as patient_id, p_name, birthYear as age, gender as sex, phone as tel, higherhos as hospital_id
-                from guardian
-                where regist_hostpital_id = :hospital_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':device_id' => $deviceId]);
-            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
+            $sql = 'select g.patient_id, g.guardian_id, p.patient_name, p.sex, p.birth_year, 
+                    p.tel, g.device_id, g.regist_doctor, g.sick_room
+                from guardian as g left join patient as p on g.patient_id = p.patient_id
+                where regist_hostpital_id = :hospital_id order by guardian_id desc';
+            if ($rows != null) {
+                $sql .= " limit $offset, $rows";
             }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':hospital_id' => $hospitalId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
+    public function getDiagnosis($guardianId)
+    {
+        try {
+            $sql = 'select d.ecg_id, a.real_name as doctor_name, e.data_path, e.content, e.create_time as alert_time
+                    from diagnosis ad d 
+                    left join account as a on d.doctor_id = a.account_id
+                    left join ecg as e on d.ecg_id = e.ecg_id
+                    where d.guardian_id = :guardian_id order by diagnosis_id desc';
+            if ($rows != null) {
+                $sql .= " limit $offset, $rows";
+            }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
