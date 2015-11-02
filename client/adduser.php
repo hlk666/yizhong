@@ -3,6 +3,7 @@ require '../config/path.php';
 require '../config/value.php';
 require PATH_LIB . 'Dbi.php';
 require PATH_LIB . 'function.php';
+require PATH_LIB . 'Invigilator.php';
 
 session_start();
 if (false == checkLogin()) {
@@ -92,7 +93,7 @@ function CheckPost() {
         myform.age.focus();
         return false;
     }
-    if (myform.hours.value == "") {
+    if (myform.hours.value == "" && myform.mode.value != "3") {
         alert("监护时长不能为空！");
         myform.hours.focus();
         return false;
@@ -138,13 +139,16 @@ function CheckPost() {
             exit;
         }
     }
-    $ret = Dbi::getDbi()->registUser($name, $sex, $age, $tel, $device, $registHospital, $guardHospital, 
+    $guardianId = Dbi::getDbi()->registUser($name, $sex, $age, $tel, $device, $registHospital, $guardHospital, 
             $mode, $hours, $lead, $doctorId, $sickRoom, $bloodPressure, $height, $weight, $familyName, 
             $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName);
-    if (VALUE_DB_ERROR == $ret) {
+    if (VALUE_DB_ERROR == $guardianId) {
         echo "<script language=javascript>alert(\"用户注册失败，请重试或联系系统管理员。\");history.back();</script>";
         exit;
     }
+    $invigilator = new Invigilator($guardianId, $mode);
+    $command = array('all_time' => $hours);
+    $invigilator->create($command);
     unset($_SESSION['guardian']);
     echo "<script language='javascript'> alert('用户添加成功！');window.location.href='myPatientss.php?id= $registHospital'</script>";
 }
@@ -249,7 +253,7 @@ function CheckPost() {
       <option value="3"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['mode'] == '3') echo 'selected="selected"'?>>单次测量模式 </option>
      </select></td>
     
-    <td><span class="STYLE4">监护时长(h)：<span class="STYLE2">*</span></span></td>
+    <td><span class="STYLE4">监护时长(小时。单次测量模式可不输入)：<span class="STYLE2">*</span></span></td>
     <td><input name="hours" type="text" style="width: 80px" id=""hours"" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['hours']?>" /></td>
   </tr>
   

@@ -1,7 +1,7 @@
 <?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
+require_once '../config/path.php';
+require_once '../config/value.php';
+require_once PATH_LIB . 'Dbi.php';
 
 session_start();
 $hospitalId = $_GET['id'];

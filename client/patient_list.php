@@ -1,8 +1,8 @@
 ﻿<?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
-require PATH_LIB . 'function.php';
+require_once '../config/path.php';
+require_once '../config/value.php';
+require_once PATH_LIB . 'Dbi.php';
+require_once PATH_LIB . 'function.php';
 
 session_start();
 if (false == checkLogin()) {
@@ -79,8 +79,15 @@ foreach ($result as $index => $row) {
     <td><div align='center' style='width:150px'>".$row['patient_id']."</div></td>
     <td><div align='center' style='width:68px'>".$row['patient_name']."</div></td>";
     if ($flag == 1) {
-        echo "<td><div align='center' style='width:70px'><a href = './starttime.php?id=" 
-            . $row['patient_id'] . "'>选择</div></td>";
+        if ($row['status'] == 0) {
+            echo "<td><div align='center' style='width:70px'><a href = './set_guard.php?status=0&id="
+                    . $row['guardian_id'] . "'>开始监护</div></td>";
+        }
+        
+        if ($row['status'] == 1) {
+            echo "<td><div align='center' style='width:70px'><a href = './set_guard.phpstatus=1&?id="
+                    . $row['guardian_id'] . "'>结束监护</div></td>";
+        }
     }
     
     echo "<td><div align='center' style='width:70px'>$statusValue</div></td>
@@ -91,7 +98,7 @@ foreach ($result as $index => $row) {
     <td><div align='center' style='width:200px'>" . $row['start_time'] . "</div></td>
     <td><div align='center' style='width:200px'>" . $row['end_time'] . "</div></td>
     <td><div align='center' style='width:68px'>" . $row['regist_doctor'] . "</div></td>
-    <td><div align='center' style='width:150px'>" . $row['sick_room'] . "</div></td></tr>"; 
+    <td><div align='center' style='width:150px'>" . $row['sickroom'] . "</div></td></tr>"; 
 }
 ?>
 </table>

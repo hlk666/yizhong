@@ -34,7 +34,7 @@ class Dbi
     public function insertEcg($data)
     {
         try {
-            $sql = 'insert into ecg(p_id, recordTime, alert, path, readstate)'
+            $sql = 'insert into ecg2(p_id, recordTime, alert, path, readstate)'
                     . ' values(:pid, :recordTime, :alert, :path, :readstate)';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(array(
@@ -76,13 +76,19 @@ class Dbi
         }
     }
     
-    public function existData($tableName, $where = array()) {
+    public function existData($tableName, $where) {
         try {
-            $sql = "select 1 from $tableName where 1";
-            foreach ($where as $key => $value) {
-                $sql .= " and $key = \"$value\"";
+            $sql = "select 1 from $tableName where 1 ";
+            if (is_array($where)) {
+                foreach ($where as $key => $value) {
+                    $sql .= " and $key = \"$value\"";
+                }
+            }
+            if (is_string($where)) {
+                $sql .= $where;
             }
             $sql .= ' limit 1';
+            
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->rowCount() > 0;
@@ -112,12 +118,45 @@ class Dbi
         }
     }
     
-    public function endThisMedical($guardianId)
+    public function startGuard($guardianId)
+    {
+        try {
+            $sql = 'update guardian set status = 1, start_time = now() where guardian_id = :guardian_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function endGuard($guardianId)
+    {
+        try {
+            $sql = 'update guardian set status = 2, end_time = now() where guardian_id = :guardian_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function endMedical($guardianId)
     {
         try {
             $sql = 'update guardian set status = 4 where guardian_id = :guardian_id';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':guardian_id' => $guardianId]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function editGuardianResult($guardianId, $newResult)
+    {
+        try {
+            $sql = 'update guardian set guardian_result = :result where guardian_id = :guardian_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':result' => $newResult]);
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
@@ -233,6 +272,30 @@ class Dbi
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':device_id' => $deviceId]);
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
+    public function getGuardianList($hospitalId)
+    {
+        try {
+            $sql = 'select g.guardian_id, g.patient_id, g.status, g.start_time, g.end_time,
+                    p.patient_name, h.hospital_name, p.sex, p.birth_year, p.tel, 
+                    g.blood_pressure, g.tentative_diagnose, g.medical_history, g.sickroom
+                    from guardian as g left join patient as p on g.patient_id = p.patient_id
+                    left join hospital as h on g.regist_hospital_id = h.hospital_id
+                    where guard_hospital_id = :hospital_id and g.status = 1
+                    order by g.guardian_id desc';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':hospital_id' => $hospitalId]);
+            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
             } else {
@@ -375,11 +438,11 @@ class Dbi
             if (false == $patientId) {
                 $patientId = $this->addPatient($patientName, $sex, $birthYear, $tel, $sickRoom, $doctor);
             }
-            $this->addGuardian($device, $registHospital, $guardHospital, $patientId, $mode, $hours, 
+            $guardianId = $this->addGuardian($device, $registHospital, $guardHospital, $patientId, $mode, $hours, 
                     $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, $familyName, $familyTel, 
                     $tentativeDiagnose, $medicalHistory, $registDoctorName);
             $this->pdo->commit();
-            return $this->pdo->lastInsertId();
+            return $guardianId;
             
         } catch (Exception $e) {
             $this->pdo->rollBack();

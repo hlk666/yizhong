@@ -17,7 +17,7 @@ class Invigilator
     private $logFile = 'cmdLog.txt';
     private $patientId;
     
-    public function __construct($patientId, $mode = '0')
+    public function __construct($patientId, $mode = '0', $hours = '24')
     {
         $this->patientId = $patientId;
         $this->file = PATH_CACHE_CMD . $patientId . '.php';
@@ -25,13 +25,13 @@ class Invigilator
             include $this->file;
             if ($info['status'] == 2) {
                 unlink($this->file);
-                $this->setDefaultInfo($mode);
+                $this->setDefaultInfo($mode, $hours);
             } else {
                 $this->info = $info;
                 $this->commands = $command;
             }
         } else {
-            $this->setDefaultInfo($mode);            
+            $this->setDefaultInfo($mode, $hours);            
         }
     }
     
@@ -80,12 +80,12 @@ class Invigilator
         fclose($handle);
     }
     
-    private function setDefaultInfo($mode)
+    private function setDefaultInfo($mode, $hours)
     {
         $this->info['mode'] = '0';
         $this->info['status'] = ($mode == '3') ? '3' : '0';
         $this->info['card'] = 'master';
-        $this->info['all_time'] = 24;
+        $this->info['all_time'] = $hours;
         $this->info['check_info'] = 'off';
         $this->info['mode1_polycardia'] = 120;
         $this->info['mode1_bradycardia'] = 50;
