@@ -151,6 +151,17 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    public function setEcgReadStatus($ecgId)
+    {
+        try {
+            $sql = 'update ecg set read_status = 1 where ecg_id = :ecg_id';
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([':ecg_id' => $ecgId]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     public function editGuardianResult($guardianId, $newResult)
     {
         try {
@@ -271,6 +282,24 @@ class Dbi
             $sql = 'select guardian_id, patient_id, status from guardian where device_id = :device_id and status < 2';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':device_id' => $deviceId]);
+            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
+    public function getGuardianTime($guardianId)
+    {
+        try {
+            $sql = 'select start_time, end_time from guardian where guardian_id = :guardian_id limit 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId]);
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();

@@ -30,7 +30,6 @@ $offset = $ret['offset'];
 $navigation = $ret['navigation'];
 
 $result = Dbi::getDbi()->getPatientList($hospitalId, $offset, $rows);
-//@todo add end_time field to guardian table.
 var_dump($result);exit;
 ?>
 <head>
