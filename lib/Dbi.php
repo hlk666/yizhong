@@ -81,7 +81,24 @@ class Dbi
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
-    } 
+    }
+    
+    public function getConsultationRequest($hospitalId)
+    {
+        try {
+            $sql = 'select consultation_id, c.ecg_id, request_message, request_time, 
+                    e.guardian_id, h.hospital_name
+                    from consultation as c inner join ecg as e on c.ecg_id = e.ecg_id 
+                    left join hospital as h on c.request_hospital_id = h.hospital_id 
+                    where response_hospital_id = :hospital_id and statu = 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(['hospital_id' => $hospitalId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     
     public function getRecordCount($table, $where)
     {
@@ -160,6 +177,17 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    public function createDiagnosis($ecgId, $doctorId, $content)
+    {
+        try {
+            $sql = 'insert into diagnosis (ecg_id, doctor_id, content) values (:ecg, :doctor, :content)';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':ecg' => $ecgId, ':doctor' => $doctorId, ':content' => $content]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     public function endGuard($guardianId)
     {
         try {
@@ -190,6 +218,25 @@ class Dbi
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':guardian_id' => $guardianId]);
         } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function handleConsultation($hospitalId, $consultationId, $guardianId)
+    {
+        try {
+            $this->pdo->beginTransaction();
+            $sql = 'update guardian set guard_hospital_id = :hospital where guardian_id = :guardian_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId, ':hospital' => $hospitalId]);
+            
+            $sql = 'update consultation set status = 2 where consultation_id = :consultation_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':consultation_id' => $consultationId]);
+            
+            $this->pdo->commit();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
@@ -512,13 +559,28 @@ class Dbi
 //     php tag end
 //         </select></td>
     
-    public function getGuardianPatientName($deviceId)
+    public function getPatientNameByDevice($deviceId)
     {
         try {
-            $sql = 'select patient_name from patient inner join guardian on patient.patient_id = guardian.patient_id 
+            $sql = 'select patient_name from guardian as g 
+                    left join patient as p on g.patient_id = p.patient_id 
                     where device_id = :device_id order by guardian_id desc limit 1';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':device_id' => $deviceId]);
+            return $stmt->fetchColumn();
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function getPatientNameByGuardian($guardianId)
+    {
+        try {
+            $sql = 'select patient_name from guardian as g 
+                    left join patient as p on g.patient_id = p.patient_id
+                    where guardian_id = :guardian_id limit 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId]);
             return $stmt->fetchColumn();
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
