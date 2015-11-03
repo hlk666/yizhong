@@ -18,7 +18,7 @@ $guardianId = $_GET["id"];
 <td width='10%'>诊断医生</td>
 </tr>
 <?php
-$result = Dbi::getDbi()->getDiagnosis($guardianId);
+$result = Dbi::getDbi()->getDiagnosisByGuardian($guardianId);
 foreach ($result as $index => $row) {
     if ($index % 2 == 0) {
         $color='#EBF5FF';

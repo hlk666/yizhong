@@ -67,7 +67,7 @@ foreach ($guardians as $index => $guardian) {
             . $guardian['patient_name'] . ']<p>已监护结束，请及时为其诊断并作出病情总结。<br />';
     }
     
-    $where = ' and read_status = 0 and guardian_id = ' . $guardian['guardian_id'] 
+    $where = ' read_status = 0 and guardian_id = ' . $guardian['guardian_id'] 
         . ' and create_time >= "' . $guardian['start_time'] . '"';
     if ($guardian['end_time'] != null) {
         $where .= ' and create_time <= "' . $guardian['end_time'] . '"';

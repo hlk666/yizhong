@@ -63,10 +63,41 @@ class Dbi
         }
     }
     
+    public function getEcg($guardianId, $startTime, $endTime)
+    {
+        try {
+            $sql = 'select ecg_id, create_time, read_status, data_path from ecg 
+                    where guardian_id = :guardian_id and create_time >= :start_time ';
+            $param = array(':guardian_id' => $guardianId, ':start_time' => $startTime);
+            if ($endTime != null) {
+                $sql .= ' and create_time <= :end_time';
+                $param[':end_time'] = $endTime;
+            }
+            $sql .= ' order by ecg_id desc';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($param);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    } 
+    
     public function getRecordCount($table, $where)
     {
         try {
-            $sql = "select 1 from $table where $where";
+            $hasWhere = false;
+            $sql = "select 1 from $table ";
+            if (is_string($where) && $where != '') {
+                $sql .= ' where ' . $where . ' ';
+                $hasWhere = true;
+            }
+            if (is_array($where) && !empty($where)) {
+                $sql .= $hasWhere ? '' : ' where ';
+                foreach ($where as $key => $value) {
+                    $sql .= " $key = \"$value\"";
+                }
+            }
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->rowCount();
@@ -79,13 +110,13 @@ class Dbi
     public function existData($tableName, $where) {
         try {
             $sql = "select 1 from $tableName where 1 ";
-            if (is_array($where)) {
+            if (is_array($where && !empty($where))) {
                 foreach ($where as $key => $value) {
                     $sql .= " and $key = \"$value\"";
                 }
             }
-            if (is_string($where)) {
-                $sql .= $where;
+            if (is_string($where) && $where != '') {
+                $sql .= ' and ' . $where;
             }
             $sql .= ' limit 1';
             
@@ -140,6 +171,18 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    public function createIllResult($guardianId, $result)
+    {
+        try {
+            $sql = 'update guardian set guardian_result = :result, status = 3 
+                    where guardian_id = :guardian_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId, ':result' => $result]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     public function endMedical($guardianId)
     {
         try {
@@ -151,6 +194,7 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    
     public function setEcgReadStatus($ecgId)
     {
         try {
@@ -233,19 +277,32 @@ class Dbi
         }
     }
     
-    public function getDiagnosis($guardianId)
+    public function getDiagnosisByGuardian($guardianId)
     {
         try {
-            $sql = 'select d.ecg_id, a.real_name as doctor_name, e.data_path, e.content, e.create_time as alert_time
-                    from diagnosis ad d 
+            $sql = 'select d.ecg_id, a.real_name as doctor_name, e.data_path, d.content, 
+                    e.create_time as alert_time, d.create_time as diagnose_time
+                    from diagnosis as d 
+                    inner join ecg as e on d.ecg_id = e.ecg_id
                     left join account as a on d.doctor_id = a.account_id
-                    left join ecg as e on d.ecg_id = e.ecg_id
-                    where d.guardian_id = :guardian_id order by diagnosis_id desc';
-            if ($rows != null) {
-                $sql .= " limit $offset, $rows";
-            }
+                    where e.guardian_id = :guardian_id order by d.diagnosis_id desc';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':guardian_id' => $guardianId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
+    public function getDiagnosisByEcg($ecgId)
+    {
+        try {
+            $sql = 'select d.ecg_id, a.real_name as doctor_name, d.content, d.create_time
+                    from diagnosis as d left join account as a on d.doctor_id = a.account_id
+                    where d.ecg_id = :ecg_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':ecg_id' => $ecgId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
@@ -288,6 +345,19 @@ class Dbi
             } else {
                 return $ret;
             }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
+    public function getGuardianStatusByGuardian($guardianId)
+    {
+        try {
+            $sql = 'select status from guardian where guardian_id = :guardian_id limit 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':guardian_id' => $guardianId]);
+            return $stmt->fetchColumn();
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
