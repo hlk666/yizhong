@@ -16,11 +16,9 @@ if ($status > 1) {
 
 $command = array();
 if ($status == 0) {
-    Dbi::getDbi()->startGuard($guardianId);
     $command = array('action' => 'start');
 }
 if ($status == 1) {
-    Dbi::getDbi()->endGuard($guardianId);
     $command = array('action' => 'end');
 }
 

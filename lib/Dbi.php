@@ -90,7 +90,23 @@ class Dbi
                     e.guardian_id, h.hospital_name
                     from consultation as c inner join ecg as e on c.ecg_id = e.ecg_id 
                     left join hospital as h on c.request_hospital_id = h.hospital_id 
-                    where response_hospital_id = :hospital_id and statu = 1';
+                    where response_hospital_id = :hospital_id and status = 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(['hospital_id' => $hospitalId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function getConsultationResponse($hospitalId)
+    {
+        try {
+            $sql = 'select consultation_id, c.ecg_id, response_message, response_time,
+                    e.guardian_id, e.data_path, h.hospital_name
+                    from consultation as c inner join ecg as e on c.ecg_id = e.ecg_id
+                    left join hospital as h on c.response_hospital_id = h.hospital_id
+                    where request_hospital_id = :hospital_id and status = 2';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(['hospital_id' => $hospitalId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -241,7 +257,41 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    public function replyConsultation($consultationId, $result)
+    {
+        try {
+            $sql = 'update consultation set status = 2, response_message = :result 
+                    where consultation_id = :consultation_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':consultation_id' => $consultationId, ':result' => $result]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function endConsultation($consultationId)
+    {
+        try {
+            $sql = 'update consultation set status = 0 where consultation_id = :consultation_id';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':consultation_id' => $consultationId]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     
+    public function delEcg($ecgId)
+    {
+        try {
+            $sql = 'delete from ecg where ecg_id = :ecg_id';
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([':ecg_id' => $ecgId]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     public function setEcgReadStatus($ecgId)
     {
         try {
@@ -384,6 +434,26 @@ class Dbi
     {
         try {
             $sql = 'select guardian_id, patient_id, status from guardian where device_id = :device_id and status < 2';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':device_id' => $deviceId]);
+            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    
+    public function getPatientByDevice($deviceId)
+    {
+        try {
+            $sql = 'select guardian_id, patient_name, mode
+                    from guardian as g left join patient as p on g.patient_id = p.patient_id 
+                    where device_id = :device_id and status < 2 order by guardian_id desc limit 1';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':device_id' => $deviceId]);
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);

@@ -9,10 +9,10 @@ if (!isset($_GET['patient_id']) && !isset($_POST['patient_id'])) {
 
 $data = array_merge($_GET, $_POST);
 
-$patientId = $data['patient_id'];
+$guardianId = $data['patient_id'];
 $mode = isset($data['mode']) ? $data['mode'] : '0';
 
-$invigilator = new Invigilator($patientId, $mode);
+$invigilator = new Invigilator($guardianId, $mode);
 $invigilator->create($data);
 
 echo json_encode(array('code' => '0'));
