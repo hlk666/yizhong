@@ -5,11 +5,8 @@ require PATH_LIB . 'Dbi.php';
 require PATH_LIB . 'function.php';
 
 session_start();
-if (false == checkLogin()) {
-    echo "您尚未登录!";
-    header('location:doctor.php');
-    exit;
-}
+checkDoctorLogin();
+
 $hospitalId = $_SESSION["hospital"];
 
 $requestConsultation = Dbi::getDbi()->getRecordCount('consultation', 'status = 1 and response_hospital_id = ' . $hospitalId);

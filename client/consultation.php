@@ -77,7 +77,7 @@ foreach ($parentHospital as $index => $row) {
   </tr>
   <tr class="STYLE3">
     <td colspan="2"  align="center" >
-      <input type="submit" name="apply" value="提交会诊"  onclick='checkPost()' style="width:100px"/>&nbsp;&nbsp;
+      <input type="submit" name="apply" value="提交会诊"  style="width:100px"/>&nbsp;&nbsp;
       <input type="reset" name="reset" value="重  置"  style="width:100px"/>
     </td>
   </tr>

@@ -5,10 +5,8 @@ require PATH_LIB . 'Dbi.php';
 require PATH_LIB . 'function.php';
 
 session_start();
-if (false == checkLogin()) {
-    echo "您尚未登录!";
-    exit;
-}
+checkDoctorLogin();
+
 $hospitalId = $_SESSION["hospital"];
 $ret = Dbi::getDbi()->getChildHospitals($hospitalId);
 if (empty($ret)) {

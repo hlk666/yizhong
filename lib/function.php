@@ -1,10 +1,11 @@
 <?php
-function checkLogin()
+function checkDoctorLogin()
 {
     if (!isset($_SESSION["isLogin"]) || $_SESSION["isLogin"] != true || $_SESSION["loginType"] != 2){
-        return false;
+        echo "您尚未登录!";
+        header('location:index.php');
+        exit;
     }
-    return true;
 }
 
 /**
