@@ -238,6 +238,24 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    public function addConsultation($requestHospital, $responseHospital, $ecgId, $mesage)
+    {
+        try {
+            $sql = 'insert into consultation(ecg_id, request_hospital_id, request_message, response_hospital_id)'
+                    . ' values(:ecg_id, :request_hospital_id, :request_message, :response_hospital_id)';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(array(
+                            ':ecg_id' => $ecgId,
+                            ':request_hospital_id' => $requestHospital,
+                            ':request_message' => $mesage,
+                            ':response_hospital_id' => $responseHospital
+            ));
+            return $this->pdo->lastInsertId();
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     public function handleConsultation($hospitalId, $consultationId, $guardianId)
     {
         try {
@@ -257,6 +275,7 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    
     public function replyConsultation($consultationId, $result)
     {
         try {
@@ -544,9 +563,10 @@ class Dbi
     public function getParentHospitals($hospitalId)
     {
         try {
-            $sql = 'select hospital.hospital_id, hospital_name from hospital inner join hospital_relation
-                    on hospital.hospital_id = hospital_relation.parent_hospital_id
-                    where hospital_relation.hospital_id = :hospital_id';
+            $sql = 'select h.hospital_id, h.hospital_name 
+                    from hospital as h inner join hospital_relation as r 
+                        on h.hospital_id = r.parent_hospital_id
+                    where r.hospital_id = :hospital_id';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':hospital_id' => $hospitalId]);
             $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
