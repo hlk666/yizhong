@@ -9,7 +9,7 @@ if (isset($_POST['apply']) && $_POST['apply']){
     $message = $_POST['message'];
     $responseHospital = $_POST['response_hospital'];
     $ret = Dbi::getDbi()->addConsultation($hospitalId, $responseHospital, $ecgId, $message);
-    if (VALUE_DB_ERROR == $ret) {
+    if (VALUE_DB_ERROR === $ret) {
         echo '会诊请求发送失败，请重试或联系管理员。';
     } else {
         echo '会诊请求发送成功。';
@@ -18,7 +18,7 @@ if (isset($_POST['apply']) && $_POST['apply']){
 }
 
 $parentHospital = Dbi::getDbi()->getParentHospitals($hospitalId);
-if (VALUE_DB_ERROR == $parentHospital) {
+if (VALUE_DB_ERROR === $parentHospital) {
     echo '读取上级医院信息失败，请重试或联系管理员。';
     exit;
 }

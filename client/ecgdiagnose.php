@@ -5,7 +5,7 @@ require_once PATH_LIB . 'Dbi.php';
 
 $ecgId = $_GET["id"];
 $diagnosis = Dbi::getDbi()->getDiagnosisByEcg($ecgId);
-if (VALUE_DB_ERROR == $diagnosis) {
+if (VALUE_DB_ERROR === $diagnosis) {
     echo '查询数据时发生错误，请重试或联系管理员。';
     exit;
 }

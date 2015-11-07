@@ -9,7 +9,7 @@ if (empty($hospitalId)) {
     exit;
 }
 $consultations = Dbi::getDbi()->getConsultationResponse($hospitalId);
-if (VALUE_DB_ERROR == $consultations) {
+if (VALUE_DB_ERROR === $consultations) {
     echo '读取数据失败，请重试或联系管理员。';
     exit;
 }

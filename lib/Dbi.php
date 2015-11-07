@@ -10,6 +10,7 @@ class Dbi
     
     /**
      * @todo move information to config file.
+     * @todo if can not connect to netwrok, how to tell user?
      */
     private function __construct()
     {
@@ -143,7 +144,7 @@ class Dbi
     public function existData($tableName, $where) {
         try {
             $sql = "select 1 from $tableName where 1 ";
-            if (is_array($where && !empty($where))) {
+            if (is_array($where) && !empty($where)) {
                 foreach ($where as $key => $value) {
                     $sql .= " and $key = \"$value\"";
                 }
@@ -152,7 +153,6 @@ class Dbi
                 $sql .= ' and ' . $where;
             }
             $sql .= ' limit 1';
-            
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->rowCount() > 0;
@@ -182,6 +182,67 @@ class Dbi
         }
     }
     
+    public function editAccount($accountId, array $data)
+    {
+        try {
+            if (empty($data)) {
+                throw new Exception('parameter of $data is empty.');
+            }
+            
+            $sql = 'update account set ';
+            foreach ($data as $key => $value) {
+                $sql .= $key . ' = "' . $value . '",';
+            }
+            $sql = substr($sql, 0, -1);
+            $sql .= ' where account_id = ' . $accountId;
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function editHospital($hospitalId, array $data)
+    {
+        try {
+            if (empty($data)) {
+                throw new Exception('parameter of $data is empty.');
+            }
+    
+            $sql = 'update hospital set ';
+            foreach ($data as $key => $value) {
+                $sql .= $key . ' = "' . $value . '",';
+            }
+            $sql = substr($sql, 0, -1);
+            $sql .= ' where hospital_id = ' . $hospitalId;
+    
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function addAccount($loginName, $realName, $password, $type, $hospitalId, $creator)
+    {
+        try {
+            $sql = 'insert into account (login_name, real_name, password, type, hospital_id, creator) 
+                    values (:login_name, :real_name, :password, :type, :hospital_id, :creator)';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(array(
+                            ':login_name' => $loginName, 
+                            ':real_name' => $realName,
+                            ':password' => $password,
+                            ':type' => $type,
+                            ':hospital_id' => $hospitalId,
+                            ':creator' => $creator
+            ));
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     public function startGuard($guardianId)
     {
         try {
@@ -311,6 +372,17 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    public function delDoctor($doctorId)
+    {
+        try {
+            $sql = 'delete from Account where account_id = :account_id';
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([':account_id' => $doctorId]);
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     public function setEcgReadStatus($ecgId)
     {
         try {
@@ -374,24 +446,42 @@ class Dbi
         }
     }
     
-    public function getPatientList($hospitalId, $offset = 0, $rows = null)
+    public function getPatientList($where, $offset = 0, $rows = null)
     {
         try {
-            $sql = 'select g.patient_id, g.guardian_id, p.patient_name, p.sex, p.birth_year, 
-                    p.tel, g.device_id, g.regist_doctor, g.sick_room
-                from guardian as g left join patient as p on g.patient_id = p.patient_id
-                where regist_hostpital_id = :hospital_id order by guardian_id desc';
+            $sql = "select g.patient_id, g.guardian_id, p.patient_name, p.sex, p.birth_year, 
+                    p.tel, g.device_id, g.regist_doctor_name, g.sickroom
+                    from guardian as g left join patient as p on g.patient_id = p.patient_id 
+                    where $where order by guardian_id desc";
             if ($rows != null) {
                 $sql .= " limit $offset, $rows";
             }
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':hospital_id' => $hospitalId]);
+            $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
     }
+    
+    public function getPatientListDistinct($where, $offset = 0, $rows = null)
+    {
+        try {
+            $sql = "select distinct g.patient_id, p.patient_name, p.sex, p.birth_year, p.tel 
+            from guardian as g left join patient as p on g.patient_id = p.patient_id
+            where $where order by guardian_id desc";
+            if ($rows != null) {
+            $sql .= " limit $offset, $rows";
+            }
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute();
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+        Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+        }
     
     public function getDiagnosisByGuardian($guardianId)
     {
@@ -618,6 +708,64 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    public function getDoctorList($hospitalId, $offset = 0, $rows = null)
+    {
+        try {
+            $sql = 'select account_id, login_name, real_name as doctor_name 
+                    from account where hospital_id = :hospital_id and type = 2';
+            if ($rows != null) {
+                $sql .= " limit $offset, $rows";
+            }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':hospital_id' => $hospitalId]);
+            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function getDoctorInfo($accountId)
+    {
+        try {
+            $sql = 'select account_id as doctor_id, login_name, real_name as doctor_name
+                    from account where account_id = :acount_id limit 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':acount_id' => $accountId]);
+            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    public function getHospitlAdminInfo($hospitalId)
+    {
+        try {
+            $sql = 'select h.hospital_id, h.hospital_name, h.address, h.tel, a.login_name, a.password
+                    from hospital as h inner join account as a on h.hospital_id = a.hospital_id
+                    where h.hospital_id = :hospital_id and a.type = 1 limit 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':hospital_id' => $hospitalId]);
+            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     
 //     public function getDoctorsByHospital($hospitalId)
 //     {
@@ -723,7 +871,7 @@ class Dbi
             $familyName, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
     {
         $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id, 
-                patient_id, mode, guardian_hours, lead, status, doctor_id,
+                patient_id, mode, guardian_hours, lead, doctor_id, status,
                 sickroom, blood_pressure, height, weight, family_name, family_tel, 
                 tentative_diagnose, medical_history, regist_doctor_name) 
                 values(:device, :regist_hospital, :guard_hospital, :patient, :mode, 

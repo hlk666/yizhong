@@ -22,7 +22,7 @@ if ($noticeConsultation != '') {
 }
 
 $guardians = Dbi::getDbi()->getGuardianList($hospitalId);
-if (VALUE_DB_ERROR == $guardians) {
+if (VALUE_DB_ERROR === $guardians) {
     echo '系统错误，请重试或联系管理员。';
     exit;
 }

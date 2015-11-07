@@ -8,6 +8,26 @@ function checkDoctorLogin()
     }
 }
 
+function checkHospitalAdminLogin()
+{
+    if (!isset($_SESSION["isLogin"]) || $_SESSION["isLogin"] != true || $_SESSION["loginType"] != 1){
+        echo "您尚未登录!";
+        header('location:index.php');
+        exit;
+    }
+}
+
+function checkDataFromDB($data)
+{
+    if (VALUE_DB_ERROR === $data) {
+        return '访问数据库错误，请重试或联系管理人员。';
+    }
+    if (is_array($data) && empty($data)) {
+        return '当前没有数据。';
+    }
+    return true;
+}
+
 /**
  * get paging(offset and navigation).
  * 
@@ -35,6 +55,7 @@ function getPaging($total, $rows, $url, $currentPage) {
     } elseif (is_null($currentPage)) {
         $url .= '&page';
     } else {
+        $url = str_replace('?page=' . $currentPage, '?page', $url);
         $url = str_replace('&page=' . $currentPage, '&page', $url);
     }
     
@@ -52,16 +73,16 @@ function getPaging($total, $rows, $url, $currentPage) {
     
     $navigation = " <a href='$url=1'>首页</a> ";
     if ($prePage == 0) {
-        $navigation .= ' 前页 ';
+        $navigation .= '  前页  ';
     } else {
-        $navigation .= " <a href='$url=$prePage'>前页</a> ";
+        $navigation .= " <a href='$url=$prePage'> 前页 </a> ";
     }
     if ($nextPage == 0) {
-        $navigation .= ' 后页 ';
+        $navigation .= '  后页  ';
     } else {
-        $navigation .= " <a href='$url=$nextPage'>后页</a> ";
+        $navigation .= " <a href='$url=$nextPage'> 后页 </a> ";
     }
-    $navigation .= " <a href='$url=$lastPage'>尾页</a> ";
+    $navigation .= " <a href='$url=$lastPage'> 尾页 </a> ";
     
     $result['offset'] = $offset;
     $result['navigation'] .= $navigation;

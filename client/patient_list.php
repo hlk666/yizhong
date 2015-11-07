@@ -5,10 +5,7 @@ require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'function.php';
 
 session_start();
-if (false == checkLogin()) {
-    echo "您尚未登录!";
-    exit;
-}
+checkDoctorLogin();
 
 if (!isset($_GET["id"])) {
     //echo "错误的访问。";
@@ -16,10 +13,11 @@ if (!isset($_GET["id"])) {
 }
 $hospitalId = $_GET["id"];
 $flag = isset($_GET['current_flag']) ? $_GET['current_flag'] : '0';
+$where = ' regist_hospital_id = ' .$hospitalId;
 
-$total = Dbi::getDbi()->getRecordCount('guardian', 'regist_hospital_id = ' .$hospitalId);
+$total = Dbi::getDbi()->getRecordCount('guardian', $where);
 if ($total == 0) {
-    echo "当前无用户。";
+    echo "该医院没有病人信息。";
     exit;
 }
 
@@ -29,7 +27,12 @@ $ret = getPaging($total, $rows, $_SERVER['REQUEST_URI'], $page);
 $offset = $ret['offset'];
 $navigation = $ret['navigation'];
 
-$result = Dbi::getDbi()->getPatientList($hospitalId, $offset, $rows);
+$result = Dbi::getDbi()->getPatientList($where, $offset, $rows);
+if (VALUE_DB_ERROR === $result) {
+    echo "读取数据失败，请重试。";
+    exit;
+}
+echo $navigation;
 var_dump($result);exit;
 ?>
 <head>

@@ -8,7 +8,7 @@ $consultationId = $_GET['consultation'];
 $guardianId = $_GET['guardian'];
 
 $ret = Dbi::getDbi()->handleConsultation($hospitalId, $consultationId, $guardianId);
-if (VALUE_DB_ERROR == $ret) {
+if (VALUE_DB_ERROR === $ret) {
     echo "<script language=javascript>alert(\"操作数据库失败，请重试或联系管理员。\");history.back();</script>";
     exit;
 }

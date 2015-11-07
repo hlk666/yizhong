@@ -3,7 +3,7 @@ session_start();
 
 if (isset($_SESSION["isLogin"]) && isset($_SESSION["loginType"]) 
         && $_SESSION["isLogin"] && $_SESSION["loginType"] == 2) {
-    header("location:myPatients.php");
+    header("location:guardian_list.php");
     exit;
 }
 
@@ -45,7 +45,7 @@ if(isset($_POST['login']) && $_POST['login']) {
             $_SESSION["loginId"] = $accountId;
             unset($_SESSION['user']);
             
-            header("location:myPatients.php");
+            header("location:guardian_list.php");
             exit;
         }
     }

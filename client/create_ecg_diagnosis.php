@@ -16,7 +16,7 @@ $content = $_GET["rx"];
 $doctorName = $_GET["docNo"];
 $doctorId = Dbi::getDbi()->getAllData('select account_id from account where real_name = "' . $doctorName . '"');
 var_dump($doctorId);exit;
-if (VALUE_DB_ERROR == $doctorId) {
+if (VALUE_DB_ERROR === $doctorId) {
     echo '访问数据库失败，请重试或联系管理员。';
     exit;
 }
@@ -25,7 +25,7 @@ if (empty($doctorId)) {
     exit;
 }
 $ret = Dbi::getDbi()->createDiagnosis($ecgId, $doctorId[0]['account_id'], $content);
-if (VALUE_DB_ERROR == $ret) {
+if (VALUE_DB_ERROR === $ret) {
     echo '访问数据库失败，请重试或联系管理员。';
     exit;
 }

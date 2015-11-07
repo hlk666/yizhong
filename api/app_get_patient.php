@@ -15,7 +15,7 @@ if (empty($deviceId)) {
 }
 $result = array();
 $patient = Dbi::getDbi()->getPatientByDevice($deviceId);
-if (VALUE_DB_ERROR == $patient) {
+if (VALUE_DB_ERROR === $patient) {
     $result['code'] = 1;
     $result['message'] = 'db error.';
 } elseif (empty($patient)) {

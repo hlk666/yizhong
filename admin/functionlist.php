@@ -19,24 +19,24 @@
 </head>
 
 <body bgcolor="#B0E2FF">
-<table width="110%" height="100%" border="0" cellpadding="0" cellspacing="0" >
+<table width="110%" border="0" cellpadding="0" cellspacing="0" style="height:100%;">
 <tr>
 <td height="60">&nbsp;</td>
 </tr>
 <tr>
-<td height="60" align="center" ><a href="./docList.php"  target="reviews" class="STYLE2">医生列表</a></td>
+<td height="60" align="center" ><a href="docList.php"  target="reviews" class="STYLE2">医生列表</a></td>
 </tr>
 <tr>
-<td height="60" align="center" ><a href="./patientList.php" target="reviews"  class="STYLE2">病人列表</a></td>
+<td height="60" align="center" ><a href="patientList.php" target="reviews"  class="STYLE2">病人列表</a></td>
 </tr>
 <tr>
-<td height="60" align="center" ><a href="./addDoc.php" target="reviews" class="STYLE2">添加医生</a></td>
+<td height="60" align="center" ><a href="addDoc.php" target="reviews" class="STYLE2">添加医生</a></td>
 </tr>
 <tr>
-<td height="60" align="center" ><a href="./setting.php"  target="reviews" class="STYLE2">系统设置</a></td>
+<td height="60" align="center" ><a href="setting.php"  target="reviews" class="STYLE2">系统设置</a></td>
 </tr>
 <tr>
-<td height="60" align="center"><a href="../action/logout.php" class="STYLE2" target="_parent">注销登录</a> </td>
+<td height="60" align="center"><a href="logout.php" class="STYLE2" target="_parent">注销登录</a> </td>
 </tr>
 </table>
 </body>

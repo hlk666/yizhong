@@ -6,10 +6,7 @@ require PATH_LIB . 'function.php';
 require PATH_LIB . 'Invigilator.php';
 
 session_start();
-if (false == checkLogin()) {
-    echo "您尚未登录!";
-    exit;
-}
+checkDoctorLogin();
 
 $registHospital = $_SESSION["hospital"];
 $doctorId = $_SESSION["loginId"]
@@ -142,7 +139,7 @@ function CheckPost() {
     $guardianId = Dbi::getDbi()->registUser($name, $sex, $age, $tel, $device, $registHospital, $guardHospital, 
             $mode, $hours, $lead, $doctorId, $sickRoom, $bloodPressure, $height, $weight, $familyName, 
             $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName);
-    if (VALUE_DB_ERROR == $guardianId) {
+    if (VALUE_DB_ERROR === $guardianId) {
         echo "<script language=javascript>alert(\"用户注册失败，请重试或联系系统管理员。\");history.back();</script>";
         exit;
     }
@@ -155,7 +152,7 @@ function CheckPost() {
 ?>
 <script language="javascript" src="../libraries/PCASClass.js"></script>
 <table width="100%" height="100%" border="0" align="center" cellspacing="1" bordercolor="#000000">
-  <form action="" method="post" id="myform" onSubmit="return CheckPost()">
+  <form action="" method="post" id="myform" onsubmit="return CheckPost()">
   <tr class="STYLE3">
     <td height="25"><span class="STYLE4">姓名：<span class="STYLE2">*</span></span></td>
     <td width="90"><input name="name" type="text" style="width: 80px" id="name" value="<?php if(isset($_SESSION['guardian'])) echo $_SESSION['guardian']['name'] ?>" /></td>
@@ -248,7 +245,7 @@ function CheckPost() {
     <td height="25"><span class="STYLE4">监护模式：<span class="STYLE2">*</span></span></td>
     <td width="83">
     <select name="mode" style="width: 80px" id="mode">
-      <option value="1" <?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['mode'] == '1') echo 'selected="selected"'?>>实时监护模式 </option>
+      <option value="1" <?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['mode'] != '1') {echo '';} else {echo 'selected="selected"';}?>>实时监护模式 </option>
       <option value="2"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['mode'] == '2') echo 'selected="selected"'?>>异常监护模式 </option>
       <option value="3"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['mode'] == '3') echo 'selected="selected"'?>>单次测量模式 </option>
      </select></td>
