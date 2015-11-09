@@ -15,7 +15,6 @@ $ecgId = $_GET["eid"];
 $content = $_GET["rx"];
 $doctorName = $_GET["docNo"];
 $doctorId = Dbi::getDbi()->getAllData('select account_id from account where real_name = "' . $doctorName . '"');
-var_dump($doctorId);exit;
 if (VALUE_DB_ERROR === $doctorId) {
     echo '访问数据库失败，请重试或联系管理员。';
     exit;

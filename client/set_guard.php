@@ -25,5 +25,5 @@ if ($status == 1) {
 $invigilator = new Invigilator($guardianId);
 $invigilator->create($command);
 
-header('myPatientss.php?id=' . $hospitalId);
+header('location:patients.php?id=' . $hospitalId);
 exit;

@@ -3,14 +3,25 @@ require '../config/path.php';
 require '../config/value.php';
 require PATH_LIB . 'Dbi.php';
 
+if (!isset($_GET['hospital']) || !isset($_GET['eid'])) {
+    echo '参数不足。';
+    exit;
+}
 $hospitalId = $_GET['hospital'];
 $ecgId = $_GET['eid'];
 if (isset($_POST['apply']) && $_POST['apply']){
+    if (!isset($_POST['message']) || !isset($_POST['response_hospital'])) {
+        echo '请输入会诊请求信息，并且选择一个上级医院。';
+        echo '<script language="javascript">setTimeout("history.back()", 1500);</script>';
+        exit;
+    }
     $message = $_POST['message'];
     $responseHospital = $_POST['response_hospital'];
     $ret = Dbi::getDbi()->addConsultation($hospitalId, $responseHospital, $ecgId, $message);
     if (VALUE_DB_ERROR === $ret) {
         echo '会诊请求发送失败，请重试或联系管理员。';
+        echo '<script language="javascript">setTimeout("history.back()", 1500);</script>';
+        exit;
     } else {
         echo '会诊请求发送成功。';
     }

@@ -143,11 +143,12 @@ function CheckPost() {
         echo "<script language=javascript>alert(\"用户注册失败，请重试或联系系统管理员。\");history.back();</script>";
         exit;
     }
-    $invigilator = new Invigilator($guardianId, $mode);
-    $command = array('all_time' => $hours);
+    $invigilator = new Invigilator($guardianId, $mode, $hours);
+    //@todo add other params here.
+    $command = array();
     $invigilator->create($command);
     unset($_SESSION['guardian']);
-    echo "<script language='javascript'> alert('用户添加成功！');window.location.href='myPatientss.php?id= $registHospital'</script>";
+    echo "<script language='javascript'> alert('用户添加成功！');window.location.href='patients.php?id= $registHospital'</script>";
 }
 ?>
 <script language="javascript" src="../libraries/PCASClass.js"></script>

@@ -52,7 +52,7 @@ class Invigilator
         return $this->commands;
     }
     
-    public function create(array $data)
+    public function create(array $data = array())
     {
         Logger::writeCommands($this->logFile, $data);
         $commandKeys = array_intersect($this->allowCommands, array_keys($data));
@@ -82,7 +82,7 @@ class Invigilator
     
     private function setDefaultInfo($mode, $hours)
     {
-        $this->info['mode'] = '0';
+        $this->info['mode'] = $mode;
         $this->info['status'] = ($mode == '3') ? '3' : '0';
         $this->info['card'] = 'master';
         $this->info['all_time'] = $hours;

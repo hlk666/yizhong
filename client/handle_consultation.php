@@ -3,6 +3,10 @@ require '../config/path.php';
 require '../config/value.php';
 require PATH_LIB . 'Dbi.php';
 
+if (!isset($_GET['hospital']) || !isset($_GET['consultation']) || !isset($_GET['guardian'])) {
+    echo "<script language=javascript>alert(\"参数不足。\");history.back();</script>";
+    exit;
+}
 $hospitalId = $_GET['hospital'];
 $consultationId = $_GET['consultation'];
 $guardianId = $_GET['guardian'];

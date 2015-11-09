@@ -14,11 +14,12 @@ $guardianId = $_GET['id'];
 <tr bgcolor='#ECEADB' style='height:30px' align='center'><td>病情总结</td></tr>
 <?php
 $result = Dbi::getDbi()->getGuardianResult($guardianId);
-foreach ($result as $row) {
-    echo"<tr align='center' style='height:25px'><td>$row</td></tr>";
-}
+// foreach ($result as $row) {
+//     echo"<tr align='center' style='height:25px'><td>$row</td></tr>";
+// }
+echo"<tr align='center' style='height:25px'><td>$result</td></tr>";
 echo "</table><input type='button' name='edit' value='修改病情总结' 
-    onclick=\"javascript:location.href='edit_result.php?id=$guardianId' />";
+    onclick=\"javascript:location.href='edit_result.php?id=$guardianId'\" />";
 ?>
 </div>
 <script type="text/javascript" src="../js/jquery-1.7.1.min.js"></script>

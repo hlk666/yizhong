@@ -33,7 +33,6 @@ if (VALUE_DB_ERROR === $result) {
     exit;
 }
 echo $navigation;
-var_dump($result);exit;
 ?>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -76,6 +75,7 @@ foreach ($result as $index => $row) {
         $statusValue = '已打印报告';
     }
     $age = date('Y') - $row['birth_year'];
+    $sex = $row['sex'] == 1 ? '男' : '女';
     echo "<tr bgcolor=$color style='height:25px'>
     <td style='display:none;'>".$row['guardian_id']."</td>
     <td><div align='center' style='width:150px'>".$row['patient_id']."</div></td>
@@ -84,22 +84,22 @@ foreach ($result as $index => $row) {
         if ($row['status'] == 0) {
             echo "<td><div align='center' style='width:70px'><a href = './set_guard.php?status=0&id="
                     . $row['guardian_id'] . "'>开始监护</div></td>";
-        }
-        
-        if ($row['status'] == 1) {
-            echo "<td><div align='center' style='width:70px'><a href = './set_guard.phpstatus=1&?id="
+        } elseif ($row['status'] == 1) {
+            echo "<td><div align='center' style='width:70px'><a href = './set_guard.php?status=1&id="
                     . $row['guardian_id'] . "'>结束监护</div></td>";
+        } else {
+            echo "<td><div align='center' style='width:70px'>-</div></td>";
         }
     }
     
     echo "<td><div align='center' style='width:70px'>$statusValue</div></td>
-    <td><div align='center' style='width:30px'>" . $row['sex'] . "</div></td>
+    <td><div align='center' style='width:30px'>$sex</div></td>
     <td><div align='center' style='width:30px'>$age</div></td>
     <td><div align='center' style='width:100px'>" . $row['tel'] . "</div></td>
     <td><div align='center' style='width:40px'>" . $row['device_id'] . "</div></td>
     <td><div align='center' style='width:200px'>" . $row['start_time'] . "</div></td>
     <td><div align='center' style='width:200px'>" . $row['end_time'] . "</div></td>
-    <td><div align='center' style='width:68px'>" . $row['regist_doctor'] . "</div></td>
+    <td><div align='center' style='width:68px'>" . $row['regist_doctor_name'] . "</div></td>
     <td><div align='center' style='width:150px'>" . $row['sickroom'] . "</div></td></tr>"; 
 }
 ?>

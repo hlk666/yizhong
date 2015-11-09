@@ -302,8 +302,8 @@ class Dbi
     public function addConsultation($requestHospital, $responseHospital, $ecgId, $mesage)
     {
         try {
-            $sql = 'insert into consultation(ecg_id, request_hospital_id, request_message, response_hospital_id)'
-                    . ' values(:ecg_id, :request_hospital_id, :request_message, :response_hospital_id)';
+            $sql = 'insert into consultation(ecg_id, request_hospital_id, request_message, response_hospital_id, status)'
+                    . ' values(:ecg_id, :request_hospital_id, :request_message, :response_hospital_id, 1)';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(array(
                             ':ecg_id' => $ecgId,
@@ -399,7 +399,7 @@ class Dbi
         try {
             $sql = 'update guardian set guardian_result = :result where guardian_id = :guardian_id';
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':result' => $newResult]);
+            $stmt->execute([':result' => $newResult, ':guardian_id' => $guardianId]);
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
@@ -409,13 +409,14 @@ class Dbi
     public function getGuardianResult($guardianId)
     {
         try {
-            $sql = 'select guardian_result from guardian where guardian_id = :guardian_id';
+            $sql = 'select guardian_result from guardian where guardian_id = :guardian_id limit 1';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':guardian_id' => $guardianId]);
-            $ret = array();
-            while ($row = $stmt->fetchColumn()) {
-                $ret[] = $row;
-            }
+//             $ret = array();
+//             while ($row = $stmt->fetchColumn()) {
+//                 $ret[] = $row;
+//             }
+            $ret = $stmt->fetchColumn();
             return $ret;
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
@@ -449,8 +450,9 @@ class Dbi
     public function getPatientList($where, $offset = 0, $rows = null)
     {
         try {
-            $sql = "select g.patient_id, g.guardian_id, p.patient_name, p.sex, p.birth_year, 
-                    p.tel, g.device_id, g.regist_doctor_name, g.sickroom
+            $sql = "select g.patient_id, g.guardian_id, g.status, g.device_id, g.start_time, g.end_time, 
+                    p.patient_name, p.sex, p.birth_year, p.tel, 
+                    g.regist_doctor_name, g.sickroom
                     from guardian as g left join patient as p on g.patient_id = p.patient_id 
                     where $where order by guardian_id desc";
             if ($rows != null) {
