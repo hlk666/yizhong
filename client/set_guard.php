@@ -25,5 +25,5 @@ if ($status == 1) {
 $invigilator = new Invigilator($guardianId);
 $invigilator->create($command);
 
-header('location:patients.php?id=' . $hospitalId);
+echo '<script language=javascript>history.back();</script>';
 exit;

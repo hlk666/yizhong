@@ -36,15 +36,20 @@ class AppUploadData
         }
         
         if ($mode == 2 || $mode == 3) {
-            $file = $this->getEcgFile($patientId);
+            $dir = PATH_ECG . $patientId . '\\';
+            if (!is_dir($dir)) {
+                mkdir($dir);
+            }
+            $file = $dir . date('YmdHis') . '.bin';
             $retIO = $this->writeFile($file, $data);
             if ($retIO === false) {
                 $this->setIOError();
                 return json_encode($this->error);
             }
             
-            $retDB = $this->insertData($patientId, $file, $alert);
-            if ($retDB <= 0) {
+            $urlFile = 'ECG/' . $patientId . '/' . date('YmdHis') . '.bin';
+            $retDB = Dbi::getDbi()->insertEcg($patientId, $alert, $urlFile);
+            if (VALUE_DB_ERROR == $retDB) {
                 $this->setError(7, 'Server DB error.');
                 return json_encode($this->error);
             }
@@ -69,7 +74,6 @@ class AppUploadData
             return false;
         }
         
-        //@todo check length of $data here.
         Logger::write($this->logFile, '\r\nlength of data : ' . strlen($data) . '\r\n');
         return $data;
     }
@@ -83,15 +87,6 @@ class AppUploadData
         }
         $this->error['code'] = $code;
         $this->error['message'] = $message;
-    }
-    
-    private function getEcgFile($id)
-    {
-        $dir = PATH_ECG . $id . '\\';
-        if (!is_dir($dir)) {
-            mkdir($dir);
-        }
-        return $dir . date('Y-m-d H_i_s') . '.txt';
     }
     
     private function writeFile($file, $data)
@@ -108,17 +103,6 @@ class AppUploadData
         }
         
         return true;
-    }
-    
-    private function insertData($id, $file, $alert)
-    {
-        $data = array(
-                'pid' => $id,
-                'recordTime' => date('YmdHis'),
-                'alert' => $alert,
-                'path' => str_replace(PATH_ROOT, '', $file)
-        );
-        return Dbi::getDbi()->insertEcg($data);
     }
     
     private function setIOError()

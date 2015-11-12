@@ -32,9 +32,9 @@ if (empty($ret)) {
 </style>
 </head>
 <body>
-  <?php
+<?php
 if (isset($_POST['current_hospital']) && $_POST['current_hospital']){
-    echo "<script language=javascript>window.location.href='patient_list.php?current_flag=1id=$hospitalId'</script>"; 
+    echo "<script language=javascript>window.location.href='patient_list.php?current_flag=1&id=$hospitalId'</script>"; 
     exit;
 }
 if (isset($_POST['child_hospital']) && $_POST['child_hospital']){

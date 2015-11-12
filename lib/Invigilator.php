@@ -9,8 +9,7 @@ class Invigilator
             'action', 'card', 'all_time', 'check_info',
             'mode1_polycardia', 'mode1_bradycardia', 'mode1_lead',
             'mode2_record_time', 'mode2_polycardia', 'mode2_bradycardia',
-            'mode2_regular_time', 'mode2_premature_beat', 'mode2_arrhythmia',
-            'mode2_pacemaker', 'mode2_lead',
+            'mode2_regular_time', 'mode2_premature_beat', 'mode2_arrhythmia', 'mode2_lead',
             'mode3_polycardia', 'mode3_bradycardia', 'mode3_lead', 'mode3_record_time');
     private $commands = array();
     private $file = '';
@@ -89,18 +88,17 @@ class Invigilator
         $this->info['check_info'] = 'off';
         $this->info['mode1_polycardia'] = 120;
         $this->info['mode1_bradycardia'] = 50;
-        $this->info['mode1_lead'] = 'V5';
+        $this->info['mode1_lead'] = 'V1';
         $this->info['mode2_record_time'] = 20;
         $this->info['mode2_polycardia'] = 120;
         $this->info['mode2_bradycardia'] = 50;
-        $this->info['mode2_regular_time'] = 1;
+        $this->info['mode2_regular_time'] = 0;
         $this->info['mode2_premature_beat'] = 8;
         $this->info['mode2_arrhythmia'] = 'on';
-        $this->info['mode2_pacemaker'] = 'on';
-        $this->info['mode2_lead'] = 'V5';
+        $this->info['mode2_lead'] = 'V1';
         $this->info['mode3_polycardia'] = 120;
         $this->info['mode3_bradycardia'] = 50;
-        $this->info['mode3_lead'] = 'V5';
+        $this->info['mode3_lead'] = 'V1';
         $this->info['mode3_record_time'] = 20;
         $this->info['start_time'] = '';
         $this->info['end_time'] = '';
@@ -161,32 +159,5 @@ class Invigilator
         $this->info['status'] = 2;
         $this->info['start_time'] = '';
         $this->info['end_time'] = '';
-        
-//         $dbi = Dbi::getDbi();
-//         $data = $dbi->getguardianInfo($this->guardianId);
-//         if (empty($data)) {
-//             Logger::write($this->logFile, 'try to end a data not existed in basic table.');
-//             return;
-//         }
-//         $data['start_time'] = date('YmdHis', $this->info['start_time']);
-//         $data['end_time'] = date('YmdHis', $this->info['end_time']);
-//         $existed = $dbi->existData('guardian_history', 
-//             array(
-//                 'hospital_id' => $data['hospital_id'],
-//                 'guardian_id' => $data['guardian_id'],
-//                 'start_time' => $data['start_time'],
-//                 'end_time' => $data['end_time'],
-//             )
-//         );
-//         if (true == $existed) {
-//             //@todo need do something here.
-//             Logger::write($this->logFile, 'try to add history that already existed.');
-//         } else {
-//             $ret = $dbi->addHistory($data);
-//         }
-        
-//         $this->info['status'] = 2;
-//         $this->info['start_time'] = '';
-//         $this->info['end_time'] = '';
     }
 }

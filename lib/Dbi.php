@@ -1,16 +1,15 @@
 <?php
 require_once PATH_CONFIG . 'value.php';
 require_once PATH_LIB . 'Logger.php';
+require_once PATH_LIB . 'BaseDbi.php';
 
-class Dbi
+class Dbi extends BaseDbi
 {
-    private $logFile = 'dbLog.txt';
-    private $pdo = null;
     private static $instance;
+    private $pdo = null;
     
     /**
-     * @todo move information to config file.
-     * @todo if can not connect to netwrok, how to tell user?
+     * for speed, not use config file now. we will do it in future.
      */
     private function __construct()
     {
@@ -32,18 +31,16 @@ class Dbi
         return self::$instance;
     }
     
-    public function insertEcg($data)
+    public function insertEcg($guardianId, $alertFlag, $dataPath)
     {
         try {
-            $sql = 'insert into ecg2(p_id, recordTime, alert, path, readstate)'
-                    . ' values(:pid, :recordTime, :alert, :path, :readstate)';
+            $sql = 'insert into ecg(guardian_id, create_time, alert_flag, data_path, read_status)'
+                    . ' values(:guardian_id, now(), :alert_flag, :data_path, 0)';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(array(
-                    ':pid' => $data['pid'],
-                    ':recordTime' => $data['recordTime'],
-                    ':alert' => $data['alert'],
-                    ':path' => $data['path'],
-                    ':readstate' => 0
+                    ':guardian_id' => $guardianId,
+                    ':alert_flag' => $alertFlag,
+                    ':data_path' => $dataPath
             ));
             return $this->pdo->lastInsertId();
         } catch (Exception $e) {
@@ -67,13 +64,8 @@ class Dbi
     public function getEcg($guardianId, $startTime, $endTime)
     {
         try {
-            $sql = 'select ecg_id, create_time, read_status, data_path from ecg 
-                    where guardian_id = :guardian_id and create_time >= :start_time ';
-            $param = array(':guardian_id' => $guardianId, ':start_time' => $startTime);
-            if ($endTime != null) {
-                $sql .= ' and create_time <= :end_time';
-                $param[':end_time'] = $endTime;
-            }
+            $sql = 'select ecg_id, create_time, read_status, data_path from ecg where guardian_id = :guardian_id';
+            $param = array(':guardian_id' => $guardianId);
             $sql .= ' order by ecg_id desc';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
@@ -162,26 +154,17 @@ class Dbi
         }
     }
     
-    public function updateHistoryReport($hospitalId, $patientId, $startTime, $endTime)
+    public function updateReport($guardianId, $file)
     {
         try {
-            $sql = 'update guardian_history set reported = 1, report_path = :path, report_time = :time 
-                    where hospital_id = :h_id and patient_id = :p_id and start_time = :s_time and end_time = :e_time';
+            $sql = 'update guardian set reported = 1, report_file = :file where guardian_id = :guardian_id';
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([
-                    ':path' => URL_ROOT . 'report/' . $patientId . '/' . $startTime . '_' . $endTime . '.pdf',
-                    ':time' => date('YmdHis'), 
-                    ':h_id' => $hospitalId, 
-                    ':p_id' => $patientId, 
-                    ':s_time' => $startTime, 
-                    ':e_time' => $endTime
-            ]);
+            $stmt->execute([':file' => $file, ':guardian_id' => $guardianId]);
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
     }
-    
     public function editAccount($accountId, array $data)
     {
         try {
@@ -518,29 +501,6 @@ class Dbi
         }
     }
     
-    public function addHistory($data)
-    {
-        try {
-            $sql = 'insert into guardian_history(hospital_id, patient_id, start_time, end_time, name, age, sex, tel)'
-                    . ' values(:hid, :pid, :stime, :etime, :name, :age, :sex, :tel)';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(array(
-                    ':hid' => $data['hospital_id'],
-                    ':pid' => $data['patient_id'],
-                    ':stime' => $data['start_time'],
-                    ':etime' => $data['end_time'],
-                    ':name' => $data['p_name'],
-                    ':age' => $data['age'],
-                    ':sex' => $data['sex'],
-                    ':tel' => $data['tel']
-            ));
-            return $this->pdo->lastInsertId();
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
     public function getGuardianStatusByDevice($deviceId)
     {
         try {
@@ -830,7 +790,7 @@ class Dbi
     
     public function registUser($patientName, $sex, $age, $tel, $device, $registHospital, $guardHospital, 
             $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, 
-            $familyName, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
+            $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
     {
         $birthYear = date('Y') - $age;
         try {
@@ -840,7 +800,7 @@ class Dbi
                 $patientId = $this->addPatient($patientName, $sex, $birthYear, $tel, $sickRoom, $doctor);
             }
             $guardianId = $this->addGuardian($device, $registHospital, $guardHospital, $patientId, $mode, $hours, 
-                    $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, $familyName, $familyTel, 
+                    $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, $familyTel, 
                     $tentativeDiagnose, $medicalHistory, $registDoctorName);
             $this->pdo->commit();
             return $guardianId;
@@ -870,15 +830,15 @@ class Dbi
     
     private function addGuardian($device, $registHospital, $guardHospital, $patientId, 
             $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, 
-            $familyName, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
+            $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
     {
         $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id, 
                 patient_id, mode, guardian_hours, lead, doctor_id, status,
-                sickroom, blood_pressure, height, weight, family_name, family_tel, 
+                sickroom, blood_pressure, height, weight, family_tel, 
                 tentative_diagnose, medical_history, regist_doctor_name) 
                 values(:device, :regist_hospital, :guard_hospital, :patient, :mode, 
                 :hours, :lead, :doctor_id, 0, :sickroom, :blood_pressure, :height, 
-                :weight, :family_name, :family_tel, :ten_dia, :medical_history, :doctor_name)';
+                :weight, :family_tel, :ten_dia, :medical_history, :doctor_name)';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(array(
                 ':device' => $device,
@@ -893,7 +853,6 @@ class Dbi
                 ':blood_pressure' => $bloodPressure,
                 ':height' => $height,
                 ':weight' => $weight,
-                ':family_name' => $familyName,
                 ':family_tel' => $familyTel,
                 ':ten_dia' => $tentativeDiagnose,
                 ':medical_history' => $medicalHistory,

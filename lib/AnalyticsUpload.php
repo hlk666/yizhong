@@ -27,8 +27,8 @@ class AnalyticsUpload
             return json_encode($this->error);
         }
         
-        $ret = Dbi::getDbi()->updateHistoryReport($param['hospital_id'], 
-                $param['patient_id'], $param['start_time'], $param['end_time']);
+        $urlFile = 'report/' . $param['patient_id'] . '/' . $param['start_time'] . '_' . $param['end_time'] . '.pdf';
+        $ret = Dbi::getDbi()->updateReport($param['patient_id'], $urlFile);
         if (VALUE_DB_ERROR === $ret) {
             $this->setError(7, 'failed to update db.');
             return json_encode($this->error);
@@ -63,26 +63,7 @@ class AnalyticsUpload
             return false;
         }
         
-        $existPatient = $this->checkPatient($param['hospital_id'], 
-                $param['patient_id'], $param['start_time'], $param['end_time']);
-        if ($existPatient == false) {
-            $this->setError(6, 'patient not exists.');
-            return false;
-        }
-        
         return true;
-    }
-    
-    private function checkPatient($hospitalId, $patientId, $startTime, $endTime)
-    {
-        $table = 'guardian_history';
-        $where = array(
-                'hospital_id' => $hospitalId,
-                'patient_id' => $patientId,
-                'start_time' => $startTime,
-                'end_time' => $endTime
-        );
-        return Dbi::getDbi()->existData($table, $where);
     }
     
     private function setError($code, $message)
@@ -94,17 +75,6 @@ class AnalyticsUpload
         }
         $this->error['code'] = $code;
         $this->error['message'] = $message;
-    }
-    
-    private function updateHistory($id, $file, $alert)
-    {
-        $data = array(
-                'pid' => $id,
-                'recordTime' => date('YmdHis'),
-                'alert' => $alert,
-                'path' => str_replace(PATH_ROOT, '', $file)
-        );
-        return Dbi::getDbi()->insertEcg($data);
     }
     
 //     $typeList = array('pdf');

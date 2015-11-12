@@ -49,10 +49,12 @@ if (isset($_POST['edit'])){
         echo "<script language='javascript'>alert('没有修改任何信息，请不要提交。');history.back();</script>";
         exit;
     }
-    //@todo add transcation.
+    
+    Dbi::getDbi()->beginTran();
     if (!empty($dataAccount)) {
         $ret = Dbi::getDbi()->editAccount($doctorId, $dataAccount);
         if (VALUE_DB_ERROR === $ret) {
+            Dbi::getDbi()->rollBack();
             echo "<script language='javascript'>alert('操作失败，请重试。');history.back();</script>";
             exit;
         }
@@ -60,10 +62,12 @@ if (isset($_POST['edit'])){
     if (!empty($dataHospital)) {
         $ret = Dbi::getDbi()->editHospital($hospitalId, $dataHospital);
         if (VALUE_DB_ERROR === $ret) {
+            Dbi::getDbi()->rollBack();
             echo "<script language='javascript'>alert('操作失败，请重试。');history.back();</script>";
             exit;
         }
     }
+    Dbi::getDbi()->commit();
     
     echo "<script language='javascript'>alert('修改成功。');window.location.href='setting.php'</script>";
     exit;

@@ -10,18 +10,8 @@ require PATH_LIB . 'Dbi.php';
 require PATH_LIB . 'function.php';
 
 $guardianId = $_GET["id"];
-//@todo in future, send start_time and end_time as parameter of get instead of accessing db.
-$times = Dbi::getDbi()->getGuardianTime($guardianId);
-if (empty($times)) {
-    echo '系统错误：没有监护时间信息。';
-    exit;
-}
 
-$where = ' guardian_id = ' . $guardianId . ' and create_time >= "' . $times['start_time'] . '"';
-if ($times['end_time'] != null) {
-    $where .= ' and create_time <= "' . $times['end_time'] . '"';
-}
-$total = Dbi::getDbi()->getRecordCount('ecg', $where);
+$total = Dbi::getDbi()->getRecordCount('ecg', ' guardian_id = ' . $guardianId);
 if ($total == VALUE_DB_ERROR) {
     echo '获取心电数据失败。';
     exit;
@@ -38,7 +28,7 @@ $navigation = $ret['navigation'];
 $sortNo = $total - $offset;
 echo $navigation;
 
-$ecgData = Dbi::getDbi()->getEcg($guardianId, $times['start_time'], $times['end_time']);
+$ecgData = Dbi::getDbi()->getEcg($guardianId);
 ?>
 <table width='100%' style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF' >
   <tr bgcolor='#ECEADB' style='height:30px' align='center'>

@@ -41,6 +41,7 @@ if (VALUE_DB_ERROR === $guardians) {
     <td>姓名</td>
     <td>性别</td>
     <td>年龄</td>
+    <td>远程查房</td>
     <td>联系电话</td>
     <td>血压</td>
     <td>初步诊断</td>
@@ -73,13 +74,16 @@ foreach ($guardians as $index => $guardian) {
         $alarmFlag = true;
         $color = '#FF0000';
     }
+    $id = $guardian['guardian_id'];
     $age = date('Y') - $guardian['birth_year'];
+    $sex = $guardian['sex'] == 1 ? '男' : '女';
     $lead = empty($guardian['lead']) ? '' : 'V' . $guardian['lead'];
     echo "<tr bgcolor='$color' style='height:25px'>
-    <td style='display:none;'>" . $guardian['guardian_id'] . "</td>
+    <td style='display:none;'>$id</td>
     <td><div align='center' style='width:80px'>" . $guardian['patient_name'] . "</div></td>
-    <td><div align='center' style='width:50px'>" . $guardian['sex'] . "</div></td>
-    <td><div align='center' style='width:50px'>$age</div></td>
+    <td><div align='center' style='width:40px'>$sex</div></td>
+    <td><div align='center' style='width:40px'>$age</div></td>
+    <td><div align='center' style='width:80px'><a href='remote_check_info.php?id=$id'>发送命令</a></div></td>
     <td><div align='center' style='width:100px'>" . $guardian['tel'] . "</div></td>
     <td><div align='center' style='width:50px'>" . $guardian['blood_pressure'] . "</div></td>
     <td><div align='center' style='width:200px'>". $guardian['tentative_diagnose'] . "</div></td>
@@ -109,7 +113,7 @@ $(function(){
         var Pname = $(this).children('td').eq(1).text();
         var sex = $(this).children('td').eq(2).text();
         var age = $(this).children('td').eq(3).text();
-        var hosNum = $(this).children('td').eq(4).text();
+        var hosNum = $(this).children('td').eq(5).text();
         var Psn = $(this).children('td').eq(0).text();
         var shebei = <?php echo $hospitalId; ?>;
         var quyu = 0;

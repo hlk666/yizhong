@@ -1,5 +1,6 @@
 <?php
 require '../config/path.php';
+require PATH_CONFIG . 'value.php';
 require PATH_LIB . 'Dbi.php';
 
 if (empty($_GET['hospital_id'])) {
@@ -8,25 +9,40 @@ if (empty($_GET['hospital_id'])) {
 }
 
 $hospitalId = $_GET['hospital_id'];
+if (!is_numeric($hospitalId)) {
+    echo json_encode(['code' => '2', 'message' => 'hospital_id is not number.']);
+    exit;
+}
 
-//@todo change to two tables
-$sql = 'select patient_id, start_time, end_time, name, age, sex, tel, reported 
-        from guardian_history where hospital_id = "' . $hospitalId . '"';
+$sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported
+        from guardian as g inner join patient as p on g.patient_id = p.patient_id
+        where regist_hospital_id = ' . $hospitalId;
 
 if (isset($_GET['reported']) && trim($_GET['reported']) != '') {
     $sql .= ' and reported = "' . $_GET['reported'] . '"';
 }
-
-//@todo if I need to change start_time to end_time here?
+//start_time is the condition from query while 'end_time' is field name.
 if (isset($_GET['start_time']) && trim($_GET['start_time']) != '') {
-    $sql .= ' and start_time >= "' . $_GET['start_time'] . '"';
+    $sql .= ' and end_time >= "' . $_GET['start_time'] . '"';
 }
 
 if (isset($_GET['end_time']) && trim($_GET['end_time']) != '') {
     $sql .= ' and end_time <= "' . $_GET['end_time'] . '"';
 }
+$data = Dbi::getDbi()->getAllData($sql);
+if (VALUE_DB_ERROR == $data) {
+    if (!is_numeric($hospitalId)) {
+        echo json_encode(['code' => '3', 'message' => 'db error.']);
+        exit;
+    }
+}
+foreach ($data as $key => $row) {
+    $data[$key]['age'] = date('Y') - $row['birth_year'];
+    $data[$key]['sex'] = $row['sex'] == 1 ? '男' : '女';
+    unset($data[$key]['birth_year']);
+}
 
-$data = array();
-$data['code'] = 0;
-$data['patients'] = Dbi::getDbi()->getAllData($sql);
-echo json_encode($data);
+$ret = array();
+$ret['code'] = 0;
+$ret['patients'] = $data;
+echo json_encode($ret);

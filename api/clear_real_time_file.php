@@ -9,7 +9,6 @@ $id = trim($_GET['id']);
 if (empty($id)) {
     exit;
 }
-//@todo add check authority here.
 
 $file = PATH_REAL_TIME . $id . '\\' . $id . SUFFIX_REAL_TIME_FILE;
 

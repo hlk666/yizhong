@@ -57,7 +57,7 @@ function Select() {
     if (form_select_hospital.custody_hos.value == "0") {
         alert("请选择下级医院。");
     } else {
-        window.location.href='patient_list.php?current_flag=0&&id=' + form_select_hospital.custody_hos.value;
+        window.location.href='patient_list.php?current_flag=0&id=' + form_select_hospital.custody_hos.value;
     }
 }
 </script>
