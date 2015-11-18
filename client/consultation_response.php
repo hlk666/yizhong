@@ -1,27 +1,19 @@
 ﻿<?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
+require '../common.php';
+include_head('会诊结果');
 
 $hospitalId = $_GET['hospital'];
 if (empty($hospitalId)) {
-    echo '医院参数没有传输，请联系管理员。';
-    exit;
+    user_goto(MESSAGE_PARAM, GOTO_FLAG_EXIT);
 }
 $consultations = Dbi::getDbi()->getConsultationResponse($hospitalId);
 if (VALUE_DB_ERROR === $consultations) {
-    echo '读取数据失败，请重试或联系管理员。';
-    exit;
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
 if (empty($consultations)) {
-    echo '没有会诊回复。';
-    exit;
+    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }
 ?>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>会诊记录</title>
-</head>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0" style='font-size:15px;'>
 <div style='height:172px; overflow:auto;'>
 <table height='50' border='0' style='width:100%; margin:0;font-size:15px;' >
@@ -50,30 +42,16 @@ echo "<tr bgcolor=$color>
 ?>
 </table>
 </div>
-<script type="text/javascript" src="../js/jquery-1.7.1.min.js"></script>
+<?php include_js_file();?>
 <script type="text/javascript">
 $(function(){
-    var rgb;
     $("tr").dblclick(function sendURL(){
         var ecgpath = $(this).children('td').eq(0).text();
         var cid = $(this).children('td').eq(1).text();
         ecgpath=$.trim(ecgpath);
         cid=$.trim(cid);
         //window.YZ.getpath(ecgpath,cid);
-        window.location.href="./end_consultation.php?id="+cid;
-    });
-    $("tr").mouseover(function(){
-        rgb = $(this).css('background-color');
-        $(this).css({
-        'backgroundColor':'#5fafcd',
-        'color':'#fff'
-        });
-    });
-   $("tr").mouseout(function(){
-       $(this).css({
-        'backgroundColor':rgb,
-        'color':'#000'
-         });
+        window.location.href="./consultation_end.php?id="+cid;
     });
 })
 </script>

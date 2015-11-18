@@ -1,7 +1,6 @@
 <?php
-require_once '../config/path.php';
-require_once '../config/value.php';
-require_once PATH_LIB . 'Dbi.php';
+require '../common.php';
+include_head('删除单条心电');
 
 $guardianId = $_GET['id'];
 $ecgId = $_GET['eid'];
@@ -13,4 +12,6 @@ if (VALUE_DB_ERROR === $ret) {
     echo '处理成功。';
 }
 
-header('location:ecg_history.php?id=' . $guardianId);
+user_goto(null, GOTO_FLAG_URL, 'ecg_list.php?id=' . $guardianId);
+?>
+</html>

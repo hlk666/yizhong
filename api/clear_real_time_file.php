@@ -1,5 +1,5 @@
 <?php
-require_once '../config/path.php';
+require_once '../config/config.php';
 
 if (!isset($_GET['id'])) {
     exit;

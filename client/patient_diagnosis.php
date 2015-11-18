@@ -1,15 +1,8 @@
 ﻿<?php
-require_once '../config/path.php';
-require_once '../config/value.php';
-require_once PATH_LIB . 'Dbi.php';
-
+require '../common.php';
+include_head('诊断记录');
 $guardianId = $_GET["id"];
 ?>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>诊断记录</title>
-
-</head>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
 <table width='100%' style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF' >
 <tr bgcolor='#ECEADB' style='height:30px' align='center'>
@@ -40,10 +33,9 @@ foreach ($result as $index => $row) {
 }
 ?>
 </table>
-<script type="text/javascript" src="../js/jquery-1.7.1.min.js"></script>
+<?php include_js_file();?>
 <script type="text/javascript">
 $(function(){
-    var rgb;
     $("tr").dblclick(function sendURL(){
     var url = $(this).children('td').eq(3).text();
         var dio = $(this).children('td').eq(1).text();
@@ -52,19 +44,6 @@ $(function(){
         dio=$.trim(dio);
         time=$.trim(time);
         window.ecg.ShowECG(url,dio,time);
-    });
-    $("tr").mouseover(function(){
-        rgb = $(this).css('background-color');
-        $(this).css({
-            'backgroundColor':'#5fafcd',
-            'color':'#fff'
-        });
-    });
-    $("tr").mouseout(function(){
-        $(this).css({
-            'backgroundColor':rgb,
-            'color':'#000'
-        });
     });
 })
 </script>  

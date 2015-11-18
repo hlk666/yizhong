@@ -1,16 +1,14 @@
 <?php
-require_once '../config/path.php';
-require_once '../config/value.php';
-require_once PATH_LIB . 'Dbi.php';
+require '../common.php';
+include_head('修改报告');
 
 $guardianId = $_GET["id"];
-$oldResult = Dbi::getDbi()->getGuardianResult($guardianId);
+$ret = Dbi::getDbi()->getGuardianById($guardianId);
+if (VALUE_DB_ERROR === $ret) {
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+}
+$oldResult = empty($ret) ? '' : $ret['guardian_result'];
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>修改报告</title>
 <style type="text/css">
 <!--
 .STYLE3 {
@@ -26,19 +24,16 @@ $oldResult = Dbi::getDbi()->getGuardianResult($guardianId);
 .Tab td{ border:solid 1px #0000EE}
 -->
 </style>
-</head>
 <body>
 <?php
 if (isset($_POST['edit']) && $_POST['edit']){
     if (trim($_POST['result']) == '') {
-        echo "<script LANGUAGE='javascript'>alert('诊断内容不能为空！');history.back();</script>";
-        exit;
+        user_goto('诊断内容不能为空。', GOTO_FLAG_BACK);
     }
     else {
         $newResult = $_POST['result'];
-        Dbi::getDbi()->editGuardianResult($guardianId, $newResult);
-        header("location:illsum.php?id=$guardianId");
-        exit;
+        Dbi::getDbi()->flowGuardianEditResult($guardianId, $newResult);
+        user_goto(null, GOTO_FLAG_URL, 'guardian_result.php?id=' . $guardianId);
     }
 }
 ?>

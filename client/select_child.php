@@ -1,21 +1,13 @@
 <?php
-require_once '../config/path.php';
-require_once '../config/value.php';
-require_once PATH_LIB . 'Dbi.php';
-
+require '../common.php';
+include_head('选择医院');
 session_start();
 $hospitalId = $_GET['id'];
-$child = Dbi::getDbi()->getChildHospitals($hospitalId);
+$child = Dbi::getDbi()->getHospitalChild($hospitalId);
 if (empty($child)) {
-    echo "<script language=javascript>alert(\"没有下级医院\");history.back();</script>";
-    exit;
+    followingAcction(MESSAGE_PARAM, GOTO_FLAG_BACK);
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>监护状态</title>
 <style type="text/css">
 <!--
 .STYLE4 {
@@ -27,7 +19,6 @@ if (empty($child)) {
 .Tab td{ border:solid 1px #0000EE}
 -->
 </style>
-</head>
 <body>
 <form name="form_select_hospital" method="post">
 <table width="100%"  cellspacing="0" class="Tab"  align="center">
@@ -46,8 +37,8 @@ if (empty($child)) {
   </tr>
   <tr bgcolor="#B0E2FF">
     <td align="center" >
-      <input type="button" name="select" value="确定"  style="width:100px" onclick="Select()" />&nbsp;&nbsp;
-      <input type="button" name="return" value="返回"  style="width:100px" onclick="javascript:history.back();" />
+      <input type="button" name="select" value="确定"  style="width:100px" onclick="Select()" />
+      <input type="button" name="return" value="返回"  style="width:100px;margin-left:25px;" onclick="javascript:history.back();" />
     </td>
   </tr> 
 </table>

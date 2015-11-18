@@ -1,8 +1,6 @@
 <?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
-require PATH_LIB . 'function.php';
+require '../common.php';
+include_head('病人列表');
 
 session_start();
 checkHospitalAdminLogin();
@@ -25,12 +23,10 @@ if (isset($_POST['search'])) {
 $patients = Dbi::getDbi()->getPatientListDistinct($where);
 $total = count($patients);
 if (VALUE_DB_ERROR === $total) {
-    echo "读取数据失败，请重试。";
-    exit;
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
 if ($total == 0) {
-    echo "该医院没有病人信息。";
-    exit;
+    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }
 
 $rows = 20;
@@ -39,15 +35,13 @@ $ret = getPaging($total, $rows, $_SERVER['REQUEST_URI'], $page);
 $offset = $ret['offset'];
 $navigation = $ret['navigation'];
 
-$patients = Dbi::getDbi()->getPatientListDistinct($where, $offset, $rows);
-if (VALUE_DB_ERROR === $patients) {
-    echo "读取数据失败，请重试。";
-    exit;
+if ($total > $rows) {
+    $patients = Dbi::getDbi()->getPatientListDistinct($where, $offset, $rows);
+    if (VALUE_DB_ERROR === $patients) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+    }
 }
 ?>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>病人列表</title>
 <style type="text/css">
 BODY {margin: 1px}
 #scroll_table{ height:100%; overflow:auto;}
@@ -61,7 +55,6 @@ th,td{border:1px solid #CCC}
 .w_40{ width:40px;}
 .w_80{ width:80px;}
 </style>
-</head>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
 <table width="460"  border="1" bordercolor="#000000" align="center" cellspacing="0">
   <tr>

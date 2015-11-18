@@ -1,25 +1,24 @@
 <?php
+require '../common.php';
+include_head('管理系统首页');
 
 session_start();
 
 if (isset($_SESSION["isLogin"]) && isset($_SESSION["loginType"])
         && $_SESSION["isLogin"] && $_SESSION["loginType"] == 1) {
-    header("location:adminf.html");
-    exit;
+    user_goto(null, GOTO_FLAG_URL, 'adminf.html');
 }
 
 if (isset($_SESSION["isLogin"]) && isset($_SESSION["loginType"])
         && $_SESSION["isLogin"] && $_SESSION["loginType"] == 0) {
-    header("location:sysf.html");
-    exit;
+    user_goto(null, GOTO_FLAG_URL, 'sysf.html');
 }
 
 if (isset($_SESSION["isLogin"]) && isset($_SESSION["loginType"])
         && $_SESSION["isLogin"] && $_SESSION["loginType"] == 2) {
     unset($_SESSION['isLogin']);
     unset($_SESSION['user']);
-    echo "<script language=javascript>alert(\"您不是管理员用户，请用管理员用户登录。\");window.location='index.php'</script>";
-    exit;
+    user_goto('您不是管理员用户，请用管理员用户登录。', GOTO_FLAG_URL, 'index.php');
 }
 
 $errorMsg = '';
@@ -29,19 +28,13 @@ if(isset($_POST['user'])) {
     } else {
         $_SESSION['user'] = $_POST['user'];
     }
-
     if ($errorMsg == '' && trim($_POST["pwd"]) == ""){
         $errorMsg = '请输入密码。';
     }
-
     if ($errorMsg == '') {
-        include '../config/path.php';
-        include '../config/value.php';
-        include PATH_LIB . 'Dbi.php';
-
         $user = $_POST['user'];
         $pwd = md5($_POST['pwd']);
-
+        //get user and pwd to check.
         $ret = Dbi::getDbi()->getAcount($user);
         if (empty($ret)) {
             $errorMsg = '您输入的用户不存在。';
@@ -55,35 +48,27 @@ if(isset($_POST['user'])) {
             if ($loginType > 1) {
                 unset($_SESSION['isLogin']);
                 unset($_SESSION['user']);
-                echo "<script language=javascript>alert(\"您不是管理员用户，请用管理员用户登录。\");window.location='index.php'</script>";
-                exit;
+                user_goto('您不是管理员用户，请用管理员用户登录。', GOTO_FLAG_URL, 'index.php');
             }
-
+            //set cookie.
             setcookie(session_name(), session_id(), time() + 8 * 3600, "/");
-
+            //store value to session.
             $_SESSION['isLogin'] = true;
             $_SESSION['loginType'] = $loginType;
             $_SESSION['hospital'] = $hospitalId;
             $_SESSION["loginId"] = $accountId;
             unset($_SESSION['user']);
-
+            //redirect to right page.
             if($loginType == 0) {
-                header("location:sysf.html");
+                user_goto(null, GOTO_FLAG_URL, 'sysf.html');
             }
             if ($loginType == 1) {
-                header("location:adminf.html");
+                user_goto(null, GOTO_FLAG_URL, 'adminf.html');
             }
-            
-            exit;
         }
     }
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>管理系统首页</title>
 <link href="../style/public.css" rel="stylesheet" type="text/css" />
 <!--IE6透明判断-->
 <!--[if IE 6]>
@@ -97,7 +82,6 @@ DD_belatedPNG.fix('.logo,.denglukuang,.line');
 span{ color: #FF0000;}
 -->
 </style>
-</head>
 <body>
 <div class="bg">
     <div class="logo"></div>
@@ -116,8 +100,8 @@ span{ color: #FF0000;}
             value="<?php if(isset($_SESSION['user'])) echo $_SESSION['user']?>" />
         <input class="mima" name="pwd" type="password" />
         <div class="btn">
-            <input class="dl" name="login" type="button" onclick="javascript:mySubmit()"/>
-            <input class="cz" name="reset" type="button" onclick="javascript:myReset();"/>
+            <input class="dl" name="login" type="button" onclick="javascript:loginSubmit()"/>
+            <input class="cz" name="reset" type="button" onclick="javascript:loginReset();"/>
         </div>
         </form>
        <?PHP if ($errorMsg != '') echo '<span class="span"><strong>' . $errorMsg . '</strong></span>'; ?>
@@ -127,13 +111,6 @@ span{ color: #FF0000;}
     <span class="img"></span>烟台羿中医疗科技有限公司&nbsp;&nbsp;&nbsp;&nbsp;地址：烟台开发区珠江路28号科技大厦617、619&nbsp;&nbsp;&nbsp;&nbsp;电话：0535-6395321
     </div>
 </div>
-<script type="text/javascript">
-function mySubmit(){
-    document.getElementById("login_form").submit()
-}
-function myReset(){
-    document.getElementById("login_form").reset();
-}
-</script>
+<?php include_js_file();?>
 </body>
 </html>

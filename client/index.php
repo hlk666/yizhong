@@ -1,10 +1,11 @@
 ﻿<?php
+require '../common.php';
+include_head('远程动态实时心电监测系统');
 session_start();
 
 if (isset($_SESSION["isLogin"]) && isset($_SESSION["loginType"]) 
         && $_SESSION["isLogin"] && $_SESSION["loginType"] == 2) {
-    header("location:guardian_list.php");
-    exit;
+    user_goto(null, GOTO_FLAG_URL, 'guardian_list.php');
 }
 
 $errorMsg = '';
@@ -20,10 +21,6 @@ if(isset($_POST['login']) && $_POST['login']) {
     }
     
     if ($errorMsg == '') {
-        include '../config/path.php';
-        include '../config/value.php';
-        include PATH_LIB . 'Dbi.php';
-        
         $user = $_POST['user'];
         $pwd = md5($_POST['pwd']);
         
@@ -45,17 +42,11 @@ if(isset($_POST['login']) && $_POST['login']) {
             $_SESSION["loginId"] = $accountId;
             unset($_SESSION['user']);
             
-            header("location:guardian_list.php");
-            exit;
+            user_goto(null, GOTO_FLAG_URL, 'guardian_list.php');
         }
     }
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>远程动态实时心电监测系统</title>
 <link href="../style/publics.css" rel="stylesheet" type="text/css" />
 <!--IE6透明判断-->
 <!--[if IE 6]>
@@ -69,7 +60,6 @@ DD_belatedPNG.fix('.logo,.denglukuang,.line');
 span{ color: #FF0000;}
 -->
 </style>
-</head>
 <body>
 <div class="bg">
     <div class="logo" align="center"></div>

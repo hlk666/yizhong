@@ -1,8 +1,6 @@
 <?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
-require PATH_LIB . 'function.php';
+require '../common.php';
+include_head('设置监护参数');
 
 session_start();
 checkDoctorLogin();
@@ -12,11 +10,6 @@ if(isset($_POST['type']) && $_POST['type'] == 'regist'){
     $_SESSION['guardian'] = $_POST;
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>监护参数设置</title>
 <style type="text/css">
 <!--
 .STYLE1 {
@@ -32,11 +25,9 @@ if(isset($_POST['type']) && $_POST['type'] == 'regist'){
 .STYLE6 {font-size: 12px; font-weight: bold; }
 -->
 </style>
-</head>
 <body>
-<script language="javascript" src="../libraries/PCASClass.js"></script>
 <table width="100%" height="100%" border="0" align="center" cellspacing="1" bordercolor="#000000">
-<form action="addUser.php" method="post" id="myform">
+<form action="add_user.php" method="post" id="formParam">
   <input type="hidden" name="type" value="save" />
   <tr class="STYLE3">
     <td colspan="2"><span style="color:red;">若删除某参数，系统会按默认值监护。</span></td>

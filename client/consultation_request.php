@@ -1,27 +1,19 @@
 ﻿<?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
+require '../common.php';
+include_head('会诊请求列表');
 
 $hospitalId = $_GET['hospital'];
 if (empty($hospitalId)) {
-    echo '医院参数没有传输，请联系管理员。';
-    exit;
+    user_goto(MESSAGE_PARAM, GOTO_FLAG_EXIT);
 }
 $consultations = Dbi::getDbi()->getConsultationRequest($hospitalId);
 if (VALUE_DB_ERROR === $consultations) {
-    echo '读取数据失败，请重试或联系管理员。';
-    exit;
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
 if (empty($consultations)) {
-    echo '没有会诊请求。';
-    exit;
+    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }
 ?>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>会诊请求</title>
-</head>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0" style='font-size:15px;'>
 <div style='height:172px; overflow:auto;'>
 <table height='50' border='0' style='width:100%; margin:0;font-size:15px;' >
@@ -52,10 +44,9 @@ foreach ($consultations as $index => $row) {
 ?>
 </table>
 </div>
-<script type="text/javascript" src="../js/jquery-1.7.1.min.js"></script>
+<?php include_js_file();?>
 <script type="text/javascript">
 $(function(){
-var rgb;
     $("tr").dblclick(function sendURL(){
         var hosnumber = $(this).children('td').eq(0).text();
         var cid = $(this).children('td').eq(1).text();
@@ -63,20 +54,7 @@ var rgb;
         hosnumber=$.trim(hosnumber);
         cid=$.trim(cid);
         pid=$.trim(pid);
-        window.location= "handle_consultation.php?hospital="+ hosnumber+"&consultation="+cid+"&guardian="+pid;
-    });
-    $("tr").mouseover(function(){
-        rgb = $(this).css('background-color');
-        $(this).css({
-        'backgroundColor':'#5fafcd',
-        'color':'#fff'
-        });
-    });
-   $("tr").mouseout(function(){
-       $(this).css({
-        'backgroundColor':rgb,
-        'color':'#000'
-         });
+        window.location= "consultation_accept.php?hospital="+ hosnumber+"&consultation="+cid+"&guardian="+pid;
     });
 })
 </script> 

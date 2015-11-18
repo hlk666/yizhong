@@ -1,20 +1,16 @@
 ﻿<?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
-require PATH_LIB . 'function.php';
+require '../common.php';
+include_head('监护列表');
 
 session_start();
 checkDoctorLogin();
 
 $hospitalId = $_SESSION["hospital"];
-
-$requestConsultation = Dbi::getDbi()->getRecordCount('consultation', 'status = 1 and response_hospital_id = ' . $hospitalId);
-if ($requestConsultation > 0) {
+$noticeConsultation = '';
+if (true == Dbi::getDbi()->existedRequestConsultation($hospitalId)) {
     $noticeConsultation = '有新的会诊请求，请及时查看。<br />';
 }
-$responseConsultation = Dbi::getDbi()->getRecordCount('consultation', 'status = 2 and request_hospital_id = ' . $hospitalId);
-if ($responseConsultation > 0) {
+if (true == Dbi::getDbi()->existedResponseConsultation($hospitalId)) {
     $noticeConsultation .= '会诊请求已回复，请查看。<br />';
 }
 if ($noticeConsultation != '') {
@@ -23,17 +19,9 @@ if ($noticeConsultation != '') {
 
 $guardians = Dbi::getDbi()->getGuardianList($hospitalId);
 if (VALUE_DB_ERROR === $guardians) {
-    echo '系统错误，请重试或联系管理员。';
-    exit;
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">   
-<html xmlns="http://www.w3.org/1999/xhtml">   
-<head>   
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
-<meta http-equiv="refresh" content="60">   
-<title>监护列表</title>   
-</head>
 <body >
 <table style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF' >
   <tr bgcolor='#ECEADB' style='height:30px' align='center'>
@@ -65,12 +53,7 @@ foreach ($guardians as $index => $guardian) {
             . $guardian['patient_name'] . ']<p>已监护结束，请及时为其诊断并作出病情总结。<br />';
     }
     
-    $where = ' read_status = 0 and guardian_id = ' . $guardian['guardian_id'] 
-        . ' and create_time >= "' . $guardian['start_time'] . '"';
-    if ($guardian['end_time'] != null) {
-        $where .= ' and create_time <= "' . $guardian['end_time'] . '"';
-    }
-    if (true == Dbi::getDbi()->existData('ecg', $where)) {
+    if (true == Dbi::getDbi()->existedEcgNotRead($guardian['guardian_id'])) {
         $alarmFlag = true;
         $color = '#FF0000';
     }
@@ -83,7 +66,7 @@ foreach ($guardians as $index => $guardian) {
     <td><div align='center' style='width:80px'>" . $guardian['patient_name'] . "</div></td>
     <td><div align='center' style='width:40px'>$sex</div></td>
     <td><div align='center' style='width:40px'>$age</div></td>
-    <td><div align='center' style='width:80px'><a href='remote_check_info.php?id=$id'>发送命令</a></div></td>
+    <td><div align='center' style='width:80px'><a href='guardian_remote_check_info.php?id=$id'>发送命令</a></div></td>
     <td><div align='center' style='width:100px'>" . $guardian['tel'] . "</div></td>
     <td><div align='center' style='width:50px'>" . $guardian['blood_pressure'] . "</div></td>
     <td><div align='center' style='width:200px'>". $guardian['tentative_diagnose'] . "</div></td>
@@ -104,10 +87,9 @@ if ($alarmFlag) {
     echo "<script language='javascript'>window.lily.playmusic(1);</script>";
 }
 ?>
-<script type="text/javascript" src="../js/jquery-1.7.1.min.js"></script>
+<?php include_js_file();?>
 <script type="text/javascript">
 $(function(){
-    var rgb;
     $("tr").dblclick(function sendURL(){
         var text = $(this).children('td').eq(0).text();
         var Pname = $(this).children('td').eq(1).text();
@@ -124,19 +106,6 @@ $(function(){
         hosNum=$.trim(hosNum);
         
         window.lily.onCall(text,hosNum,Pname,sex,age,Psn,shebei,quyu,1);
-    });
-    $("tr").mouseover(function(){
-        rgb = $(this).css('background-color');
-        $(this).css({
-        'backgroundColor':'#5fafcd',
-        'color':'#fff'
-        });
-    });
-   $("tr").mouseout(function(){
-       $(this).css({
-        'backgroundColor':rgb,
-        'color':'#000'
-         });
     });
 })
 </script>

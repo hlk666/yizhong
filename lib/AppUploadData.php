@@ -21,7 +21,7 @@ class AppUploadData
                 mkdir($realTimeDir);
             }
             $tmpFile = $realTimeDir . date('YmdHis') . '.tmp';
-            $retIO = $this->writeFile($tmpFile, $data);
+            $retIO = file_put_contents($tmpFile, $data);
             if ($retIO === false) {
                 $this->setIOError();
                 return json_encode($this->error);
@@ -41,14 +41,14 @@ class AppUploadData
                 mkdir($dir);
             }
             $file = $dir . date('YmdHis') . '.bin';
-            $retIO = $this->writeFile($file, $data);
+            $retIO = file_put_contents($file, $data);
             if ($retIO === false) {
                 $this->setIOError();
                 return json_encode($this->error);
             }
             
             $urlFile = 'ECG/' . $patientId . '/' . date('YmdHis') . '.bin';
-            $retDB = Dbi::getDbi()->insertEcg($patientId, $alert, $urlFile);
+            $retDB = Dbi::getDbi()->flowGuardianAddEcg($patientId, $alert, $urlFile);
             if (VALUE_DB_ERROR == $retDB) {
                 $this->setError(7, 'Server DB error.');
                 return json_encode($this->error);
@@ -87,22 +87,6 @@ class AppUploadData
         }
         $this->error['code'] = $code;
         $this->error['message'] = $message;
-    }
-    
-    private function writeFile($file, $data)
-    {
-        try {
-            $handle = fopen($file, 'a');
-            if ($handle == false) {
-                return false;
-            }
-            fwrite($handle, $data);
-            fclose($handle);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-        }
-        
-        return true;
     }
     
     private function setIOError()

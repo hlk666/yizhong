@@ -1,5 +1,4 @@
 <?php
-require_once PATH_CONFIG . 'value.php';
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_LIB . 'Dbi.php';
 
@@ -28,7 +27,7 @@ class AnalyticsUpload
         }
         
         $urlFile = 'report/' . $param['patient_id'] . '/' . $param['start_time'] . '_' . $param['end_time'] . '.pdf';
-        $ret = Dbi::getDbi()->updateReport($param['patient_id'], $urlFile);
+        $ret = Dbi::getDbi()->uploadReport($param['patient_id'], $urlFile);
         if (VALUE_DB_ERROR === $ret) {
             $this->setError(7, 'failed to update db.');
             return json_encode($this->error);
@@ -76,20 +75,4 @@ class AnalyticsUpload
         $this->error['code'] = $code;
         $this->error['message'] = $message;
     }
-    
-//     $typeList = array('pdf');
-//     function checkFileType($file, $typeList)
-//     {
-//         $file = trim($file);
-//         if ($file == '') {
-//             return false;
-//         }
-//         $extension = strtolower(substr(strrchr($file, '.'), 1));
-//         foreach ($typeList as $type) {
-//             if ($type != $extension) {
-//                 return false;
-//             }
-//         }
-//         return true;
-//     }
 }

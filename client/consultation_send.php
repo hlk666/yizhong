@@ -1,48 +1,34 @@
 <?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
+require '../common.php';
+include_head('会诊请求');
 
 if (!isset($_GET['hospital']) || !isset($_GET['eid'])) {
-    echo '参数不足。';
-    exit;
+    user_goto(MESSAGE_PARAM, GOTO_FLAG_EXIT);
 }
 $hospitalId = $_GET['hospital'];
 $ecgId = $_GET['eid'];
 if (isset($_POST['apply']) && $_POST['apply']){
     if (!isset($_POST['message']) || !isset($_POST['response_hospital'])) {
-        echo '请输入会诊请求信息，并且选择一个上级医院。';
-        echo '<script language="javascript">setTimeout("history.back()", 1500);</script>';
-        exit;
+        user_back_after_delay('请输入会诊请求信息，并且选择一个上级医院。', 1500);
     }
     $message = $_POST['message'];
     $responseHospital = $_POST['response_hospital'];
-    $ret = Dbi::getDbi()->addConsultation($hospitalId, $responseHospital, $ecgId, $message);
+    $ret = Dbi::getDbi()->flowConsultationSend($hospitalId, $responseHospital, $ecgId, $message);
     if (VALUE_DB_ERROR === $ret) {
-        echo '会诊请求发送失败，请重试或联系管理员。';
-        echo '<script language="javascript">setTimeout("history.back()", 1500);</script>';
-        exit;
+        user_back_after_delay('会诊请求发送失败，请重试或联系管理员。', 1500);
     } else {
-        echo '会诊请求发送成功。';
+        user_back_after_delay('会诊请求发送成功。', 1500);
     }
-    exit;
 }
 
-$parentHospital = Dbi::getDbi()->getParentHospitals($hospitalId);
+$parentHospital = Dbi::getDbi()->getHospitalParent($hospitalId);
 if (VALUE_DB_ERROR === $parentHospital) {
-    echo '读取上级医院信息失败，请重试或联系管理员。';
-    exit;
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
 if (empty($parentHospital)) {
-    echo '本院暂时没有上级医院，请添加上级医院后再申请会诊。';
-    exit;
+    user_goto('本院暂时没有上级医院，请添加上级医院后再申请会诊。', GOTO_FLAG_EXIT);
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>诊断报告</title>
 <style type="text/css">
 <!--
 .STYLE3 {
@@ -58,7 +44,6 @@ if (empty($parentHospital)) {
 .Tab td{ border:solid 1px #0000EE}
 -->
 </style>
-</head>
 <body>
 <form name="" action="" method="post">
 <table cellspacing="0" class="Tab" align="center">

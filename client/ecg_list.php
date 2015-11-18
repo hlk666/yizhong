@@ -1,25 +1,17 @@
-﻿<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>报警心电</title>
-</head>
-<body>
-<?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
-require PATH_LIB . 'function.php';
+﻿<?php
+require '../common.php';
+include_head('报警心电');
 
 $guardianId = $_GET["id"];
 
-$total = Dbi::getDbi()->getRecordCount('ecg', ' guardian_id = ' . $guardianId);
-if ($total == VALUE_DB_ERROR) {
-    echo '获取心电数据失败。';
-    exit;
+$ecgData = Dbi::getDbi()->getEcg($guardianId);
+if (VALUE_DB_ERROR === $ecgData) {
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
-if ($total == 0) {
-    echo '当前监护没有历史心电数据。';
-    exit;
+if (empty($ecgData)) {
+    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }
+$total = count($ecgData);
 $rows = 8;
 $page = isset($_GET['page']) ? $_GET['page'] : null;
 $ret = getPaging($total, $rows, $_SERVER['REQUEST_URI'], $page);
@@ -27,9 +19,12 @@ $offset = $ret['offset'];
 $navigation = $ret['navigation'];
 $sortNo = $total - $offset;
 echo $navigation;
+if ($total > $rows) {
+    $ecgData = Dbi::getDbi()->getEcg($guardianId, $offset, $rows);
+}
 
-$ecgData = Dbi::getDbi()->getEcg($guardianId);
 ?>
+<body>
 <table width='100%' style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF' >
   <tr bgcolor='#ECEADB' style='height:30px' align='center'>
   <th style='display:none;'>编号</th>
@@ -56,10 +51,9 @@ foreach ($ecgData as $index => $row) {
 }
 ?>
 </table>
-<script type="text/javascript" src="../js/jquery-1.7.1.min.js"></script>
+<?php include_js_file();?>
 <script type="text/javascript">
 $(function(){
-   var rgb;
     $("tr").dblclick(function sendURL(){
         var text = $(this).children('td').eq(0).text();
         var time = $(this).children('td').eq(2).text();
@@ -68,20 +62,7 @@ $(function(){
             time=$.trim(time);
         window.ecg.ShowECG(url,text,time);
         
-        window.location= "update_read_status.php?id="+ text; 
-    });
-   $("tr").mouseover(function(){
-        rgb = $(this).css('background-color');
-        $(this).css({
-        'backgroundColor':'#5fafcd',
-        'color':'#fff'
-        });
-    });
-   $("tr").mouseout(function(){
-       $(this).css({
-        'backgroundColor':rgb,
-        'color':'#000'
-         });
+        window.location= "guardian_read_ecg.php?id="+ text; 
     });
 })
 </script>  

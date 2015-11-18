@@ -1,41 +1,41 @@
 <?php
 header("Content-Type:text/html;charset=utf-8");
 /*--------------------------------
-¹¦ÄÜ:HTTP½Ó¿Ú ·¢ËÍ¶ÌÐÅ
-ÐÞ¸ÄÈÕÆÚ:	2009-04-08
-ËµÃ÷:		http://localhost/tx/?uid=ÓÃ»§ÕËºÅ&pwd=MD5Î»32ÃÜÂë&mobile=ºÅÂë&content=ÄÚÈÝ
-×´Ì¬:
-	100 ·¢ËÍ³É¹¦
-	101 ÑéÖ¤Ê§°Ü
-	102 ¶ÌÐÅ²»×ã
-	103 ²Ù×÷Ê§°Ü
-	104 ·Ç·¨×Ö·û
-	105 ÄÚÈÝ¹ý¶à
-	106 ºÅÂë¹ý¶à
-	107 ÆµÂÊ¹ý¿ì
-	108 ºÅÂëÄÚÈÝ¿Õ
-	109 ÕËºÅ¶³½á
-	110 ½ûÖ¹Æµ·±µ¥Ìõ·¢ËÍ
-	111 ÏµÍ³ÔÝ¶¨·¢ËÍ
-	112	ÓÐ´íÎóºÅÂë
-	113	¶¨Ê±Ê±¼ä²»¶Ô
-	114	ÕËºÅ±»Ëø£¬10·ÖÖÓºóµÇÂ¼
-	115	Á¬½ÓÊ§°Ü
-	116 ½ûÖ¹½Ó¿Ú·¢ËÍ
-	117	°ó¶¨IP²»ÕýÈ·
-	120 ÏµÍ³Éý¼¶
+åŠŸèƒ½:HTTPæŽ¥å£ å‘é€çŸ­ä¿¡
+ä¿®æ”¹æ—¥æœŸ:    2009-04-08
+è¯´æ˜Ž:        http://localhost/tx/?uid=ç”¨æˆ·è´¦å·&pwd=MD5ä½32å¯†ç &mobile=å·ç &content=å†…å®¹
+çŠ¶æ€:
+    100 å‘é€æˆåŠŸ
+    101 éªŒè¯å¤±è´¥
+    102 çŸ­ä¿¡ä¸è¶³
+    103 æ“ä½œå¤±è´¥
+    104 éžæ³•å­—ç¬¦
+    105 å†…å®¹è¿‡å¤š
+    106 å·ç è¿‡å¤š
+    107 é¢‘çŽ‡è¿‡å¿«
+    108 å·ç å†…å®¹ç©º
+    109 è´¦å·å†»ç»“
+    110 ç¦æ­¢é¢‘ç¹å•æ¡å‘é€
+    111 ç³»ç»Ÿæš‚å®šå‘é€
+    112    æœ‰é”™è¯¯å·ç 
+    113    å®šæ—¶æ—¶é—´ä¸å¯¹
+    114    è´¦å·è¢«é”ï¼Œ10åˆ†é’ŸåŽç™»å½•
+    115    è¿žæŽ¥å¤±è´¥
+    116 ç¦æ­¢æŽ¥å£å‘é€
+    117    ç»‘å®šIPä¸æ­£ç¡®
+    120 ç³»ç»Ÿå‡çº§
 --------------------------------*/
-$uid = '100818';		//ÓÃ»§ÕËºÅ
-$pwd = '05356395321';		//ÃÜÂë
-$mobile	 = $_GET['id'];	//ºÅÂë
-$content = $_GET['rx'];		//ÄÚÈÝ
+$uid = '100818';        //ç”¨æˆ·è´¦å·
+$pwd = '05356395321';        //å¯†ç 
+$mobile     = $_GET['id'];    //å·ç 
+$content = $_GET['rx'];        //å†…å®¹
 $content = mb_convert_encoding($content,"gbk","UTF-8" );
-//¼´Ê±·¢ËÍ
+//å³æ—¶å‘é€
 $res = sendSMS($uid,$pwd,$mobile,$content);
 $res = mb_convert_encoding($res, "UTF-8", "gbk");
 echo $res;
 
-//¶¨Ê±·¢ËÍ
+//å®šæ—¶å‘é€
 /*
 $time = '2010-05-27 12:11';
 $res = sendSMS($uid,$pwd,$mobile,$content,$time);
@@ -43,58 +43,58 @@ echo $res;
 */
 function sendSMS($uid,$pwd,$mobile,$content,$time='',$mid='')
 {
-	$http = 'http://http.yunsms.cn/tx/';
-	$data = array
-		(
-		'uid'=>$uid,					//ÓÃ»§ÕËºÅ
-		'pwd'=>strtolower(md5($pwd)),	//MD5Î»32ÃÜÂë
-		'mobile'=>$mobile,				//ºÅÂë
-		'content'=>$content,			//ÄÚÈÝ
-		'time'=>$time,		//¶¨Ê±·¢ËÍ
-		'mid'=>$mid						//×ÓÀ©Õ¹ºÅ
-		);
-	$re= postSMS($http,$data);			//POST·½Ê½Ìá½»
-	if( trim($re) == '100' )
-	{
-		return "·¢ËÍ³É¹¦!";
-	}
-	else 
-	{
-		return "·¢ËÍÊ§°Ü! ×´Ì¬£º".$re;
-	}
+    $http = 'http://http.yunsms.cn/tx/';
+    $data = array
+        (
+        'uid'=>$uid,                    //ç”¨æˆ·è´¦å·
+        'pwd'=>strtolower(md5($pwd)),    //MD5ä½32å¯†ç 
+        'mobile'=>$mobile,                //å·ç 
+        'content'=>$content,            //å†…å®¹
+        'time'=>$time,        //å®šæ—¶å‘é€
+        'mid'=>$mid                        //å­æ‰©å±•å·
+        );
+    $re= postSMS($http,$data);            //POSTæ–¹å¼æäº¤
+    if( trim($re) == '100' )
+    {
+        return "å‘é€æˆåŠŸ!";
+    }
+    else 
+    {
+        return "å‘é€å¤±è´¥! çŠ¶æ€ï¼š".$re;
+    }
 }
 
 function postSMS($url,$data='')
 {
-	$row = parse_url($url);
-	$host = $row['host'];
-	$port = $row['port'] ? $row['port']:80;
-	$file = $row['path'];
-	while (list($k,$v) = each($data)) 
-	{
-		$post .= rawurlencode($k)."=".rawurlencode($v)."&";	//×ªURL±ê×¼Âë
-	}
-	$post = substr( $post , 0 , -1 );
-	$len = strlen($post);
-	$fp = @fsockopen( $host ,$port, $errno, $errstr, 10);
-	if (!$fp) {
-		return "$errstr ($errno)\n";
-	} else {
-		$receive = '';
-		$out = "POST $file HTTP/1.1\r\n";
-		$out .= "Host: $host\r\n";
-		$out .= "Content-type: application/x-www-form-urlencoded\r\n";
-		$out .= "Connection: Close\r\n";
-		$out .= "Content-Length: $len\r\n\r\n";
-		$out .= $post;		
-		fwrite($fp, $out);
-		while (!feof($fp)) {
-			$receive .= fgets($fp, 128);
-		}
-		fclose($fp);
-		$receive = explode("\r\n\r\n",$receive);
-		unset($receive[0]);
-		return implode("",$receive);
-	}
+    $row = parse_url($url);
+    $host = $row['host'];
+    $port = $row['port'] ? $row['port']:80;
+    $file = $row['path'];
+    while (list($k,$v) = each($data)) 
+    {
+        $post .= rawurlencode($k)."=".rawurlencode($v)."&";    //è½¬URLæ ‡å‡†ç 
+    }
+    $post = substr( $post , 0 , -1 );
+    $len = strlen($post);
+    $fp = @fsockopen( $host ,$port, $errno, $errstr, 10);
+    if (!$fp) {
+        return "$errstr ($errno)\n";
+    } else {
+        $receive = '';
+        $out = "POST $file HTTP/1.1\r\n";
+        $out .= "Host: $host\r\n";
+        $out .= "Content-type: application/x-www-form-urlencoded\r\n";
+        $out .= "Connection: Close\r\n";
+        $out .= "Content-Length: $len\r\n\r\n";
+        $out .= $post;        
+        fwrite($fp, $out);
+        while (!feof($fp)) {
+            $receive .= fgets($fp, 128);
+        }
+        fclose($fp);
+        $receive = explode("\r\n\r\n",$receive);
+        unset($receive[0]);
+        return implode("",$receive);
+    }
 }
 ?>

@@ -1,8 +1,6 @@
 <?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
-require PATH_LIB . 'function.php';
+require '../common.php';
+include_head('系统设置');
 
 session_start();
 checkHospitalAdminLogin();
@@ -22,14 +20,12 @@ if (isset($_POST['edit'])){
     $dataAccount = array();
     $dataHospital = array();
     if ($oldLoginName != $newLoginName) {
-        $isExisted = Dbi::getDbi()->existData('account', ['login_name' => $newLoginName]);
+        $isExisted = Dbi::getDbi()->existedLoginName($newLoginName);
         if (VALUE_DB_ERROR === $isExisted) {
-            echo "<script language='javascript'>alert('数据库访问失败，请重试。');history.back();</script>";
-            exit;
+            user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
         }
         if ($isExisted) {
-            echo "<script language='javascript'>alert('该账号已被他人使用。');history.back();</script>";
-            exit;
+            user_goto('该账号已被他人使用。', GOTO_FLAG_BACK);
         }
         $dataAccount['login_name'] = $newLoginName;
     }
@@ -46,8 +42,7 @@ if (isset($_POST['edit'])){
         $dataHospital['tel'] = $newTel;
     }
     if (empty($dataAccount) && empty($dataHospital)) {
-        echo "<script language='javascript'>alert('没有修改任何信息，请不要提交。');history.back();</script>";
-        exit;
+        user_goto(MESSAGE_NOT_EDIT, GOTO_FLAG_BACK);
     }
     
     Dbi::getDbi()->beginTran();
@@ -55,40 +50,29 @@ if (isset($_POST['edit'])){
         $ret = Dbi::getDbi()->editAccount($doctorId, $dataAccount);
         if (VALUE_DB_ERROR === $ret) {
             Dbi::getDbi()->rollBack();
-            echo "<script language='javascript'>alert('操作失败，请重试。');history.back();</script>";
-            exit;
+            user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
         }
     }
     if (!empty($dataHospital)) {
         $ret = Dbi::getDbi()->editHospital($hospitalId, $dataHospital);
         if (VALUE_DB_ERROR === $ret) {
             Dbi::getDbi()->rollBack();
-            echo "<script language='javascript'>alert('操作失败，请重试。');history.back();</script>";
-            exit;
+            user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
         }
     }
     Dbi::getDbi()->commit();
-    
-    echo "<script language='javascript'>alert('修改成功。');window.location.href='setting.php'</script>";
-    exit;
+    user_goto(MESSAGE_SUCCESS, GOTO_FLAG_URL, 'setting.php');
 }
 
 $info = Dbi::getDbi()->getHospitlAdminInfo($hospitalId);
-$ret = checkDataFromDB($info);
-if ($ret !== true) {
-    echo $ret;
-    exit;
+if (VALUE_DB_ERROR === $info) {
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
 $loginName = $info['login_name'];
 $hospitalName = $info['hospital_name'];
 $address = $info['address'];
 $tel = $info['tel'];
 ?>
-<span class="style7">﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"></span>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<head>
-<title>系统设置</title>
-</head>
 <body>
 <form name="form1" method="post" action="" onSubmit="return CheckPost()">
 <input type="hidden" name="oldLoginName" value="<?php echo $loginName; ?>" />

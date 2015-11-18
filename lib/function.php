@@ -17,15 +17,64 @@ function checkHospitalAdminLogin()
     }
 }
 
-function checkDataFromDB($data)
+function include_head($title)
 {
-    if (VALUE_DB_ERROR === $data) {
-        return '访问数据库错误，请重试或联系管理人员。';
+    echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+            <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
+    echo "<title>$title</title>";
+    echo '</head>';
+}
+
+function include_js_file()
+{
+    echo '<script type="text/javascript" src="' . URL_ROOT . 'js/jquery-1.7.1.min.js"></script>';
+    echo '<script type="text/javascript" src="' . URL_ROOT . 'js/common.js"></script>';
+}
+
+/**
+ * 
+ * @param string $message message of notice information.
+ * @param integer $gotoFlag only 3 values are allowed
+ *      GOTO_FLAG_EXIT | GOTO_FLAG_BACK | GOTO_FLAG_URL) 
+ * @param string $url if $gotoFlag is given, $url is requried. if same folder, file name is ok.
+ */
+function user_goto($message, $gotoFlag, $url = null)
+{
+    if (GOTO_FLAG_URL === $gotoFlag && null == $url) {
+        echo MESSAGE_OTHER_ERROR;
+        exit;
     }
-    if (is_array($data) && empty($data)) {
-        return '当前没有数据。';
+    if (GOTO_FLAG_EXIT === $gotoFlag) {
+        echo $message;
+        exit;
     }
-    return true;
+    if (GOTO_FLAG_BACK === $gotoFlag) {
+        if (null == $message) {
+            echo '<script language="javascript">history.back();</script>';
+        } else {
+            echo '<script language="javascript">alert("' . $message . '");history.back();</script>';
+        }
+        exit;
+    }
+    if (GOTO_FLAG_URL === $gotoFlag) {
+        if (null == $message) {
+            echo '<script language="javascript">window.location.href="' . $url . '";</script>';
+        } else {
+            echo '<script language="javascript">alert("' . $message . '");window.location.href="' . $url . '";</script>';
+        }
+        exit;
+    }
+    echo MESSAGE_OTHER_ERROR;
+    exit;
+}
+
+function user_back_after_delay($message, $delayTime)
+{
+    echo $message;
+    echo '<script language="javascript">setTimeout("history.back()", ' . $delayTime . ');</script>';
+    exit;
 }
 
 /**
@@ -88,3 +137,19 @@ function getPaging($total, $rows, $url, $currentPage) {
     $result['navigation'] .= $navigation;
     return $result;
 }
+
+// $typeList = ['pdf'];
+// function checkFileType($file, $typeList)
+// {
+//     $file = trim($file);
+//     if ($file == '') {
+//         return false;
+//     }
+//     $extension = strtolower(substr(strrchr($file, '.'), 1));
+//     foreach ($typeList as $type) {
+//         if ($type != $extension) {
+//             return false;
+//         }
+//     }
+//     return true;
+// }

@@ -1,9 +1,7 @@
 ﻿<?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
-require PATH_LIB . 'function.php';
+require '../common.php';
 require PATH_LIB . 'Invigilator.php';
+include_head('用户注册');
 
 session_start();
 checkDoctorLogin();
@@ -11,11 +9,6 @@ checkDoctorLogin();
 $registHospital = $_SESSION["hospital"];
 $doctorId = $_SESSION["loginId"]
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>用户注册</title>
 <style type="text/css">
 <!--
 .STYLE1 {
@@ -35,7 +28,6 @@ $doctorId = $_SESSION["loginId"]
 .STYLE6 {font-size: 12px; font-weight: bold; }
 -->
 </style>
-</head>
 <body>
 <?php
 if (isset($_POST['type']) && $_POST['type'] == 'save') {
@@ -73,7 +65,7 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
     $premature_beat = $_SESSION['param']['premature_beat'];
     $arrhythmia = $_SESSION['param']['arrhythmia'];
     
-    $guardian = Dbi::getDbi()->getGuardianStatusByDevice($device);
+    $guardian = Dbi::getDbi()->getGuardianByDevice($device);
     if (!empty($guardian)) {
         $ret = Dbi::getDbi()->getPatient($guardian['patient_id']);
         if (empty($ret)) {
@@ -82,20 +74,17 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
             $otherPatient = $ret['patient_name'];
         }
         if (0 == $guardian['status']) {
-            echo "<script language=javascript>alert(\"'$otherPatient'已注册该设备，请待该用户监护结束后使用此设备！\");location.href='addUser.php';</script>";
-            exit;
+            user_goto($otherPatient . '已注册该设备，请待该用户监护结束后使用此设备。', GOTO_FLAG_URL, 'add_user.php');
         }
         if (1 == $guardian['status']) {
-            echo "<script language=javascript>alert(\"'$otherPatient'正在使用该设备，请从监护列表结束其监护！\");location.href='addUser.php';</script>";
-            exit;
+            user_goto($otherPatient . '正在使用该设备，请待该用户监护结束后使用此设备。', GOTO_FLAG_URL, 'add_user.php');
         }
     }
-    $guardianId = Dbi::getDbi()->registUser($name, $sex, $age, $tel, $device, $registHospital, $guardHospital, 
+    $guardianId = Dbi::getDbi()->flowGuardianAddUser($name, $sex, $age, $tel, $device, $registHospital, $guardHospital, 
             $mode, $hours, $lead, $doctorId, $sickRoom, $bloodPressure, $height, $weight, 
             $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName);
     if (VALUE_DB_ERROR === $guardianId) {
-        echo "<script language=javascript>alert(\"用户注册失败，请重试或联系系统管理员。\");history.back();</script>";
-        exit;
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
     }
     $invigilator = new Invigilator($guardianId, $mode, $hours);
     $param = array();
@@ -122,13 +111,11 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
     $invigilator->create($param);
     unset($_SESSION['guardian']);
     unset($_SESSION['param']);
-    echo "<script language='javascript'> alert('用户添加成功！');window.location.href='patients.php?id= $registHospital'</script>";
-    exit;
+    user_goto(MESSAGE_SUCCESS, GOTO_FLAG_URL, 'patients.php?id=' . $registHospital);
 }
 ?>
-<script language="javascript" src="../libraries/PCASClass.js"></script>
 <table width="100%" height="100%" border="0" align="center" cellspacing="1" bordercolor="#000000">
-  <form action="" method="post" id="myform" onsubmit="return false;">
+  <form action="" method="post" id="formAddUser" onsubmit="return false;">
   <input type="hidden" name="type" value="regist" />
   <tr class="STYLE3">
     <td height="25"><span class="STYLE4">姓名：<span class="STYLE2">*</span></span></td>
@@ -159,7 +146,7 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
     <td colspan="3"><select name="guard_hospital" style="width: 252px" id="guard_hospital">
     <option value="<?php echo $registHospital;?>"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['guard_hospital'] == $registHospital) echo 'selected="selected"'?>>本院</option>
     <?php 
-    $hospitals = Dbi::getDbi()->getParentHospitals($registHospital);
+    $hospitals = Dbi::getDbi()->getHospitalParent($registHospital);
     foreach ($hospitals as $value) {
         echo '<option value="' . $value['hospital_id'] . '" ';
         if (isset($_SESSION['guardian']) && $_SESSION['guardian']['guard_hospital'] == $value['hospital_id']) {
@@ -217,75 +204,6 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
     </tr>
     </form> 
 </table>
-<script language="javascript">
-function regist() {
-    if (CheckPost() == true) {
-        myform.action = 'adduser.php';
-        myform.submit();
-    }
-}
-function params() {
-    myform.action = 'set_guardian_params.php';
-    myform.submit();
-}
-function clearAll() {
-    myform.action = 'clear_regist.php';
-    myform.submit();
-}
-function CheckPost() {
-    if (myform.device.value == "") {
-        alert("设备编号不能为空！");
-        myform.device.focus();
-        return false;
-    }
-    if (myform.name.value == "") {
-        alert("姓名不能为空！");
-        myform.name.focus();
-        return false;
-    }
-    var set =/[^\u4e00-\u9fa5]/;
-    if (set.test(myform.name.value)) {
-        alert("请输入中文姓名！");
-        myform.name.focus();
-        return false;
-    }
-    if (myform.name.value.length > 50) {
-        alert("输入的姓名过长");
-        myform.name.focus();
-        return false;
-    }
-    if (myform.tel.value == "") {
-        alert("电话号码不能为空！");
-        myform.tel.focus();
-        return false;
-    }   
-    if (myform.tentative_diagnose.value == "") {
-        alert("请填写患者症状！");
-        myform.tentative_diagnose.focus();
-        return false;
-    }    
-    if (myform.medical_history.value == "") {
-        alert("请填写病史！");
-        myform.medical_history.focus();
-        return false;
-    }    
-    if (myform.doctor.value == "") {
-        alert("登记医生不能为空！");
-        myform.doctor.focus();
-        return false;
-    }
-    if (myform.age.value == "") {
-        alert("年龄不能为空！");
-        myform.age.focus();
-        return false;
-    }
-    if (myform.hours.value == "0" && myform.mode.value != "3") {
-        alert("请选择监护时长。");
-        myform.hours.focus();
-        return false;
-    }
-    return true;
-}
-</script>
+<?php include_js_file();?>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
-require '../config/path.php';
-require PATH_CONFIG . 'value.php';
+require '../config/config.php';
+
 require PATH_LIB . 'Dbi.php';
 
 if (empty($_GET['hospital_id'])) {
@@ -14,22 +14,20 @@ if (!is_numeric($hospitalId)) {
     exit;
 }
 
-$sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported
-        from guardian as g inner join patient as p on g.patient_id = p.patient_id
-        where regist_hospital_id = ' . $hospitalId;
-
+$reported = null;
+$startTime = null;
+$endTime = null;
 if (isset($_GET['reported']) && trim($_GET['reported']) != '') {
-    $sql .= ' and reported = "' . $_GET['reported'] . '"';
+    $reported = $_GET['reported'];
 }
-//start_time is the condition from query while 'end_time' is field name.
 if (isset($_GET['start_time']) && trim($_GET['start_time']) != '') {
-    $sql .= ' and end_time >= "' . $_GET['start_time'] . '"';
+    $startTime = $_GET['start_time'];
 }
 
 if (isset($_GET['end_time']) && trim($_GET['end_time']) != '') {
-    $sql .= ' and end_time <= "' . $_GET['end_time'] . '"';
+    $endTime = $_GET['end_time'];
 }
-$data = Dbi::getDbi()->getAllData($sql);
+$data = Dbi::getDbi()->getPatientsForAnalytics($hospitalId, $reported, $startTime, $endTime);
 if (VALUE_DB_ERROR == $data) {
     if (!is_numeric($hospitalId)) {
         echo json_encode(['code' => '3', 'message' => 'db error.']);

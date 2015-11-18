@@ -1,8 +1,7 @@
 <?php
-require_once '../config/path.php';
-require_once '../config/value.php';
-require_once PATH_LIB . 'Dbi.php';
+require '../common.php';
 require PATH_LIB . 'Invigilator.php';
+include_head('监护处理');
 
 $guardianId = $_GET["id"];
 $status = $_GET['status'];
@@ -10,8 +9,7 @@ session_start();
 $hospitalId = $_SESSION['hospital'];
 
 if ($status > 1) {
-    echo '<script language=javascript>alert("监护状态错误！");history.back();</script>';
-    exit;
+    followingAcction(MESSAGE_PARAM, GOTO_FLAG_BACK);
 }
 
 $command = array();
@@ -25,5 +23,6 @@ if ($status == 1) {
 $invigilator = new Invigilator($guardianId);
 $invigilator->create($command);
 
-echo '<script language=javascript>history.back();</script>';
-exit;
+user_goto(null, GOTO_FLAG_BACK);
+?>
+</html>

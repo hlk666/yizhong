@@ -1,43 +1,33 @@
 ﻿<?php
-require_once '../config/path.php';
-require_once '../config/value.php';
-require_once PATH_LIB . 'Dbi.php';
-require_once PATH_LIB . 'function.php';
-
+require '../common.php';
+include_head('用户列表');
 session_start();
 checkDoctorLogin();
 
 if (!isset($_GET["id"])) {
-    //echo "错误的访问。";
-    //exit;
+    user_goto(MESSAGE_PARAM, GOTO_FLAG_EXIT);
 }
 $hospitalId = $_GET["id"];
 $flag = isset($_GET['current_flag']) ? $_GET['current_flag'] : '0';
-$where = ' regist_hospital_id = ' .$hospitalId;
 
-$total = Dbi::getDbi()->getRecordCount('guardian', $where);
-if ($total == 0) {
-    echo "该医院没有病人信息。";
-    exit;
+$result = Dbi::getDbi()->getPatientList($hospitalId);
+if (empty($result)) {
+    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }
-
+$total = count($result);
 $rows = 10;
 $page = isset($_GET['page']) ? $_GET['page'] : null;
 $ret = getPaging($total, $rows, $_SERVER['REQUEST_URI'], $page);
 $offset = $ret['offset'];
 $navigation = $ret['navigation'];
 
-$result = Dbi::getDbi()->getPatientList($where, $offset, $rows);
-if (VALUE_DB_ERROR === $result) {
-    echo "读取数据失败，请重试。";
-    exit;
+if ($total > $rows) {
+    $result = Dbi::getDbi()->getPatientList($hospitalId, $offset, $rows);
+    if (VALUE_DB_ERROR === $result) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+    }
 }
-echo $navigation;
 ?>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>用户列表</title>
-</head>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
 <?php echo $navigation; ?>
 <table style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF'>
@@ -82,10 +72,10 @@ foreach ($result as $index => $row) {
     <td><div align='center' style='width:68px'>".$row['patient_name']."</div></td>";
     if ($flag == 1) {
         if ($row['status'] == 0) {
-            echo "<td><div align='center' style='width:70px'><a href = './set_guard.php?status=0&id="
+            echo "<td><div align='center' style='width:70px'><a href = './guardian_action.php?status=0&id="
                     . $row['guardian_id'] . "'>开始监护</div></td>";
         } elseif ($row['status'] == 1) {
-            echo "<td><div align='center' style='width:70px'><a href = './set_guard.php?status=1&id="
+            echo "<td><div align='center' style='width:70px'><a href = './guardian_action.php?status=1&id="
                     . $row['guardian_id'] . "'>结束监护</div></td>";
         } else {
             echo "<td><div align='center' style='width:70px'>-</div></td>";
@@ -104,10 +94,9 @@ foreach ($result as $index => $row) {
 }
 ?>
 </table>
-<script type="text/javascript" src="../js/jquery-1.7.1.min.js"></script>
+<?php include_js_file();?>
 <script type="text/javascript">
 $(function(){
-    var rgb;
     $("tr").dblclick(function sendURL(){
         var text = $(this).children('td').eq(0).text();
         var Psn = $(this).children('td').eq(1).text();
@@ -127,19 +116,6 @@ $(function(){
         quyu=$.trim(quyu);
         
         window.lily.onCall(text,hosNum,Pname,sex,age,Psn,shebei,quyu,0);
-    });
-    $("tr").mouseover(function(){
-        rgb = $(this).css('background-color');
-        $(this).css({
-        'backgroundColor':'#5fafcd',
-        'color':'#fff'
-        });
-    });
-   $("tr").mouseout(function(){
-       $(this).css({
-       'backgroundColor':rgb,
-       'color':'#000'
-       });
     });
 })
 </script>

@@ -30,7 +30,7 @@ class Invigilator
                 $this->commands = $command;
             }
         } else {
-            $this->setDefaultInfo($mode, $hours);            
+            $this->setDefaultInfo($mode, $hours);
         }
     }
     
@@ -43,7 +43,7 @@ class Invigilator
     public function getCommand()
     {
         if (!empty($this->info['end_time'])) {
-            if (time() >= $this->info['end_time']) {
+            if ($this->info['end_time'] != '' && time() >= $this->info['end_time']) {
                 $this->commands['action'] = 'end';
                 $this->setEnd();
             }
@@ -114,7 +114,7 @@ class Invigilator
             $this->info['start_time'] = time();
             $this->info['end_time'] = $this->info['start_time']
                 + $this->info['all_time'] * 3600;
-            Dbi::getDbi()->startGuard($this->guardianId);
+            Dbi::getDbi()->flowGuardianStartGuard($this->guardianId);
         }
         if ($action == 'end') {
             $this->setEnd();
@@ -155,7 +155,7 @@ class Invigilator
     
     private function setEnd()
     {
-        Dbi::getDbi()->endGuard($this->guardianId);
+        Dbi::getDbi()->flowGuardianEndGuard($this->guardianId);
         $this->info['status'] = 2;
         $this->info['start_time'] = '';
         $this->info['end_time'] = '';

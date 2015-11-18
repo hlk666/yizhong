@@ -1,23 +1,16 @@
 ﻿<?php
-require_once '../config/path.php';
-require_once '../config/value.php';
-require_once PATH_LIB . 'Dbi.php';
+require '../common.php';
+include_head('历史心电');
 
 $guardianId = $_GET["id"];
 $diagnosis = Dbi::getDbi()->getDiagnosisByGuardian($guardianId);
 if (VALUE_DB_ERROR === $diagnosis) {
-    echo '查询数据时发生错误，请重试或联系管理员。';
-    exit;
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
 if (empty($diagnosis)) {
-    echo '该监护暂时没有诊断结果。';
-    exit;
+    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 } 
 ?>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>历史心电</title>
-</head>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
 <table style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF' >
     <tr bgcolor='#ECEADB' style='height:30px' align='center'>

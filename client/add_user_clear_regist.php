@@ -1,4 +1,4 @@
 <?php
 session_start();
 unset($_SESSION['guardian']);
-header('location:addUser.php');
+header('location:add_user.php');

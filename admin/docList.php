@@ -1,8 +1,6 @@
 <?php
-require '../config/path.php';
-require '../config/value.php';
-require PATH_LIB . 'Dbi.php';
-require PATH_LIB . 'function.php';
+require '../common.php';
+include_head('医生列表');
 
 session_start();
 checkHospitalAdminLogin();
@@ -10,17 +8,12 @@ checkHospitalAdminLogin();
 $hospitalId = $_SESSION['hospital'];
 $doctors = Dbi::getDbi()->getDoctorList($hospitalId);
 if (VALUE_DB_ERROR === $doctors) {
-    echo '访问数据错误，请重试或者联系系统负责人。';
-    exit;
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
 if (empty($doctors)) {
-    echo '本院现在没有医生用户。';
-    exit;
+    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }
 ?>
-<html>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>医生列表</title>
 <style type="text/css">
 BODY {margin: 1px}
 #scroll_table{ height:100%; overflow:auto;}
@@ -30,7 +23,8 @@ th,td{border:1px solid #CCC}
 #thead{ position:fixed; z-index:100;background-color:#FFF}
 </style>
 <body>
-<div style="width: 100%"  align="center">
+<div style="width: 100%" align="center">
+<table style='width:400px;' id='data_table' >
 <?php
 $rows = 20;
 $total = count($doctors);
@@ -44,8 +38,7 @@ if ($total > $rows) {
     $doctors = Dbi::getDbi()->getDoctorList($hospitalId, $offset, $rows);
 }
 
-echo "<table style='width:400px;' id='data_table' >
-<tr bgcolor=#555555><td align='center'>用户名</td><td align='center'>姓名</td></tr>";
+echo "<tr bgcolor=#555555><td align='center'>用户名</td><td align='center'>姓名</td></tr>";
 foreach ($doctors as $index => $doctor) {
     if ($index % 2 == 1) {
         $color = '#E5E5E5';

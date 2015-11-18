@@ -1,12 +1,11 @@
 <?php
-require_once PATH_CONFIG . 'value.php';
 require_once PATH_LIB . 'Logger.php';
-require_once PATH_LIB . 'BaseDbi.php';
 
-class Dbi extends BaseDbi
+class Dbi
 {
     private static $instance;
-    private $pdo = null;
+    private $pdo;
+    private $logFile = 'dbLog.txt';
     
     /**
      * for speed, not use config file now. we will do it in future.
@@ -31,109 +30,36 @@ class Dbi extends BaseDbi
         return self::$instance;
     }
     
-    public function insertEcg($guardianId, $alertFlag, $dataPath)
+    public function beginTran()
     {
-        try {
-            $sql = 'insert into ecg(guardian_id, create_time, alert_flag, data_path, read_status)'
-                    . ' values(:guardian_id, now(), :alert_flag, :data_path, 0)';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(array(
-                    ':guardian_id' => $guardianId,
-                    ':alert_flag' => $alertFlag,
-                    ':data_path' => $dataPath
-            ));
-            return $this->pdo->lastInsertId();
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
+        $this->pdo->beginTransaction();
     }
     
-    public function getAllData($sql)
+    public function rollBack()
     {
-        try {
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
+        $this->pdo->rollBack();
     }
     
-    public function getEcg($guardianId, $startTime, $endTime)
+    public function commit()
+    {
+        $this->pdo->commit();
+    }
+    
+    
+    //************************* common methods(private) *************************
+    //********************************** start **********************************
+    private function deleteData($sql, array $param = array())
     {
         try {
-            $sql = 'select ecg_id, create_time, read_status, data_path from ecg where guardian_id = :guardian_id';
-            $param = array(':guardian_id' => $guardianId);
-            $sql .= ' order by ecg_id desc';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return true;
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
     }
-    
-    public function getConsultationRequest($hospitalId)
-    {
-        try {
-            $sql = 'select consultation_id, c.ecg_id, request_message, request_time, 
-                    e.guardian_id, h.hospital_name
-                    from consultation as c inner join ecg as e on c.ecg_id = e.ecg_id 
-                    left join hospital as h on c.request_hospital_id = h.hospital_id 
-                    where response_hospital_id = :hospital_id and status = 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['hospital_id' => $hospitalId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function getConsultationResponse($hospitalId)
-    {
-        try {
-            $sql = 'select consultation_id, c.ecg_id, response_message, response_time,
-                    e.guardian_id, e.data_path, h.hospital_name
-                    from consultation as c inner join ecg as e on c.ecg_id = e.ecg_id
-                    left join hospital as h on c.response_hospital_id = h.hospital_id
-                    where request_hospital_id = :hospital_id and status = 2';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['hospital_id' => $hospitalId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getRecordCount($table, $where)
-    {
-        try {
-            $hasWhere = false;
-            $sql = "select 1 from $table ";
-            if (is_string($where) && $where != '') {
-                $sql .= ' where ' . $where . ' ';
-                $hasWhere = true;
-            }
-            if (is_array($where) && !empty($where)) {
-                $sql .= $hasWhere ? '' : ' where ';
-                foreach ($where as $key => $value) {
-                    $sql .= " $key = \"$value\"";
-                }
-            }
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute();
-            return $stmt->rowCount();
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function existData($tableName, $where) {
+    private function existData($tableName, $where) {
         try {
             $sql = "select 1 from $tableName where 1 ";
             if (is_array($where) && !empty($where)) {
@@ -153,749 +79,528 @@ class Dbi extends BaseDbi
             return false;
         }
     }
-    
-    public function updateReport($guardianId, $file)
+    private function getDataAll($sql, array $param = array())
     {
         try {
-            $sql = 'update guardian set reported = 1, report_file = :file where guardian_id = :guardian_id';
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':file' => $file, ':guardian_id' => $guardianId]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function editAccount($accountId, array $data)
-    {
-        try {
-            if (empty($data)) {
-                throw new Exception('parameter of $data is empty.');
+            $stmt->execute($param);
+            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
             }
-            
-            $sql = 'update account set ';
-            foreach ($data as $key => $value) {
-                $sql .= $key . ' = "' . $value . '",';
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
+    private function getDataRow($sql, array $param = array())
+    {
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($param);
+            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
             }
-            $sql = substr($sql, 0, -1);
-            $sql .= ' where account_id = ' . $accountId;
-            
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute();
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
     }
-    public function editHospital($hospitalId, array $data)
+    private function getDataString($sql, array $param = array())
     {
         try {
-            if (empty($data)) {
-                throw new Exception('parameter of $data is empty.');
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($param);
+            $ret = $stmt->fetchColumn();
+            if (null === $ret) {
+                return '';
+            } else {
+                return $ret;
             }
-    
-            $sql = 'update hospital set ';
-            foreach ($data as $key => $value) {
-                $sql .= $key . ' = "' . $value . '",';
-            }
-            $sql = substr($sql, 0, -1);
-            $sql .= ' where hospital_id = ' . $hospitalId;
-    
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute();
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
     }
-    public function addAccount($loginName, $realName, $password, $type, $hospitalId, $creator)
+    private function insertData($sql, array $param = array())
     {
         try {
-            $sql = 'insert into account (login_name, real_name, password, type, hospital_id, creator) 
-                    values (:login_name, :real_name, :password, :type, :hospital_id, :creator)';
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(array(
-                            ':login_name' => $loginName, 
-                            ':real_name' => $realName,
-                            ':password' => $password,
-                            ':type' => $type,
-                            ':hospital_id' => $hospitalId,
-                            ':creator' => $creator
-            ));
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function startGuard($guardianId)
-    {
-        try {
-            $sql = 'update guardian set status = 1, start_time = now() where guardian_id = :guardian_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function createDiagnosis($ecgId, $doctorId, $content)
-    {
-        try {
-            $sql = 'insert into diagnosis (ecg_id, doctor_id, content) values (:ecg, :doctor, :content)';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':ecg' => $ecgId, ':doctor' => $doctorId, ':content' => $content]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function endGuard($guardianId)
-    {
-        try {
-            $sql = 'update guardian set status = 2, end_time = now() where guardian_id = :guardian_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function createIllResult($guardianId, $result)
-    {
-        try {
-            $sql = 'update guardian set guardian_result = :result, status = 3 
-                    where guardian_id = :guardian_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId, ':result' => $result]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function endMedical($guardianId)
-    {
-        try {
-            $sql = 'update guardian set status = 4 where guardian_id = :guardian_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function addConsultation($requestHospital, $responseHospital, $ecgId, $mesage)
-    {
-        try {
-            $sql = 'insert into consultation(ecg_id, request_hospital_id, request_message, response_hospital_id, status)'
-                    . ' values(:ecg_id, :request_hospital_id, :request_message, :response_hospital_id, 1)';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(array(
-                            ':ecg_id' => $ecgId,
-                            ':request_hospital_id' => $requestHospital,
-                            ':request_message' => $mesage,
-                            ':response_hospital_id' => $responseHospital
-            ));
+            $stmt->execute($param);
             return $this->pdo->lastInsertId();
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
     }
-    public function handleConsultation($hospitalId, $consultationId, $guardianId)
+    private function updateData($sql, array $param = array())
     {
         try {
-            $this->pdo->beginTransaction();
-            $sql = 'update guardian set guard_hospital_id = :hospital where guardian_id = :guardian_id';
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId, ':hospital' => $hospitalId]);
-            
-            $sql = 'update consultation set status = 2 where consultation_id = :consultation_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':consultation_id' => $consultationId]);
-            
-            $this->pdo->commit();
+            $stmt->execute($param);
+            return true;
         } catch (Exception $e) {
-            $this->pdo->rollBack();
             Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
     }
+    //************************* common methods(private) *************************
+    //*********************************** end ***********************************
     
-    public function replyConsultation($consultationId, $result)
+    //************************* existed methods(public) *************************
+    //********************************** start **********************************
+    public function existedDoctorName($doctorName)
     {
-        try {
-            $sql = 'update consultation set status = 2, response_message = :result 
-                    where consultation_id = :consultation_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':consultation_id' => $consultationId, ':result' => $result]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
+        return $this->existData('account', 'real_name = "' . $doctorName . '"');
     }
-    public function endConsultation($consultationId)
+    public function existedEcgNotRead($guardianId)
     {
-        try {
-            $sql = 'update consultation set status = 0 where consultation_id = :consultation_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':consultation_id' => $consultationId]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
+        return $this->existData('ecg', ' read_status = 0 and guardian_id = ' . $guardianId);
     }
+    public function existedLoginName($loginName)
+    {
+        return $this->existData('account', 'login_name = "' . $loginName . '"');
+    }
+    public function existedRequestConsultation($hospital)
+    {
+        return $this->existData('consultation', 'status = 1 and response_hospital_id = ' . $hospital);
+    }
+    public function existedResponseConsultation($hospital)
+    {
+        return $this->existData('consultation', 'status = 2 and request_hospital_id = ' . $hospital);
+    }
+    //************************* existed methods(public) *************************
+    //*********************************** end ***********************************
     
-    public function delEcg($ecgId)
-    {
-        try {
-            $sql = 'delete from ecg where ecg_id = :ecg_id';
-            $stmt = $this->pdo->prepare($sql);
-            return $stmt->execute([':ecg_id' => $ecgId]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function delDoctor($doctorId)
-    {
-        try {
-            $sql = 'delete from Account where account_id = :account_id';
-            $stmt = $this->pdo->prepare($sql);
-            return $stmt->execute([':account_id' => $doctorId]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function setEcgReadStatus($ecgId)
-    {
-        try {
-            $sql = 'update ecg set read_status = 1 where ecg_id = :ecg_id';
-            $stmt = $this->pdo->prepare($sql);
-            return $stmt->execute([':ecg_id' => $ecgId]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    public function editGuardianResult($guardianId, $newResult)
-    {
-        try {
-            $sql = 'update guardian set guardian_result = :result where guardian_id = :guardian_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':result' => $newResult, ':guardian_id' => $guardianId]);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getGuardianResult($guardianId)
-    {
-        try {
-            $sql = 'select guardian_result from guardian where guardian_id = :guardian_id limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId]);
-//             $ret = array();
-//             while ($row = $stmt->fetchColumn()) {
-//                 $ret[] = $row;
-//             }
-            $ret = $stmt->fetchColumn();
-            return $ret;
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getPatientInfo($patientId)
-    {
-        $sql = 'select p_id as patient_id, p_name, birthYear as age, gender as sex, phone as tel, higherhos as hospital_id 
-                from remote_ecg.patient_basic_info 
-                where p_id = ' . $patientId;
-        $data = $this->getAllData($sql);
-        for ($i = 0; $i < count($data); $i++) {
-            if (isset($data[$i]['birthYear'])) {
-                if (false !== strpos($data[$i]['birthYear'], '岁')) {
-                    $data[$i]['birthYear'] = trim(str_replace('岁', '', $data[$i]['birthYear']));
-                }
-                if (is_numeric($data[$i]['birthYear']) && $data[$i]['birthYear'] > 1900) {
-                    $data[$i]['birthYear'] = date('Y') - $data[$i]['birthYear'];
-                }
-            }
-        }
-        if (empty($data)) {
-            return array();
-        } else {
-            return $data[0];
-        }
-    }
-    
-    public function getPatientList($where, $offset = 0, $rows = null)
-    {
-        try {
-            $sql = "select g.patient_id, g.guardian_id, g.status, g.device_id, g.start_time, g.end_time, 
-                    p.patient_name, p.sex, p.birth_year, p.tel, 
-                    g.regist_doctor_name, g.sickroom
-                    from guardian as g left join patient as p on g.patient_id = p.patient_id 
-                    where $where order by guardian_id desc";
-            if ($rows != null) {
-                $sql .= " limit $offset, $rows";
-            }
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getPatientListDistinct($where, $offset = 0, $rows = null)
-    {
-        try {
-            $sql = "select distinct g.patient_id, p.patient_name, p.sex, p.birth_year, p.tel 
-            from guardian as g left join patient as p on g.patient_id = p.patient_id
-            where $where order by guardian_id desc";
-            if ($rows != null) {
-            $sql .= " limit $offset, $rows";
-            }
-                $stmt = $this->pdo->prepare($sql);
-                $stmt->execute();
-                return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-        Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-        }
-    
-    public function getDiagnosisByGuardian($guardianId)
-    {
-        try {
-            $sql = 'select d.ecg_id, a.real_name as doctor_name, e.data_path, d.content, 
-                    e.create_time as alert_time, d.create_time as diagnose_time
-                    from diagnosis as d 
-                    inner join ecg as e on d.ecg_id = e.ecg_id
-                    left join account as a on d.doctor_id = a.account_id
-                    where e.guardian_id = :guardian_id order by d.diagnosis_id desc';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getDiagnosisByEcg($ecgId)
-    {
-        try {
-            $sql = 'select d.ecg_id, a.real_name as doctor_name, d.content, d.create_time
-                    from diagnosis as d left join account as a on d.doctor_id = a.account_id
-                    where d.ecg_id = :ecg_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':ecg_id' => $ecgId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getGuardianStatusByDevice($deviceId)
-    {
-        try {
-            $sql = 'select guardian_id, patient_id, status from guardian where device_id = :device_id and status < 2';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':device_id' => $deviceId]);
-            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getPatientByDevice($deviceId)
-    {
-        try {
-            $sql = 'select guardian_id, patient_name, mode
-                    from guardian as g left join patient as p on g.patient_id = p.patient_id 
-                    where device_id = :device_id and status < 2 order by guardian_id desc limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':device_id' => $deviceId]);
-            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getGuardianStatusByGuardian($guardianId)
-    {
-        try {
-            $sql = 'select status from guardian where guardian_id = :guardian_id limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId]);
-            return $stmt->fetchColumn();
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getGuardianTime($guardianId)
-    {
-        try {
-            $sql = 'select start_time, end_time from guardian where guardian_id = :guardian_id limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId]);
-            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getGuardianList($hospitalId)
-    {
-        try {
-            $sql = 'select g.guardian_id, g.patient_id, g.status, g.start_time, g.end_time,
-                    p.patient_name, h.hospital_name, p.sex, p.birth_year, p.tel, 
-                    g.blood_pressure, g.tentative_diagnose, g.medical_history, g.sickroom
-                    from guardian as g left join patient as p on g.patient_id = p.patient_id
-                    left join hospital as h on g.regist_hospital_id = h.hospital_id
-                    where guard_hospital_id = :hospital_id and g.status = 1
-                    order by g.guardian_id desc';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':hospital_id' => $hospitalId]);
-            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getPatient($patientId)
-    {
-        try {
-            $sql = 'select patient_id, patient_name from patient where patient_id = :patient_id limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':patient_id' => $patientId]);
-            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getParentHospitals($hospitalId)
-    {
-        try {
-            $sql = 'select h.hospital_id, h.hospital_name 
-                    from hospital as h inner join hospital_relation as r 
-                        on h.hospital_id = r.parent_hospital_id
-                    where r.hospital_id = :hospital_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':hospital_id' => $hospitalId]);
-            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
-    public function getChildHospitals($hospitalId)
-    {
-        try {
-            $sql = 'select hospital.hospital_id, hospital_name from hospital inner join hospital_relation
-                    on hospital.hospital_id = hospital_relation.hospital_id
-                    where hospital_relation.parent_hospital_id = :hospital_id';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':hospital_id' => $hospitalId]);
-            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
-    }
-    
+    //************************** query methods(public) **************************
+    //********************************** start **********************************
     public function getAcount($loginName)
     {
-        try {
-            $sql = 'select account_id, type, password, hospital_id from account where login_name = :user';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':user' => $loginName]);
-            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
+        $sql = 'select account_id, type, password, hospital_id from account where login_name = :user limit 1';
+        $param = [':user' => $loginName];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getConsultationRequest($hospitalId)
+    {
+        $sql = 'select consultation_id, c.ecg_id, request_message, request_time, e.guardian_id, h.hospital_name
+                from consultation as c inner join ecg as e on c.ecg_id = e.ecg_id
+                left join hospital as h on c.request_hospital_id = h.hospital_id
+                where response_hospital_id = :hospital_id and status = 1';
+        $param = ['hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getConsultationResponse($hospitalId)
+    {
+        $sql = 'select consultation_id, c.ecg_id, response_message, response_time, e.guardian_id, e.data_path, h.hospital_name
+                from consultation as c inner join ecg as e on c.ecg_id = e.ecg_id
+                left join hospital as h on c.response_hospital_id = h.hospital_id
+                where request_hospital_id = :hospital_id and status = 2';
+        $param = ['hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getDiagnosisByEcg($ecgId)
+    {
+        $sql = 'select d.ecg_id, a.real_name as doctor_name, d.content, d.create_time
+                from diagnosis as d left join account as a on d.doctor_id = a.account_id
+                where d.ecg_id = :ecg_id';
+        $param = [':ecg_id' => $ecgId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getDiagnosisByGuardian($guardianId)
+    {
+        $sql = 'select d.ecg_id, a.real_name as doctor_name, e.data_path, d.content,
+                e.create_time as alert_time, d.create_time as diagnose_time
+                from diagnosis as d
+                inner join ecg as e on d.ecg_id = e.ecg_id
+                left join account as a on d.doctor_id = a.account_id
+                where e.guardian_id = :guardian_id order by d.diagnosis_id desc';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getDoctorInfo($doctorId)
+    {
+        $sql = 'select account_id as doctor_id, login_name, real_name as doctor_name
+                from account where account_id = :acount_id limit 1';
+        $param = [':acount_id' => $doctorId];
+        return $this->getDataRow($sql, $param);
     }
     public function getDoctorList($hospitalId, $offset = 0, $rows = null)
     {
-        try {
-            $sql = 'select account_id, login_name, real_name as doctor_name 
-                    from account where hospital_id = :hospital_id and type = 2';
-            if ($rows != null) {
-                $sql .= " limit $offset, $rows";
-            }
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':hospital_id' => $hospitalId]);
-            $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
+        $sql = 'select account_id, login_name, real_name as doctor_name
+                from account where hospital_id = :hospital_id and type = 2';
+        if ($rows != null) {
+            $sql .= " limit $offset, $rows";
         }
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
     }
-    public function getDoctorInfo($accountId)
+    public function getEcg($guardianId, $offset = 0, $rows = null)
     {
-        try {
-            $sql = 'select account_id as doctor_id, login_name, real_name as doctor_name
-                    from account where account_id = :acount_id limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':acount_id' => $accountId]);
-            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
+        $sql = 'select ecg_id, create_time, read_status, data_path from ecg
+                where guardian_id = :guardian order by ecg_id desc';
+        if ($rows != null) {
+            $sql .= " limit $offset, $rows";
         }
+        $param = [':guardian' => $guardianId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getGuardianByDevice($deviceId)
+    {
+        $sql = 'select guardian_id, patient_id, status from guardian
+                where device_id = :device_id and status < 2 order by guardian_id desc limit 1';
+        $param = [':device_id' => $deviceId];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getGuardianById($guardianId)
+    {
+        $sql = 'select status, guardian_result from guardian where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getGuardianList($hospitalId)
+    {
+        $sql = 'select g.guardian_id, g.patient_id, g.status, g.start_time, g.end_time,
+                p.patient_name, h.hospital_name, p.sex, p.birth_year, p.tel,
+                g.blood_pressure, g.tentative_diagnose, g.medical_history, g.sickroom
+                from guardian as g left join patient as p on g.patient_id = p.patient_id
+                left join hospital as h on g.regist_hospital_id = h.hospital_id
+                where guard_hospital_id = :hospital_id and g.status = 1
+                order by g.guardian_id desc';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
     }
     public function getHospitlAdminInfo($hospitalId)
     {
-        try {
-            $sql = 'select h.hospital_id, h.hospital_name, h.address, h.tel, a.login_name, a.password
-                    from hospital as h inner join account as a on h.hospital_id = a.hospital_id
-                    where h.hospital_id = :hospital_id and a.type = 1 limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':hospital_id' => $hospitalId]);
-            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (false === $ret) {
-                return array();
-            } else {
-                return $ret;
-            }
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
+        $sql = 'select h.hospital_id, h.hospital_name, h.address, h.tel, a.login_name, a.password
+                from hospital as h inner join account as a on h.hospital_id = a.hospital_id
+                where h.hospital_id = :hospital_id and a.type = 1 limit 1';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataRow($sql, $param);
     }
-    
-//     public function getDoctorsByHospital($hospitalId)
-//     {
-//         try {
-//             $sql = 'select account_id, real_name from account where hospital_id = :hospital_id';
-//             $stmt = $this->pdo->prepare($sql);
-//             $stmt->execute([':hospital_id' => $hospitalId]);
-//             $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
-//             if (false === $ret) {
-//                 return array();
-//             } else {
-//                 return $ret;
-//             }
-//         } catch (Exception $e) {
-//             Logger::write($this->logFile, $e->getMessage());
-//             return VALUE_DB_ERROR;
-//         }
-//     }
-//     <td><select name="doctor" style="width: 80px" id="doctor">
-//     php tag start
-//     $doctors = Dbi::getDbi()->getDoctorsByHospital($registHospital);
-//     foreach ($doctors as $value) {
-//         echo '<option value="' . $value['account_id'] . '" ';
-//         if (isset($_SESSION['guardian']) && $_SESSION['guardian']['doctor'] == $value['account_id']) {
-//             echo 'selected="selected" ';
-//         }
-//         echo '>' . $value['real_name'] . '</option>';
-//     }
-//     php tag end
-//         </select></td>
-    
-    public function getPatientNameByDevice($deviceId)
+    public function getHospitalChild($hospitalId)
     {
-        try {
-            $sql = 'select patient_name from guardian as g 
-                    left join patient as p on g.patient_id = p.patient_id 
-                    where device_id = :device_id order by guardian_id desc limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':device_id' => $deviceId]);
-            return $stmt->fetchColumn();
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
+        $sql = 'select h.hospital_id, hospital_name from hospital as h
+                inner join hospital_relation as r on h.hospital_id = r.hospital_id
+                where r.parent_hospital_id = :hospital_id';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getHospitalParent($hospitalId)
+    {
+        $sql = 'select h.hospital_id, h.hospital_name from hospital as h
+                inner join hospital_relation as r on h.hospital_id = r.parent_hospital_id
+                where r.hospital_id = :hospital_id';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getPatient($patientId)
+    {
+        $sql = 'select patient_id, patient_name from patient where patient_id = :patient_id limit 1';
+        $param = [':patient_id' => $patientId];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getPatientList($hospitalId, $offset = 0, $rows = null, $where = '')
+    {
+        if ('' != $where) {
+            $where = ' and ' . $where;
         }
+        $sql = 'select g.patient_id, g.guardian_id, g.status, g.device_id,
+                p.patient_name, p.sex, p.birth_year, p.tel,
+                g.start_time, g.end_time, g.regist_doctor_name, g.sickroom
+                from guardian as g left join patient as p on g.patient_id = p.patient_id
+                where regist_hospital_id = :hospital ' . $where . 'order by guardian_id desc';
+        if ($rows != null) {
+            $sql .= " limit $offset, $rows";
+        }
+        $param = [':hospital' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getPatientListDistinct($where, $offset = 0, $rows = null)
+    {
+        $sql = "select distinct g.patient_id, p.patient_name, p.sex, p.birth_year, p.tel
+        from guardian as g left join patient as p on g.patient_id = p.patient_id
+        where $where order by guardian_id desc";
+        if ($rows != null) {
+        $sql .= " limit $offset, $rows";
+        }
+        return $this->getDataAll($sql);
+    }
+    public function getPatientByDevice($deviceId)
+    {
+        $sql = 'select guardian_id, patient_name, mode
+                from guardian as g left join patient as p on g.patient_id = p.patient_id
+                where device_id = :device_id and status < 2 order by guardian_id desc limit 1';
+        $param = [':device_id' => $deviceId];
+        return $this->getDataRow($sql, $param);
     }
     public function getPatientNameByGuardian($guardianId)
     {
-        try {
-            $sql = 'select patient_name from guardian as g 
-                    left join patient as p on g.patient_id = p.patient_id
-                    where guardian_id = :guardian_id limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':guardian_id' => $guardianId]);
-            return $stmt->fetchColumn();
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
+        $sql = 'select patient_name from guardian as g
+                left join patient as p on g.patient_id = p.patient_id
+                where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataString($sql, $param);
+    }
+    public function getPatientsForAnalytics($hospitalId, $reported = null, $startTime = null, $endTime = null)
+    {
+        $sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported
+                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                 where regist_hospital_id = :hospital_id';
+        
+        $param = array(':hospital_id' => $hospitalId);
+        if (isset($reported)) {
+            $sql .= ' and reported = :reported ';
+            $param[':reported'] = $reported;
+        }
+        if (isset($startTime)) {
+            $sql .= ' and end_time >= :start_time ';
+            $param[':start_time'] = $startTime;
+        }
+        if (isset($endTime)) {
+            $sql .= ' and end_time <= :end_time ';
+            $param[':end_time'] = $endTime;
+        }
+        
+        return $this->getDataAll($sql, $param);
+    }
+    //************************** query methods(public) **************************
+    //*********************************** end ***********************************
+    
+    //************************* execute methods(public) *************************
+    //********************************** start **********************************
+    public function addAccount($loginName, $realName, $password, $type, $hospitalId, $creator)
+    {
+        $sql = 'insert into account (login_name, real_name, password, type, hospital_id, creator)
+                values (:login_name, :real_name, :password, :type, :hospital_id, :creator)';
+        $param = [':login_name' => $loginName, ':real_name' => $realName, ':password' => $password,
+                        ':type' => $type, ':hospital_id' => $hospitalId,':creator' => $creator ];
+        return $this->insertData($sql, $param);
+    }
+    public function delDoctor($doctorId)
+    {
+        $sql = 'delete from Account where account_id = :account_id';
+        $param = [':account_id' => $doctorId];
+        return $this->deleteData($sql, $param);
+    }
+    public function delEcg($ecgId)
+    {
+        $sql = 'delete from ecg where ecg_id = :ecg_id';
+        $param = [':ecg_id' => $ecgId];
+        return $this->deleteData($sql, $param);
+    }
+    public function editAccount($accountId, array $data)
+    {
+        $sql = 'update account set ';
+        foreach ($data as $key => $value) {
+            $sql .= $key . ' = "' . $value . '",';
+        }
+        $sql = substr($sql, 0, -1);
+        $sql .= ' where account_id = :account';
+        $param = [':account' => $accountId];
+        return $this->updateData($sql, $param);
+    }
+    public function editHospital($hospitalId, array $data)
+    {
+        $sql = 'update hospital set ';
+        foreach ($data as $key => $value) {
+            $sql .= $key . ' = "' . $value . '",';
+        }
+        $sql = substr($sql, 0, -1);
+        $sql .= ' where hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId];
+        return $this->updateData($sql, $param);
+    }
+    /**
+     * step1 of consultation: accepted by parent hospial.
+     */
+    public function flowConsultationAccept($hospitalId, $consultationId, $guardianId)
+    {
+        $this->pdo->beginTransaction();
+        //change guardian hospital.
+        $sql = 'update guardian set guard_hospital_id = :hospital where guardian_id = :guardian_id';
+        $param = [':guardian_id' => $guardianId, ':hospital' => $hospitalId];
+        $ret = $this->updateData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
+        //change status.
+        $sql = 'update consultation set status = 2 where consultation_id = :consultation_id';
+        $param = [':consultation_id' => $consultationId];
+        $ret = $this->updateData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        //succeed.
+        $this->pdo->commit();
+        return true;
     }
-    
-    public function registUser($patientName, $sex, $age, $tel, $device, $registHospital, $guardHospital, 
-            $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, 
-            $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
+    /**
+     * step4 of consultation: end.
+     */
+    public function flowConsultationEnd($consultationId)
+    {
+        $sql = 'update consultation set status = 0 where consultation_id = :consultation_id';
+        $param = [':consultation_id' => $consultationId];
+        return $this->updateData($sql, $param);
+    }
+    /**
+     * step3 of consultation: replied by parent hospital.
+     */
+    public function flowConsultationReply($consultationId, $result)
+    {
+        $sql = 'update consultation set status = 2, response_message = :result
+                where consultation_id = :consultation_id';
+        $param = [':consultation_id' => $consultationId, ':result' => $result];
+        return $this->updateData($sql, $param);
+    }
+    /**
+     * step1 of consultation: create a consultation and send.
+     */
+    public function flowConsultationSend($requestHospital, $responseHospital, $ecgId, $mesage)
+    {
+        $sql = 'insert into consultation(ecg_id, request_hospital_id, request_message, response_hospital_id, status)
+                values (:ecg_id, :request_hospital_id, :request_message, :response_hospital_id, 1)';
+        $param = [':ecg_id' => $ecgId, ':request_hospital_id' => $requestHospital, ':request_message' => $mesage,
+                        ':response_hospital_id' => $responseHospital];
+        return $this->insertData($sql, $param);
+    }
+    /**
+     * step5 of guardian: add diagnosis to ecg data.
+     */
+    public function flowGuardianAddDiagnosis($ecgId, $doctorId, $content)
+    {
+        $sql = 'insert into diagnosis (ecg_id, doctor_id, content) values (:ecg, :doctor, :content)';
+        $param = [':ecg' => $ecgId, ':doctor' => $doctorId, ':content' => $content];
+        return $this->insertData($sql, $param);
+    }
+    /**
+     * step3 of guardian: add ecg data by client.
+     */
+    public function flowGuardianAddEcg($guardianId, $alertFlag, $dataPath)
+    {
+        $sql = 'insert into ecg(guardian_id, alert_flag, data_path) values(:guardian, :alert, :path)';
+        $param = [':guardian' => $guardianId, ':alert' => $alertFlag, ':path' => $dataPath];
+        return $this->insertData($sql, $param);
+    }
+    /**
+     * step7 of guardian: create result of the guardian.
+     */
+    public function flowGuardianAddResult($guardianId, $result)
+    {
+        $sql = 'update guardian set guardian_result = :result, status = 3 where guardian_id = :guardian';
+        $param = [':guardian' => $guardianId, ':result' => $result];
+        return $this->updateData($sql, $param);
+    }
+    /**
+     * step1 of guardian: add user.
+     */
+    public function flowGuardianAddUser($patientName, $sex, $age, $tel, $device, $registHospital,
+            $guardHospital, $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height,
+            $weight, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
     {
         $birthYear = date('Y') - $age;
-        try {
-            $patientId = $this->getSamePatient($patientName, $birthYear, $tel);
-            $this->pdo->beginTransaction();
-            if (false == $patientId) {
-                $patientId = $this->addPatient($patientName, $sex, $birthYear, $tel, $sickRoom, $doctor);
+        $sql = 'select patient_id from patient
+                where patient_name = :name and birth_year = :birth and tel = :tel limit 1';
+        $param = [':name' => $patientName, ':birth' => $birthYear, ':tel' => $tel];
+        $patientId = $this->getDataString($sql, $param);
+        if (VALUE_DB_ERROR == $patientId) {
+            return VALUE_DB_ERROR;
+        }
+        //use transaction.
+        $this->pdo->beginTransaction();
+        //if patient not existed, add to patient table.
+        if ('' == $patientId) {
+            $sql = 'insert into patient(patient_name, sex, birth_year, tel, address, creator)
+                    values(:name, :sex, :birth, :tel, :address, :creator)';
+            $param = [':name' => $patientName, ':sex' => $sex, ':birth' => $birthYear,
+                            ':tel' => $tel, ':address' => $address, ':creator' => $creator];
+            $patientId = $this->insertData($sql, $param);
+            if (VALUE_DB_ERROR == $patientId) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
             }
-            $guardianId = $this->addGuardian($device, $registHospital, $guardHospital, $patientId, $mode, $hours, 
-                    $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, $familyTel, 
-                    $tentativeDiagnose, $medicalHistory, $registDoctorName);
-            $this->pdo->commit();
-            return $guardianId;
-            
-        } catch (Exception $e) {
+        }
+        //add to guardian table.
+        $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id,
+                    patient_id, mode, guardian_hours, lead, doctor_id, status,
+                    sickroom, blood_pressure, height, weight, family_tel,
+                    tentative_diagnose, medical_history, regist_doctor_name)
+                    values (:device, :regist_hospital, :guard_hospital, :patient, :mode,
+                    :hours, :lead, :doctor_id, 0, :sickroom, :blood_pressure, :height,
+                    :weight, :family_tel, :ten_dia, :medical_history, :doctor_name)';
+        $param = [':device' => $device, ':regist_hospital' => $registHospital, ':guard_hospital' => $guardHospital,
+                        ':patient' => $patientId, ':mode' => $mode, ':hours' => $hours, ':lead' => $lead,
+                        ':doctor_id' => $doctor, ':sickroom' => $sickRoom, ':blood_pressure' => $bloodPressure,
+                        ':height' => $height, ':weight' => $weight, ':family_tel' => $familyTel,
+                        ':ten_dia' => $tentativeDiagnose, ':medical_history' => $medicalHistory,
+                        ':doctor_name' => $registDoctorName];
+        $guardianId = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR == $guardianId) {
             $this->pdo->rollBack();
-            Logger::write($this->logFile, $e->getMessage());
             return VALUE_DB_ERROR;
         }
+        //succeed.
+        $this->pdo->commit();
+        return $guardianId;
     }
-    
-    private function addPatient($patientName, $sex, $birthYear, $tel, $address, $creator)
+    /**
+     * step8 of guardian: edit result(sometimes).
+     */
+    public function flowGuardianEditResult($guardianId, $newResult)
     {
-        $sql = 'insert into patient(patient_name, sex, birth_year, tel, address, creator)'
-                . ' values(:name, :sex, :birth, :tel, :address, :creator)';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(array(
-                ':name' => $patientName,
-                ':sex' => $sex,
-                ':birth' => $birthYear,
-                ':tel' => $tel,
-                ':address' => $address,
-                ':creator' => $creator
-        ));
-        return $this->pdo->lastInsertId();
+        $sql = 'update guardian set guardian_result = :result where guardian_id = :guardian_id';
+        $param = [':result' => $newResult, ':guardian_id' => $guardianId];
+        return $this->updateData($sql, $param);
     }
-    
-    private function addGuardian($device, $registHospital, $guardHospital, $patientId, 
-            $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height, $weight, 
-            $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
+    /**
+     * step9 of guardian: end all of the guardian.
+     */
+    public function flowGuardianEndAll($guardianId)
     {
-        $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id, 
-                patient_id, mode, guardian_hours, lead, doctor_id, status,
-                sickroom, blood_pressure, height, weight, family_tel, 
-                tentative_diagnose, medical_history, regist_doctor_name) 
-                values(:device, :regist_hospital, :guard_hospital, :patient, :mode, 
-                :hours, :lead, :doctor_id, 0, :sickroom, :blood_pressure, :height, 
-                :weight, :family_tel, :ten_dia, :medical_history, :doctor_name)';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(array(
-                ':device' => $device,
-                ':regist_hospital' => $registHospital,
-                ':guard_hospital' => $guardHospital,
-                ':patient' => $patientId,
-                ':mode' => $mode,
-                ':hours' => $hours,
-                ':lead' => $lead,
-                ':doctor_id' => $doctor,
-                ':sickroom' => $sickRoom,
-                ':blood_pressure' => $bloodPressure,
-                ':height' => $height,
-                ':weight' => $weight,
-                ':family_tel' => $familyTel,
-                ':ten_dia' => $tentativeDiagnose,
-                ':medical_history' => $medicalHistory,
-                ':doctor_name' => $registDoctorName
-        ));
-        return $this->pdo->lastInsertId();
+        $sql = 'update guardian set status = 4 where guardian_id = :guardian_id';
+        $param = [':guardian_id' => $guardianId];
+        return $this->updateData($sql, $param);
     }
-    
-    private function getSamePatient($patientName, $birthYear, $tel)
+    /**
+     * step6 of guardian: end the guardian(after that, create result).
+     */
+    public function flowGuardianEndGuard($guardianId)
     {
-        try {
-            $sql = 'select patient_id from patient 
-                    where patient_name = :name and birth_year = :birth and tel = :tel limit 1';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(array(':name' => $patientName, ':birth' => $birthYear, ':tel' => $tel));
-            return $stmt->fetchColumn();
-        } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
-            return VALUE_DB_ERROR;
-        }
+        $sql = 'update guardian set status = 2, end_time = now() where guardian_id = :guardian_id';
+        $param = [':guardian_id' => $guardianId];
+        return $this->updateData($sql, $param);
     }
-    
-//     public function addCommand($patientId, $status)
-//     {
-//         try {
-//             $sql = 'insert into remote_command(p_id, status) values(:id, :status)';
-//             $stmt = $this->pdo->prepare($sql);
-//             $stmt->execute([':id' => $patientId, ':status' => $status]);
-//         } catch (Exception $e) {
-//             Logger::write($this->logFile, $e->getMessage());
-//             return VALUE_DB_ERROR;
-//         }
-//     }
-    
-//     public function delCommand($patientId)
-//     {
-//         try {
-//             $sql = 'delete from remote_command where p_id = :id';
-//             $stmt = $this->pdo->prepare($sql);
-//             $stmt->execute([':id' => $patientId]);
-//         } catch (Exception $e) {
-//             Logger::write($this->logFile, $e->getMessage());
-//             return VALUE_DB_ERROR;
-//         }
-//     }
+    /**
+     * step4 of guardian: read the ecg data.
+     */
+    public function flowGuardianReadEcg($ecgId)
+    {
+        $sql = 'update ecg set read_status = 1 where ecg_id = :ecg_id';
+        $param = [':ecg_id' => $ecgId];
+        return $this->updateData($sql, $param);
+    }
+    /**
+     * step2 of guardian: start.
+     */
+    public function flowGuardianStartGuard($guardianId)
+    {
+        $sql = 'update guardian set status = 1, start_time = now() where guardian_id = :guardian_id';
+        $param = [':guardian_id' => $guardianId];
+        return $this->updateData($sql, $param);
+    }
+    public function uploadReport($guardianId, $file)
+    {
+        $sql = 'update guardian set reported = 1, report_file = :file where guardian_id = :guardian';
+        $param = [':file' => $file, ':guardian' => $guardianId];
+        return $this->insertData($sql, $param);
+    }
+    //************************* execute methods(public) *************************
+    //*********************************** end ***********************************
 }

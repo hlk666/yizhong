@@ -1,23 +1,16 @@
 <?php
-require_once '../config/path.php';
-require_once '../config/value.php';
-require_once PATH_LIB . 'Dbi.php';
+require '../common.php';
+include_head('诊断结论');
 
 $ecgId = $_GET["id"];
 $diagnosis = Dbi::getDbi()->getDiagnosisByEcg($ecgId);
 if (VALUE_DB_ERROR === $diagnosis) {
-    echo '查询数据时发生错误，请重试或联系管理员。';
-    exit;
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
 if (empty($diagnosis)) {
-    echo '该条记录未做诊断。';
-    exit;
+    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 } 
 ?>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>诊断结论</title>
-</head>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
 <table style='font-size:14px;' border='0' cellpadding='0' bgcolor='#C1BDBE' >
   <tr bgcolor='#ECEADB' style='height:30px' align='center'>
