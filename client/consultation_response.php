@@ -16,7 +16,7 @@ if (empty($consultations)) {
 ?>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0" style='font-size:15px;'>
 <div style='height:172px; overflow:auto;'>
-<table height='50' border='0' style='width:100%; margin:0;font-size:15px;' >
+<table style="height:50px;border:0;width:100%;margin:0;font-size:15px;">
   <tr bgcolor='#666666'>
     <td style='display:none;'>数据路径</td>
     <td style='display:none;'>会诊号</td>

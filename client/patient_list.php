@@ -30,7 +30,7 @@ if ($total > $rows) {
 ?>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
 <?php echo $navigation; ?>
-<table style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF'>
+<table style="border-collapse:collapse;font-size:14px;border:0;bgcolor:#A3C7DF">
 <tr bgcolor='#ECEADB' style='height:30px' align='center'>
   <td style='display:none;'>序号</td>
   <td>用户编码</td>

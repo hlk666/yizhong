@@ -79,7 +79,7 @@ $tel = $info['tel'];
 <input type="hidden" name="oldHospitalName" value="<?php echo $hospitalName; ?>" />
 <input type="hidden" name="oldAddress" value="<?php echo $address; ?>" />
 <input type="hidden" name="oldTel" value="<?php echo $tel; ?>" />
-<table width="620" align="center" >
+<table style="width:620;align:center;">
   <tr bgcolor="#4F94CD">
     <td height="36" colspan="3"><strong>&nbsp;&nbsp;医院信息管理</strong></td>
   </tr>
@@ -116,7 +116,7 @@ $tel = $info['tel'];
   </tr>
   </table>
 </form>
-<script language="javascript">
+<script type="text/javascript">
 function CheckPost() {
     if (form1.pwd2.value != form1.pwd1.value) {
         alert("两次输入密码不一致");

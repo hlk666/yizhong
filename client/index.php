@@ -74,5 +74,6 @@ span{ color: #FF0000;}
       </form>
       <?PHP if ($errorMsg != '') echo '<span class="span"><strong>' . $errorMsg . '</strong></span>'; ?>
     </div>
+</div>
 </body>
 </html>

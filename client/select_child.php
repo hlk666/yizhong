@@ -14,14 +14,12 @@ if (empty($child)) {
     font-family: "宋体";
     font-weight: bold;
 }
-.STYLE5 {font-size: 14px}
-.Tab{ border-collapse:collapse; height:100%;}
-.Tab td{ border:solid 1px #0000EE}
+td{ border:solid 1px #0000EE}
 -->
 </style>
 <body>
 <form name="form_select_hospital" method="post">
-<table width="100%"  cellspacing="0" class="Tab"  align="center">
+<table style="border-collapse:collapse;width:100%;height:100%;align:center;">
   <tr bgcolor="#4F94CD">
     <td  height="29"><span class="STYLE4">&nbsp;&nbsp;选择查看医院</span></td>
   </tr>
@@ -43,7 +41,7 @@ if (empty($child)) {
   </tr> 
 </table>
 </form>
-<script language="javascript">
+<script type="text/javascript">
 function Select() {
     if (form_select_hospital.custody_hos.value == "0") {
         alert("请选择下级医院。");

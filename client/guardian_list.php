@@ -23,7 +23,7 @@ if (VALUE_DB_ERROR === $guardians) {
 }
 ?>
 <body >
-<table style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF' >
+<table style="border-collapse:collapse;font-size:14px;border:0;bgcolor:#A3C7DF">
   <tr bgcolor='#ECEADB' style='height:30px' align='center'>
     <td style='display:none;'>编号</td>
     <td>姓名</td>

@@ -33,11 +33,12 @@ if (isset($_POST['add']) && $_POST['add']){
 }
 ?>
 <body>
-<table width="427" height="261" align="center" class="style18" >
+<form name="formAddDoc" method="post" action="" onsubmit="return checkAddDoc()">
+<table style="width:427px;height:261px;align:center;">
 <tr bgcolor="#4F94CD">
   <td width="419" height="38" colspan="2" class="style7"> &nbsp;&nbsp;<strong>您的位置</strong>：添加医生</td>
 </tr>
-<form name="formAddDoc" method="post" action="" onsubmit="return checkAddDoc()">
+
 <tr bgcolor="#B0E2FF" >
   <td width="419" height="34" style="width: 200px" align="center">用户帐号</td>
   <td width="200" align="center"><input type="text" name="login_name" id="login_name"></td>
@@ -62,8 +63,8 @@ if (isset($_POST['add']) && $_POST['add']){
     <input name="Button1" type="reset" value="重 置" style="width:150px" />
   </td>
 </tr>
-</form>
 </table>
+</form>
 <?php include_js_file();?>
 </body>
 </html>

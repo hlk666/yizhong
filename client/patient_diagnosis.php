@@ -4,7 +4,7 @@ include_head('诊断记录');
 $guardianId = $_GET["id"];
 ?>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
-<table width='100%' style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF' >
+<table style="border-collapse:collapse;width:100%;font-size:14px;border:0;bgcolor:#A3C7DF">
 <tr bgcolor='#ECEADB' style='height:30px' align='center'>
 <td width='30%'>报警时间</td>
 <td width='60%'>诊断结论</td>

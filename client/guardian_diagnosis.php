@@ -12,7 +12,7 @@ if (empty($diagnosis)) {
 } 
 ?>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
-<table style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF' >
+<table style="border-collapse:collapse;font-size:14px;border:0;bgcolor:#A3C7DF">
     <tr bgcolor='#ECEADB' style='height:30px' align='center'>
     <td width='40%'>诊断时间</td>
     <td width='*'>诊断结论</td>

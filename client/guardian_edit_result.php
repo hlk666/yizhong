@@ -19,9 +19,7 @@ $oldResult = empty($ret) ? '' : $ret['guardian_result'];
     font-family: "宋体";
     font-weight: bold;
 }
-.STYLE5 {font-size: 14px}
-.Tab{ border-collapse:collapse; }
-.Tab td{ border:solid 1px #0000EE}
+td{ border:solid 1px #0000EE}
 -->
 </style>
 <body>
@@ -38,7 +36,7 @@ if (isset($_POST['edit']) && $_POST['edit']){
 }
 ?>
 <form name="" action="" method="post">
-<table width="100%" height="100%" cellspacing="0" class="Tab"  align="center">
+<table style="border-collapse:collapse;width:100%;height:100%;align:center;">
   <tr bgcolor="#4F94CD" height="10%" >
     <td colspan="2"><span class="STYLE4">&nbsp;&nbsp;修改病情总结</span></td>
   </tr>

@@ -11,42 +11,28 @@ if(isset($_POST['type']) && $_POST['type'] == 'regist'){
 }
 ?>
 <style type="text/css">
-<!--
-.STYLE1 {
-    font-family: "新宋体";
-    font-weight: bold;
-    font-size: 12px;
-}
-.STYLE3 {
-    border: 1px solid #808080;
-    background-color: #B0E2FF;
-}
-.STYLE4 {font-size: 12px}
-.STYLE6 {font-size: 12px; font-weight: bold; }
--->
+tr {height:24px;border: 1px solid #FFFFFF;background-color: #B0E2FF;}
+td {border: 1px solid #FFFFFF;height:24px;}
 </style>
-<body>
-<table width="100%" height="100%" border="0" align="center" cellspacing="1" bordercolor="#000000">
+<body style="font-size:12px;">
 <form action="add_user.php" method="post" id="formParam">
-  <input type="hidden" name="type" value="save" />
-  <tr class="STYLE3">
-    <td colspan="2"><span style="color:red;">若删除某参数，系统会按默认值监护。</span></td>
+<input type="hidden" name="type" value="save" />
+<table style="width:100%;height:100%;border-collapse:collapse;border-color:#FFFFFF;">
+  <tr>
+    <td colspan="2"><strong>共通参数(所有监护模式都须设置)：</strong></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="25" colspan="2"><span class="STYLE4"><strong>共通参数(所有监护模式都须设置)：</strong></span></td>
-  </tr>
-  <tr class="STYLE3">
-    <td height="25"><span class="STYLE4">心动过速阀值(数字)：</span></td>
+  <tr>
+    <td>心动过速阀值(不填则用默认值)：</td>
     <td width="90"><input name="polycardia" type="text" style="width: 100px" 
     value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['polycardia'];} else {echo 120;}?>" /></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="25"><span class="STYLE4">心动过缓阀值(数字)：</span></td>
+  <tr>
+    <td>心动过缓阀值(不填则用默认值)：</td>
     <td width="90"><input name="bradycardia" type="text" style="width: 100px" 
     value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['bradycardia'];} else {echo 50;}?>" /></td>
   </tr>
-  <tr class="STYLE3">
-    <td><span class="STYLE4">胸导位置：</span></td>
+  <tr>
+    <td>胸导位置：</td>
     <td><select name="lead" style="width: 105px" id="lead">
       <option value="1" 
       <?php 
@@ -73,11 +59,11 @@ if(isset($_POST['type']) && $_POST['type'] == 'regist'){
       >V6</option>
     </select></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="25" colspan="2"><span class="STYLE4"><strong>仅单次测量模式的参数：</strong></span></td>
+  <tr>
+    <td colspan="2"><strong>仅单次测量模式的参数：</strong></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="25"><span class="STYLE4">单次心电录制时长：</span></td>
+  <tr>
+    <td>单次心电录制时长：</td>
     <td width="90"><select name="mode3_record_time" style="width: 105px" id="lead">
       <option value="10" 
       <?php if(isset($_SESSION['param']) && $_SESSION['param']['mode3_record_time'] == '10') echo 'selected="selected"'?>
@@ -92,11 +78,11 @@ if(isset($_POST['type']) && $_POST['type'] == 'regist'){
       >20秒</option>
     </select></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="25" colspan="2"><span class="STYLE4"><strong>仅异常监护模式的参数：</strong></span></td>
+  <tr>
+    <td colspan="2"><strong>仅异常监护模式的参数：</strong></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="25"><span class="STYLE4">报警心电录制时长：</span></td>
+  <tr>
+    <td>报警心电录制时长：</td>
     <td width="90"><select name="mode2_record_time" style="width: 105px" id="lead">
       <option value="10" 
       <?php if(isset($_SESSION['param']) && $_SESSION['param']['mode2_record_time'] == '10') echo 'selected="selected"'?>
@@ -111,8 +97,8 @@ if(isset($_POST['type']) && $_POST['type'] == 'regist'){
       >20秒</option>
     </select></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="25"><span class="STYLE4">定时监护(按时固定发送一次<span style="color:#FF0000;">正常</span>心电数据)：</span></td>
+  <tr>
+    <td>定时监护(按时发送一次<span style="color:#FF0000;">正常</span>心电数据)：</td>
     <td width="90"><select name="regular_time" style="width: 105px" id="lead">
       <option value="0" 
       <?php 
@@ -136,8 +122,8 @@ if(isset($_POST['type']) && $_POST['type'] == 'regist'){
       >间隔4小时</option>
     </select></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="25"><span class="STYLE4">早搏(个/分钟，超过该值则报警)：</span></td>
+  <tr>
+    <td>早搏(个/分钟，超过该值则报警)：</td>
     <td width="90"><select name="premature_beat" style="width: 105px" id="lead">
       <option value="1" 
       <?php if(isset($_SESSION['param']) && $_SESSION['param']['premature_beat'] == '1') echo 'selected="selected"'?>
@@ -176,8 +162,8 @@ if(isset($_POST['type']) && $_POST['type'] == 'regist'){
       >10个/分钟</option>
     </select></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="25"><span class="STYLE4">其他异常监护(关闭则只监护过速和过缓)：</span></td>
+  <tr>
+    <td>其他异常监护(关闭则只监护心率)：</td>
     <td width="90"><select name="arrhythmia" style="width: 100px" id="lead">
       <option value="1" 
       <?php 
@@ -192,10 +178,10 @@ if(isset($_POST['type']) && $_POST['type'] == 'regist'){
       >关闭</option>
     </select></td>
   </tr>
-  <tr class="STYLE3">
-    <td height="30" colspan="4"><div align="center"><input name="param" type="submit" value="返回注册页面" /></div></td>
+  <tr>
+    <td colspan="4"><div align="center"><input name="param" type="submit" value="返回注册页面" /></div></td>
   </tr>
-</form> 
 </table>
+</form> 
 </body>
 </html>

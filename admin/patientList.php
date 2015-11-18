@@ -56,7 +56,7 @@ th,td{border:1px solid #CCC}
 .w_80{ width:80px;}
 </style>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
-<table width="460"  border="1" bordercolor="#000000" align="center" cellspacing="0">
+<table style="border-collapse:collapse;width:460;border:1;bordercolor:#000000;align:center;">
   <tr>
     <td height="35" bgcolor="#4F94CD"><div align="center">用户查询</div></td>
   </tr>
@@ -78,7 +78,7 @@ th,td{border:1px solid #CCC}
     </td>
   </tr>
 </table>
-<table width="460"  border="1" bordercolor="#000000" align="center" cellspacing="0">
+<table style="border-collapse:collapse;width:460;border:1;bordercolor:#000000;align:center;">
   <tr>
     <td align="center" height="500">
     <div id='scroll_table' style="height:480px;">

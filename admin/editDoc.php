@@ -64,7 +64,7 @@ if (VALUE_DB_ERROR === $info) {
 <input type="hidden" name="doctorId" value="<?php echo $info['doctor_id']; ?>" />
 <input type="hidden" name="oldLoginName" value="<?php echo $info['login_name']; ?>" />
 <input type="hidden" name="oldName" value="<?php echo $info['doctor_name']; ?>" />
-<table style="height:221px;width:500px;" align="center">
+<table style="height:221px;width:500px;align:center;">
 <tr bgcolor="#4F94CD"><td height="36" colspan="3"  >&nbsp;</td></tr>
 <tr align="center" bgcolor="#B0E2FF">
   <td width="134" ><strong>姓名:</strong></td>

@@ -39,19 +39,18 @@ if (empty($parentHospital)) {
     font-family: "宋体";
     font-weight: bold;
 }
-.STYLE5 {font-size: 14px}
-.Tab{ border-collapse:collapse; width:300px; height:300px;}
-.Tab td{ border:solid 1px #0000EE}
+.Tab{ }
+td{ border:solid 1px #0000EE}
 -->
 </style>
 <body>
 <form name="" action="" method="post">
-<table cellspacing="0" class="Tab" align="center">
+<table style="border-collapse:collapse; width:300px; height:300px;align:center;">
   <tr bgcolor="#4F94CD"><td height="30" colspan="2"><strong>&nbsp;&nbsp;医院列表</strong></td></tr>
   <tr>
     <td height="178" colspan="2"><div style='height:185px; overflow:auto;'>
-    <table width='100%' border='0' style='width:100%; margin:0;font-size:12px;' >
-     <tr bgcolor='#666666'><th width='20'>选择</th><th width='210'>医院名称</th></tr>
+    <table style="border:0;width:100%; margin:0;font-size:12px;">
+      <tr bgcolor='#666666'><th width='20'>选择</th><th width='210'>医院名称</th></tr>
 <?php
 foreach ($parentHospital as $index => $row) {
     if ($index % 2 == 0) {
@@ -60,7 +59,7 @@ foreach ($parentHospital as $index => $row) {
         $color = '#ADD8E6';
     }
     echo "<tr bgcolor=$color><td><div align='center' >
-      <input type='radio' name='response_hospital' value=" . $row['hospital_id'] . " >
+    <input type='radio' name='response_hospital' value=" . $row['hospital_id'] . " >
     </div></td><td><div align='center' >" . $row['hospital_name'] . "</div></td></tr>";
 }
 ?>  

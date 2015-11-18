@@ -22,10 +22,9 @@ echo $navigation;
 if ($total > $rows) {
     $ecgData = Dbi::getDbi()->getEcg($guardianId, $offset, $rows);
 }
-
 ?>
 <body>
-<table width='100%' style='font-size:14px;' border='0' cellpadding='0' bgcolor='#A3C7DF' >
+<table style="border-collapse:collapse;width:100%;font-size:14px;border:0;bgcolor:#A3C7DF">
   <tr bgcolor='#ECEADB' style='height:30px' align='center'>
   <th style='display:none;'>编号</th>
   <th width='20%'>序号</th>
