@@ -36,7 +36,7 @@ if (isset($_POST['edit']) && $_POST['edit']){
 }
 ?>
 <form name="" action="" method="post">
-<table style="border-collapse:collapse;width:100%;height:100%;align:center;">
+<table style="width:100%;height:100%;align:center;">
   <tr bgcolor="#4F94CD" height="10%" >
     <td colspan="2"><span class="STYLE4">&nbsp;&nbsp;修改病情总结</span></td>
   </tr>

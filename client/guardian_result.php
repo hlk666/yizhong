@@ -5,7 +5,7 @@ $guardianId = $_GET['id'];
 ?>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
 <div align="center">
-<table style="border-collapse:collapse;width:100%;font-size:14px;border:0;bgcolor:#A3C7DF">
+<table style="width:100%;font-size:14px;border:0;background-color:#A3C7DF">
 <tr bgcolor='#ECEADB' style='height:30px' align='center'><td>病情总结</td></tr>
 <?php
 $ret = Dbi::getDbi()->getGuardianById($guardianId);

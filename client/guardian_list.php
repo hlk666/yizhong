@@ -21,9 +21,12 @@ $guardians = Dbi::getDbi()->getGuardianList($hospitalId);
 if (VALUE_DB_ERROR === $guardians) {
     user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
+if (empty($guardians)) {
+    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
+}
 ?>
 <body >
-<table style="border-collapse:collapse;font-size:14px;border:0;bgcolor:#A3C7DF">
+<table style="font-size:14px;border:0;background-color:#A3C7DF;">
   <tr bgcolor='#ECEADB' style='height:30px' align='center'>
     <td style='display:none;'>编号</td>
     <td>姓名</td>

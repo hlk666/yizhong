@@ -5,7 +5,7 @@ session_start();
 $hospitalId = $_GET['id'];
 $child = Dbi::getDbi()->getHospitalChild($hospitalId);
 if (empty($child)) {
-    followingAcction(MESSAGE_PARAM, GOTO_FLAG_BACK);
+    user_goto(MESSAGE_PARAM, GOTO_FLAG_BACK);
 }
 ?>
 <style type="text/css">

@@ -79,6 +79,7 @@ $tel = $info['tel'];
 <input type="hidden" name="oldHospitalName" value="<?php echo $hospitalName; ?>" />
 <input type="hidden" name="oldAddress" value="<?php echo $address; ?>" />
 <input type="hidden" name="oldTel" value="<?php echo $tel; ?>" />
+<div style="width:100%;margin-top:5px;" align="center">
 <table style="width:620;align:center;">
   <tr bgcolor="#4F94CD">
     <td height="36" colspan="3"><strong>&nbsp;&nbsp;医院信息管理</strong></td>
@@ -115,6 +116,7 @@ $tel = $info['tel'];
     <td width="200" height="36" colspan="3" ><input name="edit" type="submit" value="提交" style="width:78px"/></td>
   </tr>
   </table>
+</div>
 </form>
 <script type="text/javascript">
 function CheckPost() {

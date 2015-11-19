@@ -551,6 +551,15 @@ class Dbi
         return $guardianId;
     }
     /**
+     * step? of guardian: delete guardian(sometimes).
+     */
+    public function flowGuardianDelete($guardianId)
+    {
+        $sql = 'delete from guardian where guardian_id = :guardian_id';
+        $param = [':guardian_id' => $guardianId];
+        return $this->deleteData($sql, $param);
+    }
+    /**
      * step8 of guardian: edit result(sometimes).
      */
     public function flowGuardianEditResult($guardianId, $newResult)

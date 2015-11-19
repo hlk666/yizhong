@@ -45,52 +45,35 @@ if ($total > $rows) {
 <style type="text/css">
 BODY {margin: 1px}
 #scroll_table{ height:100%; overflow:auto;}
-table{border-collapse:collapse; }
+table{border-collapse:collapse;}
 table thead{background-color:#FFFFFF}
 th,td{border:1px solid #CCC}
 #thead{ position:fixed; z-index:100;background-color:#FFF}
-.w_140{ width:140px;}
-.w_145{ width:145px;}
-.w_70{ width:70px;}
-.w_40{ width:40px;}
-.w_80{ width:80px;}
 </style>
-<body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
-<table style="border-collapse:collapse;width:460;border:1;bordercolor:#000000;align:center;">
-  <tr>
-    <td height="35" bgcolor="#4F94CD"><div align="center">用户查询</div></td>
-  </tr>
-  <tr>
-    <td height="30px" bgcolor="#B0E2FF">
-    <form action="" method="post" name="search_form" id="search_form">
-    <div style="margin-left:5px;margin-top:10px;height:15px;">
-查询条件
-      <select name="type" size="1">
-        <option value="real_name">姓名</option>
-        <option value="sex">性别</option>
-        <option value="birth_year">年龄</option>
-        <option value="tel">电话</option>
-      </select>
-      <span style="margin-left:60px;">查询内容</span>
-      <input name="value" type="text" style="width: 100px" />
-      <input name="search" type="submit" value="查询" /></div>
-    </form>
-    </td>
-  </tr>
-</table>
-<table style="border-collapse:collapse;width:460;border:1;bordercolor:#000000;align:center;">
-  <tr>
-    <td align="center" height="500">
-    <div id='scroll_table' style="height:480px;">
-    <?php echo "<div>$navigation</div>";?>
-    <table id='data_table' style='font-size:14px;'>
-        <tr bgcolor=#555555>
-        <th class='w_140'>用户编码</th>
-        <th class='w_70'>姓名</th>
-        <th class='w_40'>性别</th>
-        <th class='w_40'>年龄</th>
-        <th class='w_80'>历史心电</th>
-        <th class='w_80'>健康档案</th>
+<body style="font-size:19px;">
+<div style="width:100%;margin-top:20px;" align="center">
+<form action="" method="post" name="search_form" id="search_form">
+<div style="margin-top:15px;height:25px;vertical-align:middle;">
+<span>查询条件</span>
+  <select name="type" style="font-size:14px;width:80px;">
+    <option value="real_name">姓名</option>
+    <option value="sex">性别</option>
+    <option value="birth_year">年龄</option>
+    <option value="tel">电话</option>
+  </select>
+  <span style="margin-left:60px;">查询内容</span>
+  <input name="value" type="text" style="width: 100px" />
+  <input name="search" type="submit" value="查询" />
+</div>
+<table style="border:1px;margin-top:5px;">
+    <?php echo "<div style='margin-top:30px;'>$navigation</div>";?>
+        <tr bgcolor=#A3C7DF>
+        <th style="width:60px;">ID</th>
+        <th style="width:100px;">姓名</th>
+        <th style="width:50px;">性别</th>
+        <th style="width:50px;">年龄</th>
+        <th style="width:90px;">历史心电</th>
+        <th style="width:90px;">编辑信息</th>
         </tr>
 <?php
 foreach ($patients as $index => $patient) {
@@ -101,22 +84,21 @@ foreach ($patients as $index => $patient) {
     }
     $age = date('Y') - $patient['birth_year'];
     $sex = $patient['sex'] == 1 ? '男' : '女';
-    echo "<tbody><tr bgcolor=$color>
-        <td><div align='center' style='width:200px; height:19px'>".$patient['patient_id']."</div></td>
-        <td><div align='center' style='width:100px; height:19px'>".$patient['patient_name']."</div></td>
-        <td><div align='center' style='width:80px; height:19px'>$sex</div></td>
-        <td><div align='center' style='width:80px; height:19px'>$age</div></td>
+    $id = $patient['patient_id'];
+    $name = $patient['patient_name'];
+    echo "<tr bgcolor=$color>
+        <td><div align='center' style='height:19px'>$id</div></td>
+        <td><div align='center' style='height:19px'>$name</div></td>
+        <td><div align='center' style='height:19px'>$sex</div></td>
+        <td><div align='center' style='height:19px'>$age</div></td>
+        <td><div align='center' style='height:19px'>
+            <a href='historys.php?id=$id' target='_blank'>查看</a></div></td>
         <td><div align='center' style='width:120px; height:19px'>
-            <a href='historys.php?id=" . $patient['patient_id'] . "'>查看</a></div></td>
-        <td><div align='center' style='width:120px; height:19px'>
-            <a href ='editUser.php?id=" . $patient['patient_id'] . "'>查看</a></div></td>
-        </tr></tbody>";
+            <a href ='editUser.php?id=$id' target='_blank'>查看</a></div></td>
+        </tr>";
 }
 ?>
-    </table></div>  
-    </td>
-  </tr>
-</table>
+</table></form></div>
 <script type="text/javascript">
 var win = null;
 function NewWindow(mypage,myname,w,h,scroll) {

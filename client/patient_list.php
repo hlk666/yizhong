@@ -28,12 +28,15 @@ if ($total > $rows) {
     }
 }
 ?>
+<style>
+tr td {bordercolor:#FFFFFF;}
+</style>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
 <?php echo $navigation; ?>
-<table style="border-collapse:collapse;font-size:14px;border:0;bgcolor:#A3C7DF">
+<table style="font-size:14px;border:1;background-color:#A3C7DF">
 <tr bgcolor='#ECEADB' style='height:30px' align='center'>
   <td style='display:none;'>序号</td>
-  <td>用户编码</td>
+  <td>ID</td>
   <td>姓名</td>
   <?php if($flag == 1) echo '<td>监护设置</td>'; ?>
   <td>监护状态</td>
@@ -58,9 +61,9 @@ foreach ($result as $index => $row) {
     } elseif ($row['status'] == 1) {
         $statusValue = '正在监护';
     } elseif ($row['status'] == 2) {
-        $statusValue = '结束监护';
+        $statusValue = '已结束监护';
     } elseif ($row['status'] == 3) {
-        $statusValue = '已诊断(未打印报告)';
+        $statusValue = '已诊断';
     } else {
         $statusValue = '已打印报告';
     }
@@ -68,15 +71,12 @@ foreach ($result as $index => $row) {
     $sex = $row['sex'] == 1 ? '男' : '女';
     echo "<tr bgcolor=$color style='height:25px'>
     <td style='display:none;'>".$row['guardian_id']."</td>
-    <td><div align='center' style='width:150px'>".$row['patient_id']."</div></td>
+    <td><div align='center' style='width:20px'>".$row['patient_id']."</div></td>
     <td><div align='center' style='width:68px'>".$row['patient_name']."</div></td>";
     if ($flag == 1) {
-        if ($row['status'] == 0) {
+        if ($row['status'] == 0 || $row['status'] == 1) {
             echo "<td><div align='center' style='width:70px'><a href = './guardian_action.php?status=0&id="
-                    . $row['guardian_id'] . "'>开始监护</div></td>";
-        } elseif ($row['status'] == 1) {
-            echo "<td><div align='center' style='width:70px'><a href = './guardian_action.php?status=1&id="
-                    . $row['guardian_id'] . "'>结束监护</div></td>";
+                    . $row['guardian_id'] . "'>监护设置</div></td>";
         } else {
             echo "<td><div align='center' style='width:70px'>-</div></td>";
         }

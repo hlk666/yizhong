@@ -17,7 +17,7 @@ if (empty($doctors)) {
 <style type="text/css">
 BODY {margin: 1px}
 #scroll_table{ height:100%; overflow:auto;}
-table{border-collapse:collapse; }
+table{border-collapse:collapse;}
 table thead{background-color:#FFFFFF}
 th,td{border:1px solid #CCC}
 #thead{ position:fixed; z-index:100;background-color:#FFF}

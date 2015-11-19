@@ -34,7 +34,8 @@ if (isset($_POST['add']) && $_POST['add']){
 ?>
 <body>
 <form name="formAddDoc" method="post" action="" onsubmit="return checkAddDoc()">
-<table style="width:427px;height:261px;align:center;">
+<div style="width:100%;margin-top:5px;" align="center">
+<table style="width:427px;height:261px;">
 <tr bgcolor="#4F94CD">
   <td width="419" height="38" colspan="2" class="style7"> &nbsp;&nbsp;<strong>您的位置</strong>：添加医生</td>
 </tr>
@@ -64,6 +65,7 @@ if (isset($_POST['add']) && $_POST['add']){
   </td>
 </tr>
 </table>
+</div>
 </form>
 <?php include_js_file();?>
 </body>

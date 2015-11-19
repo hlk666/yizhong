@@ -79,6 +79,12 @@ class Invigilator
         fclose($handle);
     }
     
+    public function delete()
+    {
+        unlink($this->file);
+        return Dbi::getDbi()->flowGuardianDelete($this->guardianId);
+    }
+    
     private function setDefaultInfo($mode, $hours)
     {
         $this->info['mode'] = $mode;

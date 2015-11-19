@@ -70,10 +70,14 @@ function user_goto($message, $gotoFlag, $url = null)
     exit;
 }
 
-function user_back_after_delay($message, $delayTime)
+function user_back_after_delay($message, $delayTime, $url = null)
 {
     echo $message;
-    echo '<script language="javascript">setTimeout("history.back()", ' . $delayTime . ');</script>';
+    if (null == $url) {
+        echo '<script language="javascript">setTimeout("history.back()", ' . $delayTime . ');</script>';
+    } else {
+        echo "<script language='javascript'>setTimeout('window.location.href=\"$url\"',$delayTime);</script>";
+    }
     exit;
 }
 
