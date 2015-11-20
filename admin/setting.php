@@ -73,6 +73,10 @@ $hospitalName = $info['hospital_name'];
 $address = $info['address'];
 $tel = $info['tel'];
 ?>
+<style>
+tr {background-color:#B0E2FF;}
+td {text-align:left;padding-left:5px;height:30px;}
+</style>
 <body>
 <form name="form1" method="post" action="" onSubmit="return CheckPost()">
 <input type="hidden" name="oldLoginName" value="<?php echo $loginName; ?>" />
@@ -80,41 +84,33 @@ $tel = $info['tel'];
 <input type="hidden" name="oldAddress" value="<?php echo $address; ?>" />
 <input type="hidden" name="oldTel" value="<?php echo $tel; ?>" />
 <div style="width:100%;margin-top:5px;" align="center">
-<table style="width:620;align:center;">
-  <tr bgcolor="#4F94CD">
-    <td height="36" colspan="3"><strong>&nbsp;&nbsp;医院信息管理</strong></td>
+<table>
+  <tr><td colspan="2"><div align="center"><strong>医院信息管理</strong></div></td></tr>
+  <tr>
+    <td width="120">管理员账号 </td>
+    <td width="400"><input name="loginName" type="text" id="loginName" value="<?php echo $loginName; ?>" />(字母,数字组合)</td>
+  </tr>
+  <tr>
+    <td>医院名称</td>
+    <td><input name="hospitalName" type="text" id="hospitalName" value="<?php echo $hospitalName; ?>" /></td>
+  </tr>
+  <tr>
+    <td>医院地址</td>
+    <td colspan="2"><input name="address" type="text" id="address" value="<?php echo $address; ?>" /></td>
+  </tr>
+  <tr>
+    <td>医院联系电话</td>
+    <td><input name="tel" type="text" id="tel" value="<?php echo $tel; ?>" /></td>
+  </tr>
+  <tr>
+    <td>密码</td>
+    <td><input type="password" name="pwd1" id="pwd1" />(6-20位,不更改请留空)</td>
   </tr>
   <tr align="center" bgcolor="#B0E2FF">
-    <td width="200" height="30" >管理员账号 </td>
-    <td width="200">
-      <input name="loginName" type="text" id="loginName" value="<?php echo $loginName; ?>" /></td>
-    <td width="200">(字母,数字组合)</td>
+    <td>确认密码</td>
+    <td><input type="password" name="pwd2" id="pwd2" /></td>
   </tr>
-  <tr align="center" bgcolor="#B0E2FF">
-    <td width="200" height="30" >医院名称</td>
-    <td colspan="2"><input name="hospitalName" type="text" id="hospitalName" style="width:360" value="<?php echo $hospitalName; ?>" /></td>
-  </tr>
-  <tr align="center" bgcolor="#B0E2FF">
-    <td width="200" height="30">医院地址</td>
-    <td colspan="2"><input name="address" type="text" id="address"  style="width:360" value="<?php echo $address; ?>" /></td>
-  </tr>
-  <tr align="center" bgcolor="#B0E2FF">
-    <td width="200" height="30">医院联系电话</td>
-    <td colspan="2"><input name="tel" type="text" id="tel"  style="width:360" value="<?php echo $tel; ?>" /></td>
-  </tr>
-  <tr align="center" bgcolor="#B0E2FF">
-    <td width="200" height="30">密码</td>
-    <td width="200"><input type="password" name="pwd1" id="pwd1" /></td>
-    <td width="200">(6-20位,不更改请留空)</td>
-  </tr>
-  <tr align="center" bgcolor="#B0E2FF">
-    <td width="200" height="30">确认密码</td>
-    <td width="200"><input type="password" name="pwd2" id="pwd2" /></td>
-    <td width="200">&nbsp;</td>
-  </tr>
-  <tr  bgcolor="#4F94CD"  align="center">
-    <td width="200" height="36" colspan="3" ><input name="edit" type="submit" value="提交" style="width:78px"/></td>
-  </tr>
+  <tr><td colspan="2"><div align="center"><input name="edit" type="submit" value="提交" style="width:78px"/></div></td></tr>
   </table>
 </div>
 </form>
