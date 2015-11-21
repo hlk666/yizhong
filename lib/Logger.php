@@ -4,8 +4,7 @@ class Logger
     public static function write($fileName, $message)
     {
         $data = '(' . self::getIP() . ')' . date('Ymd H:i:s') . '----' . $message . "\r\n";
-        
-        $handle = fopen(PATH_LOG . $fileName, 'a');
+        $handle = fopen(PATH_LOG . date('Ymd') . $fileName, 'a');
         if ($handle == false) {
             return;
         }

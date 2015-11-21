@@ -50,7 +50,7 @@ foreach ($doctors as $index => $doctor) {
     $doctorName = $doctor['doctor_name'];
     echo "<tr bgcolor=$color>
     <td><div align='center' style='width:200px; height:20px'>
-    <a href = 'editDoc.php?id=$doctorId'>$loginName</div></td>
+    <a href = 'edit_doctor.php?id=$doctorId'>$loginName</div></td>
     <td><div align='center' style='width:200px; height:20px'>$doctorName</div></td></tr>";
 }
 ?>

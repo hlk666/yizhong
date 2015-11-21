@@ -300,7 +300,8 @@ class Dbi
     }
     public function getPatient($patientId)
     {
-        $sql = 'select patient_id, patient_name from patient where patient_id = :patient_id limit 1';
+        $sql = 'select patient_id, patient_name, sex, birth_year, tel, address
+                from patient where patient_id = :patient_id limit 1';
         $param = [':patient_id' => $patientId];
         return $this->getDataRow($sql, $param);
     }
@@ -413,6 +414,17 @@ class Dbi
         $sql = substr($sql, 0, -1);
         $sql .= ' where hospital_id = :hospital';
         $param = [':hospital' => $hospitalId];
+        return $this->updateData($sql, $param);
+    }
+    public function editPatient($patientId, array $data)
+    {
+        $sql = 'update patient set ';
+        foreach ($data as $key => $value) {
+            $sql .= $key . ' = "' . $value . '",';
+        }
+        $sql = substr($sql, 0, -1);
+        $sql .= ' where patient_id = :patient';
+        $param = [':patient' => $patientId];
         return $this->updateData($sql, $param);
     }
     /**

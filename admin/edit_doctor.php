@@ -36,7 +36,7 @@ if(isset($_POST['submitType']) && $_POST['submitType'] == 'edit'){
     if (VALUE_DB_ERROR === $ret) {
         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
     } else {
-        user_goto(MESSAGE_SUCCESS, GOTO_FLAG_URL, 'docList.php');
+        user_goto(MESSAGE_SUCCESS, GOTO_FLAG_URL, 'doctors.php');
     }
 }
  
@@ -45,7 +45,7 @@ if(isset($_POST['submitType']) && $_POST['submitType'] == 'delete'){
     if (VALUE_DB_ERROR === $ret) {
         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
     } else {
-        user_goto(MESSAGE_SUCCESS, GOTO_FLAG_URL, 'docList.php');
+        user_goto(MESSAGE_SUCCESS, GOTO_FLAG_URL, 'doctors.php');
     }
 }
 

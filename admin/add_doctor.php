@@ -28,7 +28,7 @@ if (isset($_POST['add']) && $_POST['add']){
     if (VALUE_DB_ERROR === $ret) {
         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
     } else {
-        user_goto(MESSAGE_SUCCESS, GOTO_FLAG_URL, 'docList.php');
+        user_goto(MESSAGE_SUCCESS, GOTO_FLAG_URL, 'doctors.php');
     }
 }
 ?>
@@ -37,7 +37,7 @@ if (isset($_POST['add']) && $_POST['add']){
 <div style="width:100%;margin-top:5px;" align="center">
 <table style="width:427px;height:261px;">
 <tr bgcolor="#4F94CD">
-  <td width="419" height="38" colspan="2" class="style7"> &nbsp;&nbsp;<strong>您的位置</strong>：添加医生</td>
+  <td width="419" height="38" colspan="2" class="style7"><div align="center">添加医生</div></td>
 </tr>
 
 <tr bgcolor="#B0E2FF" >

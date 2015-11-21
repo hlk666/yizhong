@@ -43,14 +43,11 @@ if ($total > $rows) {
 }
 ?>
 <style type="text/css">
-BODY {margin: 1px}
-#scroll_table{ height:100%; overflow:auto;}
+body {margin: 1px}
 table{border-collapse:collapse;}
-table thead{background-color:#FFFFFF}
 th,td{border:1px solid #CCC}
-#thead{ position:fixed; z-index:100;background-color:#FFF}
 </style>
-<body style="font-size:19px;">
+<body style="font-size:18px;">
 <div style="width:100%;margin-top:20px;" align="center">
 <form action="" method="post" name="search_form" id="search_form">
 <div style="margin-top:15px;height:25px;vertical-align:middle;">
@@ -72,7 +69,6 @@ th,td{border:1px solid #CCC}
         <th style="width:100px;">姓名</th>
         <th style="width:50px;">性别</th>
         <th style="width:50px;">年龄</th>
-        <th style="width:90px;">历史心电</th>
         <th style="width:90px;">编辑信息</th>
         </tr>
 <?php
@@ -91,10 +87,8 @@ foreach ($patients as $index => $patient) {
         <td><div align='center' style='height:19px'>$name</div></td>
         <td><div align='center' style='height:19px'>$sex</div></td>
         <td><div align='center' style='height:19px'>$age</div></td>
-        <td><div align='center' style='height:19px'>
-            <a href='historys.php?id=$id' target='_blank'>查看</a></div></td>
         <td><div align='center' style='width:120px; height:19px'>
-            <a href ='editUser.php?id=$id' target='_blank'>查看</a></div></td>
+            <a href ='edit_patient.php?id=$id'>编辑</a></div></td>
         </tr>";
 }
 ?>
