@@ -5,13 +5,16 @@ session_start();
 checkDoctorLogin();
 
 $hospitalId = $_SESSION["hospital"];
-if (isset($_POST['current_hospital']) && $_POST['current_hospital']){
+if (isset($_POST['current_hospital'])){
     user_goto(null, GOTO_FLAG_URL, 'patient_list.php?current_flag=1&id=' . $hospitalId);
 }
-if (isset($_POST['child_hospital']) && $_POST['child_hospital']){
+if (isset($_POST['child_hospital'])){
     user_goto(null, GOTO_FLAG_URL, 'select_child.php?id=' . $hospitalId);
 }
 $ret = Dbi::getDbi()->getHospitalChild($hospitalId);
+if (VALUE_DB_ERROR === $ret) {
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+}
 if (empty($ret)) {
     user_goto(null, GOTO_FLAG_URL, 'patient_list.php?current_flag=1&id=' . $hospitalId);
 }

@@ -6,9 +6,9 @@ $consultationId = $_GET['cid'];
 $result = $_GET['res'];
 $ret = Dbi::getDbi()->flowConsultationReply($consultationId, $result);
 if (VALUE_DB_ERROR === $ret) {
-    echo '处理失败，请重试或联系管理员。';
+    echo MESSAGE_DB_ERROR;
 } else {
-    echo '处理成功。';
+    echo MESSAGE_SUCCESS;
 }
 ?>
 </html>

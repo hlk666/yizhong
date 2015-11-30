@@ -22,14 +22,14 @@ class AnalyticsUpload
         $file = $dir . $param['start_time'] . '_' . $param['end_time'] . '.pdf';
         $ret = file_put_contents($file, $data);
         if (false === $ret) {
-            $this->setError(7, 'failed to save file.');
+            $this->setError(6, 'IO error.');
             return json_encode($this->error);
         }
         
         $urlFile = 'report/' . $param['patient_id'] . '/' . $param['start_time'] . '_' . $param['end_time'] . '.pdf';
         $ret = Dbi::getDbi()->uploadReport($param['patient_id'], $urlFile);
         if (VALUE_DB_ERROR === $ret) {
-            $this->setError(7, 'failed to update db.');
+            $this->setError(7, 'DB error.');
             return json_encode($this->error);
         }
         return json_encode($this->retSuccess);
@@ -41,27 +41,22 @@ class AnalyticsUpload
             $this->setError(1, 'hospital_id is empty.');
             return false;
         }
-        
         if (!isset($param['patient_id']) || trim($param['patient_id']) == '') {
             $this->setError(2, 'patient_id is empty.');
             return false;
         }
-        
         if (!isset($param['start_time']) || trim($param['start_time']) == '') {
             $this->setError(3, 'start_time is empty.');
             return false;
         }
-        
         if (!isset($param['end_time']) || trim($param['end_time']) == '') {
             $this->setError(4, 'end_time is empty.');
             return false;
         }
-        
         if (empty($data)) {
             $this->setError(5, 'no file uploaded.');
             return false;
         }
-        
         return true;
     }
     

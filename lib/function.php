@@ -34,7 +34,6 @@ function include_js_file()
 }
 
 /**
- * 
  * @param string $message message of notice information.
  * @param integer $gotoFlag only 3 values are allowed
  *      GOTO_FLAG_EXIT | GOTO_FLAG_BACK | GOTO_FLAG_URL) 
@@ -79,6 +78,16 @@ function user_back_after_delay($message, $delayTime, $url = null)
         echo "<script language='javascript'>setTimeout('window.location.href=\"$url\"',$delayTime);</script>";
     }
     exit;
+}
+
+function check_user_existed($isExisted)
+{
+    if (VALUE_DB_ERROR === $isExisted) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+    }
+    if (true === $isExisted) {
+        user_goto('该账号已被他人使用。', GOTO_FLAG_BACK);
+    }
 }
 
 /**

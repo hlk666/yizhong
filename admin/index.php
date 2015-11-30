@@ -36,6 +36,9 @@ if(isset($_POST['user'])) {
         $pwd = md5($_POST['pwd']);
         //get user and pwd to check.
         $ret = Dbi::getDbi()->getAcount($user);
+        if (VALUE_DB_ERROR === $ret) {
+            user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+        }
         if (empty($ret)) {
             $errorMsg = '您输入的用户不存在。';
         } elseif ($ret['password'] != $pwd) {

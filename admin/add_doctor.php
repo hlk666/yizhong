@@ -17,9 +17,7 @@ if (isset($_POST['add']) && $_POST['add']){
     
     $loginName = $_POST['login_name'];
     $isExisted = Dbi::getDbi()->existedLoginName($loginName);
-    if ($isExisted) {
-        user_goto('该登录名已被他人使用。', GOTO_FLAG_BACK);
-    }
+    check_user_existed($isExisted);
     
     $name = $_POST['name'];
     

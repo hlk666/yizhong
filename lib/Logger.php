@@ -12,7 +12,7 @@ class Logger
         fclose($handle);
     }
     
-    public static function writeCommands($fileName, array $cmd)
+    public static function writeCommands($fileName, $id, array $cmd)
     {
         if (empty($cmd)) {
             return;
@@ -20,7 +20,7 @@ class Logger
         
         $ip = self::getIP();
         $clientInfo = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'known client';
-        $command = "client info : $clientInfo.\ncommand info :";
+        $command = "id=$id, client info : $clientInfo.\ncommand info :";
         foreach ($cmd as $key => $value) {
             $command .= $key . ' => ' . $value . ', ';
         }

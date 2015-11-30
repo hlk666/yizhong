@@ -21,12 +21,7 @@ if (isset($_POST['edit'])){
     $dataHospital = array();
     if ($oldLoginName != $newLoginName) {
         $isExisted = Dbi::getDbi()->existedLoginName($newLoginName);
-        if (VALUE_DB_ERROR === $isExisted) {
-            user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
-        }
-        if ($isExisted) {
-            user_goto('该账号已被他人使用。', GOTO_FLAG_BACK);
-        }
+        check_user_existed($isExisted);
         $dataAccount['login_name'] = $newLoginName;
     }
     if (!empty($password)) {

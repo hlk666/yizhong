@@ -24,12 +24,12 @@ td {border: 1px solid #FFFFFF;height:24px;}
   <tr>
     <td>心动过速阀值(不填则用默认值)：</td>
     <td width="90"><input name="polycardia" type="text" style="width: 100px" 
-    value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['polycardia'];} else {echo 120;}?>" /></td>
+    value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['polycardia'];} else {echo PARAM_POLYCARDIA;}?>" /></td>
   </tr>
   <tr>
     <td>心动过缓阀值(不填则用默认值)：</td>
     <td width="90"><input name="bradycardia" type="text" style="width: 100px" 
-    value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['bradycardia'];} else {echo 50;}?>" /></td>
+    value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['bradycardia'];} else {echo PARAM_BRADYCARDIA;}?>" /></td>
   </tr>
   <tr>
     <td>胸导位置：</td>

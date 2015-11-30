@@ -4,6 +4,9 @@ include_head('选择医院');
 session_start();
 $hospitalId = $_GET['id'];
 $child = Dbi::getDbi()->getHospitalChild($hospitalId);
+if (VALUE_DB_ERROR === $child) {
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+}
 if (empty($child)) {
     user_goto(MESSAGE_PARAM, GOTO_FLAG_BACK);
 }

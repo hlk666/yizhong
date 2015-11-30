@@ -21,10 +21,10 @@ if (isset($_POST['search'])) {
 }
 
 $patients = Dbi::getDbi()->getPatientListDistinct($where);
-$total = count($patients);
-if (VALUE_DB_ERROR === $total) {
+if (VALUE_DB_ERROR === $patients) {
     user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
+$total = count($patients);
 if ($total == 0) {
     user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }

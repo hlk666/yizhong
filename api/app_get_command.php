@@ -2,8 +2,8 @@
 require '../config/config.php';
 require PATH_LIB . 'Invigilator.php';
 
-if (!isset($_GET['patient_id'])) {
-    echo 'param error.';
+if (!isset($_GET['patient_id']) || '' == trim($_GET['patient_id'])) {
+    echo json_encode(['code' => 1, 'message' => MESSAGE_REQUIRED . 'patient_id']);
     exit;
 }
 $patientId = $_GET['patient_id'];

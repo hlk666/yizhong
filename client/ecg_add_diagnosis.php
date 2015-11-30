@@ -10,7 +10,7 @@ $isExisted = Dbi::getDbi()->existedDoctorName($doctorName);
 if (VALUE_DB_ERROR === $isExisted) {
     user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
-if (!$isExisted) {
+if (false === $isExisted) {
     user_goto('该医生尚未在系统中注册，请通过医院管理注册该医生信息。', GOTO_FLAG_EXIT);
 }
 $ret = Dbi::getDbi()->flowGuardianAddDiagnosis($ecgId, $doctorId[0]['account_id'], $content);

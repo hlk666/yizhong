@@ -34,6 +34,17 @@ class Invigilator
         }
     }
     
+    private function validate()
+    {
+        if (null == $this->guardianId || empty($this->guardianId)) {
+            return false;
+        }
+        if (!is_numeric($this->guardianId)) {
+            return false;
+        }
+        return true;
+    }
+    
     public function clearCommand()
     {
         $this->commands = array();
@@ -53,7 +64,10 @@ class Invigilator
     
     public function create(array $data = array())
     {
-        Logger::writeCommands($this->logFile, $data);
+        Logger::writeCommands($this->logFile, $this->guardianId, $data);
+        if (false === $this->validate()) {
+            return VALUE_PARAM_ERROR;
+        }
         $commandKeys = array_intersect($this->allowCommands, array_keys($data));
         foreach ($commandKeys as $cmd) {
             $this->commands[$cmd] = $data[$cmd];
@@ -67,7 +81,10 @@ class Invigilator
             unset($this->commands['action']);
         }
         if (isset($data['action'])) {
-            $this->handleAction($data['action']);
+            $ret = $this->handleAction($data['action']);
+            if (VALUE_DB_ERROR === $ret) {
+                return VALUE_DB_ERROR;
+            }
         }
         
         $this->clearInfoNotNeed();
@@ -77,6 +94,7 @@ class Invigilator
         $handle = fopen($this->file, 'w');
         fwrite($handle, $template);
         fclose($handle);
+        return true;
     }
     
     public function delete()
@@ -113,18 +131,25 @@ class Invigilator
     private function handleAction($action)
     {
         if ($this->info['mode'] != 1 && $this->info['mode'] != 2) {
-            return;
+            return true;
         }
         if ($action == 'start' && $this->info['end_time'] == '') {
             $this->info['status'] = 1;
             $this->info['start_time'] = time();
             $this->info['end_time'] = $this->info['start_time']
                 + $this->info['all_time'] * 3600;
-            Dbi::getDbi()->flowGuardianStartGuard($this->guardianId);
+            $ret = Dbi::getDbi()->flowGuardianStartGuard($this->guardianId);
+            if (VALUE_DB_ERROR === $ret) {
+                return VALUE_DB_ERROR;
+            }
         }
         if ($action == 'end') {
-            $this->setEnd();
+            $ret = $this->setEnd();
+            if (VALUE_DB_ERROR === $ret) {
+                return VALUE_DB_ERROR;
+            }
         }
+        return true;
     }
     
     private function getTemplateInfo()
@@ -161,9 +186,13 @@ class Invigilator
     
     private function setEnd()
     {
-        Dbi::getDbi()->flowGuardianEndGuard($this->guardianId);
+        $ret = Dbi::getDbi()->flowGuardianEndGuard($this->guardianId);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
         $this->info['status'] = 2;
         $this->info['start_time'] = '';
         $this->info['end_time'] = '';
+        return true;
     }
 }

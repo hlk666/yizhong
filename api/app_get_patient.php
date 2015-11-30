@@ -1,26 +1,21 @@
 <?php
 require '../config/config.php';
-
 require PATH_LIB . 'Dbi.php';
 
 if (empty($_GET['device_id'])) {
-    echo json_encode(['code' => '1', 'message' => 'device_id is empty.']);
+    echo json_encode(['code' => '1', 'message' => MESSAGE_REQUIRED .'device_id']);
     exit;
 }
 
 $deviceId = $_GET['device_id'];
-if (empty($deviceId)) {
-    echo json_encode(['code' => 1, 'message' => 'param of "device_id" is required.']);
-    exit;
-}
 $result = array();
 $patient = Dbi::getDbi()->getPatientByDevice($deviceId);
 if (VALUE_DB_ERROR === $patient) {
     $result['code'] = 1;
-    $result['message'] = 'db error.';
+    $result['message'] = MESSAGE_DB_ERROR;
 } elseif (empty($patient)) {
     $result['code'] = 2;
-    $result['message'] = 'no patient.';
+    $result['message'] = MESSAGE_DB_NO_DATA;
 } else {
     $result['code'] = 0;
     $result['patient_id'] = $patient['guardian_id'];

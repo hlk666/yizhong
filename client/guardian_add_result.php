@@ -14,7 +14,7 @@ if (empty($ret)) {
     user_goto($message, GOTO_FLAG_EXIT);
 }
 
-if ($ret['status'] < 2) {
+if (($ret['mode'] == 1 || $ret['mode'] == 2) && $ret['status'] < 2) {
     $notice = '该用户尚未结束监护，如需下诊断总结，请先从【用户管理】中将该用户结束监护。';
     $message =  '<p style="font-size:18pt;color:red;text-align:center">' . $notice . '<p>';
     user_goto($message, GOTO_FLAG_EXIT);

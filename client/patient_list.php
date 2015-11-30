@@ -11,6 +11,9 @@ $hospitalId = $_GET["id"];
 $flag = isset($_GET['current_flag']) ? $_GET['current_flag'] : '0';
 
 $result = Dbi::getDbi()->getPatientList($hospitalId);
+if (VALUE_DB_ERROR === $result) {
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+}
 if (empty($result)) {
     user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }
@@ -69,13 +72,14 @@ foreach ($result as $index => $row) {
     }
     $age = date('Y') - $row['birth_year'];
     $sex = $row['sex'] == 1 ? '男' : '女';
+    $status = $row['status'];
     echo "<tr bgcolor=$color style='height:25px'>
     <td style='display:none;'>".$row['guardian_id']."</td>
     <td><div align='center' style='width:20px'>".$row['patient_id']."</div></td>
     <td><div align='center' style='width:68px'>".$row['patient_name']."</div></td>";
     if ($flag == 1) {
-        if ($row['status'] == 0 || $row['status'] == 1) {
-            echo "<td><div align='center' style='width:70px'><a href = './guardian_action.php?status=0&id="
+        if ($status == 0 || $status == 1) {
+            echo "<td><div align='center' style='width:70px'><a href = './guardian_action.php?status=$status&id="
                     . $row['guardian_id'] . "'>监护设置</div></td>";
         } else {
             echo "<td><div align='center' style='width:70px'>-</div></td>";

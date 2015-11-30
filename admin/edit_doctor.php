@@ -15,9 +15,7 @@ if(isset($_POST['submitType']) && $_POST['submitType'] == 'edit'){
     $data = array();
     if ($oldLoginName != $newLoginName) {
         $isExisted = Dbi::getDbi()->existedLoginName($newLoginName);
-        if ($isExisted) {
-            user_goto('该登录名已被他人使用。', GOTO_FLAG_BACK);
-        }
+        check_user_existed($isExisted);
         $data['login_name'] = $newLoginName;
     }
     

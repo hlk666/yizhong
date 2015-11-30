@@ -21,6 +21,9 @@ $sortNo = $total - $offset;
 echo $navigation;
 if ($total > $rows) {
     $ecgData = Dbi::getDbi()->getEcg($guardianId, $offset, $rows);
+    if (VALUE_DB_ERROR === $ecgData) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+    }
 }
 ?>
 <body>

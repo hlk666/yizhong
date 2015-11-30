@@ -14,9 +14,8 @@ define('SUFFIX_REAL_TIME_FILE', '_real_time.bin');
 
 define('URL_ROOT', 'http://101.200.174.235/');
 
-define('VALUE_COMMON_SUCCESS', 0);
-define('VALUE_COMMON_ERROR', -1);
 define('VALUE_DB_ERROR', -1);
+define('VALUE_PARAM_ERROR', -2);
 
 define('GOTO_FLAG_EXIT', 1);
 define('GOTO_FLAG_BACK', 2);
@@ -28,5 +27,16 @@ define('MESSAGE_DB_NO_DATA', '当前没有数据。');
 define('MESSAGE_PARAM', '参数错误，请重试或联系管理员。');
 define('MESSAGE_OTHER_ERROR', '系统内部错误。');
 define('MESSAGE_NOT_EDIT', '没有修改任何信息，请不要提交。');
+define('MESSAGE_REQUIRED', '请提供参数： ');
+define('MESSAGE_FORMAT', '该参数格式错误： ');
+
+define('PARAM_POLYCARDIA', 120);
+define('PARAM_BRADYCARDIA', 50);
+define('PARAM_LEAD', '1');
+define('PARAM_MODE3_RECORD_TIME', '20');
+define('PARAM_MODE2_RECORD_TIME', '20');
+define('PARAM_REGULAR_TIME', '0');
+define('PARAM_PREMATURE_BEAT', '8');
+define('PARAM_ARRHYTHMIA', '1');
 
 

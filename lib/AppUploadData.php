@@ -49,8 +49,8 @@ class AppUploadData
             
             $urlFile = 'ECG/' . $patientId . '/' . date('YmdHis') . '.bin';
             $retDB = Dbi::getDbi()->flowGuardianAddEcg($patientId, $alert, $urlFile);
-            if (VALUE_DB_ERROR == $retDB) {
-                $this->setError(7, 'Server DB error.');
+            if (VALUE_DB_ERROR === $retDB) {
+                $this->setError(5, 'Server DB error.');
                 return json_encode($this->error);
             }
         }
@@ -60,17 +60,17 @@ class AppUploadData
     private function validate($patientId, $mode, $data)
     {
         if (!isset($patientId) || trim($patientId) == '') {
-            $this->setError(3, 'Patient id is required.');
+            $this->setError(1, 'Patient id is required.');
             return false;
         }
         
         if (!isset($mode) || trim($mode) == '' || !in_array($mode, [1, 2, 3])) {
-            $this->setError(4, 'Mode is empty or wrong.');
+            $this->setError(2, 'Mode is empty or wrong.');
             return false;
         }
         
         if (!isset($data) || trim($data) == '') {
-            $this->setError(5, 'Detail data error.');
+            $this->setError(3, 'Detail data error.');
             return false;
         }
         
@@ -91,6 +91,6 @@ class AppUploadData
     
     private function setIOError()
     {
-        $this->setError(6, 'Server IO error.');
+        $this->setError(4, 'Server IO error.');
     }
 }

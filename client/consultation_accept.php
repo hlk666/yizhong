@@ -14,6 +14,9 @@ if (VALUE_DB_ERROR === $ret) {
     user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
 }
 $patientName = Dbi::getDbi()->getPatientNameByGuardian($guardianId);
-echo $patientName . '已添加到监护列表，稍后请从监护列表查看';
+if (VALUE_DB_ERROR === $patientName) {
+    $patientName = '';
+}
+echo $patientName . '已添加到监护列表，稍后请从监护列表查看。';
 ?>
 </html>

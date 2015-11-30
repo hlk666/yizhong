@@ -30,7 +30,10 @@ if (isset($_POST['edit']) && $_POST['edit']){
     }
     else {
         $newResult = $_POST['result'];
-        Dbi::getDbi()->flowGuardianEditResult($guardianId, $newResult);
+        $ret = Dbi::getDbi()->flowGuardianAddResult($guardianId, $newResult);
+        if (VALUE_DB_ERROR == $ret) {
+            user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+        }
         user_goto(null, GOTO_FLAG_URL, 'guardian_result.php?id=' . $guardianId);
     }
 }

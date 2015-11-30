@@ -41,23 +41,29 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
     $hours = $_POST['hours'];
     
     //common param
-    $polycardia = $_SESSION['param']['polycardia'];
-    $bradycardia = $_SESSION['param']['bradycardia'];
-    $lead = $_SESSION['param']['lead'];
+    $polycardia = isset($_SESSION['param']['polycardia']) ? $_SESSION['param']['polycardia'] : PARAM_POLYCARDIA;
+    $bradycardia = isset($_SESSION['param']['bradycardia']) ? $_SESSION['param']['bradycardia'] : PARAM_BRADYCARDIA;
+    $lead = isset($_SESSION['param']['lead']) ? $_SESSION['param']['lead'] : PARAM_LEAD;
     //special param
-    $mode3_record_time = $_SESSION['param']['mode3_record_time'];
-    $mode2_record_time = $_SESSION['param']['mode2_record_time'];
-    $regular_time = $_SESSION['param']['regular_time'];
-    $premature_beat = $_SESSION['param']['premature_beat'];
-    $arrhythmia = $_SESSION['param']['arrhythmia'];
+    $mode3_record_time = isset($_SESSION['param']['mode3_record_time']) ? $_SESSION['param']['mode3_record_time'] : PARAM_MODE3_RECORD_TIME;
+    $mode2_record_time = isset($_SESSION['param']['mode2_record_time']) ? $_SESSION['param']['mode2_record_time'] : PARAM_MODE2_RECORD_TIME;
+    $regular_time = isset($_SESSION['param']['regular_time']) ? $_SESSION['param']['regular_time'] : PARAM_REGULAR_TIME;
+    $premature_beat = isset($_SESSION['param']['premature_beat']) ? $_SESSION['param']['premature_beat'] : PARAM_PREMATURE_BEAT;
+    $arrhythmia = isset($_SESSION['param']['arrhythmia']) ? $_SESSION['param']['arrhythmia'] : PARAM_ARRHYTHMIA;
     
     $guardian = Dbi::getDbi()->getGuardianByDevice($device);
+    if (VALUE_DB_ERROR === $guardian) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_URL, 'add_user.php');
+    }
     if (!empty($guardian)) {
-        $ret = Dbi::getDbi()->getPatient($guardian['patient_id']);
-        if (empty($ret)) {
+        $patient = Dbi::getDbi()->getPatient($guardian['patient_id']);
+        if (VALUE_DB_ERROR === $patient) {
+            user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_URL, 'add_user.php');
+        }
+        if (empty($patient)) {
             $otherPatient = '其他用户(id:' . $guardian['patient_id'] . ')';
         } else {
-            $otherPatient = $ret['patient_name'];
+            $otherPatient = $patient['patient_name'];
         }
         if (0 == $guardian['status']) {
             user_goto($otherPatient . '已注册该设备，请待该用户监护结束后使用此设备。', GOTO_FLAG_URL, 'add_user.php');
@@ -94,10 +100,20 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
         $param['mode3_lead'] = $lead;
         $param['mode3_record_time'] = $mode3_record_time;
     }
-    $invigilator->create($param);
+    $ret = $invigilator->create($param);
+    if (VALUE_PARAM_ERROR === $ret) {
+        user_goto(MESSAGE_PARAM, GOTO_FLAG_URL, 'add_user.php');
+    }
+    if (VALUE_DB_ERROR === $ret) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_URL, 'add_user.php');
+    }
     unset($_SESSION['guardian']);
     unset($_SESSION['param']);
     user_goto(MESSAGE_SUCCESS, GOTO_FLAG_URL, 'patients.php?id=' . $registHospital);
+}
+$hospitals = Dbi::getDbi()->getHospitalParent($registHospital);
+if (VALUE_DB_ERROR === $hospitals) {
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_URL, 'add_user.php');
 }
 ?>
 <form action="" method="post" id="formAddUser" onsubmit="return false;">
@@ -110,7 +126,7 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
     <td width="83">
     <select name="sex" style="width: 80px" id="sex">
       <option value="1" <?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['sex'] == '1') echo 'selected="selected"'?>>男 </option>
-      <option value="2"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['sex'] == '2') echo 'selected="selected"'?>>女 </option>
+      <option value="2" <?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['sex'] == '2') echo 'selected="selected"'?>>女 </option>
      </select></td>
   </tr>
   <tr>
@@ -131,8 +147,7 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
     <td>监护医院：<span class="STYLE2">*</span></td>
     <td colspan="3"><select name="guard_hospital" style="width: 252px" id="guard_hospital">
     <option value="<?php echo $registHospital;?>"<?php if(isset($_SESSION['guardian']) && $_SESSION['guardian']['guard_hospital'] == $registHospital) echo 'selected="selected"'?>>本院</option>
-    <?php 
-    $hospitals = Dbi::getDbi()->getHospitalParent($registHospital);
+    <?php
     foreach ($hospitals as $value) {
         echo '<option value="' . $value['hospital_id'] . '" ';
         if (isset($_SESSION['guardian']) && $_SESSION['guardian']['guard_hospital'] == $value['hospital_id']) {

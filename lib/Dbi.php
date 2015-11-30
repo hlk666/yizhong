@@ -213,10 +213,9 @@ class Dbi
     }
     public function getDiagnosisByGuardian($guardianId)
     {
-        $sql = 'select d.ecg_id, a.real_name as doctor_name, e.data_path, d.content,
+        $sql = 'select e.ecg_id, a.real_name as doctor_name, e.data_path, d.content,
                 e.create_time as alert_time, d.create_time as diagnose_time
-                from diagnosis as d
-                inner join ecg as e on d.ecg_id = e.ecg_id
+                from ecg as e left join diagnosis as d on d.ecg_id = e.ecg_id
                 left join account as a on d.doctor_id = a.account_id
                 where e.guardian_id = :guardian_id order by d.diagnosis_id desc';
         $param = [':guardian_id' => $guardianId];
@@ -252,13 +251,14 @@ class Dbi
     public function getGuardianByDevice($deviceId)
     {
         $sql = 'select guardian_id, patient_id, status from guardian
-                where device_id = :device_id and status < 2 order by guardian_id desc limit 1';
+                where device_id = :device_id and mode in (1,2) and status < 2 
+                order by guardian_id desc limit 1';
         $param = [':device_id' => $deviceId];
         return $this->getDataRow($sql, $param);
     }
     public function getGuardianById($guardianId)
     {
-        $sql = 'select status, guardian_result from guardian where guardian_id = :guardian_id limit 1';
+        $sql = 'select status, mode, guardian_result from guardian where guardian_id = :guardian_id limit 1';
         $param = [':guardian_id' => $guardianId];
         return $this->getDataRow($sql, $param);
     }
@@ -269,7 +269,8 @@ class Dbi
                 g.blood_pressure, g.tentative_diagnose, g.medical_history, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id
-                where guard_hospital_id = :hospital_id and g.status = 1
+                where guard_hospital_id = :hospital_id 
+                and ((g.status = 1 and g.mode in (1,2)) or (g.status = 0 and g.mode = 3))
                 order by g.guardian_id desc';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
@@ -522,7 +523,7 @@ class Dbi
                 where patient_name = :name and birth_year = :birth and tel = :tel limit 1';
         $param = [':name' => $patientName, ':birth' => $birthYear, ':tel' => $tel];
         $patientId = $this->getDataString($sql, $param);
-        if (VALUE_DB_ERROR == $patientId) {
+        if (VALUE_DB_ERROR === $patientId) {
             return VALUE_DB_ERROR;
         }
         //use transaction.
@@ -534,7 +535,7 @@ class Dbi
             $param = [':name' => $patientName, ':sex' => $sex, ':birth' => $birthYear,
                             ':tel' => $tel, ':address' => $address, ':creator' => $creator];
             $patientId = $this->insertData($sql, $param);
-            if (VALUE_DB_ERROR == $patientId) {
+            if (VALUE_DB_ERROR === $patientId) {
                 $this->pdo->rollBack();
                 return VALUE_DB_ERROR;
             }
@@ -554,7 +555,7 @@ class Dbi
                         ':ten_dia' => $tentativeDiagnose, ':medical_history' => $medicalHistory,
                         ':doctor_name' => $registDoctorName];
         $guardianId = $this->insertData($sql, $param);
-        if (VALUE_DB_ERROR == $guardianId) {
+        if (VALUE_DB_ERROR === $guardianId) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
@@ -572,16 +573,7 @@ class Dbi
         return $this->deleteData($sql, $param);
     }
     /**
-     * step8 of guardian: edit result(sometimes).
-     */
-    public function flowGuardianEditResult($guardianId, $newResult)
-    {
-        $sql = 'update guardian set guardian_result = :result where guardian_id = :guardian_id';
-        $param = [':result' => $newResult, ':guardian_id' => $guardianId];
-        return $this->updateData($sql, $param);
-    }
-    /**
-     * step9 of guardian: end all of the guardian.
+     * step8 of guardian: end all of the guardian.
      */
     public function flowGuardianEndAll($guardianId)
     {

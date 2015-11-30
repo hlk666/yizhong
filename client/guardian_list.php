@@ -7,10 +7,10 @@ checkDoctorLogin();
 
 $hospitalId = $_SESSION["hospital"];
 $noticeConsultation = '';
-if (true == Dbi::getDbi()->existedRequestConsultation($hospitalId)) {
+if (true === Dbi::getDbi()->existedRequestConsultation($hospitalId)) {
     $noticeConsultation = '有新的会诊请求，请及时查看。<br />';
 }
-if (true == Dbi::getDbi()->existedResponseConsultation($hospitalId)) {
+if (true === Dbi::getDbi()->existedResponseConsultation($hospitalId)) {
     $noticeConsultation .= '会诊请求已回复，请查看。<br />';
 }
 if ($noticeConsultation != '') {
@@ -56,7 +56,7 @@ foreach ($guardians as $index => $guardian) {
             . $guardian['patient_name'] . ']<p>已监护结束，请及时为其诊断并作出病情总结。<br />';
     }
     
-    if (true == Dbi::getDbi()->existedEcgNotRead($guardian['guardian_id'])) {
+    if (true === Dbi::getDbi()->existedEcgNotRead($guardian['guardian_id'])) {
         $alarmFlag = true;
         $color = '#FF0000';
     }

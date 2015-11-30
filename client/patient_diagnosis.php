@@ -12,6 +12,9 @@ $guardianId = $_GET["id"];
 </tr>
 <?php
 $result = Dbi::getDbi()->getDiagnosisByGuardian($guardianId);
+if (VALUE_DB_ERROR === $result) {
+    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+}
 foreach ($result as $index => $row) {
     if ($index % 2 == 0) {
         $color='#EBF5FF';

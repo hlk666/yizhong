@@ -36,6 +36,9 @@ $navigation = $ret['navigation'];
 echo $navigation;
 if ($total > $rows) {
     $doctors = Dbi::getDbi()->getDoctorList($hospitalId, $offset, $rows);
+    if (VALUE_DB_ERROR === $doctors) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+    }
 }
 
 echo "<tr bgcolor=#555555><td align='center'>用户名</td><td align='center'>姓名</td></tr>";

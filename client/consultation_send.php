@@ -15,9 +15,9 @@ if (isset($_POST['apply']) && $_POST['apply']){
     $responseHospital = $_POST['response_hospital'];
     $ret = Dbi::getDbi()->flowConsultationSend($hospitalId, $responseHospital, $ecgId, $message);
     if (VALUE_DB_ERROR === $ret) {
-        user_back_after_delay('会诊请求发送失败，请重试或联系管理员。', 1500);
+        user_back_after_delay(MESSAGE_DB_ERROR, 1500);
     } else {
-        user_back_after_delay('会诊请求发送成功。', 1500);
+        user_back_after_delay(MESSAGE_SUCCESS, 1500);
     }
 }
 
