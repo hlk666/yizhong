@@ -154,10 +154,6 @@ class Dbi
     
     //************************* existed methods(public) *************************
     //********************************** start **********************************
-    public function existedDoctorName($doctorName)
-    {
-        return $this->existData('account', 'real_name = "' . $doctorName . '"');
-    }
     public function existedEcgNotRead($guardianId)
     {
         return $this->existData('ecg', ' read_status = 0 and guardian_id = ' . $guardianId);
@@ -188,7 +184,7 @@ class Dbi
     public function getConsultationRequest($hospitalId)
     {
         $sql = 'select consultation_id, c.ecg_id, request_message, request_time, e.guardian_id, h.hospital_name
-                from consultation as c inner join ecg as e on c.ecg_id = e.ecg_id
+                from consultation as c left join ecg as e on c.ecg_id = e.ecg_id
                 left join hospital as h on c.request_hospital_id = h.hospital_id
                 where response_hospital_id = :hospital_id and status = 1';
         $param = ['hospital_id' => $hospitalId];
@@ -197,7 +193,7 @@ class Dbi
     public function getConsultationResponse($hospitalId)
     {
         $sql = 'select consultation_id, c.ecg_id, response_message, response_time, e.guardian_id, e.data_path, h.hospital_name
-                from consultation as c inner join ecg as e on c.ecg_id = e.ecg_id
+                from consultation as c left join ecg as e on c.ecg_id = e.ecg_id
                 left join hospital as h on c.response_hospital_id = h.hospital_id
                 where request_hospital_id = :hospital_id and status = 2';
         $param = ['hospital_id' => $hospitalId];
@@ -213,11 +209,11 @@ class Dbi
     }
     public function getDiagnosisByGuardian($guardianId)
     {
-        $sql = 'select e.ecg_id, a.real_name as doctor_name, e.data_path, d.content,
-                e.create_time as alert_time, d.create_time as diagnose_time
-                from ecg as e left join diagnosis as d on d.ecg_id = e.ecg_id
+        $sql = 'select d.mark, d.diagnosis_id, e.ecg_id, a.real_name as doctor_name, e.data_path, 
+                d.content, e.create_time as alert_time, d.create_time as diagnose_time
+                from diagnosis as d left join ecg as e on d.ecg_id = e.ecg_id
                 left join account as a on d.doctor_id = a.account_id
-                where e.guardian_id = :guardian_id order by d.diagnosis_id desc';
+                where e.guardian_id = :guardian_id order by d.mark desc, d.diagnosis_id desc';
         $param = [':guardian_id' => $guardianId];
         return $this->getDataAll($sql, $param);
     }
@@ -227,6 +223,12 @@ class Dbi
                 from account where account_id = :acount_id limit 1';
         $param = [':acount_id' => $doctorId];
         return $this->getDataRow($sql, $param);
+    }
+    public function getDoctorByName($doctorName)
+    {
+        $sql = 'select account_id as doctor_id from account where real_name = :real_name limit 1';
+        $param = [':real_name' => $doctorName];
+        return $this->getDataString($sql, $param);
     }
     public function getDoctorList($hospitalId, $offset = 0, $rows = null)
     {
@@ -240,8 +242,8 @@ class Dbi
     }
     public function getEcg($guardianId, $offset = 0, $rows = null)
     {
-        $sql = 'select ecg_id, create_time, read_status, data_path from ecg
-                where guardian_id = :guardian order by ecg_id desc';
+        $sql = 'select ecg_id, mark, create_time, read_status, data_path from ecg
+                where guardian_id = :guardian order by mark desc, ecg_id desc';
         if ($rows != null) {
             $sql .= " limit $offset, $rows";
         }
@@ -351,7 +353,7 @@ class Dbi
     public function getPatientsForAnalytics($hospitalId, $reported = null, $startTime = null, $endTime = null)
     {
         $sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported
-                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                  where regist_hospital_id = :hospital_id';
         
         $param = array(':hospital_id' => $hospitalId);
@@ -606,6 +608,18 @@ class Dbi
     {
         $sql = 'update guardian set status = 1, start_time = now() where guardian_id = :guardian_id';
         $param = [':guardian_id' => $guardianId];
+        return $this->updateData($sql, $param);
+    }
+    public function markDiagnosis($diagnosisId, $mark)
+    {
+        $sql = 'update diagnosis set mark = :mark where diagnosis_id = :diagnosis_id';
+        $param = [':diagnosis_id' => $diagnosisId, ':mark' => $mark];
+        return $this->updateData($sql, $param);
+    }
+    public function markEcg($ecgId, $mark)
+    {
+        $sql = 'update ecg set mark = :mark where ecg_id = :ecg_id';
+        $param = [':ecg_id' => $ecgId, ':mark' => $mark];
         return $this->updateData($sql, $param);
     }
     public function uploadReport($guardianId, $file)

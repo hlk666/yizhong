@@ -8,7 +8,7 @@ if (!isset($_GET["id"])) {
     user_goto(MESSAGE_PARAM, GOTO_FLAG_EXIT);
 }
 $hospitalId = $_GET["id"];
-$flag = isset($_GET['current_flag']) ? $_GET['current_flag'] : '0';
+$flag = isset($_GET['current_flag']) ? $_GET['current_flag'] : '1';
 
 $result = Dbi::getDbi()->getPatientList($hospitalId);
 if (VALUE_DB_ERROR === $result) {

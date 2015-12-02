@@ -6,14 +6,15 @@ $guardianId = $_GET["id"];
 $ecgId = $_GET["eid"];
 $content = $_GET["rx"];
 $doctorName = $_GET["docNo"];
-$isExisted = Dbi::getDbi()->existedDoctorName($doctorName);
-if (VALUE_DB_ERROR === $isExisted) {
+
+$doctorId = Dbi::getDbi()->getDoctorByName($doctorName);
+if (VALUE_DB_ERROR === $doctorId) {
     user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
-if (false === $isExisted) {
+if (empty($doctorId)) {
     user_goto('该医生尚未在系统中注册，请通过医院管理注册该医生信息。', GOTO_FLAG_EXIT);
 }
-$ret = Dbi::getDbi()->flowGuardianAddDiagnosis($ecgId, $doctorId[0]['account_id'], $content);
+$ret = Dbi::getDbi()->flowGuardianAddDiagnosis($ecgId, $doctorId, $content);
 if (VALUE_DB_ERROR === $ret) {
     user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
 }
