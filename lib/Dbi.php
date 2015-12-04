@@ -324,6 +324,26 @@ class Dbi
         $param = [':hospital' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
+    public function getPatientListCondition($flag, $hospitalId, $name)
+    {
+        if ('1' == $flag) {
+            $where = ' where regist_hospital_id = ' . $hospitalId;
+        } else {
+            $childHospital = $this->getHospitalChild($hospitalId);
+            $where = ' where regist_hospital_id in (';
+            foreach ($childHospital as $hospital) {
+                $where .= $hospital['hospital_id'] . ',';
+            }
+            $where = substr($where, 0, -1);
+            $where .= ') ';
+        }
+        $sql = "select g.patient_id, g.guardian_id, g.status, g.device_id,
+                p.patient_name, p.sex, p.birth_year, p.tel,
+                g.start_time, g.end_time, g.regist_doctor_name, g.sickroom
+                from guardian as g left join patient as p on g.patient_id = p.patient_id 
+                $where and p.patient_name = '$name'";
+        return $this->getDataAll($sql);
+    }
     public function getPatientListDistinct($where, $offset = 0, $rows = null)
     {
         $sql = "select distinct g.patient_id, p.patient_name, p.sex, p.birth_year, p.tel

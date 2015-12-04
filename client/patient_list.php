@@ -4,31 +4,40 @@ include_head('用户列表');
 session_start();
 checkDoctorLogin();
 
-if (!isset($_GET["id"])) {
+if (!isset($_GET['id']) && !isset($_GET['name'])) {
     user_goto(MESSAGE_PARAM, GOTO_FLAG_EXIT);
 }
-$hospitalId = $_GET["id"];
 $flag = isset($_GET['current_flag']) ? $_GET['current_flag'] : '1';
-
-$result = Dbi::getDbi()->getPatientList($hospitalId);
-if (VALUE_DB_ERROR === $result) {
-    user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
-}
-if (empty($result)) {
-    user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
-}
-$total = count($result);
-$rows = 10;
-$page = isset($_GET['page']) ? $_GET['page'] : null;
-$ret = getPaging($total, $rows, $_SERVER['REQUEST_URI'], $page);
-$offset = $ret['offset'];
-$navigation = $ret['navigation'];
-
-if ($total > $rows) {
-    $result = Dbi::getDbi()->getPatientList($hospitalId, $offset, $rows);
+if (isset($_GET['id'])) {
+    $hospitalId = $_GET['id'];
+    $result = Dbi::getDbi()->getPatientList($hospitalId);
     if (VALUE_DB_ERROR === $result) {
         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
     }
+    if (empty($result)) {
+        user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
+    }
+    $total = count($result);
+    $rows = 10;
+    $page = isset($_GET['page']) ? $_GET['page'] : null;
+    $ret = getPaging($total, $rows, $_SERVER['REQUEST_URI'], $page);
+    $offset = $ret['offset'];
+    $navigation = $ret['navigation'];
+    
+    if ($total > $rows) {
+        $result = Dbi::getDbi()->getPatientList($hospitalId, $offset, $rows);
+        if (VALUE_DB_ERROR === $result) {
+            user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+        }
+    }
+} else {
+    $hospitalId = $_SESSION['hospital'];
+    $name = $_GET['name'];
+    $result = Dbi::getDbi()->getPatientListCondition($flag, $hospitalId, $name);
+    if (VALUE_DB_ERROR === $result) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+    }
+    $navigation = '';
 }
 ?>
 <style>
