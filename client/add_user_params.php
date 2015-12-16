@@ -34,28 +34,28 @@ td {border: 1px solid #FFFFFF;height:24px;}
   <tr>
     <td>胸导位置：</td>
     <td><select name="lead" style="width: 105px" id="lead">
-      <option value="1" 
+      <option value="V1" 
       <?php 
-      if(isset($_SESSION['param']) && $_SESSION['param']['lead'] != '1') {
+      if(isset($_SESSION['param']) && $_SESSION['param']['lead'] != 'V1') {
           echo '';
       } else {
           echo 'selected="selected"';
       }?>
       >V1</option>
-      <option value="2" 
-      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == '2') echo 'selected="selected"'?>
+      <option value="V2" 
+      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == 'V2') echo 'selected="selected"'?>
       >V2</option>
-      <option value="3" 
-      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == '3') echo 'selected="selected"'?>
+      <option value="V3" 
+      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == 'V3') echo 'selected="selected"'?>
       >V3</option>
-      <option value="4" 
-      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == '4') echo 'selected="selected"'?>
+      <option value="V4" 
+      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == 'V4') echo 'selected="selected"'?>
       >V4</option>
-      <option value="5" 
-      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == '5') echo 'selected="selected"'?>
+      <option value="V5" 
+      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == 'V5') echo 'selected="selected"'?>
       >V5</option>
-      <option value="6" 
-      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == '6') echo 'selected="selected"'?>
+      <option value="V6" 
+      <?php if(isset($_SESSION['param']) && $_SESSION['param']['lead'] == 'V6') echo 'selected="selected"'?>
       >V6</option>
     </select></td>
   </tr>
@@ -64,7 +64,7 @@ td {border: 1px solid #FFFFFF;height:24px;}
   </tr>
   <tr>
     <td>单次心电录制时长：</td>
-    <td width="90"><select name="mode3_record_time" style="width: 105px" id="lead">
+    <td width="90"><select name="mode3_record_time" style="width: 105px">
       <option value="10" 
       <?php if(isset($_SESSION['param']) && $_SESSION['param']['mode3_record_time'] == '10') echo 'selected="selected"'?>
       >10秒</option>
@@ -83,7 +83,7 @@ td {border: 1px solid #FFFFFF;height:24px;}
   </tr>
   <tr>
     <td>报警心电录制时长：</td>
-    <td width="90"><select name="mode2_record_time" style="width: 105px" id="lead">
+    <td width="90"><select name="mode2_record_time" style="width: 105px">
       <option value="10" 
       <?php if(isset($_SESSION['param']) && $_SESSION['param']['mode2_record_time'] == '10') echo 'selected="selected"'?>
       >10秒</option>
@@ -99,7 +99,7 @@ td {border: 1px solid #FFFFFF;height:24px;}
   </tr>
   <tr>
     <td>定时监护(按时发送一次<span style="color:#FF0000;">正常</span>心电数据)：</td>
-    <td width="90"><select name="regular_time" style="width: 105px" id="lead">
+    <td width="90"><select name="regular_time" style="width: 105px">
       <option value="0" 
       <?php 
       if(isset($_SESSION['param']) && $_SESSION['param']['regular_time'] != '0') {
@@ -124,7 +124,7 @@ td {border: 1px solid #FFFFFF;height:24px;}
   </tr>
   <tr>
     <td>早搏(个/分钟，超过该值则报警)：</td>
-    <td width="90"><select name="premature_beat" style="width: 105px" id="lead">
+    <td width="90"><select name="premature_beat" style="width: 105px">
       <option value="1" 
       <?php if(isset($_SESSION['param']) && $_SESSION['param']['premature_beat'] == '1') echo 'selected="selected"'?>
       >1个/分钟</option>
@@ -163,18 +163,54 @@ td {border: 1px solid #FFFFFF;height:24px;}
     </select></td>
   </tr>
   <tr>
-    <td>其他异常监护(关闭则只监护心率)：</td>
-    <td width="90"><select name="arrhythmia" style="width: 100px" id="lead">
-      <option value="1" 
+    <td>联律报警：</td>
+    <td width="90"><select name="combeatrhy" style="width: 100px">
+      <option value="on" 
       <?php 
-      if(isset($_SESSION['param']) && $_SESSION['param']['arrhythmia'] != '1') {
+      if(isset($_SESSION['param']) && $_SESSION['param']['combeatrhy'] != 'on') {
           echo '';
       } else {
           echo 'selected="selected"';
       }?>
       >打开</option>
-      <option value="2" 
-      <?php if(isset($_SESSION['param']) && $_SESSION['param']['arrhythmia'] == '2') echo 'selected="selected"'?>
+      <option value="off" 
+      <?php if(isset($_SESSION['param']) && $_SESSION['param']['combeatrhy'] == 'off') echo 'selected="selected"'?>
+      >关闭</option>
+    </select></td>
+  </tr>
+  <tr>
+    <td>心率过缓极低值(数字)：</td>
+    <td width="90"><input name="exminrate" type="text" style="width:100px" 
+    value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['exminrate'];} else {echo PARAM_EXMINRATE;}?>" /></td>
+  </tr>
+  <tr>
+    <td>停搏报警阀值(秒)：</td>
+    <td width="90"><input name="stopbeat" type="text" style="width:100px" 
+    value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['stopbeat'];} else {echo PARAM_STOPBEAT;}?>" /></td>
+  </tr>
+  <tr>
+    <td>ST抬高报警阀值(数字)：</td>
+    <td width="90"><input name="sthigh" type="text" style="width: 100px" 
+    value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['sthigh'];} else {echo PARAM_STHIGH;}?>" /></td>
+  </tr>
+  <tr>
+    <td>ST压低报警阀值(数字)：</td>
+    <td width="90"><input name="stlow" type="text" style="width: 100px" 
+    value="<?php if(isset($_SESSION['param'])) {echo $_SESSION['param']['stlow'];} else {echo PARAM_STLOW;}?>" /></td>
+  </tr>
+  <tr>
+    <td>T波报警：</td>
+    <td width="90"><select name="twave" style="width: 100px">
+      <option value="on" 
+      <?php 
+      if(isset($_SESSION['param']) && $_SESSION['param']['twave'] != 'on') {
+          echo '';
+      } else {
+          echo 'selected="selected"';
+      }?>
+      >打开</option>
+      <option value="off" 
+      <?php if(isset($_SESSION['param']) && $_SESSION['param']['twave'] == 'off') echo 'selected="selected"'?>
       >关闭</option>
     </select></td>
   </tr>

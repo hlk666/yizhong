@@ -3,7 +3,6 @@ require '../common.php';
 include_head('报警心电');
 
 $guardianId = $_GET["id"];
-
 $ecgData = Dbi::getDbi()->getEcg($guardianId);
 if (VALUE_DB_ERROR === $ecgData) {
     user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
@@ -12,13 +11,12 @@ if (empty($ecgData)) {
     user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }
 $total = count($ecgData);
-$rows = 8;
+$rows = get_rows_by_resolution($_GET['height'], 2);
 $page = isset($_GET['page']) ? $_GET['page'] : null;
 $ret = getPaging($total, $rows, $_SERVER['REQUEST_URI'], $page);
 $offset = $ret['offset'];
 $navigation = $ret['navigation'];
 $sortNo = $total - $offset;
-echo $navigation;
 if ($total > $rows) {
     $ecgData = Dbi::getDbi()->getEcg($guardianId, $offset, $rows);
     if (VALUE_DB_ERROR === $ecgData) {
@@ -26,9 +24,10 @@ if ($total > $rows) {
     }
 }
 ?>
-<body>
+<body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
+<div style="height:20px;margin-top:1px;"><?php echo $navigation; ?></div>
 <table style="width:100%;font-size:14px;border:0;background-color:#A3C7DF">
-  <tr bgcolor='#ECEADB' style='height:30px' align='center'>
+  <tr bgcolor='#ECEADB' style='height:22px' align='center'>
   <th style='display:none;'>编号</th>
   <th width='30%'>做标记(置顶)</th>
   <th width='20%'>序号</th>
@@ -47,7 +46,7 @@ foreach ($ecgData as $index => $row) {
     }
     $ecgId = $row['ecg_id'];
     $checked = $row['mark'] == 1 ? "checked='checked'" : '';
-    echo"<tr bgcolor=$color align='center' style='height:25px'>
+    echo"<tr bgcolor=$color align='center' style='height:21px'>
         <td style='display:none;'>$ecgId</td>
         <td><input type='checkbox' name='chk$ecgId' onclick='mark(this, $ecgId)' $checked /></td>
         <td>" . $sortNo-- . "</td>

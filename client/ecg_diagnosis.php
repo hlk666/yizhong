@@ -14,9 +14,9 @@ if (empty($diagnosis)) {
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
 <table style="border:0;font-size:14px;background-color:#C1BDBE;">
   <tr bgcolor='#ECEADB' style='height:30px' align='center'>
-    <td width='40%'>诊断时间</td>
-    <td width='*'>诊断结论</td>
-    <td width='15%'>诊断医生</td>
+    <td width='70px'><div style='width:70px;'>诊断时间</div></td>
+    <td width='60px'><div style='width:60px;'>诊断医生</div></td>
+    <td>诊断结论</td>
   </tr>
 <?php
 foreach ($diagnosis as $index => $row) {
@@ -27,8 +27,8 @@ foreach ($diagnosis as $index => $row) {
     }
     echo"<tr bgcolor=$color align='center' style='height:25px'>
     <td>" . $row['create_time'] . "</td>
-    <td>" . $row['content'] . "</td>
     <td>" . $row['doctor_name'] . "</td>
+    <td>" . $row['content'] . "</td>
     </tr>";
 }
 ?>

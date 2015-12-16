@@ -15,14 +15,10 @@ $oldResult = empty($ret) ? '' : $ret['guardian_result'];
        border: 1px solid #808080;
        background-color: #B0E2FF;
 }
-.STYLE4 {
-    font-family: "宋体";
-    font-weight: bold;
-}
 td{ border:solid 1px #0000EE}
 -->
 </style>
-<body>
+<body style="font-size:14px;margin:0px;padding:0px;">
 <?php
 if (isset($_POST['edit']) && $_POST['edit']){
     if (trim($_POST['result']) == '') {
@@ -39,19 +35,19 @@ if (isset($_POST['edit']) && $_POST['edit']){
 }
 ?>
 <form name="" action="" method="post">
-<table style="width:100%;height:100%;align:center;">
-  <tr bgcolor="#4F94CD" height="10%" >
-    <td colspan="2"><span class="STYLE4">&nbsp;&nbsp;修改病情总结</span></td>
+<table style="width:100%;height:100%;">
+  <tr bgcolor="#4F94CD" height="20px;" >
+    <td colspan="2"><span style="font-weight: bold;">修改病情总结</span></td>
   </tr>
-  <tr height="80%" class="STYLE3">
-    <td colspan="2" align="center">
+  <tr class="STYLE3">
+    <td colspan="2" align="center" height="75px">
     <textarea name="result" id="result" cols="40" rows="5" ><?php echo $oldResult;?></textarea>
     </td>
   </tr>
-  <tr class="STYLE3" height="10%">
-    <td  colspan="2"  align="center" >
-      <input type="submit" name="edit" value="提  交"  style="width:100px"/>&nbsp;&nbsp;
-      <input type="reset" name="clear" value="重  置"  style="width:100px"/> </td>
+  <tr class="STYLE3" height="20px;">
+    <td colspan="2" align="center" >
+      <input type="submit" name="edit" value="提  交"  style="width:100px"/>
+      <input type="reset" name="clear" value="重  置"  style="width:100px;margin-left:20px;"/></td>
   </tr>
 </table>
 </form>

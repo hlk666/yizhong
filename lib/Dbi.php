@@ -199,6 +199,12 @@ class Dbi
         $param = ['hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
+    public function getDeviceId($guardianId)
+    {
+        $sql = 'select device_id from guardian where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataString($sql, $param);
+    }
     public function getDiagnosisByEcg($ecgId)
     {
         $sql = 'select d.ecg_id, a.real_name as doctor_name, d.content, d.create_time
@@ -264,7 +270,7 @@ class Dbi
         $param = [':guardian_id' => $guardianId];
         return $this->getDataRow($sql, $param);
     }
-    public function getGuardianList($hospitalId)
+    public function getGuardianList($hospitalId, $offset = 0, $rows = null)
     {
         $sql = 'select g.guardian_id, g.patient_id, g.status, g.start_time, g.end_time,
                 p.patient_name, h.hospital_name, p.sex, p.birth_year, p.tel,
@@ -272,8 +278,11 @@ class Dbi
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id
                 where guard_hospital_id = :hospital_id 
-                and ((g.status = 1 and g.mode in (1,2)) or (g.status = 0 and g.mode = 3))
+                and ((g.status < 3 and g.mode in (1,2)) or (g.status = 0 and g.mode = 3))
                 order by g.guardian_id desc';
+        if ($rows != null) {
+            $sql .= " limit $offset, $rows";
+        }
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }

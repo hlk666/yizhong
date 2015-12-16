@@ -33,6 +33,56 @@ function include_js_file()
     echo '<script type="text/javascript" src="' . URL_ROOT . 'js/common.js"></script>';
 }
 
+function get_rows_by_resolution($height, $webView, $noticeRow = 0)
+{
+    if (1 == $webView) {
+        switch ($height) {
+            case 768:
+                $rows = 6 - $noticeRow;
+                break;
+            case 900:
+                $rows = 8 - $noticeRow;
+                break;
+            case 1024:
+                $rows = 10 - $noticeRow;
+                break;
+            case 1050:
+                $rows = 10 - $noticeRow;
+                break;
+            case 1080:
+                $rows = 11 - $noticeRow;
+                break;
+            default:
+                $rows = null;
+        }
+    }
+    if (2 == $webView) {
+        switch ($height) {
+            case 768:
+                $rows = 5;
+                break;
+            case 900:
+                $rows = 6;
+                break;
+            case 1024:
+                $rows = 8;
+                break;
+            case 1050:
+                $rows = 8;
+                break;
+            case 1080:
+                $rows = 9;
+                break;
+            default:
+                $rows = null;
+        }
+    }
+    if (3 == $webView) {
+    
+    }
+    return $rows;
+}
+
 /**
  * @param string $message message of notice information.
  * @param integer $gotoFlag only 3 values are allowed

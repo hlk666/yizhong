@@ -1,5 +1,6 @@
 ﻿<?php
 require '../common.php';
+
 include_head('用户列表');
 session_start();
 checkDoctorLogin();
@@ -18,7 +19,13 @@ if (isset($_GET['id'])) {
         user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
     }
     $total = count($result);
-    $rows = 10;
+    
+    $rows = get_rows_by_resolution($_SESSION['height'], 1);
+    if (null == $rows) {
+        $rows = 7;
+        include_once PATH_LIB . 'Logger.php';
+        Logger::write('otherLog.txt', 'new resolution : ' . $_SESSION['height']);
+    }
     $page = isset($_GET['page']) ? $_GET['page'] : null;
     $ret = getPaging($total, $rows, $_SERVER['REQUEST_URI'], $page);
     $offset = $ret['offset'];
@@ -37,6 +44,9 @@ if (isset($_GET['id'])) {
     if (VALUE_DB_ERROR === $result) {
         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
     }
+    if (empty($result)) {
+        user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
+    }
     $navigation = '';
 }
 ?>
@@ -44,9 +54,9 @@ if (isset($_GET['id'])) {
 tr td {bordercolor:#FFFFFF;}
 </style>
 <body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
-<?php echo $navigation; ?>
+<div style="height:20px;margin-top:2px;margin-bottom:2px;"><?php echo $navigation; ?></div>
 <table style="font-size:14px;border:1;background-color:#A3C7DF">
-<tr bgcolor='#ECEADB' style='height:30px' align='center'>
+<tr bgcolor='#ECEADB' style='height:23px' align='center'>
   <td style='display:none;'>序号</td>
   <td>ID</td>
   <td>姓名</td>
@@ -82,7 +92,7 @@ foreach ($result as $index => $row) {
     $age = date('Y') - $row['birth_year'];
     $sex = $row['sex'] == 1 ? '男' : '女';
     $status = $row['status'];
-    echo "<tr bgcolor=$color style='height:25px'>
+    echo "<tr bgcolor=$color style='height:22px'>
     <td style='display:none;'>".$row['guardian_id']."</td>
     <td><div align='center' style='width:20px'>".$row['patient_id']."</div></td>
     <td><div align='center' style='width:68px'>".$row['patient_name']."</div></td>";
@@ -99,7 +109,7 @@ foreach ($result as $index => $row) {
     <td><div align='center' style='width:30px'>$sex</div></td>
     <td><div align='center' style='width:30px'>$age</div></td>
     <td><div align='center' style='width:100px'>" . $row['tel'] . "</div></td>
-    <td><div align='center' style='width:40px'>" . $row['device_id'] . "</div></td>
+    <td><div align='center' style='width:45px'>" . $row['device_id'] . "</div></td>
     <td><div align='center' style='width:200px'>" . $row['start_time'] . "</div></td>
     <td><div align='center' style='width:200px'>" . $row['end_time'] . "</div></td>
     <td><div align='center' style='width:68px'>" . $row['regist_doctor_name'] . "</div></td>

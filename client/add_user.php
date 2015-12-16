@@ -49,7 +49,12 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
     $mode2_record_time = isset($_SESSION['param']['mode2_record_time']) ? $_SESSION['param']['mode2_record_time'] : PARAM_MODE2_RECORD_TIME;
     $regular_time = isset($_SESSION['param']['regular_time']) ? $_SESSION['param']['regular_time'] : PARAM_REGULAR_TIME;
     $premature_beat = isset($_SESSION['param']['premature_beat']) ? $_SESSION['param']['premature_beat'] : PARAM_PREMATURE_BEAT;
-    $arrhythmia = isset($_SESSION['param']['arrhythmia']) ? $_SESSION['param']['arrhythmia'] : PARAM_ARRHYTHMIA;
+    $combeatrhy = isset($_SESSION['param']['combeatrhy']) ? $_SESSION['param']['combeatrhy'] : PARAM_COMBEATRHY;
+    $exminrate = isset($_SESSION['param']['exminrate']) ? $_SESSION['param']['exminrate'] : PARAM_EXMINRATE;
+    $stopbeat = isset($_SESSION['param']['stopbeat']) ? $_SESSION['param']['stopbeat'] : PARAM_STOPBEAT;
+    $sthigh = isset($_SESSION['param']['sthigh']) ? $_SESSION['param']['sthigh'] : PARAM_STHIGH;
+    $stlow = isset($_SESSION['param']['stlow']) ? $_SESSION['param']['stlow'] : PARAM_STLOW;
+    $twave = isset($_SESSION['param']['twave']) ? $_SESSION['param']['twave'] : PARAM_TWAVE;
     
     $guardian = Dbi::getDbi()->getGuardianByDevice($device);
     if (VALUE_DB_ERROR === $guardian) {
@@ -92,7 +97,12 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
         $param['mode2_lead'] = $lead;
         $param['mode2_regular_time'] = $regular_time;
         $param['mode2_premature_beat'] = $premature_beat;
-        $param['mode2_arrhythmia'] = $arrhythmia;
+        $param['mode2_exminrate'] = $exminrate;
+        $param['mode2_combeatrhy'] = $combeatrhy;
+        $param['mode2_stopbeat'] = $stopbeat;
+        $param['mode2_sthigh'] = $sthigh;
+        $param['mode2_stlow'] = $stlow;
+        $param['mode2_twave'] = $twave;
     }
     if ($mode == 3) {
         $param['mode3_polycardia'] = $polycardia;
@@ -106,6 +116,9 @@ if (isset($_POST['type']) && $_POST['type'] == 'regist'){
     }
     if (VALUE_DB_ERROR === $ret) {
         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_URL, 'add_user.php');
+    }
+    if (VALUE_GT_ERROR === $ret) {
+        user_goto('注册成功，但和设备通信失败，请手动操作设备开始监护。', GOTO_FLAG_URL, 'add_user.php');
     }
     unset($_SESSION['guardian']);
     unset($_SESSION['param']);

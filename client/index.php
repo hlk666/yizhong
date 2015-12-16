@@ -2,7 +2,9 @@
 require '../common.php';
 include_head('远程动态实时心电监测系统');
 session_start();
-
+if (!isset($_SESSION['height'])) {
+    $_SESSION['height'] = $_GET['height'];
+}
 if (isset($_SESSION["isLogin"]) && isset($_SESSION["loginType"]) 
         && $_SESSION["isLogin"] && $_SESSION["loginType"] == 2) {
     user_goto(null, GOTO_FLAG_URL, 'guardian_list.php');

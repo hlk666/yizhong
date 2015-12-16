@@ -37,6 +37,9 @@ if (isset($_POST['action'])) {
     if (VALUE_DB_ERROR === $ret) {
         $message = '操作失败，请重试。即将返回前页。';
     }
+    if (VALUE_GT_ERROR === $ret) {
+        $message = '和设备通信失败，请重试。即将返回前页。';
+    }
     
     user_back_after_delay($message, 2000, 'patient_list.php?current_flag=1&id=' . $hospitalId);
 }

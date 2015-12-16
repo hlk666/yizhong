@@ -3,18 +3,29 @@ require '../common.php';
 include_head('监护列表');
 
 session_start();
-checkDoctorLogin();
 
+checkDoctorLogin();
+$consultationFlag = 0;
+$consultationMsg = '';
 $hospitalId = $_SESSION["hospital"];
-$noticeConsultation = '';
+
 if (true === Dbi::getDbi()->existedRequestConsultation($hospitalId)) {
-    $noticeConsultation = '有新的会诊请求，请及时查看。<br />';
+    $consultationFlag = 1;
+    $consultationMsg .= '有新的会诊请求';
+    
 }
 if (true === Dbi::getDbi()->existedResponseConsultation($hospitalId)) {
-    $noticeConsultation .= '会诊请求已回复，请查看。<br />';
+    if ($consultationFlag == 1) {
+        $consultationMsg .= '和会诊回复';
+    } else {
+        $consultationMsg .= '有新的会诊回复';
+        $consultationFlag = 1;
+    }
 }
-if ($noticeConsultation != '') {
-    echo $noticeConsultation;
+if ($consultationFlag == 1) {
+    $consultationMsg .= '，请及时查看。';
+    echo '<div style="height:20px;margin-top:2px;margin-bottom:2px;"><font color="red">' 
+            . $consultationMsg . '</font></div>';
 }
 
 $guardians = Dbi::getDbi()->getGuardianList($hospitalId);
@@ -24,11 +35,35 @@ if (VALUE_DB_ERROR === $guardians) {
 if (empty($guardians)) {
     user_goto(MESSAGE_DB_NO_DATA, GOTO_FLAG_EXIT);
 }
+$total = count($guardians);
+
+$rows = get_rows_by_resolution($_SESSION['height'], 1, $consultationFlag);
+if (null == $rows) {
+    $rows = 7;
+    include_once PATH_LIB . 'Logger.php';
+    Logger::write('otherLog.txt', 'new resolution : ' . $_SESSION['height']);
+}
+$page = isset($_GET['page']) ? $_GET['page'] : null;
+$ret = getPaging($total, $rows, $_SERVER['REQUEST_URI'], $page);
+$offset = $ret['offset'];
+$navigation = $ret['navigation'];
+
+if ($total > $rows) {
+    $guardians = Dbi::getDbi()->getGuardianList($hospitalId, $offset, $rows);
+    if (VALUE_DB_ERROR === $result) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_EXIT);
+    }
+}
 ?>
-<body >
+<body topmargin="1" leftmargin="1" marginwidth="0" marginheight="0">
+<?php
+$noticeEndGuard = '';
+$alarmFlag = false;
+$sum = 0;
+$table = '<div style="height:20px;margin-top:3px;margin-bottom:3px;">' . $navigation . '</div>
 <table style="font-size:14px;border:0;background-color:#A3C7DF;">
-  <tr bgcolor='#ECEADB' style='height:30px' align='center'>
-    <td style='display:none;'>编号</td>
+  <tr bgcolor="#ECEADB" style="height:23px" align="center">
+    <td style="display:none;">编号</td>
     <td>姓名</td>
     <td>性别</td>
     <td>年龄</td>
@@ -40,10 +75,7 @@ if (empty($guardians)) {
     <td>胸导联</td>
     <td>所属医院</td>
     <td>病区</td>
-  </tr>
-<?php
-$noticeEndGuard = '';
-$alarmFlag = false;
+  </tr>';
 foreach ($guardians as $index => $guardian) {
     if ($index % 2 == 0) {
         $color = '#C7E5FF';
@@ -52,8 +84,11 @@ foreach ($guardians as $index => $guardian) {
     }
     
     if ($guardian['status'] == 2) {
-        $noticeEndGuard .= '<p style="color:red">[' 
-            . $guardian['patient_name'] . ']<p>已监护结束，请及时为其诊断并作出病情总结。<br />';
+        $sum++;
+        if ($sum < 4) {
+            $noticeEndGuard .= '<font color="red">['
+                    . $guardian['patient_name'] . ']</font>已监护结束，请为其诊断并作出总结。<br>';
+        }
     }
     
     if (true === Dbi::getDbi()->existedEcgNotRead($guardian['guardian_id'])) {
@@ -64,7 +99,7 @@ foreach ($guardians as $index => $guardian) {
     $age = date('Y') - $guardian['birth_year'];
     $sex = $guardian['sex'] == 1 ? '男' : '女';
     $lead = empty($guardian['lead']) ? '' : 'V' . $guardian['lead'];
-    echo "<tr bgcolor='$color' style='height:25px'>
+    $table .= "<tr bgcolor='$color' style='height:22px'>
     <td style='display:none;'>$id</td>
     <td><div align='center' style='width:80px'>" . $guardian['patient_name'] . "</div></td>
     <td><div align='center' style='width:40px'>$sex</div></td>
@@ -79,13 +114,13 @@ foreach ($guardians as $index => $guardian) {
     <td><div align='center' style='width:200px'>". $guardian['sickroom'] . "</div></td>
     </tr>";
 }
-?>
-</table>
-<?php
 if ($noticeEndGuard != '') {
     echo $noticeEndGuard;
 }
-
+echo $table;
+?>
+</table>
+<?php
 if ($alarmFlag) {
     echo "<script language='javascript'>window.lily.playmusic(1);</script>";
 }
