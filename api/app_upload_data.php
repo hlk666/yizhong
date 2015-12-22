@@ -1,6 +1,4 @@
 <?php
-require '../config/config.php';
-
 require_once PATH_LIB . 'AppUploadData.php';
 
 $patientId = isset($_GET['patient_id']) ? $_GET['patient_id'] : null;

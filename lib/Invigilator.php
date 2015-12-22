@@ -1,7 +1,7 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_LIB . 'Dbi.php';
-require_once PATH_GETUI . 'GeTui.php';
+require_once PATH_LIB . 'GeTui.php';
 
 class Invigilator
 {

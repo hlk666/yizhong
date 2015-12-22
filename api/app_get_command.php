@@ -1,5 +1,4 @@
 <?php
-require '../config/config.php';
 require PATH_LIB . 'Invigilator.php';
 
 if (!isset($_GET['patient_id']) || '' == trim($_GET['patient_id'])) {

@@ -1,6 +1,4 @@
 <?php
-require_once '../config/config.php';
-
 if (!isset($_GET['id'])) {
     exit;
 }
@@ -17,3 +15,4 @@ if (!$handle) {
     exit;
 }
 fclose($handle);
+echo 'success.';

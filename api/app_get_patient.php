@@ -1,5 +1,4 @@
 <?php
-require '../config/config.php';
 require PATH_LIB . 'Dbi.php';
 
 if (empty($_GET['device_id'])) {

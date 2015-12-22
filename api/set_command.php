@@ -1,5 +1,4 @@
 <?php
-require '../config/config.php';
 require PATH_LIB . 'Invigilator.php';
 
 $data = array_merge($_GET, $_POST);

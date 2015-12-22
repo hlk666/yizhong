@@ -1,6 +1,4 @@
 <?php
-require '../config/config.php';
-
 $data = array_merge($_GET, $_POST);
 if (!isset($data['device_id']) || '' == trim($data['device_id'])) {
     echo json_encode(['code' => 1, 'message' => MESSAGE_REQUIRED . 'device_id']);
