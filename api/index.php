@@ -1,4 +1,5 @@
 <?php
+header("Content-Type:text/html;charset=utf-8");
 require '../config/config.php';
 
 if (!isset($_GET['entry']) || empty($_GET['entry'])) {
@@ -14,4 +15,14 @@ if (!file_exists($file)) {
     echo 'Permission denied!';
     exit;
 }
-require $file;
+
+function api_exit(array $ret)
+{
+    if (empty($ret)) {
+        $ret = ['code' => '99', 'message' => 'other error.'];
+    }
+    echo json_encode($ret);
+    exit;
+}
+
+include $file;

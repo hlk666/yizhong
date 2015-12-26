@@ -177,7 +177,8 @@ class Dbi
     //********************************** start **********************************
     public function getAcount($loginName)
     {
-        $sql = 'select account_id, type, password, hospital_id from account where login_name = :user limit 1';
+        $sql = 'select account_id, real_name as name, type, password, hospital_id 
+                from account where login_name = :user limit 1';
         $param = [':user' => $loginName];
         return $this->getDataRow($sql, $param);
     }
@@ -259,7 +260,7 @@ class Dbi
     public function getGuardianByDevice($deviceId)
     {
         $sql = 'select guardian_id, patient_id, status from guardian
-                where device_id = :device_id and mode in (1,2) and status < 2 
+                where device_id = :device_id and status < 2 
                 order by guardian_id desc limit 1';
         $param = [':device_id' => $deviceId];
         return $this->getDataRow($sql, $param);
@@ -269,6 +270,31 @@ class Dbi
         $sql = 'select status, mode, guardian_result from guardian where guardian_id = :guardian_id limit 1';
         $param = [':guardian_id' => $guardianId];
         return $this->getDataRow($sql, $param);
+    }
+    public function getDuardians($hospitalId, $offset, $rows, 
+            $name = null, $tel = null, $sTime = null, $eTime = null)
+    {
+        $sql = 'select g.guardian_id, g.status, g.start_time, g.end_time,
+                p.patient_name, h.hospital_name, p.sex, p.birth_year, p.tel,
+                g.blood_pressure, g.tentative_diagnose, g.medical_history, g.sickroom
+                from guardian as g left join patient as p on g.patient_id = p.patient_id
+                left join hospital as h on g.guard_hospital_id = h.hospital_id
+                where g.guard_hospital_id = ' . $hospitalId;
+        if ($name != null) {
+            $sql .= " and p.patient_name = '$name' ";
+        }
+        if ($tel != null) {
+            $sql .= " and p.tel = '$tel' ";
+        }
+        if ($sTime != null) {
+            $sql .= " and g.start_time >= '$sTime' ";
+        }
+        if ($eTime != null) {
+            $sql .= " and g.start_time <= '$eTime' ";
+        }
+        $sql .= " order by g.guardian_id desc limit $offset, $rows";
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
     }
     public function getGuardianList($hospitalId, $offset = 0, $rows = null)
     {
@@ -291,6 +317,13 @@ class Dbi
         $sql = 'select h.hospital_id, h.hospital_name, h.address, h.tel, a.login_name, a.password
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getHospitalInfo($hospitalId)
+    {
+        $sql = 'select hospital_id, hospital_name, address, tel
+                from hospital where hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
     }
@@ -583,10 +616,10 @@ class Dbi
         $this->pdo->beginTransaction();
         //if patient not existed, add to patient table.
         if ('' == $patientId) {
-            $sql = 'insert into patient(patient_name, sex, birth_year, tel, address, creator)
-                    values(:name, :sex, :birth, :tel, :address, :creator)';
+            $sql = 'insert into patient(patient_name, sex, birth_year, tel, address)
+                    values(:name, :sex, :birth, :tel, :address)';
             $param = [':name' => $patientName, ':sex' => $sex, ':birth' => $birthYear,
-                            ':tel' => $tel, ':address' => $address, ':creator' => $creator];
+                            ':tel' => $tel, ':address' => $sickRoom];
             $patientId = $this->insertData($sql, $param);
             if (VALUE_DB_ERROR === $patientId) {
                 $this->pdo->rollBack();
@@ -599,7 +632,7 @@ class Dbi
                     sickroom, blood_pressure, height, weight, family_tel,
                     tentative_diagnose, medical_history, regist_doctor_name)
                     values (:device, :regist_hospital, :guard_hospital, :patient, :mode,
-                    :hours, :lead, :doctor_id, 0, :sickroom, :blood_pressure, :height,
+                    :hours, :lead, :doctor_id, 1, :sickroom, :blood_pressure, :height,
                     :weight, :family_tel, :ten_dia, :medical_history, :doctor_name)';
         $param = [':device' => $device, ':regist_hospital' => $registHospital, ':guard_hospital' => $guardHospital,
                         ':patient' => $patientId, ':mode' => $mode, ':hours' => $hours, ':lead' => $lead,
