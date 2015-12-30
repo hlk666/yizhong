@@ -6,7 +6,9 @@ if (!isset($_GET['entry']) || empty($_GET['entry'])) {
     echo 'Permission denied!';
     exit;
 }
-if ($_GET['entry'] == 'app_set_command' || $_GET['entry'] == 'app_set_param') {
+if ($_GET['entry'] == 'app_set_command' 
+        || $_GET['entry'] == 'app_set_param' 
+        || $_GET['entry'] == 'client_update_param') {
     $file = 'set_command.php';
 } else{
     $file = $_GET['entry'] . '.php';

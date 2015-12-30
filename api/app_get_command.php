@@ -12,10 +12,10 @@ $command = $invigilator->getCommand();
 
 $result = array();
 if (empty($command)) {
-    $result['code'] = 9;
+    $result['code'] = '9';
     $result['message'] = 'no command.';
 } else {
-    $result['code'] = 0;
+    $result['code'] = '0';
     $result['command'] = $command;
     $invigilator->clearCommand();
 }

@@ -149,6 +149,18 @@ class Dbi
             return VALUE_DB_ERROR;
         }
     }
+    private function backupData($table, $bkTable, $keyName, $keyValue)
+    {
+        try {
+            $sql = "insert into $bkTable select *, now() from $table where $keyName = $keyValue";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($param);
+            return true;
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     //************************* common methods(private) *************************
     //*********************************** end ***********************************
     
@@ -169,6 +181,10 @@ class Dbi
     public function existedResponseConsultation($hospital)
     {
         return $this->existData('consultation', 'status = 2 and request_hospital_id = ' . $hospital);
+    }
+    public function existedGuardian($guardianId)
+    {
+        return $this->existData('guardian', 'guardian_id = ' . $guardianId);
     }
     //************************* existed methods(public) *************************
     //*********************************** end ***********************************
@@ -257,6 +273,18 @@ class Dbi
         $param = [':guardian' => $guardianId];
         return $this->getDataAll($sql, $param);
     }
+    public function getEcgs($guardianId, $offset, $rows, $readStatus)
+    {
+        $sql = 'select ecg_id, alert_flag, create_time, read_status, data_path 
+                from ecg where guardian_id = :guardian ';
+        if ($readStatus != null) {
+            $sql .= " and read_status = $readStatus ";
+        }
+        $sql .= " order by mark desc, ecg_id desc limit $offset, $rows";
+        
+        $param = [':guardian' => $guardianId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getGuardianByDevice($deviceId)
     {
         $sql = 'select guardian_id, patient_id, status from guardian
@@ -271,15 +299,18 @@ class Dbi
         $param = [':guardian_id' => $guardianId];
         return $this->getDataRow($sql, $param);
     }
-    public function getDuardians($hospitalId, $offset, $rows, 
+    public function getDuardians($hospitalId, $offset, $rows, $status = null, 
             $name = null, $tel = null, $sTime = null, $eTime = null)
     {
-        $sql = 'select g.guardian_id, g.status, g.start_time, g.end_time,
+        $sql = 'select g.guardian_id, g.status, g.mark, g.start_time, g.end_time,
                 p.patient_name, h.hospital_name, p.sex, p.birth_year, p.tel,
                 g.blood_pressure, g.tentative_diagnose, g.medical_history, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.guard_hospital_id = h.hospital_id
                 where g.guard_hospital_id = ' . $hospitalId;
+        if ($status != null) {
+            $sql .= " and g.status = $status ";
+        }
         if ($name != null) {
             $sql .= " and p.patient_name = '$name' ";
         }
@@ -455,6 +486,17 @@ class Dbi
         }
     
         return $this->getDataAll($sql, $param);
+    }
+    public function getRegistInfo($guardianId)
+    {
+        $sql = 'select g.mode, g.lead, p.patient_name as name, p.birth_year, p.sex, p.tel,
+                tentative_diagnose, medical_history, regist_hospital_id, guard_hospital_id,
+                device_id, guardian_hours, regist_doctor_name as doctor_name,
+                height, weight, blood_pressure, sickroom, family_tel
+                from guardian as g left join patient as p on g.patient_id = p.patient_id
+                where guardian_id = :guardian_id';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataRow($sql, $param);
     }
     //************************** query methods(public) **************************
     //*********************************** end ***********************************
@@ -654,9 +696,14 @@ class Dbi
      */
     public function flowGuardianDelete($guardianId)
     {
-        $sql = 'delete from guardian where guardian_id = :guardian_id';
-        $param = [':guardian_id' => $guardianId];
-        return $this->deleteData($sql, $param);
+        $ret = $this->backupData('guardian', 'history_guardian', 'guardian_id', $guardianId);
+        if (true !== $ret) {
+            return VALUE_DB_ERROR;
+        } else {
+            $sql = 'delete from guardian where guardian_id = :guardian_id';
+            $param = [':guardian_id' => $guardianId];
+            return $this->deleteData($sql, $param);
+        }
     }
     /**
      * step8 of guardian: end all of the guardian.

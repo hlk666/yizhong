@@ -86,7 +86,14 @@ class GeTui
         
         try {
             $rep = $igt->pushMessageToSingle($message, $target);
-            return self::checkResponse($rep);
+            $ret = self::checkResponse($rep);
+            if (true === $ret) {
+                Logger::write(self::$logFile, date('Y-m-d H:i:s') . ' success.');
+                return true;
+            } else {
+                Logger::write(self::$logFile, date('Y-m-d H:i:s') . ' fail.');
+                return false;
+            }
         } catch(RequestException $e) {
             Logger::write(self::$logFile, $e->getMessage());
             return false;

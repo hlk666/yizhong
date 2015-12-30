@@ -19,21 +19,16 @@ class Invigilator
     private $logFile = 'cmdLog.txt';
     private $guardianId;
     
-    public function __construct($guardianId, $mode = '0', $hours = '24')
+    public function __construct($guardianId, $hours = 24)
     {
         $this->guardianId = $guardianId;
         $this->file = PATH_CACHE_CMD . $guardianId . '.php';
         if (file_exists($this->file)) {
             include $this->file;
-            if ($info['status'] == 2) {
-                unlink($this->file);
-                $this->setDefaultInfo($mode, $hours);
-            } else {
-                $this->info = $info;
-                $this->commands = $command;
-            }
+            $this->info = $info;
+            $this->commands = $command;
         } else {
-            $this->setDefaultInfo($mode, $hours);
+            $this->setDefaultInfo($hours);
         }
     }
     
@@ -97,9 +92,6 @@ class Invigilator
             $this->info[$key] = $value;
         }
         
-        if ($this->info['mode'] == 3 && isset($this->commands['action'])) {
-            unset($this->commands['action']);
-        }
         if (isset($data['action'])) {
             $ret = $this->handleAction($data['action']);
             if (VALUE_DB_ERROR === $ret) {
@@ -125,6 +117,7 @@ class Invigilator
             if (false === $gt) {
                 return VALUE_GT_ERROR;
             }
+            Logger::write($this->logFile, 'GeTui with id : ' . $clientId);
         }
         $this->gtFlag = true;
         return true;
@@ -136,10 +129,8 @@ class Invigilator
         return Dbi::getDbi()->flowGuardianDelete($this->guardianId);
     }
     
-    private function setDefaultInfo($mode, $hours)
+    private function setDefaultInfo($hours)
     {
-        $this->info['mode'] = $mode;
-        $this->info['status'] = ($mode == '3') ? '3' : '0';
         $this->info['card'] = 'master';
         $this->info['all_time'] = $hours;
         $this->info['check_info'] = 'off';
@@ -171,11 +162,7 @@ class Invigilator
     
     private function handleAction($action)
     {
-        if ($this->info['mode'] != 1 && $this->info['mode'] != 2) {
-            return true;
-        }
         if ($action == 'start' && $this->info['end_time'] == '') {
-            $this->info['status'] = 1;
             $this->info['start_time'] = time();
             $this->info['end_time'] = $this->info['start_time']
                 + $this->info['all_time'] * 3600;
@@ -231,7 +218,6 @@ class Invigilator
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
         }
-        $this->info['status'] = 2;
         $this->info['start_time'] = '';
         $this->info['end_time'] = '';
         return true;

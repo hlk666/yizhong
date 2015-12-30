@@ -12,6 +12,17 @@ class Logger
         fclose($handle);
     }
     
+    public static function writeCommonError($message)
+    {
+        $data = '(' . self::getIP() . ')' . date('Ymd H:i:s') . '----' . $message . "\r\n";
+        $handle = fopen(PATH_LOG . date('Ymd') . 'error.txt', 'a');
+        if ($handle == false) {
+            return;
+        }
+        fwrite($handle, $data);
+        fclose($handle);
+    }
+    
     public static function writeCommands($fileName, $id, array $cmd)
     {
         if (empty($cmd)) {

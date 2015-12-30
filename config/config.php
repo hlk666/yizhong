@@ -20,6 +20,8 @@ define('VALUE_DB_ERROR', -1);
 define('VALUE_PARAM_ERROR', -2);
 define('VALUE_GT_ERROR', -3);
 
+define('VALUE_DEFAULT_ROWS', 100);
+
 define('GOTO_FLAG_EXIT', 1);
 define('GOTO_FLAG_BACK', 2);
 define('GOTO_FLAG_URL', 3);

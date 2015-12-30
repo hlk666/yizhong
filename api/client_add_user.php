@@ -51,7 +51,7 @@ $guardianId = Dbi::getDbi()->flowGuardianAddUser($name, $sex, $age, $tel, $devic
 if (VALUE_DB_ERROR === $guardianId) {
     api_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
 }
-$invigilator = new Invigilator($guardianId, $mode, $hours);
+$invigilator = new Invigilator($guardianId, $hours);
 $param = array();
 if ('1' == $mode) {
     $param['mode1_polycardia'] = $polycardia;
