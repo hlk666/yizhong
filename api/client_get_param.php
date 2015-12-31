@@ -20,7 +20,7 @@ if (file_exists($file)) {
     $result['record_seconds'] = $info['mode2_record_time'];
     $result['regular_time'] = $info['mode2_regular_time'];
     $result['premature_beat'] = $info['mode2_premature_beat'];
-    //$result['lead'] = $info['mode2_lead'];
+    $result['lead'] = $info['mode2_lead'];
     $result['combeatrhy'] = $info['mode2_combeatrhy'];
     $result['exminrate'] = $info['mode2_exminrate'];
     $result['stopbeat'] = $info['mode2_stopbeat'];

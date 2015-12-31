@@ -302,9 +302,10 @@ class Dbi
     public function getDuardians($hospitalId, $offset, $rows, $status = null, 
             $name = null, $tel = null, $sTime = null, $eTime = null)
     {
-        $sql = 'select g.guardian_id, g.status, g.mark, g.start_time, g.end_time,
-                p.patient_name, h.hospital_name, p.sex, p.birth_year, p.tel,
-                g.blood_pressure, g.tentative_diagnose, g.medical_history, g.sickroom
+        $sql = 'select g.guardian_id, g.status, g.mark, g.device_id, 
+                p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, 
+                g.blood_pressure, g.tentative_diagnose, g.medical_history,
+                g.lead, h.hospital_name, g.regist_doctor_name as doctor_name, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.guard_hospital_id = h.hospital_id
                 where g.guard_hospital_id = ' . $hospitalId;
