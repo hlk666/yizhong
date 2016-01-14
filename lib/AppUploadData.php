@@ -53,8 +53,37 @@ class AppUploadData
                 $this->setError(5, 'Server DB error.');
                 return json_encode($this->error);
             }
+            $this->setEcgNotice($patientId);
         }
         return json_encode($this->retSuccess);
+    }
+    
+    private function setEcgNotice($guardianId)
+    {
+        $hospital = Dbi::getDbi()->getHospitalByGuardian($guardianId);
+        if (VALUE_DB_ERROR === $hospital) {
+            return;
+        }
+        $file = PATH_CACHE_ECG_NOTICE . $hospital['guard_hospital_id'] . '.php';
+        if (file_exists($file)) {
+            include $file;
+            $patients[] = $guardianId;
+            $patients = array_unique($patients);
+        } else {
+            $patients = array();
+            $patients[] = $guardianId;
+        }
+        $template = "<?php\n";
+        $template .= '$patients = array();' . "\n";
+        
+        foreach ($patients as $patient) {
+            $template .= "\$patients[] = '$patient';\n";
+        }
+        $template .= "\n";
+        
+        $handle = fopen($file, 'w');
+        fwrite($handle, $template);
+        fclose($handle);
     }
     
     private function validate($patientId, $mode, $data)

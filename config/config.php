@@ -9,6 +9,8 @@ define('PATH_ECG', PATH_ROOT . 'ECG\\');
 define('PATH_REAL_TIME', PATH_ROOT . 'RealTime\\');
 define('PATH_CACHE_CMD', PATH_ROOT . 'cache\cmd\\');
 define('PATH_CACHE_CLIENT', PATH_ROOT . 'cache\client\\');
+define('PATH_CACHE_ECG_NOTICE', PATH_ROOT . 'cache\ecg_notice\\');
+define('PATH_CACHE_REGIST_NOTICE', PATH_ROOT . 'cache\regist_notice\\');
 define('PATH_REPORT', PATH_ROOT . 'report\\');
 define('PATH_GETUI', PATH_ROOT . 'vendor\\getui\\');
 
@@ -38,7 +40,7 @@ define('MESSAGE_FORMAT', '该参数格式错误： ');
 
 define('PARAM_POLYCARDIA', 120);
 define('PARAM_BRADYCARDIA', 50);
-define('PARAM_LEAD', 'V1');
+define('PARAM_LEAD', '5');
 define('PARAM_MODE3_RECORD_TIME', '20');
 define('PARAM_MODE2_RECORD_TIME', '20');
 define('PARAM_REGULAR_TIME', '0');

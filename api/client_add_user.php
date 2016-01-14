@@ -77,6 +77,7 @@ if ('3' == $mode) {
     $param['mode3_bradycardia'] = $bradycardia;
     $param['mode3_lead'] = $lead;
 }
+$param['action'] = 'start';
 $ret = $invigilator->create($param);
 if (VALUE_PARAM_ERROR === $ret) {
     api_exit(['code' => '1', 'message' => MESSAGE_PARAM]);
@@ -90,7 +91,7 @@ if (VALUE_GT_ERROR === $ret) {
 
 $result = array();
 $result['code'] = '0';
-$result['message'] = '注册成功。';
+$result['message'] = $guardianId;
 api_exit($result);
 
 function validate_add_user($post)

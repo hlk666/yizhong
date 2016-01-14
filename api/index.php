@@ -6,6 +6,9 @@ if (!isset($_GET['entry']) || empty($_GET['entry'])) {
     echo 'Permission denied!';
     exit;
 }
+
+$_GET['entry'] = str_replace('test_', 'client_', $_GET['entry']);
+
 if ($_GET['entry'] == 'app_set_command' 
         || $_GET['entry'] == 'app_set_param' 
         || $_GET['entry'] == 'client_update_param') {

@@ -13,6 +13,8 @@ class Validate
             return false;
         } else if ('' == trim($value)) {
             return false;
+        } else if ('null' == trim($value)) {
+            return false;
         } else {
             return true;
         }

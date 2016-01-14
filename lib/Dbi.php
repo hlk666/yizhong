@@ -166,6 +166,14 @@ class Dbi
     
     //************************* existed methods(public) *************************
     //********************************** start **********************************
+    public function existedDiagnosis($ecgId)
+    {
+        return $this->existData('diagnosis', ' ecg_id = ' . $ecgId);
+    }
+    public function existedEcg($ecgId)
+    {
+        return $this->existData('ecg', ' ecg_id = ' . $ecgId);
+    }
     public function existedEcgNotRead($guardianId)
     {
         return $this->existData('ecg', ' read_status = 0 and guardian_id = ' . $guardianId);
@@ -196,6 +204,13 @@ class Dbi
         $sql = 'select account_id, real_name as name, type, password, hospital_id 
                 from account where login_name = :user limit 1';
         $param = [':user' => $loginName];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getAcountById($doctorId)
+    {
+        $sql = 'select account_id, login_name as user, real_name as name, type, password, hospital_id
+                from account where account_id = :account_id limit 1';
+        $param = [':account_id' => $doctorId];
         return $this->getDataRow($sql, $param);
     }
     public function getConsultationRequest($hospitalId)
@@ -232,11 +247,14 @@ class Dbi
     }
     public function getDiagnosisByGuardian($guardianId)
     {
-        $sql = 'select d.mark, d.diagnosis_id, e.ecg_id, a.real_name as doctor_name, e.data_path, 
-                d.content, e.create_time as alert_time, d.create_time as diagnose_time
+//         $sql = 'select d.mark, d.diagnosis_id, e.ecg_id, a.real_name as doctor_name, e.data_path, 
+//                 d.content, e.create_time as alert_time, d.create_time as diagnose_time
+//                 from diagnosis as d left join ecg as e on d.ecg_id = e.ecg_id
+//                 left join account as a on d.doctor_id = a.account_id
+//                 where e.guardian_id = :guardian_id order by d.mark desc, d.diagnosis_id desc';
+        $sql = 'select d.ecg_id, d.content, d.content_parent, d.create_time as content_time, e.data_path
                 from diagnosis as d left join ecg as e on d.ecg_id = e.ecg_id
-                left join account as a on d.doctor_id = a.account_id
-                where e.guardian_id = :guardian_id order by d.mark desc, d.diagnosis_id desc';
+                where d.guardian_id = :guardian_id';
         $param = [':guardian_id' => $guardianId];
         return $this->getDataAll($sql, $param);
     }
@@ -253,13 +271,10 @@ class Dbi
         $param = [':real_name' => $doctorName];
         return $this->getDataString($sql, $param);
     }
-    public function getDoctorList($hospitalId, $offset = 0, $rows = null)
+    public function getDoctorList($hospitalId)
     {
-        $sql = 'select account_id, login_name, real_name as doctor_name
-                from account where hospital_id = :hospital_id and type = 2';
-        if ($rows != null) {
-            $sql .= " limit $offset, $rows";
-        }
+        $sql = 'select account_id as doctor_id, login_name as user, real_name as doctor_name, type
+                from account where hospital_id = :hospital_id';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
@@ -295,20 +310,24 @@ class Dbi
     }
     public function getGuardianById($guardianId)
     {
-        $sql = 'select status, mode, guardian_result from guardian where guardian_id = :guardian_id limit 1';
+        $sql = 'select status, mode, ifnull(guardian_result, \'\') as result 
+                from guardian where guardian_id = :guardian_id limit 1';
         $param = [':guardian_id' => $guardianId];
         return $this->getDataRow($sql, $param);
     }
-    public function getDuardians($hospitalId, $offset, $rows, $status = null, 
+    public function getGuardians($hospitalId, $offset, $rows, $mode = null, $status = null, 
             $name = null, $tel = null, $sTime = null, $eTime = null)
     {
-        $sql = 'select g.guardian_id, g.status, g.mark, g.device_id, 
+        $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, 
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, 
                 g.blood_pressure, g.tentative_diagnose, g.medical_history,
                 g.lead, h.hospital_name, g.regist_doctor_name as doctor_name, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.guard_hospital_id = h.hospital_id
                 where g.guard_hospital_id = ' . $hospitalId;
+        if ($mode != null) {
+            $sql .= " and g.mode = $mode ";
+        }
         if ($status != null) {
             $sql .= " and g.status = $status ";
         }
@@ -350,6 +369,12 @@ class Dbi
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getHospitalByGuardian($guardianId)
+    {
+        $sql = 'select guard_hospital_id from guardian where guardian_id = :guardian limit 1';
+        $param = [':guardian' => $guardianId];
         return $this->getDataRow($sql, $param);
     }
     public function getHospitalInfo($hospitalId)
@@ -616,11 +641,24 @@ class Dbi
     /**
      * step5 of guardian: add diagnosis to ecg data.
      */
-    public function flowGuardianAddDiagnosis($ecgId, $doctorId, $content)
+    public function flowGuardianAddDiagnosis($ecgId, $guardianId, $doctorId, $content, $type)
     {
-        $sql = 'insert into diagnosis (ecg_id, doctor_id, content) values (:ecg, :doctor, :content)';
-        $param = [':ecg' => $ecgId, ':doctor' => $doctorId, ':content' => $content];
-        return $this->insertData($sql, $param);
+        if ($type == 1) {
+            $contentName = 'content';
+        } else {
+            $contentName = 'content_parent';
+        }
+        
+        if ($this->existedDiagnosis($ecgId)) {
+            $sql = "update diagnosis set guardian_id = :guardian, doctor_id = :doctor, $contentName = :content
+             where ecg_id = :ecg";
+        } else {
+            $sql = "insert into diagnosis (ecg_id, guardian_id, doctor_id, $contentName)
+                values (:ecg, :guardian, :doctor, :content)";
+        }
+        
+        $param = [':ecg' => $ecgId, ':guardian' => $guardianId, ':doctor' => $doctorId, ':content' => $content];
+        return $this->updateData($sql, $param);
     }
     /**
      * step3 of guardian: add ecg data by client.
@@ -754,11 +792,23 @@ class Dbi
         $param = [':ecg_id' => $ecgId, ':mark' => $mark];
         return $this->updateData($sql, $param);
     }
+    public function markPatient($guardianId, $mark)
+    {
+        $sql = 'update guardian set mark = :mark where guardian_id = :guardian';
+        $param = [':guardian' => $guardianId, ':mark' => $mark];
+        return $this->updateData($sql, $param);
+    }
     public function uploadReport($guardianId, $file)
     {
         $sql = 'update guardian set reported = 1, report_file = :file where guardian_id = :guardian';
         $param = [':file' => $file, ':guardian' => $guardianId];
-        return $this->insertData($sql, $param);
+        return $this->updateData($sql, $param);
+    }
+    public function updatePassword($user, $newPwd)
+    {
+        $sql = 'update account set password = :pwd where login_name = :user';
+        $param = [':user' => $user, ':pwd' => $newPwd];
+        return $this->updateData($sql, $param);
     }
     //************************* execute methods(public) *************************
     //*********************************** end ***********************************

@@ -16,7 +16,7 @@ class GeTui
         $template = new IGtTransmissionTemplate();
         $template->set_appId(self::$appID);
         $template->set_appkey(self::$appKey);
-        $template->set_transmissionType(1);
+        $template->set_transmissionType(2);
         $template->set_transmissionContent($message);
     
         return $template;
