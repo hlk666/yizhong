@@ -215,21 +215,26 @@ class Dbi
     }
     public function getConsultationRequest($hospitalId)
     {
-        $sql = 'select consultation_id, c.ecg_id, request_message, request_time, e.guardian_id, h.hospital_name
-                from consultation as c left join ecg as e on c.ecg_id = e.ecg_id
-                left join hospital as h on c.request_hospital_id = h.hospital_id
+        $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, request_message, request_time
+                from consultation as c left join hospital as h on c.request_hospital_id = h.hospital_id
                 where response_hospital_id = :hospital_id and status = 1';
         $param = ['hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
     public function getConsultationResponse($hospitalId)
     {
-        $sql = 'select consultation_id, c.ecg_id, response_message, response_time, e.guardian_id, e.data_path, h.hospital_name
-                from consultation as c left join ecg as e on c.ecg_id = e.ecg_id
-                left join hospital as h on c.response_hospital_id = h.hospital_id
+        $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, response_message, response_time
+                from consultation as c left join hospital as h on c.response_hospital_id = h.hospital_id
                 where request_hospital_id = :hospital_id and status = 2';
         $param = ['hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
+    }
+    public function getConsultationById($consultationId)
+    {
+        $sql = 'select request_hospital_id, response_hospital_id
+                from consultation where consultation_id = :consultation_id';
+        $param = [':consultation_id' => $consultationId];
+        return $this->getDataRow($sql, $param);
     }
     public function getDeviceId($guardianId)
     {
@@ -630,12 +635,17 @@ class Dbi
     /**
      * step1 of consultation: create a consultation and send.
      */
-    public function flowConsultationSend($requestHospital, $responseHospital, $ecgId, $mesage)
+    public function flowConsultationSend($guardianId, $requestHospital, $responseHospital, $ecgId, $mesage)
     {
-        $sql = 'insert into consultation(ecg_id, request_hospital_id, request_message, response_hospital_id, status)
-                values (:ecg_id, :request_hospital_id, :request_message, :response_hospital_id, 1)';
-        $param = [':ecg_id' => $ecgId, ':request_hospital_id' => $requestHospital, ':request_message' => $mesage,
-                        ':response_hospital_id' => $responseHospital];
+        $sql = 'insert into consultation(guardian_id, ecg_id, request_hospital_id, request_message, response_hospital_id, status)
+                values (:guardian, :ecg, :request_hospital_id, :request_message, :response_hospital_id, 1)';
+        $param = [
+                        ':guardian' => $guardianId,
+                        ':ecg' => $ecgId, 
+                        ':request_hospital_id' => $requestHospital, 
+                        ':request_message' => $mesage,
+                        ':response_hospital_id' => $responseHospital
+        ];
         return $this->insertData($sql, $param);
     }
     /**

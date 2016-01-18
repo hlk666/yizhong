@@ -11,6 +11,8 @@ define('PATH_CACHE_CMD', PATH_ROOT . 'cache\cmd\\');
 define('PATH_CACHE_CLIENT', PATH_ROOT . 'cache\client\\');
 define('PATH_CACHE_ECG_NOTICE', PATH_ROOT . 'cache\ecg_notice\\');
 define('PATH_CACHE_REGIST_NOTICE', PATH_ROOT . 'cache\regist_notice\\');
+define('PATH_CACHE_CONSULTATION_APPLY_NOTICE', PATH_ROOT . 'cache\consultation_apply\\');
+define('PATH_CACHE_CONSULTATION_REPLY_NOTICE', PATH_ROOT . 'cache\consultation_reply\\');
 define('PATH_REPORT', PATH_ROOT . 'report\\');
 define('PATH_GETUI', PATH_ROOT . 'vendor\\getui\\');
 

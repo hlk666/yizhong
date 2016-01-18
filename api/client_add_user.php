@@ -85,6 +85,9 @@ if (VALUE_PARAM_ERROR === $ret) {
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
+//both of success and failing to send message to device
+setRegistNotice($guardHospital);
+
 if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => '注册成功，但和设备通信失败。']);
 }
@@ -93,6 +96,14 @@ $result = array();
 $result['code'] = '0';
 $result['message'] = $guardianId;
 api_exit($result);
+
+function setRegistNotice($hospitalId)
+{
+    $file = PATH_CACHE_REGIST_NOTICE . $hospitalId . '.php';
+    if (!file_exists($file)) {
+        file_put_contents($file, '1');
+    }
+}
 
 function validate_add_user($post)
 {
