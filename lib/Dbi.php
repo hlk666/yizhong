@@ -166,6 +166,10 @@ class Dbi
     
     //************************* existed methods(public) *************************
     //********************************** start **********************************
+    public function existedDeviceHospital($deviceId, $hospitalId)
+    {
+        return $this->existData('device', " device_id = $deviceId and hospital_id = $hospitalId ");
+    }
     public function existedDiagnosis($ecgId)
     {
         return $this->existData('diagnosis', ' ecg_id = ' . $ecgId);
@@ -315,7 +319,7 @@ class Dbi
     }
     public function getGuardianById($guardianId)
     {
-        $sql = 'select status, mode, ifnull(guardian_result, \'\') as result 
+        $sql = 'select patient_id, status, mode, ifnull(guardian_result, \'\') as result 
                 from guardian where guardian_id = :guardian_id limit 1';
         $param = [':guardian_id' => $guardianId];
         return $this->getDataRow($sql, $param);
@@ -334,7 +338,7 @@ class Dbi
             $sql .= " and g.mode = $mode ";
         }
         if ($status != null) {
-            $sql .= " and g.status = $status ";
+            $sql .= " and g.status in ($status) ";
         }
         if ($name != null) {
             $sql .= " and p.patient_name = '$name' ";
@@ -565,6 +569,17 @@ class Dbi
         $param = [':account' => $accountId];
         return $this->updateData($sql, $param);
     }
+    public function editGuardian($guardianId, array $data)
+    {
+        $sql = 'update guardian set ';
+        foreach ($data as $key => $value) {
+            $sql .= $key . ' = "' . $value . '",';
+        }
+        $sql = substr($sql, 0, -1);
+        $sql .= ' where guardian_id = :guardian';
+        $param = [':guardian' => $guardianId];
+        return $this->updateData($sql, $param);
+    }
     public function editHospital($hospitalId, array $data)
     {
         $sql = 'update hospital set ';
@@ -587,44 +602,12 @@ class Dbi
         $param = [':patient' => $patientId];
         return $this->updateData($sql, $param);
     }
-    /**
-     * step1 of consultation: accepted by parent hospial.
-     */
-    public function flowConsultationAccept($hospitalId, $consultationId, $guardianId)
+    public function flowConsultationEnd($idList)
     {
-        $this->pdo->beginTransaction();
-        //change guardian hospital.
-        $sql = 'update guardian set guard_hospital_id = :hospital where guardian_id = :guardian_id';
-        $param = [':guardian_id' => $guardianId, ':hospital' => $hospitalId];
-        $ret = $this->updateData($sql, $param);
-        if (VALUE_DB_ERROR === $ret) {
-            $this->pdo->rollBack();
-            return VALUE_DB_ERROR;
-        }
-        //change status.
-        $sql = 'update consultation set status = 2 where consultation_id = :consultation_id';
-        $param = [':consultation_id' => $consultationId];
-        $ret = $this->updateData($sql, $param);
-        if (VALUE_DB_ERROR === $ret) {
-            $this->pdo->rollBack();
-            return VALUE_DB_ERROR;
-        }
-        //succeed.
-        $this->pdo->commit();
-        return true;
-    }
-    /**
-     * step4 of consultation: end.
-     */
-    public function flowConsultationEnd($consultationId)
-    {
-        $sql = 'update consultation set status = 0 where consultation_id = :consultation_id';
-        $param = [':consultation_id' => $consultationId];
+        $sql = 'update consultation set status = 0 where consultation_id in :list';
+        $param = [':list' => $idList];
         return $this->updateData($sql, $param);
     }
-    /**
-     * step3 of consultation: replied by parent hospital.
-     */
     public function flowConsultationReply($consultationId, $result)
     {
         $sql = 'update consultation set status = 2, response_message = :result
@@ -632,10 +615,7 @@ class Dbi
         $param = [':consultation_id' => $consultationId, ':result' => $result];
         return $this->updateData($sql, $param);
     }
-    /**
-     * step1 of consultation: create a consultation and send.
-     */
-    public function flowConsultationSend($guardianId, $requestHospital, $responseHospital, $ecgId, $mesage)
+    public function flowConsultationApply($guardianId, $requestHospital, $responseHospital, $ecgId, $mesage)
     {
         $sql = 'insert into consultation(guardian_id, ecg_id, request_hospital_id, request_message, response_hospital_id, status)
                 values (:guardian, :ecg, :request_hospital_id, :request_message, :response_hospital_id, 1)';
@@ -648,9 +628,6 @@ class Dbi
         ];
         return $this->insertData($sql, $param);
     }
-    /**
-     * step5 of guardian: add diagnosis to ecg data.
-     */
     public function flowGuardianAddDiagnosis($ecgId, $guardianId, $doctorId, $content, $type)
     {
         if ($type == 1) {
@@ -670,27 +647,18 @@ class Dbi
         $param = [':ecg' => $ecgId, ':guardian' => $guardianId, ':doctor' => $doctorId, ':content' => $content];
         return $this->updateData($sql, $param);
     }
-    /**
-     * step3 of guardian: add ecg data by client.
-     */
     public function flowGuardianAddEcg($guardianId, $alertFlag, $dataPath)
     {
         $sql = 'insert into ecg(guardian_id, alert_flag, data_path) values(:guardian, :alert, :path)';
         $param = [':guardian' => $guardianId, ':alert' => $alertFlag, ':path' => $dataPath];
         return $this->insertData($sql, $param);
     }
-    /**
-     * step7 of guardian: create result of the guardian.
-     */
     public function flowGuardianAddResult($guardianId, $result)
     {
         $sql = 'update guardian set guardian_result = :result, status = 3 where guardian_id = :guardian';
         $param = [':guardian' => $guardianId, ':result' => $result];
         return $this->updateData($sql, $param);
     }
-    /**
-     * step1 of guardian: add user.
-     */
     public function flowGuardianAddUser($patientName, $sex, $age, $tel, $device, $registHospital,
             $guardHospital, $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height,
             $weight, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
@@ -703,7 +671,6 @@ class Dbi
         if (VALUE_DB_ERROR === $patientId) {
             return VALUE_DB_ERROR;
         }
-        //use transaction.
         $this->pdo->beginTransaction();
         //if patient not existed, add to patient table.
         if ('' == $patientId) {
@@ -717,7 +684,6 @@ class Dbi
                 return VALUE_DB_ERROR;
             }
         }
-        //add to guardian table.
         $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id,
                     patient_id, mode, guardian_hours, lead, doctor_id, status,
                     sickroom, blood_pressure, height, weight, family_tel,
@@ -736,13 +702,9 @@ class Dbi
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
-        //succeed.
         $this->pdo->commit();
         return $guardianId;
     }
-    /**
-     * step? of guardian: delete guardian(sometimes).
-     */
     public function flowGuardianDelete($guardianId)
     {
         $ret = $this->backupData('guardian', 'history_guardian', 'guardian_id', $guardianId);
@@ -754,46 +716,22 @@ class Dbi
             return $this->deleteData($sql, $param);
         }
     }
-    /**
-     * step8 of guardian: end all of the guardian.
-     */
-    public function flowGuardianEndAll($guardianId)
-    {
-        $sql = 'update guardian set status = 4 where guardian_id = :guardian_id';
-        $param = [':guardian_id' => $guardianId];
-        return $this->updateData($sql, $param);
-    }
-    /**
-     * step6 of guardian: end the guardian(after that, create result).
-     */
     public function flowGuardianEndGuard($guardianId)
     {
         $sql = 'update guardian set status = 2, end_time = now() where guardian_id = :guardian_id';
         $param = [':guardian_id' => $guardianId];
         return $this->updateData($sql, $param);
     }
-    /**
-     * step4 of guardian: read the ecg data.
-     */
     public function flowGuardianReadEcg($ecgId)
     {
         $sql = 'update ecg set read_status = 1 where ecg_id = :ecg_id';
         $param = [':ecg_id' => $ecgId];
         return $this->updateData($sql, $param);
     }
-    /**
-     * step2 of guardian: start.
-     */
     public function flowGuardianStartGuard($guardianId)
     {
         $sql = 'update guardian set status = 1, start_time = now() where guardian_id = :guardian_id';
         $param = [':guardian_id' => $guardianId];
-        return $this->updateData($sql, $param);
-    }
-    public function markDiagnosis($diagnosisId, $mark)
-    {
-        $sql = 'update diagnosis set mark = :mark where diagnosis_id = :diagnosis_id';
-        $param = [':diagnosis_id' => $diagnosisId, ':mark' => $mark];
         return $this->updateData($sql, $param);
     }
     public function markEcg($ecgId, $mark)

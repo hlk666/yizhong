@@ -30,4 +30,11 @@ function api_exit(array $ret)
     exit;
 }
 
+foreach ($_GET as $key => $value) {
+    $_GET[$key] = trim($value);
+}
+foreach ($_POST as $key => $value) {
+    $_POST[$key] = trim($value);
+}
+
 include $file;

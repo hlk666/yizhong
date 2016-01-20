@@ -24,7 +24,7 @@ $requestHospital = $_POST['request_hospital_id'];
 $mesage = $_POST['request_message'];
 $responseHospital = $_POST['response_hospital_id'];
 
-$ret = Dbi::getDbi()->flowConsultationSend($guardianId, $requestHospital, $responseHospital, $ecgId, $mesage);
+$ret = Dbi::getDbi()->flowConsultationApply($guardianId, $requestHospital, $responseHospital, $ecgId, $mesage);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

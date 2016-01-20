@@ -14,6 +14,16 @@ if (VALUE_DB_ERROR === $ret) {
 if (empty($ret)) {
     api_exit(['code' => '3', 'message' => MESSAGE_DB_NO_DATA]);
 } else {
+    $idList = '(0';
+    foreach ($ret as $consultation) {
+        $idList .= ',' . $consultation['consultation_id'];
+    }
+    $idList .= ')';
+    $endConsultation = Dbi::getDbi()->flowConsultationEnd($idList);
+    if (VALUE_DB_ERROR === $endConsultation) {
+        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+    }
+    
     $result = array();
     $result['code'] = '0';
     $result['message'] = '';

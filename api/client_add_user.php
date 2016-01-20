@@ -6,8 +6,6 @@ require_once PATH_LIB . 'Invigilator.php';
 validate_add_user($_POST);
 
 $device = $_POST['device_id'];
-check_device_used($device);
-
 $mode = $_POST['mode'];
 $name = $_POST['name'];
 $age = $_POST['age'];
@@ -19,6 +17,8 @@ $registHospital = $_POST['regist_hospital'];
 $guardHospital = $_POST['guard_hospital'];
 $doctorId = 0;//will be used in future.
 $doctorName = $_POST['doctor_name'];
+
+check_device($device, $registHospital);
 
 $height = isset($_POST['height']) ? $_POST['height'] : '0';
 $weight = isset($_POST['weight']) ? $_POST['weight'] : '0';
@@ -190,8 +190,12 @@ function validate_add_user($post)
     }
 }
 
-function check_device_used($device)
+function check_device($device, $hospital)
 {
+    $ret = Dbi::getDbi()->existedDeviceHospital($device, $hospital);
+    if (false == $ret) {
+        api_exit(['code' => '5', 'message' => '此设备不属于该医院。']);
+    }
     $guardian = Dbi::getDbi()->getGuardianByDevice($device);
     if (VALUE_DB_ERROR === $guardian) {
         api_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
