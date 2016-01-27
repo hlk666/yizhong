@@ -6,18 +6,19 @@ if (!isset($_GET['patient_id']) || '' == trim($_GET['patient_id'])) {
     exit;
 }
 $patientId = $_GET['patient_id'];
+if (!file_exists(PATH_CACHE_CMD . $patientId . '.php')) {
+    api_exit(['code' => '9', 'message' => 'no command.']);
+}
 
 $invigilator = new Invigilator($patientId);
 $command = $invigilator->getCommand();
 
 $result = array();
 if (empty($command)) {
-    $result['code'] = '9';
-    $result['message'] = 'no command.';
+    api_exit(['code' => '9', 'message' => 'no command.']);
 } else {
     $result['code'] = '0';
     $result['command'] = $command;
     $invigilator->clearCommand();
+    api_exit($result);
 }
-
-echo json_encode($result);

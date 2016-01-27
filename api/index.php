@@ -9,24 +9,18 @@ if (!isset($_GET['entry']) || empty($_GET['entry'])) {
 
 $_GET['entry'] = str_replace('test_', 'client_', $_GET['entry']);
 
-if ($_GET['entry'] == 'app_set_command' 
+if ($_GET['entry'] == 'special_get_patients'
+        || $_GET['entry'] == 'clear_real_time_file') {
+    $file = $_GET['entry'] . '.php';
+} elseif ($_GET['entry'] == 'app_set_command' 
         || $_GET['entry'] == 'app_set_param' 
         || $_GET['entry'] == 'client_update_param') {
     $file = 'set_command.php';
 } else{
-    $file = $_GET['entry'] . '.php';
+    $file = get_file($_GET['entry']);
 }
 if (!file_exists($file)) {
     echo 'Permission denied!';
-    exit;
-}
-
-function api_exit(array $ret)
-{
-    if (empty($ret)) {
-        $ret = ['code' => '99', 'message' => 'other error.'];
-    }
-    echo json_encode($ret);
     exit;
 }
 
@@ -38,3 +32,23 @@ foreach ($_POST as $key => $value) {
 }
 
 include $file;
+
+function get_file($api)
+{
+    $route = explode('_', $api, 2);
+    return $route[0] . DIRECTORY_SEPARATOR . $route[1] . '.php';
+}
+
+function api_exit(array $ret)
+{
+    if (empty($ret)) {
+        $ret = ['code' => '99', 'message' => '发生未知错误，请联系管理员。'];
+    }
+    echo json_encode($ret);
+    exit;
+}
+
+function error_handler_param($param)
+{
+    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . $param . '。']);
+}

@@ -67,12 +67,6 @@ class Invigilator
     
     public function getCommand()
     {
-        if (!empty($this->info['end_time'])) {
-            if ($this->info['end_time'] != '' && time() >= $this->info['end_time']) {
-                $this->commands['action'] = 'end';
-                $this->setEnd();
-            }
-        }
         return $this->commands;
     }
     

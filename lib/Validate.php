@@ -19,4 +19,20 @@ class Validate
             return true;
         }
     }
+    
+    /**
+     * check if params are provided.
+     * 
+     * @param array $params
+     * @return boolean
+     */
+    public static function checkRequiredParam(array $params)
+    {
+        foreach ($params as $param) {
+            if (false === self::checkRequired($param)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

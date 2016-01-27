@@ -8,7 +8,7 @@ if (empty($id)) {
     exit;
 }
 
-$file = PATH_REAL_TIME . $id . '\\' . $id . SUFFIX_REAL_TIME_FILE;
+$file = PATH_REAL_TIME . $id . DIRECTORY_SEPARATOR . $id . SUFFIX_REAL_TIME_FILE;
 
 $handle = fopen($file, 'w');
 if (!$handle) {

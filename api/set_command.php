@@ -18,5 +18,5 @@ if (VALUE_PARAM_ERROR === $ret) {
 } elseif (VALUE_GT_ERROR === $ret) {
     echo json_encode(['code' => 3, 'message' => MESSAGE_GT_ERROR]);
 } else {
-    echo json_encode(array('code' => '0'));
+    echo json_encode(array('code' => '0', 'message' => ''));
 }

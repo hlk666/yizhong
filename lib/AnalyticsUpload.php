@@ -1,6 +1,6 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
-require_once PATH_LIB . 'Dbi.php';
+require_once PATH_LIB . 'DbiAnalytics.php';
 
 class AnalyticsUpload
 {
@@ -15,7 +15,7 @@ class AnalyticsUpload
             return json_encode($this->error);
         }
         
-        $dir = PATH_REPORT . $param['patient_id'] . '\\';
+        $dir = PATH_REPORT . $param['patient_id'] . DIRECTORY_SEPARATOR;
         if (!file_exists($dir)) {
             mkdir($dir);
         }
@@ -27,7 +27,7 @@ class AnalyticsUpload
         }
         
         $urlFile = 'report/' . $param['patient_id'] . '/' . $param['start_time'] . '_' . $param['end_time'] . '.pdf';
-        $ret = Dbi::getDbi()->uploadReport($param['patient_id'], $urlFile);
+        $ret = DbiAnalytics::getDbi()->uploadReport($param['patient_id'], $urlFile);
         if (VALUE_DB_ERROR === $ret) {
             $this->setError(7, 'DB error.');
             return json_encode($this->error);

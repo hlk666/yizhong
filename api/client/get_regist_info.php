@@ -20,7 +20,7 @@ if (empty($ret)) {
     $result['code'] = '0';
     $result['message'] = '';
     
-    $ret['age'] = date('Y') - $ret['birth_year'];
+    $ret['age'] = (string)(date('Y') - $ret['birth_year']);
     $ret['sex'] = $ret['sex'] == 1 ? '男' : '女';
     unset($ret['birth_year']);
     

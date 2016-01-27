@@ -1,5 +1,5 @@
 <?php
-require PATH_LIB . 'Dbi.php';
+require PATH_LIB . 'DbiAnalytics.php';
 
 if (empty($_GET['hospital_id'])) {
     echo json_encode(['code' => '1', 'message' => MESSAGE_REQUIRED .'hospital_id']);
@@ -24,7 +24,7 @@ if (isset($_GET['start_time']) && trim($_GET['start_time']) != '') {
 if (isset($_GET['end_time']) && trim($_GET['end_time']) != '') {
     $endTime = $_GET['end_time'];
 }
-$patients = Dbi::getDbi()->getPatientsForAnalytics($hospitalId, $reported, $startTime, $endTime);
+$patients = DbiAnalytics::getDbi()->getPatientsForAnalytics($hospitalId, $reported, $startTime, $endTime);
 if (VALUE_DB_ERROR === $patients) {
     echo json_encode(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
     exit;

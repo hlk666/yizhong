@@ -16,7 +16,7 @@ class AppUploadData
         }
 
         if ($mode == 1) {
-            $realTimeDir = PATH_REAL_TIME . $patientId . '\\';
+            $realTimeDir = PATH_REAL_TIME . $patientId . DIRECTORY_SEPARATOR;
             if (!is_dir($realTimeDir)) {
                 mkdir($realTimeDir);
             }
@@ -36,7 +36,7 @@ class AppUploadData
         }
         
         if ($mode == 2 || $mode == 3) {
-            $dir = PATH_ECG . $patientId . '\\';
+            $dir = PATH_ECG . $patientId . DIRECTORY_SEPARATOR;
             if (!is_dir($dir)) {
                 mkdir($dir);
             }
