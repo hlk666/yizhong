@@ -12,15 +12,15 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 if (empty($ret)) {
-    api_exit(['code' => '3', 'message' => MESSAGE_DB_NO_DATA]);
+    api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 }
 if (isset($ret['result']) && empty($ret['result'])) {
-    api_exit(['code' => '3', 'message' => MESSAGE_DB_NO_DATA]);
+    api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 }
 
 $result = array();
 $result['code'] = '0';
-$result['message'] = '';
+$result['message'] = MESSAGE_SUCCESS;
 
 $result['result'] = $ret['result'];
 api_exit($result);

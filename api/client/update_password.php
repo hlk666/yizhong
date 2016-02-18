@@ -22,10 +22,10 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 if (empty($ret)) {
-    api_exit(['code' => '3', 'message' => '用户不存在。']);
+    api_exit(['code' => '11', 'message' => '该医生账户不存在。']);
 }
 if ($ret['password'] != $oldPwd) {
-    api_exit(['code' => '3', 'message' => '密码有误。']);
+    api_exit(['code' => '12', 'message' => '密码错误。']);
 }
 
 $ret = Dbi::getDbi()->updatePassword($user, $newPwd);
@@ -33,7 +33,4 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
-$result = array();
-$result['code'] = '0';
-$result['message'] = '';
-api_exit($result);
+api_exit_success();

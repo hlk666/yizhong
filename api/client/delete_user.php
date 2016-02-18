@@ -13,7 +13,7 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 if (false === $ret) {
-    api_exit(['code' => '3', 'message' => MESSAGE_DB_NO_DATA]);
+    api_exit(['code' => '18', 'message' => '该删除对象不存在。']);
 }
 
 $ret = Dbi::getDbi()->flowGuardianDelete($guardianId);
@@ -21,8 +21,4 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
-$result = array();
-$result['code'] = '0';
-$result['message'] = '';
-
-api_exit($result);
+api_exit_success();

@@ -19,8 +19,8 @@ if (VALUE_PARAM_ERROR === $ret) {
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
-
 if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
 }
-api_exit(['code' => '0', 'message' => '']);
+
+api_exit_success();

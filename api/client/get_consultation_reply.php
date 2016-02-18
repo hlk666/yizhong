@@ -12,8 +12,9 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 if (empty($ret)) {
-    api_exit(['code' => '3', 'message' => MESSAGE_DB_NO_DATA]);
+    api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 } else {
+    //close the consultation.
     $idList = '(0';
     foreach ($ret as $consultation) {
         $idList .= ',' . $consultation['consultation_id'];
@@ -26,8 +27,7 @@ if (empty($ret)) {
     
     $result = array();
     $result['code'] = '0';
-    $result['message'] = '';
-
+    $result['message'] = MESSAGE_SUCCESS;
     $result['reply_consultation'] = $ret;
     api_exit($result);
 }

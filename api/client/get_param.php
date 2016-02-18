@@ -14,7 +14,7 @@ if (file_exists($file)) {
     include $file;
     $result = array();
     $result['code'] = '0';
-    $result['message'] = '';
+    $result['message'] = MESSAGE_SUCCESS;
     $result['polycardia'] = $info['mode2_polycardia'];
     $result['bradycardia'] = $info['mode2_bradycardia'];
     $result['record_seconds'] = $info['mode2_record_time'];
@@ -30,5 +30,5 @@ if (file_exists($file)) {
     api_exit($result);
 } else {
     Logger::writeCommonError('cache file not existed with ID:' . $guardianId);
-    api_exit(['code' => '3', 'message' => '参数配置信息不存在，请联系管理员。']);
+    api_exit(['code' => '19', 'message' => '参数配置信息不存在，请联系管理员。']);
 }

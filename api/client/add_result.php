@@ -25,10 +25,10 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 if (empty($ret)) {
-    api_exit(['code' => '3', 'message' => '该医生不存在。']);
+    api_exit(['code' => '11', 'message' => '该医生账户不存在。']);
 }
 if ($ret['password'] != $pwd) {
-    api_exit(['code' => '3', 'message' => '密码有误。']);
+    api_exit(['code' => '12', 'message' => '密码错误。']);
 }
 
 $ret = Dbi::getDbi()->getGuardianById($guardianId);
@@ -36,10 +36,10 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 if (empty($ret)) {
-    api_exit(['code' => '4', 'message' => '该监护不存在。']);
+    api_exit(['code' => '14', 'message' => '找不到该病人的监护信息。']);
 }
 if (($ret['mode'] == 1 || $ret['mode'] == 2) && $ret['status'] < 2) {
-    api_exit(['code' => '5', 'message' => '该用户尚未结束监护，如需下诊断总结，请将该用户结束监护。']);
+    api_exit(['code' => '15', 'message' => '病人尚未结束监护，请结束监护后再做出病情 。']);
 }
 
 $ret = Dbi::getDbi()->flowGuardianAddResult($guardianId, $result);
@@ -47,8 +47,4 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
-$result = array();
-$result['code'] = '0';
-$result['message'] = '';
-
-api_exit($result);
+api_exit_success();

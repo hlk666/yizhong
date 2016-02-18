@@ -96,26 +96,23 @@ if (!empty($dataGuardian)) {
     }
 }
 
-$result = array();
-$result['code'] = '0';
-$result['message'] = $guardianId;
-api_exit($result);
+api_exit_success();
 
 function check_device($device, $hospital, &$outerPatientId)
 {
     $ret = Dbi::getDbi()->existedDeviceHospital($device, $hospital);
     if (false == $ret) {
-        api_exit(['code' => '5', 'message' => '此设备不属于该医院。']);
+        api_exit(['code' => '16', 'message' => '该设备不属于本医院。']);
     }
     $guardian = Dbi::getDbi()->getGuardianByDevice($device);
     if (VALUE_DB_ERROR === $guardian) {
-        api_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
+        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
     }
     if (!empty($guardian)) {
         $outerPatientId = $guardian['patient_id'];
         $patient = Dbi::getDbi()->getPatient($guardian['patient_id']);
         if (VALUE_DB_ERROR === $patient) {
-            api_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
+            api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
         }
         if (empty($patient)) {
             $otherPatient = '其他用户(id:' . $guardian['patient_id'] . ')';
@@ -123,7 +120,7 @@ function check_device($device, $hospital, &$outerPatientId)
             $otherPatient = $patient['patient_name'];
         }
         if ('0' == $guardian['status'] || '1' == $guardian['status']) {
-            api_exit(['code' => '4', 'message' => $otherPatient . '正在使用该设备。']);
+            api_exit(['code' => '17', 'message' => $otherPatient . '正在使用该设备。']);
         }
     }
 }

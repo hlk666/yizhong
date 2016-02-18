@@ -8,17 +8,16 @@ if (false === Validate::checkRequired($_GET['patient_id'])) {
 
 $guardianId = $_GET['patient_id'];
 
-
 $ret = Dbi::getDbi()->getRegistInfo($guardianId);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 if (empty($ret)) {
-    api_exit(['code' => '3', 'message' => MESSAGE_DB_NO_DATA]);
+    api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 } else {
     $result = array();
     $result['code'] = '0';
-    $result['message'] = '';
+    $result['message'] = MESSAGE_SUCCESS;
     
     $ret['age'] = (string)(date('Y') - $ret['birth_year']);
     $ret['sex'] = $ret['sex'] == 1 ? '男' : '女';

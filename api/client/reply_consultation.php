@@ -28,10 +28,7 @@ if (VALUE_DB_ERROR === $ret) {
 
 setNotice($requestHospital, PATH_CACHE_CONSULTATION_REPLY_NOTICE);
 
-$result = array();
-$result['code'] = '0';
-$result['message'] = '';
-api_exit($result);
+api_exit_success();
 
 function setNotice($hospitalId, $directory)
 {

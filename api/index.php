@@ -48,7 +48,7 @@ function api_exit(array $ret)
     exit;
 }
 
-function error_handler_param($param)
+function api_exit_success($otherMsg = '')
 {
-    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . $param . '。']);
+    api_exit(['code' => '0', 'message' => MESSAGE_SUCCESS . $otherMsg]);
 }

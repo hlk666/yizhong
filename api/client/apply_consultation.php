@@ -31,10 +31,7 @@ if (VALUE_DB_ERROR === $ret) {
 
 setNotice($responseHospital, PATH_CACHE_CONSULTATION_APPLY_NOTICE);
 
-$result = array();
-$result['code'] = '0';
-$result['message'] = '申请会诊成功。';
-api_exit($result);
+api_exit_success();
 
 function setNotice($hospitalId, $directory)
 {

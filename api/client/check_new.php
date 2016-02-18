@@ -14,12 +14,12 @@ $fileConsultationReply = PATH_CACHE_CONSULTATION_REPLY_NOTICE . $hospitalId . '.
 
 if (!file_exists($fileEcgNotice) && !file_exists($fileRegistNotice) 
         && !file_exists($fileConsultationApply) && !file_exists($fileConsultationReply)) {
-    api_exit(['code' => '3', 'message' => MESSAGE_DB_NO_DATA]);
+    api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 }
 
 $result = array();
 $result['code'] = '0';
-$result['message'] = '';
+$result['message'] = MESSAGE_SUCCESS;
 $result['patients'] = array();
 $result['new_patient'] = '0';
 $result['new_consultation_apply'] = '0';
