@@ -56,19 +56,27 @@ class Dbi extends BaseDbi
         $param = [':account_id' => $doctorId];
         return $this->getDataRow($sql, $param);
     }
-    public function getConsultationRequest($hospitalId)
+    public function getConsultationRequest($hospitalId, $allFlag)
     {
         $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, request_message, request_time
                 from consultation as c left join hospital as h on c.request_hospital_id = h.hospital_id
-                where response_hospital_id = :hospital_id and status = 1';
+                where response_hospital_id = :hospital_id ';
+        if (0 == $allFlag) {
+            $sql .= ' and status = 1';
+        }
         $param = ['hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
-    public function getConsultationResponse($hospitalId)
+    public function getConsultationResponse($hospitalId, $allFlag)
     {
         $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, response_message, response_time
                 from consultation as c left join hospital as h on c.response_hospital_id = h.hospital_id
-                where request_hospital_id = :hospital_id and status = 2';
+                where request_hospital_id = :hospital_id ';
+        if (1 == $allFlag) {
+            $sql .= ' and status >= 2';
+        } else {
+            $sql .= ' and status = 2';
+        }
         $param = ['hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
@@ -84,6 +92,18 @@ class Dbi extends BaseDbi
         $sql = 'select device_id from guardian where guardian_id = :guardian_id limit 1';
         $param = [':guardian_id' => $guardianId];
         return $this->getDataString($sql, $param);
+    }
+    public function getDeviceList($hospital = null, $offset = 0, $rows = null)
+    {
+        $sql = 'select hospital_name, device_id from device as d 
+                inner join hospital as h on d.hospital_id = h.hospital_id';
+        if (null !== $hospital){
+            $sql .= ' where d.hospital_id = ' . $hospital;
+        }
+        if (null !== $rows) {
+            $sql .= " limit $offset, $rows";
+        }
+        return $this->getDataAll($sql);
     }
     public function getDiagnosisByGuardian($guardianId)
     {
@@ -102,7 +122,7 @@ class Dbi extends BaseDbi
     }
     public function getEcgs($guardianId, $offset, $rows, $readStatus)
     {
-        $sql = 'select ecg_id, alert_flag, create_time, read_status, data_path 
+        $sql = 'select ecg_id, alert_flag, create_time, read_status, data_path, mark 
                 from ecg where guardian_id = :guardian ';
         if ($readStatus != null) {
             $sql .= " and read_status = $readStatus ";
@@ -167,7 +187,7 @@ class Dbi extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select hospital_id, hospital_name, address, tel
+        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag
                 from hospital where hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
@@ -182,11 +202,24 @@ class Dbi extends BaseDbi
     }
     public function getHospitalParent($hospitalId)
     {
-        $sql = 'select h.hospital_id, h.hospital_name from hospital as h
+        $sql = 'select h.hospital_id, hospital_name from hospital as h
                 inner join hospital_relation as r on h.hospital_id = r.parent_hospital_id
                 where r.hospital_id = :hospital_id';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
+    }
+    public function getHospitalParentList()
+    {
+        $sql = 'select hospital_id, hospital_name from hospital where parent_flag = 1';
+        return $this->getDataAll($sql);
+    }
+    public function getHospitalList($offset = 0, $rows = null)
+    {
+        $sql = 'select hospital_id, hospital_name, tel, address, parent_flag from hospital ';
+        if (null !== $rows) {
+            $sql .= " limit $offset, $rows";
+        }
+        return $this->getDataAll($sql);
     }
     public function getPatient($patientId)
     {
@@ -227,6 +260,36 @@ class Dbi extends BaseDbi
                         ':type' => $type, ':hospital_id' => $hospitalId,':creator' => $creator ];
         return $this->insertData($sql, $param);
     }
+    public function addDevice($hospital, $device)
+    {
+        $sql = 'insert into device (device_id, hospital_id) values (:device, :hospital)';
+        $param = [':device' => $device, ':hospital' => $hospital];
+        return $this->insertData($sql, $param);
+    }
+    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital)
+    {
+        $this->pdo->beginTransaction();
+        $sql = 'insert into hospital(hospital_name, tel, address, parent_flag)
+                values (:name, :tel, :address, :flag)';
+        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':flag' => $parentFlag];
+        $hospitalId = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR === $hospitalId) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        if (!empty($parentHospital)) {
+            $sql = 'insert into hospital_relation(hospital_id, parent_hospital_id)
+                values (:hospital_id, :parent_hospital_id)';
+            $param = [':hospital_id' => $hospitalId, ':parent_hospital_id' => $parentHospital];
+            $ret = $this->insertData($sql, $param);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
+        }
+        $this->pdo->commit();
+        return true;
+    }
     public function delEcg($ecgId)
     {
         $sql = 'delete from ecg where ecg_id = :ecg_id';
@@ -243,7 +306,7 @@ class Dbi extends BaseDbi
     }
     public function flowConsultationEnd($idList)
     {
-        $sql = 'update consultation set status = 0 where consultation_id in ' . $idList;
+        $sql = 'update consultation set status = 3 where consultation_id in ' . $idList;
         return $this->updateData($sql);
     }
     public function flowConsultationReply($consultationId, $result)
@@ -285,10 +348,10 @@ class Dbi extends BaseDbi
         $param = [':ecg' => $ecgId, ':guardian' => $guardianId, ':doctor' => $doctorId, ':content' => $content];
         return $this->updateData($sql, $param);
     }
-    public function flowGuardianAddEcg($guardianId, $alertFlag, $dataPath)
+    public function flowGuardianAddEcg($guardianId, $alertFlag, $time, $dataPath)
     {
-        $sql = 'insert into ecg(guardian_id, alert_flag, data_path) values(:guardian, :alert, :path)';
-        $param = [':guardian' => $guardianId, ':alert' => $alertFlag, ':path' => $dataPath];
+        $sql = 'insert into ecg(guardian_id, alert_flag, create_time, data_path) values(:guardian, :alert, :time, :path)';
+        $param = [':guardian' => $guardianId, ':alert' => $alertFlag, ':time' => $time, ':path' => $dataPath];
         return $this->insertData($sql, $param);
     }
     public function flowGuardianAddResult($guardianId, $result)

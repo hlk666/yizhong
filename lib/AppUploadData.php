@@ -8,9 +8,9 @@ class AppUploadData
     private $logFile = 'uploadDataLog.txt';
     private $retSuccess = array('code' => 0, 'message' => '');
     
-    public function run($patientId, $mode, $alert = 0, $data = array())
+    public function run($patientId, $mode, $alert = 0, $time = '', $data = array())
     {
-        $ret = $this->validate($patientId, $mode, $data);
+        $ret = $this->validate($patientId, $mode, $time, $data);
         if ($ret === false) {
             return json_encode($this->error);
         }
@@ -40,15 +40,15 @@ class AppUploadData
             if (!is_dir($dir)) {
                 mkdir($dir);
             }
-            $file = $dir . date('YmdHis') . '.bin';
+            $file = $dir . $time . '.bin';
             $retIO = file_put_contents($file, $data);
             if ($retIO === false) {
                 $this->setIOError();
                 return json_encode($this->error);
             }
             
-            $urlFile = 'ECG/' . $patientId . '/' . date('YmdHis') . '.bin';
-            $retDB = Dbi::getDbi()->flowGuardianAddEcg($patientId, $alert, $urlFile);
+            $urlFile = 'ECG/' . $patientId . '/' . $time . '.bin';
+            $retDB = Dbi::getDbi()->flowGuardianAddEcg($patientId, $alert, $time, $urlFile);
             if (VALUE_DB_ERROR === $retDB) {
                 $this->setError(5, 'Server DB error.');
                 return json_encode($this->error);
@@ -86,7 +86,7 @@ class AppUploadData
         fclose($handle);
     }
     
-    private function validate($patientId, $mode, $data)
+    private function validate($patientId, $mode, $time, $data)
     {
         if (!isset($patientId) || trim($patientId) == '') {
             $this->setError(1, 'Patient id is required.');
@@ -98,13 +98,23 @@ class AppUploadData
             return false;
         }
         
-        if (!isset($data) || trim($data) == '') {
-            $this->setError(3, 'Detail data error.');
+        if (!isset($time) || trim($time) == '') {
+            $this->setError(3, 'alert time is required.');
             return false;
         }
         
-        Logger::write($this->logFile, '\r\nlength of data : ' . strlen($data) . '\r\n');
-        return $data;
+        if (!isset($data) || trim($data) == '') {
+            $this->setError(4, 'Detail data error.');
+            return false;
+        }
+        
+        $len = strlen($data);
+        Logger::write($this->logFile, '\r\nlength of data : ' . $len . '\r\n');
+        if ($len % 4000 > 0) {
+            $this->setError(5, 'Data size is wrong.');
+            return false;
+        }
+        return true;
     }
     
     private function setError($code, $message)

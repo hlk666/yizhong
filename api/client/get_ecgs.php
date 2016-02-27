@@ -22,5 +22,16 @@ if (empty($ret)) {
     $result['code'] = '0';
     $result['message'] = MESSAGE_SUCCESS;
     $result['ecgs'] = $ret;
+    
+    $file = PATH_CACHE_CMD . $guardianId . '.php';
+    if (file_exists($file)) {
+        include $file;
+        $result['mode2_lead'] = $info['mode2_lead'];
+        $result['mode3_lead'] = $info['mode3_lead'];
+    } else {
+        $result['mode2_lead'] = '';
+        $result['mode3_lead'] = '';
+    }
+    
     api_exit($result);
 }

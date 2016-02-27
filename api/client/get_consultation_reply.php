@@ -6,8 +6,9 @@ if (false === Validate::checkRequired($_GET['hospital_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'hospital_id.']);
 }
 $hospitalId = $_GET['hospital_id'];
+$allFlag = isset($_GET['all_flag']) ? $_GET['all_flag'] : 0;
 
-$ret = Dbi::getDbi()->getConsultationResponse($hospitalId);
+$ret = Dbi::getDbi()->getConsultationResponse($hospitalId, $allFlag);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

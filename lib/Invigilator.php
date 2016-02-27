@@ -130,14 +130,14 @@ class Invigilator
         $this->info['check_info'] = 'off';
         $this->info['mode1_polycardia'] = PARAM_POLYCARDIA;
         $this->info['mode1_bradycardia'] = PARAM_BRADYCARDIA;
-        $this->info['mode1_lead'] = 'V1';
+        $this->info['mode1_lead'] = PARAM_LEAD;
         
         $this->info['mode2_record_time'] = PARAM_MODE2_RECORD_TIME;
         $this->info['mode2_polycardia'] = PARAM_POLYCARDIA;
         $this->info['mode2_bradycardia'] = PARAM_BRADYCARDIA;
         $this->info['mode2_regular_time'] = PARAM_REGULAR_TIME;
         $this->info['mode2_premature_beat'] = PARAM_PREMATURE_BEAT;
-        $this->info['mode2_lead'] = 'V1';
+        $this->info['mode2_lead'] = PARAM_LEAD;
         $this->info['mode2_exminrate'] = PARAM_EXMINRATE;
         $this->info['mode2_combeatrhy'] = 'on';
         $this->info['mode2_stopbeat'] = PARAM_STOPBEAT;
@@ -147,7 +147,7 @@ class Invigilator
         
         $this->info['mode3_polycardia'] = PARAM_POLYCARDIA;
         $this->info['mode3_bradycardia'] = PARAM_BRADYCARDIA;
-        $this->info['mode3_lead'] = 'V1';
+        $this->info['mode3_lead'] = PARAM_LEAD;
         $this->info['mode3_record_time'] = PARAM_MODE3_RECORD_TIME;
         
         $this->info['start_time'] = '';
