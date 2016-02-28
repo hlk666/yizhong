@@ -19,6 +19,14 @@ class Dbi extends BaseDbi
         return self::$instance;
     }
     
+    public function countEcgs($guardianId, $readStatus)
+    {
+        $where = ' guardian_id = ' . $guardianId;
+        if ($readStatus != null) {
+            $where .= " and read_status = $readStatus ";
+        }
+        return $this->countData('ecg', $where);
+    }
     //************************* existed methods(public) *************************
     //********************************** start **********************************
     public function existedDeviceHospital($deviceId, $hospitalId)
@@ -241,7 +249,7 @@ class Dbi extends BaseDbi
         $sql = 'select g.mode, g.lead, p.patient_name as name, p.birth_year, p.sex, p.tel,
                 tentative_diagnose, medical_history, regist_hospital_id, guard_hospital_id,
                 device_id, guardian_hours, regist_doctor_name as doctor_name,
-                height, weight, blood_pressure, sickroom, family_tel
+                height, weight, blood_pressure, sickroom, family_tel, start_time
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 where guardian_id = :guardian_id';
         $param = [':guardian_id' => $guardianId];

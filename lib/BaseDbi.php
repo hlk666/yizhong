@@ -53,6 +53,23 @@ class BaseDbi
             return VALUE_DB_ERROR;
         }
     }
+    protected function countData($tableName, $where = '')
+    {
+        try {
+            $sql = "select count(*) as count from $tableName where $where";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($param);
+            $ret = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (false === $ret) {
+                return array();
+            } else {
+                return $ret;
+            }
+        } catch (Exception $e) {
+            Logger::write($this->logFile, $e->getMessage());
+            return VALUE_DB_ERROR;
+        }
+    }
     protected function deleteData($sql, array $param = array())
     {
         try {

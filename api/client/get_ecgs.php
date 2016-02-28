@@ -11,6 +11,11 @@ $page = isset($_GET['page']) ? $_GET['page'] : 0;
 $rows = isset($_GET['rows']) ? $_GET['rows'] : VALUE_DEFAULT_ROWS;
 $offset = $page * $rows;
 
+$count = Dbi::getDbi()->countEcgs($guardianId, $readStatus);
+if (VALUE_DB_ERROR === $count) {
+    api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+}
+
 $ret = Dbi::getDbi()->getEcgs($guardianId, $offset, $rows, $readStatus);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
@@ -32,6 +37,6 @@ if (empty($ret)) {
         $result['mode2_lead'] = '';
         $result['mode3_lead'] = '';
     }
-    
+    $result['count'] = $count['count'];
     api_exit($result);
 }
