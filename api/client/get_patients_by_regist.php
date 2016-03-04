@@ -16,12 +16,11 @@ $tel = isset($_GET['tel']) ? $_GET['tel'] : null;
 $sTime = isset($_GET['start_time']) ? $_GET['start_time'] : null;
 $eTime = isset($_GET['end_time']) ? $_GET['end_time'] : null;
 $device = isset($_GET['device_id']) ? $_GET['device_id'] : null;
-$registHospitalId = isset($_GET['regist_hospital']) ? $_GET['regist_hospital'] : null;
 $doctorName = isset($_GET['doctor_name']) ? $_GET['doctor_name'] : null;
 $offset = $page * $rows;
 
-$ret = Dbi::getDbi()->getGuardians($hospitalId, $offset, $rows, $mode, $status, 
-        $patientName, $tel, $sTime, $eTime, $device, $registHospitalId, $doctorName);
+$ret = Dbi::getDbi()->getGuardiansByRegist($hospitalId, $offset, $rows, $mode, $status, 
+        $patientName, $tel, $sTime, $eTime, $device, $doctorName);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

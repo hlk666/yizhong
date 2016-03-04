@@ -64,18 +64,27 @@ class Dbi extends BaseDbi
         $param = [':account_id' => $doctorId];
         return $this->getDataRow($sql, $param);
     }
-    public function getConsultationRequest($hospitalId, $allFlag)
+    public function getConsultationRequest($hospitalId, $allFlag, $requestHospital, $startTime, $endTime)
     {
         $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, request_message, request_time
                 from consultation as c left join hospital as h on c.request_hospital_id = h.hospital_id
                 where response_hospital_id = :hospital_id ';
         if (0 == $allFlag) {
-            $sql .= ' and status = 1';
+            $sql .= ' and status = 1 ';
+        }
+        if (null !== $requestHospital) {
+            $sql .= ' and request_hospital_id = ' . $requestHospital;
+        }
+        if (null !== $startTime) {
+            $sql .= ' and request_time >= ' . $startTime;
+        }
+        if (null !== $endTime) {
+            $sql .= ' and request_time <= ' . $endTime;
         }
         $param = ['hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
-    public function getConsultationResponse($hospitalId, $allFlag)
+    public function getConsultationResponse($hospitalId, $allFlag, $responseHospital, $startTime, $endTime)
     {
         $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, response_message, response_time
                 from consultation as c left join hospital as h on c.response_hospital_id = h.hospital_id
@@ -84,6 +93,15 @@ class Dbi extends BaseDbi
             $sql .= ' and status >= 2';
         } else {
             $sql .= ' and status = 2';
+        }
+        if (null !== $responseHospital) {
+            $sql .= ' and response_hospital_id = ' . $responseHospital;
+        }
+        if (null !== $startTime) {
+            $sql .= ' and response_time >= ' . $startTime;
+        }
+        if (null !== $endTime) {
+            $sql .= ' and response_time <= ' . $endTime;
         }
         $param = ['hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
@@ -156,20 +174,24 @@ class Dbi extends BaseDbi
         return $this->getDataRow($sql, $param);
     }
     public function getGuardians($hospitalId, $offset, $rows, $mode = null, $status = null, 
-            $name = null, $tel = null, $sTime = null, $eTime = null)
+            $name = null, $tel = null, $sTime = null, $eTime = null, 
+            $device = null, $registHospitalId = null, $doctorName = null)
     {
         $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, 
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, 
-                g.blood_pressure, g.tentative_diagnose, g.medical_history,
+                g.blood_pressure, g.tentative_diagnose, g.medical_history, 
                 g.lead, h.hospital_name, g.regist_doctor_name as doctor_name, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.guard_hospital_id = h.hospital_id
-                where g.guard_hospital_id = ' . $hospitalId;
+                where guard_hospital_id = ' . $hospitalId;
         if ($mode != null) {
             $sql .= " and g.mode = $mode ";
         }
         if ($status != null) {
             $sql .= " and g.status in ($status) ";
+        }
+        if ($device != null) {
+            $sql .= " and g.device_id = $device ";
         }
         if ($name != null) {
             $sql .= " and p.patient_name = '$name' ";
@@ -182,6 +204,50 @@ class Dbi extends BaseDbi
         }
         if ($eTime != null) {
             $sql .= " and g.start_time <= '$eTime' ";
+        }
+        if ($registHospitalId != null) {
+            $sql .= " and g.regist_hospial_id in ($registHospitalId) ";
+        }
+        if ($doctorName != null) {
+            $sql .= " and g.regist_doctor_name = $doctorName ";
+        }
+        $sql .= " order by g.guardian_id desc limit $offset, $rows";
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getGuardiansByRegist($hospitalId, $offset, $rows, $mode = null, $status = null,
+            $name = null, $tel = null, $sTime = null, $eTime = null, $device = null, $doctorName = null)
+    {
+        $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id,
+                p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time,
+                g.blood_pressure, g.tentative_diagnose, g.medical_history,
+                g.lead, h.hospital_name, g.regist_doctor_name as doctor_name, g.sickroom
+                from guardian as g left join patient as p on g.patient_id = p.patient_id
+                left join hospital as h on g.guard_hospital_id = h.hospital_id
+                where regist_hospital_id = ' . $hospitalId;
+        if ($mode != null) {
+            $sql .= " and g.mode = $mode ";
+        }
+        if ($status != null) {
+            $sql .= " and g.status in ($status) ";
+        }
+        if ($device != null) {
+            $sql .= " and g.device_id = $device ";
+        }
+        if ($name != null) {
+            $sql .= " and p.patient_name = '$name' ";
+        }
+        if ($tel != null) {
+            $sql .= " and p.tel = '$tel' ";
+        }
+        if ($sTime != null) {
+            $sql .= " and g.start_time >= '$sTime' ";
+        }
+        if ($eTime != null) {
+            $sql .= " and g.start_time <= '$eTime' ";
+        }
+        if ($doctorName != null) {
+            $sql .= " and g.regist_doctor_name = $doctorName ";
         }
         $sql .= " order by g.guardian_id desc limit $offset, $rows";
         $param = [':hospital_id' => $hospitalId];
@@ -428,6 +494,12 @@ class Dbi extends BaseDbi
     public function flowGuardianEndGuard($guardianId)
     {
         $sql = 'update guardian set status = 2, end_time = now() where guardian_id = :guardian_id';
+        $param = [':guardian_id' => $guardianId];
+        return $this->updateData($sql, $param);
+    }
+    public function flowGuardianPrintReport($guardianId)
+    {
+        $sql = 'update guardian set status = 4 where guardian_id = :guardian_id';
         $param = [':guardian_id' => $guardianId];
         return $this->updateData($sql, $param);
     }

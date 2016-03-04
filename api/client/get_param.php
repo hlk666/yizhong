@@ -30,5 +30,5 @@ if (file_exists($file)) {
     api_exit($result);
 } else {
     Logger::writeCommonError('cache file not existed with ID:' . $guardianId);
-    api_exit(['code' => '19', 'message' => '参数配置信息不存在，请联系管理员。']);
+    api_exit(['code' => '19', 'message' => '该监护已结束，无法查看监护参数。']);
 }

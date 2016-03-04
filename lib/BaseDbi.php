@@ -4,9 +4,9 @@ class BaseDbi
     protected $pdo = null;
     protected $logFile = 'dbLog.txt';
     protected $server = '101.200.174.235';
-    protected $db = 'test';
-    protected $user = 'yantaiyizhong';
-    protected $pwd = 'yantaiyizhong';
+    protected $db = 'ecg';
+    protected $user = 'production';
+    protected $pwd = 'YrGGCDL3RKJU6VQd';
     
     private function __construct() {}
     

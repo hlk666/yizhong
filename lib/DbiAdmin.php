@@ -18,7 +18,25 @@ class DbiAdmin extends BaseDbi
         }
         return self::$instance;
     }
-    
+    public function getGuardiansByRegistTime($startTime, $endTime, array $exceptHospitals = array())
+    {
+        $sql = 'select guardian_id, device_id, regist_hospital_id, guard_hospital_id, mode
+                from guardian where regist_time <= "' . $endTime . '"';
+        if (null !== $startTime) {
+            $sql .= ' and regist_time >= "' . $startTime . '"';
+        }
+        if (!empty($exceptHospitals)) {
+            $where = ' and regist_hospital_id not in (';
+            foreach ($exceptHospitals as $hospital) {
+                $where .= $hospital . ',';
+            }
+            $where = substr($where, 0, -1);
+            $where .= ')';
+            $sql .= $where;
+        }
+        return $this->getDataAll($sql);
+    }
+    /*
     public function existedLoginName($loginName)
     {
         return $this->existData('account', 'login_name = "' . $loginName . '"');
@@ -110,5 +128,5 @@ class DbiAdmin extends BaseDbi
     public function editPatient($patientId, array $data)
     {
         return $this->updateTableByKey('patient', 'patient_id', $patientId, $data);
-    }
+    }*/
 }
