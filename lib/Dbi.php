@@ -340,7 +340,7 @@ class Dbi extends BaseDbi
         $param = [':device' => $device, ':hospital' => $hospital];
         return $this->insertData($sql, $param);
     }
-    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital)
+    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser)
     {
         $this->pdo->beginTransaction();
         $sql = 'insert into hospital(hospital_name, tel, address, parent_flag)
@@ -351,6 +351,16 @@ class Dbi extends BaseDbi
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
+        //default password:123456, defalt type:1->administrator
+        $sql = 'insert into account(login_name, real_name, password, type, hospital_id)
+                values (:login_name, :real_name, "e10adc3949ba59abbe56e057f20f883e", 1, :hospital_id)';
+        $param = [':login_name' => $adminUser, ':real_name' => $name . '管理员', ':hospital_id' => $hospitalId];
+        $insertAccount = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR === $insertAccount) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
         if (!empty($parentHospital)) {
             $sql = 'insert into hospital_relation(hospital_id, parent_hospital_id)
                 values (:hospital_id, :parent_hospital_id)';
@@ -486,9 +496,25 @@ class Dbi extends BaseDbi
         if (true !== $ret) {
             return VALUE_DB_ERROR;
         } else {
+            $this->pdo->beginTransaction();
+            
             $sql = 'delete from guardian where guardian_id = :guardian_id';
             $param = [':guardian_id' => $guardianId];
-            return $this->deleteData($sql, $param);
+            $ret = $this->deleteData($sql, $param);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
+            
+            $sql = 'delete from ecg where guardian_id = :guardian_id';
+            $param = [':guardian_id' => $guardianId];
+            $ret = $this->deleteData($sql, $param);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
+            $this->pdo->commit();
+            return true;
         }
     }
     public function flowGuardianEndGuard($guardianId)

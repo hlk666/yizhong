@@ -27,6 +27,7 @@ if (empty($ret)) {
     $result['account_id'] = $ret['account_id'];
     $result['name'] = $ret['name'];
     $result['hospital_id'] = $ret['hospital_id'];
+    $result['type'] = $ret['type'];
     
     $ret = Dbi::getDbi()->getHospitalInfo($result['hospital_id']);
     if (VALUE_DB_ERROR === $ret) {
