@@ -24,10 +24,13 @@ if (1 === $page) {
 $htmlDevices = '';
 foreach ($ret as $value) {
     $htmlDevices .= '<tr><td>' 
-            . $value['hospital_name'] . '</td><td>'
-            . $value['device_id'] . '</td><td>' 
-            . '<a href="edit_device.php?action=edit&id=' . $value['device_id'] . '">点击修改</a></td><td>'  
-            . '<a href="edit_device.php?action=del&id=' . $value['device_id'] . '">点击删除</a></td></tr>';
+        . $value['hospital_name'] . '</td><td>'
+        . $value['device_id'] . '</td><td>'
+        . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:unbindDevice(' 
+            . $value['device_id'] . ')">点击解除</button></td></tr>';
+    
+    
+    
 }
 $paging = getPaging($page, $lastPage);
 echo <<<EOF
@@ -36,8 +39,7 @@ echo <<<EOF
       <tr>
         <th>医院名</th>
         <th>设备ID</th>
-        <th>修改信息</th>
-        <th>删除信息</th>
+        <th>解除绑定</th>
       </tr>
     </thead>
     <tbody>$htmlDevices</tbody>

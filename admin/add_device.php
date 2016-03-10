@@ -3,8 +3,6 @@ require '../common.php';
 $title = '添加新的设备';
 require 'header.php';
 
-session_start();
-
 $repeatedAddHospital = !isset($_GET['hospital']) ? null : $_GET['hospital'];
 
 if (isset($_POST['submit'])){
