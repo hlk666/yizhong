@@ -18,23 +18,62 @@ class DbiAdmin extends BaseDbi
         }
         return self::$instance;
     }
-    public function getGuardiansByRegistTime($startTime, $endTime, array $exceptHospitals = array())
+    public function delDevice($deviceId)
     {
-        $sql = 'select guardian_id, device_id, regist_hospital_id, guard_hospital_id, mode
-                from guardian where regist_time <= "' . $endTime . '"';
+        $sql = 'delete from device where device_id = :device';
+        $param = [':device' => $deviceId];
+        return $this->deleteData($sql, $param);
+    }
+    public function getAdminAcount($loginName)
+    {
+        $sql = 'select account_id, real_name as name, type, password, hospital_id
+                from account where login_name = :user and type = 0 limit 1';
+        $param = [':user' => $loginName];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getGuardiansByRegistTime($startTime, $endTime, $exceptHospitalList)
+    {
+        $sql = 'select guardian_id, device_id, regist_hospital_id, guard_hospital_id, mode, p.patient_name, 
+                h1.hospital_name as regist_hospital_name, h2.hospital_name as guard_hospital_name
+                from guardian as g left join hospital as h1 on g.regist_hospital_id = h1.hospital_id
+                left join hospital as h2 on g.guard_hospital_id = h2.hospital_id
+                left join patient as p on g.patient_id = p.patient_id
+                where regist_time <= "' . $endTime . '"';
         if (null !== $startTime) {
             $sql .= ' and regist_time >= "' . $startTime . '"';
         }
-        if (!empty($exceptHospitals)) {
-            $where = ' and regist_hospital_id not in (';
-            foreach ($exceptHospitals as $hospital) {
-                $where .= $hospital . ',';
-            }
-            $where = substr($where, 0, -1);
-            $where .= ')';
-            $sql .= $where;
+        if (!empty($exceptHospitalList)) {
+            $sql .= " and regist_hospital_id not in ($exceptHospitalList)";
         }
+        $sql .= ' order by g.regist_hospital_id';
         return $this->getDataAll($sql);
+    }
+    public function getEcgs($startTime, $endTime, $exceptHospitalList)
+    {
+        $sql = 'select ecg_id, e.guardian_id, alert_flag, create_time
+                from ecg as e left join guardian as g on e.guardian_id = g.guardian_id
+                where create_time >= :start and create_time <= :end ';
+        if (!empty($exceptHospitalList)) {
+            $sql .= " and regist_hospital_id not in ($exceptHospitalList)";
+        }
+        $param = [':start' => $startTime, ':end' => $endTime];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getDeviceSum($exceptHospitalList)
+    {
+        $sql = 'select count(device_id) as total from device where 1 ';
+        if (!empty($exceptHospitalList)) {
+            $sql .= " and hospital_id not in ($exceptHospitalList)";
+        }
+        return $this->getDataRow($sql);
+    }
+    public function getHospitalInfo($hospitalId)
+    {
+        $sql = 'select h.hospital_id, hospital_name, address, tel, parent_flag, a.login_name
+                from hospital as h inner join account as a on h.hospital_id = a.hospital_id
+                where h.hospital_id = :hospital_id and a.type = 1 limit 1';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataRow($sql, $param);
     }
     /*
     public function existedLoginName($loginName)

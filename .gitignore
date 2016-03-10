@@ -8,3 +8,5 @@
 /cache/cmd/*.php
 /admin_all/
 /bootstrap/
+/data/
+/log/

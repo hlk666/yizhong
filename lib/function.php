@@ -111,15 +111,14 @@ function user_goto($message, $gotoFlag, $url = null)
     exit;
 }
 
-function user_back_after_delay($message, $delayTime, $url = null)
+function user_back_after_delay($message, $delayTime = 1000, $url = null)
 {
-    echo $message;
+    echo '<font color="#eb9316">' . $message . '<br>' . ($delayTime / 1000) . '秒后自动跳转页面。</font>';
     if (null == $url) {
         echo '<script language="javascript">setTimeout("history.back()", ' . $delayTime . ');</script>';
     } else {
         echo "<script language='javascript'>setTimeout('window.location.href=\"$url\"',$delayTime);</script>";
     }
-    exit;
 }
 
 function check_user_existed($isExisted)

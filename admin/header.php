@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+if (false === stripos($_SERVER['REQUEST_URI'], 'index.php')) {
+    if (!isset($_SESSION['login']) || true !== $_SESSION['login']) {
+        echo 'Permission denied!';
+        exit;
+    }
+}
+?>
 <!DOCTYPE html>
   <head>
     <meta charset="utf-8">
@@ -24,7 +34,18 @@
   <body>
     <div class="container" style="background-color:#FFF">
     <div class="row">
+<?php
+if (isset($isHideSider) && true === $isHideSider) {
+    echo <<<EOF
+    <div class="col-sm-12 blog-sidebar">
+      <div style="margin-top:10px;margin-bottom:10px;font-size:x-large;text-align:center;">$title</div>
+EOF;
+} else {
+    echo <<<EOF
       <div class="col-sm-2 blog-main">
+        <ul class="nav nav-sidebar">
+          <li><a href="summary.php">统计信息</a></li>
+        </ul>
         <ul class="nav nav-sidebar">
           <li><a href="hospital.php">医院列表</a></li>
           <li><a href="add_hospital.php">添加医院</a></li>
@@ -34,10 +55,10 @@
           <li><a href="add_device.php">添加设备</a></li>
         </ul>
         <ul class="nav nav-sidebar">
-          <li><a href="#">注销登录</a></li>
+          <li><a href="logout.php">注销登录</a></li>
         </ul>
       </div>
-      <div class="col-sm-10 blog-sidebar">
-        <div style="margin-top:10px;margin-bottom:10px;/*background-color:#5bc0de;*/font-size:x-large;text-align:center;">
-          <?php echo $title;?>
-        </div>
+    <div class="col-sm-10 blog-sidebar">
+      <div style="margin-top:10px;margin-bottom:10px;font-size:x-large;text-align:center;">$title</div>
+EOF;
+}
