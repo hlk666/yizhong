@@ -3,7 +3,7 @@ require '../config/config.php';
 require '../lib/function.php';
 require '../lib/DbiAdmin.php';
 
-$title = '统计信息(不计内部测试数据)';
+$title = '昨日信息统计(不计内部测试数据)';
 require 'header.php';
 
 $dataFile = PATH_DATA . date('Ymd', strtotime('-1 day')) . '.php';
@@ -81,21 +81,33 @@ $noticeEcgDay = '<tr><td>' . $ecgCount
     . '</td><td>' . $ecgSOSCount
     . '</td><td>' . $ecgRemoteCheckCount . '</td></tr>';
 
-$deviceUsedRate = ($deviceTotal == 0) ? 0 : ($deviceUsedNotRepeated / $deviceTotal) * 100;
+$deviceUsedRate = ($deviceTotal == 0) ? 0 : ($deviceUsed / $deviceTotal) * 100;
 $deviceUsedRate = round($deviceUsedRate, 2);
-$noticeDevice = '总设备数：<font color="blue">' . $deviceTotal
-    . '</font>。<br>使用设备数(包含重复使用)：<font color="blue">' . $deviceUsed
-    . '</font>。<br>使用设备数(去掉重复使用)：<font color="blue">' . $deviceUsedNotRepeated
-    . '</font>，<br>设备使用率(去重复后)：<font color="blue">' . $deviceUsedRate . '%</font>。';
 $noticeDevice = '<tr><td>' . $deviceTotal
     . '</td><td>' . $deviceUsed
-    . '</td><td>' . $deviceUsedNotRepeated
     . '</td><td>' . $deviceUsedRate . '%</td></tr>';
+
 $htmlGuardianAll = '<tr><td>' . $guardianCountAll
     . '</td><td>' . $guardianCountAllRealtime
     . '</td><td>' . $guardianCountAllAbnormal
     . '</td><td>' . $guardianCountAllOnetime . '</td></tr>';
 echo <<<EOF
+<div style="background-color:#428bca;"><h3>查看期间范围数据(请勿频繁查询):</h3></div>
+<form class="form-horizontal" role="form" method="post" action="summary_condition.php">
+<div class="row">
+  <div class="col-xs-12 col-sm-4 col-md-4">
+    <label for="start_time" class="control-label"><font color="red">*</font>开始日：</label>
+    <input type="text" name="start_time" onclick="SelectDate(this,'yyyy-MM-dd')" />
+  </div>
+  <div class="col-xs-12 col-sm-4 col-md-4">
+    <label for="end_time" class="control-label"><font color="red">*</font>结束日：</label>
+    <input type="text" name="end_time" onclick="SelectDate(this,'yyyy-MM-dd')" />
+  </div>
+  <div class="col-xs-12 col-sm-3 col-md-3">
+    <button type="submit" class="btn btn-sm btn-success" name="query">日期范围内查询</button>
+  </div>
+</div>
+</form>
 <div style="background-color:#428bca;"><h3>昨日数据：</h3></div>
 <table class="table table-striped">
   <thead>
@@ -140,9 +152,8 @@ echo <<<EOF
     <thead>
       <tr>
         <th>总设备数</th>
-        <th>使用设备数(含重复)</th>
-        <th>使用设备数(去重复)</th>
-        <th>设备使用率(去重复)</th>
+        <th>设备使用台次</th>
+        <th>设备使用率</th>
       </tr>
     </thead>
     <tbody>$noticeDevice</tbody>

@@ -1,5 +1,8 @@
 <?php
-require '../common.php';
+require '../config/config.php';
+require '../lib/function.php';
+require '../lib/DbiAdmin.php';
+
 $title = '添加新的设备';
 require 'header.php';
 
@@ -7,20 +10,28 @@ $repeatedAddHospital = !isset($_GET['hospital']) ? null : $_GET['hospital'];
 
 if (isset($_POST['submit'])){
     if (true === $_SESSION['post']) {
-        user_goto('请不要刷新页面。', GOTO_FLAG_URL, 'add_device.php');
+        user_back_after_delay('请不要刷新页面。');
     }
     
     $hospitalId = !isset($_POST['hospital']) ? null : $_POST['hospital'];
     $deviceId = !isset($_POST['device_id']) ? null : $_POST['device_id'];
     
     if (empty($hospitalId) || '0' == $hospitalId) {
-        user_goto('请选择医院。', GOTO_FLAG_BACK);
+        user_back_after_delay('请选择医院。');
     }
     if (empty($deviceId)) {
-        user_goto('请正确输入设备ID。', GOTO_FLAG_BACK);
+        user_back_after_delay('请正确输入设备ID。');
     }
     
-    $ret = Dbi::getDbi()->addDevice($hospitalId, $deviceId);
+    $isExisted = DbiAdmin::getDbi()->existedDevice($deviceId);
+    if (VALUE_DB_ERROR === $isExisted) {
+        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+    }
+    if (true === $isExisted) {
+        user_back_after_delay('该设备ID已经和其他医院绑定，请解绑后再操作。');
+    }
+    
+    $ret = DbiAdmin::getDbi()->addDevice($hospitalId, $deviceId);
     if (VALUE_DB_ERROR === $ret) {
         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
     }
@@ -32,7 +43,7 @@ if (isset($_POST['submit'])){
         . ' onclick="javascript:location.href=\'add_device.php?hospital=' . $hospitalId . '\';">继续给该医院添加设备</button>';
 } else {
     $_SESSION['post'] = false;
-    $ret = Dbi::getDbi()->getHospitalList();
+    $ret = DbiAdmin::getDbi()->getHospitalList();
     if (VALUE_DB_ERROR === $ret) {
         $ret = array();
     }

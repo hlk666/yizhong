@@ -1,9 +1,12 @@
 <?php
-require '../common.php';
+require '../config/config.php';
+require '../lib/function.php';
+require '../lib/DbiAdmin.php';
+
 $title = '医院列表';
 require 'header.php';
 
-$ret = Dbi::getDbi()->getHospitalList();
+$ret = DbiAdmin::getDbi()->getHospitalList();
 if (VALUE_DB_ERROR === $ret) {
     echo '<script language="javascript">alert("服务器访问失败，请刷新重试。");</script>';
     $ret = array();
@@ -17,7 +20,7 @@ $lastPage = ceil($count / $rows);
 if (1 === $page) {
     $ret = array_slice($ret, 0, $rows);
 } else {
-    $ret = Dbi::getDbi()->getHospitalList($offset, $rows);
+    $ret = DbiAdmin::getDbi()->getHospitalList($offset, $rows);
 }
 
 $htmlHospitals = '';

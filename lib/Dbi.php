@@ -287,14 +287,6 @@ class Dbi extends BaseDbi
         $sql = 'select hospital_id, hospital_name from hospital where parent_flag = 1';
         return $this->getDataAll($sql);
     }
-    public function getHospitalList($offset = 0, $rows = null)
-    {
-        $sql = 'select hospital_id, hospital_name, tel, address, parent_flag from hospital ';
-        if (null !== $rows) {
-            $sql .= " limit $offset, $rows";
-        }
-        return $this->getDataAll($sql);
-    }
     public function getPatient($patientId)
     {
         $sql = 'select patient_id, patient_name, sex, birth_year, tel, address
@@ -332,12 +324,6 @@ class Dbi extends BaseDbi
                 values (:login_name, :real_name, :password, :type, :hospital_id, :creator)';
         $param = [':login_name' => $loginName, ':real_name' => $realName, ':password' => $password,
                         ':type' => $type, ':hospital_id' => $hospitalId,':creator' => $creator ];
-        return $this->insertData($sql, $param);
-    }
-    public function addDevice($hospital, $device)
-    {
-        $sql = 'insert into device (device_id, hospital_id) values (:device, :hospital)';
-        $param = [':device' => $device, ':hospital' => $hospital];
         return $this->insertData($sql, $param);
     }
     public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser)

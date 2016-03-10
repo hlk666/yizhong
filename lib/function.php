@@ -110,15 +110,17 @@ function user_goto($message, $gotoFlag, $url = null)
     echo MESSAGE_OTHER_ERROR;
     exit;
 }
-
-function user_back_after_delay($message, $delayTime = 1000, $url = null)
+//only for admin folder because using path:tpl/***.
+function user_back_after_delay($message, $delayTime = 2000, $url = null)
 {
-    echo '<font color="#eb9316">' . $message . '<br>' . ($delayTime / 1000) . '秒后自动跳转页面。</font>';
+    echo '<font color="#eb9316" size="5px">' . $message . '<br>' . ($delayTime / 1000) . '秒后自动跳转页面。</font>';
     if (null == $url) {
         echo '<script language="javascript">setTimeout("history.back()", ' . $delayTime . ');</script>';
     } else {
         echo "<script language='javascript'>setTimeout('window.location.href=\"$url\"',$delayTime);</script>";
     }
+    include 'tpl/footer.tpl';
+    exit;
 }
 
 function check_user_existed($isExisted)

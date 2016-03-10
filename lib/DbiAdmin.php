@@ -18,11 +18,21 @@ class DbiAdmin extends BaseDbi
         }
         return self::$instance;
     }
+    public function addDevice($hospital, $device)
+    {
+        $sql = 'insert into device (device_id, hospital_id) values (:device, :hospital)';
+        $param = [':device' => $device, ':hospital' => $hospital];
+        return $this->insertData($sql, $param);
+    }
     public function delDevice($deviceId)
     {
         $sql = 'delete from device where device_id = :device';
         $param = [':device' => $deviceId];
         return $this->deleteData($sql, $param);
+    }
+    public function existedDevice($deviceId)
+    {
+        return $this->existData('device', 'device_id = ' . $deviceId);
     }
     public function getAdminAcount($loginName)
     {
@@ -74,6 +84,14 @@ class DbiAdmin extends BaseDbi
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
+    }
+    public function getHospitalList($offset = 0, $rows = null)
+    {
+        $sql = 'select hospital_id, hospital_name, tel, address, parent_flag from hospital ';
+        if (null !== $rows) {
+            $sql .= " limit $offset, $rows";
+        }
+        return $this->getDataAll($sql);
     }
     /*
     public function existedLoginName($loginName)

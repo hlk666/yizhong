@@ -3,8 +3,6 @@ require '../common.php';
 $title = '添加新的医院';
 require 'header.php';
 
-session_start();
-
 if (isset($_POST['submit'])){
     if (true === $_SESSION['post']) {
         user_goto('请不要刷新页面。', GOTO_FLAG_URL, 'add_hospital.php');
@@ -15,6 +13,7 @@ if (isset($_POST['submit'])){
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
     $hospitalParent = !isset($_POST['hospital_parent']) ? null : $_POST['hospital_parent'];
+    $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
     
     if (empty($hospitalName)) {
         user_goto('请正确输入医院名。', GOTO_FLAG_BACK);
@@ -25,14 +24,17 @@ if (isset($_POST['submit'])){
     if (empty($hospitalAddress)) {
         user_goto('请正确输入医院地址。', GOTO_FLAG_BACK);
     }
+    if (empty($adminUser)) {
+        user_goto('请正确输入初始管理员登录用户。', GOTO_FLAG_BACK);
+    }
     
-    $ret = Dbi::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $hospitalParent);
+    $ret = Dbi::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser);
     if (VALUE_DB_ERROR === $ret) {
         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
     }
     $_SESSION['post'] = true;
     echo MESSAGE_SUCCESS 
-        . '<br /><button type="submit" class="btn btn-lg btn-info" style="margin-top:50px;" ' 
+        . '<br /><button type="button" class="btn btn-lg btn-info" style="margin-top:50px;" ' 
         . ' onclick="javascript:location.href=\'hospital.php\';">查看医院列表</button>';
 } else {
     $_SESSION['post'] = false;
@@ -63,6 +65,12 @@ if (isset($_POST['submit'])){
     <label for="hospital_address" class="col-sm-2 control-label">地址<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="hospital_address" name="hospital_address" placeholder="请输入医院的地址">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="admin" class="col-sm-2 control-label">管理员<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="admin" name="admin" placeholder="请输入管理员登录用户名">
     </div>
   </div>
   <div class="form-group">

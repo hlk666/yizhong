@@ -21,6 +21,7 @@ define('PATH_GETUI', PATH_ROOT . 'vendor\\getui\\');
 define('SUFFIX_REAL_TIME_FILE', '_real_time.bin');
 
 define('URL_ROOT', 'http://101.200.174.235/');
+define('TEST_HOSPITALS', '1,4,5');
 
 define('VALUE_DB_ERROR', -1);
 define('VALUE_PARAM_ERROR', -2);
