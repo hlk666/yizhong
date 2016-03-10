@@ -80,5 +80,4 @@ $handle = fopen($dataFile, 'w');
 fwrite($handle, $template);
 fclose($handle);
 
-echo 'success.';
 exit(0);

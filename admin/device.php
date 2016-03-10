@@ -1,13 +1,31 @@
 <?php
-require '../common.php';
+require '../config/config.php';
+require '../lib/function.php';
+require '../lib/DbiAdmin.php';
+
 $title = '医院-设备列表';
 require 'header.php';
 
 $hospital = isset($_GET['hospital']) ? $_GET['hospital'] : null;
-$ret = Dbi::getDbi()->getDeviceList($hospital);
+if (0 == $hospital) {
+    $hospital = null;
+}
+$ret = DbiAdmin::getDbi()->getHospitalList();
 if (VALUE_DB_ERROR === $ret) {
-    echo '<script language="javascript">alert("服务器访问失败，请刷新重试。");</script>';
-    $ret = array();
+    user_back_after_delay(MESSAGE_DB_ERROR);
+}
+$htmlHospitals = '<option value="0">请选择医院</option>';
+foreach ($ret as $value) {
+    if ($hospital == $value['hospital_id']) {
+        $htmlHospitals .= '<option value="' . $value['hospital_id'] . '" selected>' . $value['hospital_name'] . '</option>';
+    } else {
+        $htmlHospitals .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
+    }
+}
+
+$ret = DbiAdmin::getDbi()->getDeviceList($hospital);
+if (VALUE_DB_ERROR === $ret) {
+    user_back_after_delay(MESSAGE_DB_ERROR);
 }
 $count = count($ret);
 $page = isset($_GET['page']) ? $_GET['page'] : 1;
@@ -18,7 +36,10 @@ $lastPage = ceil($count / $rows);
 if (1 === $page) {
     $ret = array_slice($ret, 0, $rows);
 } else {
-    $ret = Dbi::getDbi()->getDeviceList($hospital, $offset, $rows);
+    $ret = DbiAdmin::getDbi()->getDeviceList($hospital, $offset, $rows);
+    if (VALUE_DB_ERROR === $ret) {
+        user_back_after_delay(MESSAGE_DB_ERROR);
+    }
 }
 
 $htmlDevices = '';
@@ -28,12 +49,23 @@ foreach ($ret as $value) {
         . $value['device_id'] . '</td><td>'
         . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:unbindDevice(' 
             . $value['device_id'] . ')">点击解除</button></td></tr>';
-    
-    
-    
 }
 $paging = getPaging($page, $lastPage);
 echo <<<EOF
+<form class="form-horizontal" role="form" method="get">
+<div class="row">
+  <div class="col-xs-12 col-sm-2" style="margin-bottom:3px;">
+    <label for="start_time" class="control-label"><font color="red">*</font>选择医院</label>
+  </div>
+  <div class="col-xs-12 col-sm-3" style="margin-bottom:3px;">
+    <select class="form-control" name="hospital">$htmlHospitals</select>
+  </div>
+  <div class="col-xs-12 col-sm-2">
+    <button type="submit" class="btn btn-sm btn-info">查看该院设备</button>
+  </div>
+</div>
+</form>
+<hr style="border-top:1px ridge red;" />
   <table class="table table-striped">
     <thead>
       <tr>

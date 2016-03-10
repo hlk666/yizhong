@@ -119,18 +119,6 @@ class Dbi extends BaseDbi
         $param = [':guardian_id' => $guardianId];
         return $this->getDataString($sql, $param);
     }
-    public function getDeviceList($hospital = null, $offset = 0, $rows = null)
-    {
-        $sql = 'select hospital_name, device_id from device as d 
-                inner join hospital as h on d.hospital_id = h.hospital_id';
-        if (null !== $hospital){
-            $sql .= ' where d.hospital_id = ' . $hospital;
-        }
-        if (null !== $rows) {
-            $sql .= " limit $offset, $rows";
-        }
-        return $this->getDataAll($sql);
-    }
     public function getDiagnosisByGuardian($guardianId)
     {
         $sql = 'select d.ecg_id, d.content, d.content_parent, d.create_time as content_time, e.data_path

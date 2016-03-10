@@ -33,6 +33,10 @@ if (isset($_POST['login'])) {
     }
     exit;
 } else {
+    if (isset($_SESSION['login']) && true === $_SESSION['login']) {
+        header('location:summary.php');
+        exit;
+    }
     $message = isset($_GET['error']) ? $_GET['error'] :null;
     if (null !== $message) {
         $message = '<lable><font color="red">' . $message . '</font></lable>';

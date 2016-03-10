@@ -34,6 +34,18 @@ class DbiAdmin extends BaseDbi
     {
         return $this->existData('device', 'device_id = ' . $deviceId);
     }
+    public function getDeviceList($hospital = null, $offset = 0, $rows = null)
+    {
+        $sql = 'select hospital_name, device_id from device as d
+                inner join hospital as h on d.hospital_id = h.hospital_id';
+        if (null !== $hospital){
+            $sql .= ' where d.hospital_id = ' . $hospital;
+        }
+        if (null !== $rows) {
+            $sql .= " limit $offset, $rows";
+        }
+        return $this->getDataAll($sql);
+    }
     public function getAdminAcount($loginName)
     {
         $sql = 'select account_id, real_name as name, type, password, hospital_id

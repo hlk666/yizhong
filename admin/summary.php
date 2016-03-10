@@ -95,16 +95,16 @@ echo <<<EOF
 <div style="background-color:#428bca;"><h3>查看期间范围数据(请勿频繁查询):</h3></div>
 <form class="form-horizontal" role="form" method="post" action="summary_condition.php">
 <div class="row">
-  <div class="col-xs-12 col-sm-4 col-md-4">
+  <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
     <label for="start_time" class="control-label"><font color="red">*</font>开始日：</label>
     <input type="text" name="start_time" onclick="SelectDate(this,'yyyy-MM-dd')" />
   </div>
-  <div class="col-xs-12 col-sm-4 col-md-4">
+  <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
     <label for="end_time" class="control-label"><font color="red">*</font>结束日：</label>
     <input type="text" name="end_time" onclick="SelectDate(this,'yyyy-MM-dd')" />
   </div>
-  <div class="col-xs-12 col-sm-3 col-md-3">
-    <button type="submit" class="btn btn-sm btn-success" name="query">日期范围内查询</button>
+  <div class="col-xs-12 col-sm-3">
+    <button type="submit" class="btn btn-sm btn-info" name="query">日期范围内查询</button>
   </div>
 </div>
 </form>
