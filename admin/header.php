@@ -42,20 +42,20 @@ if (isset($isHideSider) && true === $isHideSider) {
 EOF;
 } else {
     echo <<<EOF
-      <div class="col-sm-2 blog-main">
+      <div class="col-sm-2 blog-main" style="font-size:18px;">
         <ul class="nav nav-sidebar">
-          <li><a href="summary.php">统计信息</a></li>
+          <li><a href="summary.php">前 日 统 计 信 息</a></li>
         </ul>
         <ul class="nav nav-sidebar">
-          <li><a href="hospital.php">医院列表</a></li>
-          <li><a href="add_hospital.php">添加医院</a></li>
+          <li><a href="hospital.php">医 院 基 本 信 息</a></li>
+          <li><a href="add_hospital.php">添 加 新 的 医 院</a></li>
         </ul>
         <ul class="nav nav-sidebar">
-          <li><a href="device.php">设备列表</a></li>
-          <li><a href="add_device.php">添加设备</a></li>
+          <li><a href="device.php">设 备 绑 定 信 息</a></li>
+          <li><a href="add_device.php">绑 定 新 的 设 备</a></li>
         </ul>
         <ul class="nav nav-sidebar">
-          <li><a href="logout.php">注销登录</a></li>
+          <li><a href="logout.php">注 销 本 次 登 录</a></li>
         </ul>
       </div>
     <div class="col-sm-10 blog-sidebar">

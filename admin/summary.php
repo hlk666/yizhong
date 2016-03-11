@@ -3,7 +3,7 @@ require '../config/config.php';
 require '../lib/function.php';
 require '../lib/DbiAdmin.php';
 
-$title = '昨日信息统计(不计内部测试数据)';
+$title = '昨日信息统计';
 require 'header.php';
 
 $dataFile = PATH_DATA . date('Ymd', strtotime('-1 day')) . '.php';
@@ -55,7 +55,6 @@ foreach ($guardiansDay as $value) {
     }
     
     $htmlGuardianDay .= '<tr><td>' . $value['regist_hospital_name'] 
-        . '</td><td>' . $value['guard_hospital_name']
         . '</td><td>' . $value['device_id']
         . '</td><td>' . $value['guardian_id']
         . '</td><td>' . $value['patient_name']
@@ -92,7 +91,7 @@ $htmlGuardianAll = '<tr><td>' . $guardianCountAll
     . '</td><td>' . $guardianCountAllAbnormal
     . '</td><td>' . $guardianCountAllOnetime . '</td></tr>';
 echo <<<EOF
-<div style="background-color:#428bca;"><h3>查看期间范围数据(请勿频繁查询):</h3></div>
+<div style="background-color:#428bca;"><h3>期间范围数据(勿频繁查询):</h3></div>
 <form class="form-horizontal" role="form" method="post" action="summary_condition.php">
 <div class="row">
   <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
@@ -125,7 +124,6 @@ echo <<<EOF
     <thead>
       <tr>
         <th>开单医院</th>
-        <th>监护医院</th>
         <th>设备ID</th>
         <th>监护ID</th>
         <th>病人姓名</th>
@@ -157,18 +155,6 @@ echo <<<EOF
       </tr>
     </thead>
     <tbody>$noticeDevice</tbody>
-  </table>
-<div style="background-color:#428bca;"><h3>截止到昨日的合计数据：</h3></div>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>监护数</th>
-        <th>实时模式</th>
-        <th>异常模式</th>
-        <th>单次模式</th>
-      </tr>
-    </thead>
-    <tbody>$htmlGuardianAll</tbody>
   </table>
 EOF;
 require 'tpl/footer.tpl';
