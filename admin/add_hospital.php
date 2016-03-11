@@ -1,5 +1,8 @@
 <?php
-require '../common.php';
+require '../config/config.php';
+require '../lib/function.php';
+require '../lib/DbiAdmin.php';
+
 $title = '添加新的医院';
 require 'header.php';
 
@@ -28,7 +31,7 @@ if (isset($_POST['submit'])){
         user_goto('请正确输入初始管理员登录用户。', GOTO_FLAG_BACK);
     }
     
-    $ret = Dbi::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser);
+    $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser);
     if (VALUE_DB_ERROR === $ret) {
         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
     }
@@ -38,7 +41,7 @@ if (isset($_POST['submit'])){
         . ' onclick="javascript:location.href=\'hospital.php\';">查看医院列表</button>';
 } else {
     $_SESSION['post'] = false;
-    $ret = Dbi::getDbi()->getHospitalParentList();
+    $ret = DbiAdmin::getDbi()->getHospitalParentList();
     if (VALUE_DB_ERROR === $ret) {
         $ret = array();
     }

@@ -24,15 +24,144 @@ class DbiAdmin extends BaseDbi
         $param = [':device' => $device, ':hospital' => $hospital];
         return $this->insertData($sql, $param);
     }
+    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser)
+    {
+        $this->pdo->beginTransaction();
+        $sql = 'insert into hospital(hospital_name, tel, address, parent_flag)
+                values (:name, :tel, :address, :flag)';
+        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':flag' => $parentFlag];
+        $hospitalId = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR === $hospitalId) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        //default password:123456, defalt type:1->administrator
+        $sql = 'insert into account(login_name, real_name, password, type, hospital_id)
+                values (:login_name, :real_name, "e10adc3949ba59abbe56e057f20f883e", 1, :hospital_id)';
+        $param = [':login_name' => $adminUser, ':real_name' => $name . '管理员', ':hospital_id' => $hospitalId];
+        $insertAccount = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR === $insertAccount) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+    
+        if (!empty($parentHospital)) {
+            $sql = 'insert into hospital_relation(hospital_id, parent_hospital_id)
+                values (:hospital_id, :parent_hospital_id)';
+            $param = [':hospital_id' => $hospitalId, ':parent_hospital_id' => $parentHospital];
+            $ret = $this->insertData($sql, $param);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
+        }
+        $this->pdo->commit();
+        return true;
+    }
+    public function addHospitalParent($hospitalId, $parentHospital)
+    {
+        $sql = 'insert into hospital_relation(hospital_id, parent_hospital_id)
+            values (:hospital_id, :parent_hospital_id)';
+        $param = [':hospital_id' => $hospitalId, ':parent_hospital_id' => $parentHospital];
+        return  $this->insertData($sql, $param);
+    }
     public function delDevice($deviceId)
     {
         $sql = 'delete from device where device_id = :device';
         $param = [':device' => $deviceId];
         return $this->deleteData($sql, $param);
     }
+    public function delHospital($hospitalId)
+    {
+        $this->pdo->beginTransaction();
+        
+        $sql = 'delete from hospital_relation where hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId];
+        $ret = $this->deleteData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = 'delete from hospital_relation where parent_hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId];
+        $ret = $this->deleteData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = 'delete from account where hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId];
+        $ret = $this->deleteData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = 'delete from hospital where hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId];
+        $ret = $this->deleteData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        $this->pdo->commit();
+        return true;
+    }
+    public function delHospitalRelation($hospitalId, array $parentHospitalIdList = array())
+    {
+        $sql = 'delete from hospital_relation where hospital_id = :hospital ';
+        if (!empty($parentHospitalIdList)) {
+            $list = '(';
+            foreach ($parentHospitalIdList as $id) {
+                $list .= $id . ',';
+            }
+            $list = substr($list, 0, -1);
+            $list .= ')';
+            $sql .= ' and parent_hospital_id not in ' . $list;
+        }
+        $param = [':hospital' => $hospitalId];
+        return $this->deleteData($sql, $param);
+    }
+    public function editHospital($hospitalId, $hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $loginUser)
+    {
+        $this->pdo->beginTransaction();
+    
+        $sql = 'update account set login_name = :login_user 
+                where hospital_id = :hospital and type = 1';
+        $param = [':login_user' => $loginUser, ':hospital' => $hospitalId];
+        $ret = $this->updateData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = 'update hospital 
+                set hospital_name = :name, tel = :tel, address = :address, parent_flag = :flag
+                where hospital_id = :hospital';
+        $param = [
+            ':hospital' => $hospitalId,
+            ':name' => $hospitalName,
+            ':tel' => $hospitalTel,
+            ':address' => $hospitalAddress,
+            ':flag' => $parentFlag
+        ];
+        $ret = $this->updateData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        $this->pdo->commit();
+        return true;
+    }
     public function existedDevice($deviceId)
     {
         return $this->existData('device', 'device_id = ' . $deviceId);
+    }
+    public function existedLoginName($loginName, $hospital)
+    {
+        return $this->existData('account', "login_name = '$loginName' and hospital_id <> $hospital");
     }
     public function getDeviceList($hospital = null, $offset = 0, $rows = null)
     {
@@ -99,10 +228,24 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalList($offset = 0, $rows = null)
     {
-        $sql = 'select hospital_id, hospital_name, tel, address, parent_flag from hospital ';
+        $sql = 'select h.hospital_id, hospital_name, tel, address, parent_flag, a.login_name 
+                from hospital as h left join account as a on h.hospital_id = a.hospital_id where a.type = 1';
         if (null !== $rows) {
             $sql .= " limit $offset, $rows";
         }
+        return $this->getDataAll($sql);
+    }
+    public function getHospitalParent($hospitalId)
+    {
+        $sql = 'select h.hospital_id, hospital_name from hospital as h
+                inner join hospital_relation as r on h.hospital_id = r.parent_hospital_id
+                where r.hospital_id = :hospital_id';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getHospitalParentList()
+    {
+        $sql = 'select hospital_id, hospital_name from hospital where parent_flag = 1';
         return $this->getDataAll($sql);
     }
     /*

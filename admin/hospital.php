@@ -28,11 +28,13 @@ foreach ($ret as $value) {
     $htmlHospitals .= '<tr><td>' 
             . $value['hospital_id'] . '</td><td>'
             . $value['hospital_name'] . '</td><td>'
-            . $value['tel'] . '</td><td>'
-            . $value['address'] . '</td><td>'
-            . '<a href="edit_hospital.php?action=edit&id=' . $value['hospital_id'] . '">点击修改</a></td><td>'
-            . '<a href="edit_relation.php?id=' . $value['hospital_id'] . '">点击修改</a></td><td>'
-            . '<a href="edit_hospital.php?action=del&id=' . $value['hospital_id'] . '">点击删除</a></td></tr>';
+            . $value['login_name'] . '</td><td>'
+            . '<button type="button" class="btn btn-xs btn-warning" onclick="javascript:editHospital(' 
+                . $value['hospital_id'] . ')">修改</button></td><td>'
+            . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editRelation(' 
+                . $value['hospital_id'] . ')">配置</button></td><td>'
+            . '<button type="button" class="btn btn-xs btn-danger" onclick="javascript:deleteHospital(' 
+                . $value['hospital_id'] . ')">删除</button></td></tr>';
 }
 $paging = getPaging($page, $lastPage);
 
@@ -42,11 +44,10 @@ echo <<<EOF
   <tr>
     <th>ID</th>
     <th>医院名</th>
-    <th>电话</th>
-    <th>地址</th>
+    <th>管理员用户</th>
     <th>基本信息</th>
     <th>上级医院</th>
-    <th>删除信息</th>
+    <th>删除医院</th>
   </tr>
 </thead>
 <tbody>$htmlHospitals</tbody>

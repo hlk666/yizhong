@@ -38,7 +38,7 @@ if (false === stripos($_SERVER['REQUEST_URI'], 'index.php')) {
 if (isset($isHideSider) && true === $isHideSider) {
     echo <<<EOF
     <div class="col-sm-12 blog-sidebar">
-      <div style="margin-top:10px;margin-bottom:10px;font-size:x-large;text-align:center;">$title</div>
+      <div style="margin-top:10px;margin-bottom:10px;text-align:center;"><h2>$title</h2></div>
 EOF;
 } else {
     echo <<<EOF
@@ -51,7 +51,7 @@ EOF;
           <li><a href="add_hospital.php">添 加 新 的 医 院</a></li>
         </ul>
         <ul class="nav nav-sidebar">
-          <li><a href="device.php">设 备 绑 定 信 息</a></li>
+          <li><a href="device.php">设 备 基 本 信 息</a></li>
           <li><a href="add_device.php">绑 定 新 的 设 备</a></li>
         </ul>
         <ul class="nav nav-sidebar">
@@ -59,6 +59,6 @@ EOF;
         </ul>
       </div>
     <div class="col-sm-10 blog-sidebar">
-      <div style="margin-top:10px;margin-bottom:10px;font-size:x-large;text-align:center;">$title</div>
+      <div style="margin-top:10px;margin-bottom:10px;font-size:x-large;text-align:center;"><h2>$title</h2></div>
 EOF;
 }

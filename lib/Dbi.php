@@ -270,11 +270,6 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
-    public function getHospitalParentList()
-    {
-        $sql = 'select hospital_id, hospital_name from hospital where parent_flag = 1';
-        return $this->getDataAll($sql);
-    }
     public function getPatient($patientId)
     {
         $sql = 'select patient_id, patient_name, sex, birth_year, tel, address
@@ -314,40 +309,7 @@ class Dbi extends BaseDbi
                         ':type' => $type, ':hospital_id' => $hospitalId,':creator' => $creator ];
         return $this->insertData($sql, $param);
     }
-    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser)
-    {
-        $this->pdo->beginTransaction();
-        $sql = 'insert into hospital(hospital_name, tel, address, parent_flag)
-                values (:name, :tel, :address, :flag)';
-        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':flag' => $parentFlag];
-        $hospitalId = $this->insertData($sql, $param);
-        if (VALUE_DB_ERROR === $hospitalId) {
-            $this->pdo->rollBack();
-            return VALUE_DB_ERROR;
-        }
-        //default password:123456, defalt type:1->administrator
-        $sql = 'insert into account(login_name, real_name, password, type, hospital_id)
-                values (:login_name, :real_name, "e10adc3949ba59abbe56e057f20f883e", 1, :hospital_id)';
-        $param = [':login_name' => $adminUser, ':real_name' => $name . '管理员', ':hospital_id' => $hospitalId];
-        $insertAccount = $this->insertData($sql, $param);
-        if (VALUE_DB_ERROR === $insertAccount) {
-            $this->pdo->rollBack();
-            return VALUE_DB_ERROR;
-        }
-        
-        if (!empty($parentHospital)) {
-            $sql = 'insert into hospital_relation(hospital_id, parent_hospital_id)
-                values (:hospital_id, :parent_hospital_id)';
-            $param = [':hospital_id' => $hospitalId, ':parent_hospital_id' => $parentHospital];
-            $ret = $this->insertData($sql, $param);
-            if (VALUE_DB_ERROR === $ret) {
-                $this->pdo->rollBack();
-                return VALUE_DB_ERROR;
-            }
-        }
-        $this->pdo->commit();
-        return true;
-    }
+    
     public function delEcg($ecgId)
     {
         $sql = 'delete from ecg where ecg_id = :ecg_id';

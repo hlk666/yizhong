@@ -6,3 +6,21 @@ function unbindDevice(id)
         //do nothing.
     }
 }
+function editHospital(id)
+{
+    window.location = 'edit_hospital.php?action=edit&id=' + id;
+}
+function editRelation(id)
+{
+
+    window.location = 'edit_relation.php?id=' + id;
+
+}
+function deleteHospital(id)
+{
+    if (confirm('确定删除该医院相关信息么？')) {
+        window.location = 'edit_hospital.php?action=del&id=' + id;
+    } else {
+        //do nothing.
+    }
+}

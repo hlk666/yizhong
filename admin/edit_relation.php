@@ -1,97 +1,104 @@
 <?php
-require '../common.php';
-$title = '修改医院信息';
+require '../config/config.php';
+require '../lib/function.php';
+require '../lib/DbiAdmin.php';
+
+$title = '配置上级医院';
 require 'header.php';
 
-session_start();
-
-if (isset($_POST['submit'])){
+if (isset($_POST['save']) || isset($_POST['add'])){
     if (true === $_SESSION['post']) {
-        user_goto('请不要刷新页面。', GOTO_FLAG_URL, 'add_hospital.php');
+        user_back_after_delay('请不要重复刷新页面。', 2000, 'edit_hospital.php');
+    }
+    $hospitalId = isset($_POST['hospital_id']) ? $_POST['hospital_id'] : null;
+    if (empty($hospitalId)) {
+        user_back_after_delay('非法访问。');
     }
     
-    $hospitalName = !isset($_POST['hospital_name']) ? null : $_POST['hospital_name'];
-    $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
-    $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
-    $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
-    $hospitalParent = !isset($_POST['hospital_parent']) ? null : $_POST['hospital_parent'];
-    
-    if (empty($hospitalName)) {
-        user_goto('请正确输入医院名。', GOTO_FLAG_BACK);
+    if (isset($_POST['save'])) {
+        $newParentId = $_POST;
+        unset($newParentId['save']);
+        unset($newParentId['hospital_id']);
+        $newParentId = array_keys($newParentId);
+        
+        $ret = DbiAdmin::getDbi()->delHospitalRelation($hospitalId, $newParentId);
     }
-    if (empty($hospitalTel)) {
-        user_goto('请正确输入医院电话。', GOTO_FLAG_BACK);
-    }
-    if (empty($hospitalAddress)) {
-        user_goto('请正确输入医院地址。', GOTO_FLAG_BACK);
-    }
-    
-//     $ret = Dbi::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $hospitalParent);
-//     if (VALUE_DB_ERROR === $ret) {
-//         user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
-//     }
-    $_SESSION['post'] = true;
-    echo MESSAGE_SUCCESS 
-        . '<br /><button type="submit" class="btn btn-lg btn-info" style="margin-top:50px;" ' 
-        . ' onclick="javascript:location.href=\'hospital.php\';">查看医院列表</button>';
-} else {
-    $_SESSION['post'] = false;
-    $action = isset($_GET['action']) ? $_GET['action'] : null;
-    $hospitalId = isset($_GET['id']) ? $_GET['id'] : null;
-    if (empty($action) || empty($hospitalId)) {
-        user_goto(MESSAGE_PARAM, GOTO_FLAG_BACK);
+    if (isset($_POST['add'])) {
+        $parentHospital = isset($_POST['hospital_parent']) ? $_POST['hospital_parent'] : null;
+        if (empty($parentHospital)) {
+            user_back_after_delay('请选择上级医院。');
+        }
+        
+        $ret = DbiAdmin::getDbi()->addHospitalParent($hospitalId, $parentHospital);
     }
     
-    $ret = Dbi::getDbi()->getHospitalInfo($hospitalId);
     if (VALUE_DB_ERROR === $ret) {
-        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+        user_back_after_delay(MESSAGE_DB_ERROR);
     }
-    $hospitalName = $ret['hospital_name'];
+    $_SESSION['post'] = true;
+    echo MESSAGE_SUCCESS
+    . '<br /><button type="button" class="btn btn-lg btn-info" style="margin-top:50px;" '
+            . ' onclick="javascript:location.href=\'edit_relation.php?id=' . $hospitalId . '\';">刷新查看</button>';
+} else {
+    $hospitalId = isset($_GET['id']) ? $_GET['id'] : null;
+    $_SESSION['post'] = false;
     
-    echo <<<EOF
+    $hospitalParent = DbiAdmin::getDbi()->getHospitalParent($hospitalId);
+    $parentId = array();
+    if (VALUE_DB_ERROR === $hospitalParent) {
+        user_back_after_delay(MESSAGE_DB_ERROR);
+    }
+    
+    $htmlHospitalParent = '<h4><font color="#f0ad4e">';
+    foreach ($hospitalParent as $value) {
+        $parentId[] = $value['hospital_id'];
+        $htmlHospitalParent .= '<div class="col-xs-12 col-sm-4"><input type="checkbox" name="' 
+                . $value['hospital_id'] . '" checked>' . $value['hospital_name'] . '</div>';
+    }
+    $htmlHospitalParent .= '</font></h4>';
+    
+    $ret = DbiAdmin::getDbi()->getHospitalParentList();
+    if (VALUE_DB_ERROR === $ret) {
+        user_back_after_delay(MESSAGE_DB_ERROR);
+    }
+    $htmlHospitalParentList = '';
+    foreach ($ret as $value) {
+        if (in_array($value['hospital_id'], $parentId)) {
+            continue;
+        }
+        $htmlHospitalParentList .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
+    }
+    
+    if (!empty($hospitalParent)) {
+        echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
+  <input type="hidden" name="hospital_id" value="$hospitalId">
+  <div class="form-group"><h3>上级医院信息：</h3>$htmlHospitalParent</div>
   <div class="form-group">
-    <label for="hospital_name" class="col-sm-2 control-label">医院名<font color="red">*</font></label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="hospital_name" name="hospital_name" value="请输入医院的名字">
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="hospital_tel" class="col-sm-2 control-label">电话<font color="red">*</font></label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="hospital_tel" name="hospital_tel" value="请输入医院的联系电话">
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="hospital_address" class="col-sm-2 control-label">地址<font color="red">*</font></label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="hospital_address" name="hospital_address" value="请输入医院的地址">
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="parent_flag" class="col-sm-2 control-label">可否作为上级医院<font color="red">*</font></label>
-    <div class="col-sm-10">
-      <label class="checkbox-inline">
-      <input type="radio" name="parent_flag" value="1">可</label>
-      <label class="checkbox-inline">
-      <input type="radio" name="parent_flag" value="0" checked>否</label>
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="hospital_parent" class="col-sm-2 control-label">本院的上级医院</label>
-    <div class="col-sm-10">
-      <select class="form-control" name="hospital_parent">
-        <option value="0">请选择上级医院(非必须)</option>$htmlParentHospitals
-    </select></div>
-  </div>
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <button type="submit" class="btn btn-lg btn-success" name="submit">保存</button>
-      <button type="button" class="btn btn-lg btn-primary" style="margin-left:50px" 
-        onclick="javascript:history.back();">返回</button>
+    <div class="col-sm-offset-4 col-sm-2">
+      <button type="submit" class="btn btn-lg btn-info" name="save">保存修改</button>
     </div>
   </div>
 </form>
+<hr style="border-top:1px ridge red;" />
+EOF;
+    }
+    echo <<<EOF
+<form class="form-horizontal" role="form" method="post">
+  <input type="hidden" name="hospital_id" value="$hospitalId">
+  <h3>添加新的上级医院：</h3>
+  <div class="row"><h4>
+    <div class="col-sm-6">
+      <select class="form-control" name="hospital_parent" style="margin:6px 0 6px 0;">
+        <option value="0">请选择上级医院</option>$htmlHospitalParentList
+      </select>
+    </div>
+    <div class="col-sm-6">
+      <button type="submit" class="btn btn-lg btn-info" name="add">添加新的上级医院</button>
+    </div>
+  </h4></div>
+</form>
 EOF;
 }
+
 require 'tpl/footer.tpl';
