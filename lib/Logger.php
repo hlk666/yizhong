@@ -12,6 +12,17 @@ class Logger
         fclose($handle);
     }
     
+    public static function writeBatch($fileName, $message)
+    {
+        $data = date('Ymd H:i:s') . '----' . $message . "\r\n";
+        $handle = fopen(PATH_LOG . date('Ymd') . $fileName, 'a');
+        if ($handle == false) {
+            return;
+        }
+        fwrite($handle, $data);
+        fclose($handle);
+    }
+    
     public static function writeCommonError($message)
     {
         $data = '(' . self::getIP() . ')' . date('Ymd H:i:s') . '----' . $message . "\r\n";
