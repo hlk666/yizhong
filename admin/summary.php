@@ -2,17 +2,18 @@
 require '../config/config.php';
 require '../lib/function.php';
 require '../lib/DbiAdmin.php';
+require '../lib/DataFile.php';
 
 $title = '昨日信息统计';
 require 'header.php';
 
-$dataFile = PATH_DATA . date('Ymd', strtotime('-1 day')) . '.php';
-if (!file_exists($dataFile)) {
+
+$dataFile = DataFile::getDataFile('daysum', date('Ymd', strtotime('-1 day')));
+if (false === $dataFile) {
     echo '夜间更新文件不存在，请联系系统管理员。';
     require 'tpl/footer.tpl';
     exit;
 }
-
 include $dataFile;
 
 $guardianCountDay = 0;
@@ -80,16 +81,11 @@ $noticeEcgDay = '<tr><td>' . $ecgCount
     . '</td><td>' . $ecgSOSCount
     . '</td><td>' . $ecgRemoteCheckCount . '</td></tr>';
 
-$deviceUsedRate = ($deviceTotal == 0) ? 0 : ($deviceUsed / $deviceTotal) * 100;
+$deviceUsedRate = ($device['deviceTotal'] == 0) ? 0 : ($device['deviceUsed'] / $device['deviceTotal']) * 100;
 $deviceUsedRate = round($deviceUsedRate, 2);
-$noticeDevice = '<tr><td>' . $deviceTotal
-    . '</td><td>' . $deviceUsed
+$noticeDevice = '<tr><td>' . $device['deviceTotal']
+    . '</td><td>' . $device['deviceUsed']
     . '</td><td>' . $deviceUsedRate . '%</td></tr>';
-
-$htmlGuardianAll = '<tr><td>' . $guardianCountAll
-    . '</td><td>' . $guardianCountAllRealtime
-    . '</td><td>' . $guardianCountAllAbnormal
-    . '</td><td>' . $guardianCountAllOnetime . '</td></tr>';
 echo <<<EOF
 <div style="background-color:#428bca;"><h3>期间范围数据(勿频繁查询):</h3></div>
 <form class="form-horizontal" role="form" method="post" action="summary_condition.php">

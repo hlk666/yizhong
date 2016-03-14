@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('asia/shanghai');
+
 define('PATH_ROOT', 'D:\hp\www\yizhong\\');
 
 define('PATH_LOG', PATH_ROOT . 'log\\');
