@@ -168,9 +168,8 @@ class Dbi extends BaseDbi
         $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, 
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, 
                 g.blood_pressure, g.tentative_diagnose, g.medical_history, 
-                g.lead, h.hospital_name, g.regist_doctor_name as doctor_name, g.sickroom
+                g.lead, g.regist_doctor_name as doctor_name, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
-                left join hospital as h on g.guard_hospital_id = h.hospital_id
                 where guard_hospital_id = ' . $hospitalId;
         if ($mode != null) {
             $sql .= " and g.mode = $mode ";
@@ -209,9 +208,8 @@ class Dbi extends BaseDbi
         $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id,
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time,
                 g.blood_pressure, g.tentative_diagnose, g.medical_history,
-                g.lead, h.hospital_name, g.regist_doctor_name as doctor_name, g.sickroom
+                g.lead, g.regist_doctor_name as doctor_name, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
-                left join hospital as h on g.guard_hospital_id = h.hospital_id
                 where regist_hospital_id = ' . $hospitalId;
         if ($mode != null) {
             $sql .= " and g.mode = $mode ";
