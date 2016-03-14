@@ -18,10 +18,10 @@ class DbiAdmin extends BaseDbi
         }
         return self::$instance;
     }
-    public function addDevice($hospital, $device)
+    public function addDevice($hospital, $device, $city)
     {
-        $sql = 'insert into device (device_id, hospital_id) values (:device, :hospital)';
-        $param = [':device' => $device, ':hospital' => $hospital];
+        $sql = 'insert into device (device_id, hospital_id, city) values (:device, :hospital, :city)';
+        $param = [':device' => $device, ':hospital' => $hospital, ':city' => $city];
         return $this->insertData($sql, $param);
     }
     public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser)
@@ -165,7 +165,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getDeviceList($hospital = null, $offset = 0, $rows = null)
     {
-        $sql = 'select hospital_name, device_id from device as d
+        $sql = 'select hospital_name, device_id, city from device as d
                 inner join hospital as h on d.hospital_id = h.hospital_id';
         if (null !== $hospital){
             $sql .= ' where d.hospital_id = ' . $hospital;
@@ -217,6 +217,11 @@ class DbiAdmin extends BaseDbi
             $sql .= " and hospital_id not in ($exceptHospitalList)";
         }
         return $this->getDataRow($sql);
+    }
+    public function getDeviceBloc()
+    {
+        $sql = 'select distinct hospital_id, city from device';
+        return $this->getDataAll($sql);
     }
     public function getHospitalInfo($hospitalId)
     {

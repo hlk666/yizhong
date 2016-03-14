@@ -47,10 +47,15 @@ foreach ($ret as $value) {
     $htmlDevices .= '<tr><td>' 
         . $value['hospital_name'] . '</td><td>'
         . $value['device_id'] . '</td><td>'
+        . $value['city'] . '</td><td>'
         . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:unbindDevice(' 
             . $value['device_id'] . ')">点击解除</button></td></tr>';
 }
-$paging = getPaging($page, $lastPage);
+$currentPage = null;
+if (null !== $hospital) {
+    $currentPage = 'device.php?hospital=' . $hospital;
+}
+$paging = getPaging($page, $lastPage, $currentPage);
 echo <<<EOF
 <form class="form-horizontal" role="form" method="get">
 <div class="row">
@@ -71,6 +76,7 @@ echo <<<EOF
       <tr>
         <th>医院名</th>
         <th>设备ID</th>
+        <th>城市代码</th>
         <th>解除绑定</th>
       </tr>
     </thead>
