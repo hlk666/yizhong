@@ -1,10 +1,5 @@
 <?php
-//require 'E:\wamp\www\config\config.php';
-require 'D:\hp\www\yizhong\config\config.php';
-require_once PATH_LIB . 'Logger.php';
-require_once PATH_LIB . 'function.php';
-require_once PATH_LIB . 'DbiAdmin.php';
-require_once PATH_LIB . 'DataFile.php';
+require 'common.php';
 
 $logFile = 'day_sum.log';
 $day = date('Y-m-d', strtotime('-1 day'));

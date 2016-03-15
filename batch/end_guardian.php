@@ -1,6 +1,6 @@
 <?php
-require 'E:\wamp\www\config\config.php';
-require PATH_LIB . 'Invigilator.php';
+require 'common.php';
+require_once PATH_LIB . 'Invigilator.php';
 
 $files = scandir(PATH_CACHE_CMD);
 foreach ($files as $file) {
