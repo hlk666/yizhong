@@ -39,10 +39,6 @@ foreach ($guardiansDay as $value) {
     } else {
         //do nothing.
     }
-    $noticeGuardianDay = '<tr><td>' . $guardianCountDay
-        . '</td><td>' . $guardianCountDayRealtime
-        . '</td><td>' . $guardianCountDayAbnormal
-        . '</td><td>' . $guardianCountDayOnetime . '</td></tr>';
     
     $modeText = '';
     if ($value['mode'] == '1') {
@@ -61,6 +57,13 @@ foreach ($guardiansDay as $value) {
         . '</td><td>' . $value['patient_name']
         . '</td><td>' . $modeText . '</td></tr>';
 }
+if (empty($guardiansDay)) {
+    $htmlGuardianDay = '<tr><td colspan="5"><font color="red">无数据。</font></td></tr>';
+}
+$noticeGuardianDay = '<tr><td>' . $guardianCountDay
+    . '</td><td>' . $guardianCountDayRealtime
+    . '</td><td>' . $guardianCountDayAbnormal
+    . '</td><td>' . $guardianCountDayOnetime . '</td></tr>';
 
 $htmlEcgDay = '';
 foreach ($ecgsDay as $value) {
@@ -86,6 +89,7 @@ $deviceUsedRate = round($deviceUsedRate, 2);
 $noticeDevice = '<tr><td>' . $device['deviceTotal']
     . '</td><td>' . $device['deviceUsed']
     . '</td><td>' . $deviceUsedRate . '%</td></tr>';
+$hr = '<hr style="border-top:1px ridge #428bca;" />';
 echo <<<EOF
 <div style="background-color:#428bca;"><h3>期间范围数据(勿频繁查询):</h3></div>
 <form class="form-horizontal" role="form" method="post" action="summary_condition.php">
@@ -115,7 +119,7 @@ echo <<<EOF
     </thead>
     <tbody>$noticeGuardianDay</tbody>
   </table>
-<hr style="border-top:1px ridge red;" />
+$hr
   <table class="table table-striped">
     <thead>
       <tr>
@@ -128,7 +132,7 @@ echo <<<EOF
     </thead>
     <tbody>$htmlGuardianDay</tbody>
   </table>
-<hr style="border-top:1px ridge red;" />
+$hr
   <table class="table table-striped">
     <thead>
       <tr>
@@ -141,7 +145,7 @@ echo <<<EOF
     </thead>
     <tbody>$noticeEcgDay</tbody>
   </table>
-<hr style="border-top:1px ridge red;" />
+$hr
   <table class="table table-striped">
     <thead>
       <tr>

@@ -91,6 +91,7 @@ $noticeDevice = '<tr><td>' . $deviceTotal
     . '</td><td>' . $deviceUsed
     . '</td><td>' . $days
     . '</td><td>' . $deviceUsedRate . '%</td></tr>';
+$hr = '<hr style="border-top:1px ridge #428bca;" />';
 echo <<<EOF
 <table class="table table-striped">
   <thead>
@@ -103,7 +104,7 @@ echo <<<EOF
     </thead>
     <tbody>$noticeGuardian</tbody>
   </table>
-<hr style="border-top:1px ridge red;" />
+$hr
   <table class="table table-striped">
     <thead>
       <tr>
@@ -116,7 +117,7 @@ echo <<<EOF
     </thead>
     <tbody>$noticeEcg</tbody>
   </table>
-<hr style="border-top:1px ridge red;" />
+$hr
   <table class="table table-striped">
     <thead>
       <tr>
