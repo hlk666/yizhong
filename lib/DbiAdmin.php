@@ -163,18 +163,7 @@ class DbiAdmin extends BaseDbi
     {
         return $this->existData('account', "login_name = '$loginName' and hospital_id <> $hospital");
     }
-    public function getDeviceList($hospital = null, $offset = 0, $rows = null)
-    {
-        $sql = 'select hospital_name, device_id, city from device as d
-                inner join hospital as h on d.hospital_id = h.hospital_id';
-        if (null !== $hospital){
-            $sql .= ' where d.hospital_id = ' . $hospital;
-        }
-        if (null !== $rows) {
-            $sql .= " limit $offset, $rows";
-        }
-        return $this->getDataAll($sql);
-    }
+    
     public function getAdminAcount($loginName)
     {
         $sql = 'select account_id, real_name as name, type, password, hospital_id
@@ -210,6 +199,31 @@ class DbiAdmin extends BaseDbi
         $param = [':start' => $startTime, ':end' => $endTime];
         return $this->getDataAll($sql, $param);
     }
+    public function getDeviceBloc()
+    {
+        $sql = 'select distinct hospital_id, city from device order by city, hospital_id';
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceIdList($city, $hospital = null)
+    {
+        $sql = 'select device_id from device where city = ' . $city;
+        if (!empty($hospital)) {
+            $sql .= ' and hospital_id = ' . $hospital;
+        }
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceList($hospital = null, $offset = 0, $rows = null)
+    {
+        $sql = 'select hospital_name, device_id, city from device as d
+                inner join hospital as h on d.hospital_id = h.hospital_id';
+        if (null !== $hospital){
+            $sql .= ' where d.hospital_id = ' . $hospital;
+        }
+        if (null !== $rows) {
+            $sql .= " limit $offset, $rows";
+        }
+        return $this->getDataAll($sql);
+    }
     public function getDeviceSum($exceptHospitalList)
     {
         $sql = 'select count(device_id) as total from device where 1 ';
@@ -217,11 +231,6 @@ class DbiAdmin extends BaseDbi
             $sql .= " and hospital_id not in ($exceptHospitalList)";
         }
         return $this->getDataRow($sql);
-    }
-    public function getDeviceBloc()
-    {
-        $sql = 'select distinct hospital_id, city from device';
-        return $this->getDataAll($sql);
     }
     public function getHospitalInfo($hospitalId)
     {

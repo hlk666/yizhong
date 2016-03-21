@@ -8,12 +8,7 @@
   </footer>
 </div> <!-- /container -->
 <script type="text/javascript" src="js/yizhong.js"></script>
-<script type="text/javascript" src="js/adddate.js"></script>
 <script src="http://apps.bdimg.com/libs/jquery/2.0.0/jquery.min.js"></script>
 <script src="http://apps.bdimg.com/libs/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-<script src="//cdn.bootcss.com/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
-<script type="text/javascript">
-    $('.selectpicker').selectpicker();
-</script>
 </body>
 </html>

@@ -156,6 +156,7 @@ $hr
     </thead>
     <tbody>$noticeDevice</tbody>
   </table>
+<script type="text/javascript" src="js/adddate.js"></script>
 EOF;
 require 'tpl/footer.tpl';
 

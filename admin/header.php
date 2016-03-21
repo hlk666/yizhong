@@ -45,6 +45,7 @@ EOF;
       <div class="col-sm-2 blog-main" style="font-size:18px;">
         <ul class="nav nav-sidebar">
           <li><a href="summary.php">前 日 统 计 信 息</a></li>
+          <li><a href="qps.php"> 24 小 时 并 发</a></li>
         </ul>
         <ul class="nav nav-sidebar">
           <li><a href="hospital.php">医 院 基 本 信 息</a></li>

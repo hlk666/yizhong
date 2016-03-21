@@ -121,7 +121,7 @@ class Dbi extends BaseDbi
     }
     public function getDiagnosisByGuardian($guardianId)
     {
-        $sql = 'select d.ecg_id, d.content, d.content_parent, d.create_time as content_time, e.data_path
+        $sql = 'select d.ecg_id, d.content, d.content_parent, e.create_time as content_time, e.data_path
                 from diagnosis as d left join ecg as e on d.ecg_id = e.ecg_id
                 where d.guardian_id = :guardian_id';
         $param = [':guardian_id' => $guardianId];
@@ -165,9 +165,9 @@ class Dbi extends BaseDbi
             $name = null, $tel = null, $sTime = null, $eTime = null, 
             $device = null, $registHospitalId = null, $doctorName = null)
     {
-        $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, 
+        $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, g.regist_hospital_id, 
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, 
-                g.blood_pressure, g.tentative_diagnose, g.medical_history, 
+                g.blood_pressure, g.tentative_diagnose, g.medical_history, g.hospitalization_id, 
                 g.lead, g.regist_doctor_name as doctor_name, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 where guard_hospital_id = ' . $hospitalId;
@@ -205,9 +205,9 @@ class Dbi extends BaseDbi
     public function getGuardiansByRegist($hospitalId, $offset, $rows, $mode = null, $status = null,
             $name = null, $tel = null, $sTime = null, $eTime = null, $device = null, $doctorName = null)
     {
-        $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id,
+        $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, g.regist_hospital_id, 
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time,
-                g.blood_pressure, g.tentative_diagnose, g.medical_history,
+                g.blood_pressure, g.tentative_diagnose, g.medical_history, g.hospitalization_id, 
                 g.lead, g.regist_doctor_name as doctor_name, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 where regist_hospital_id = ' . $hospitalId;
@@ -287,7 +287,7 @@ class Dbi extends BaseDbi
     {
         $sql = 'select g.mode, g.lead, p.patient_name as name, p.birth_year, p.sex, p.tel,
                 tentative_diagnose, medical_history, regist_hospital_id, guard_hospital_id,
-                device_id, guardian_hours, regist_doctor_name as doctor_name,
+                device_id, guardian_hours, regist_doctor_name as doctor_name, g.hospitalization_id,
                 height, weight, blood_pressure, sickroom, family_tel, start_time
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 where guardian_id = :guardian_id';
@@ -380,7 +380,7 @@ class Dbi extends BaseDbi
     }
     public function flowGuardianAddUser($patientName, $sex, $age, $tel, $device, $registHospital,
             $guardHospital, $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height,
-            $weight, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName)
+            $weight, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName, $hospitalizationId = '0')
     {
         $birthYear = date('Y') - $age;
         $sql = 'select patient_id from patient
@@ -406,16 +406,16 @@ class Dbi extends BaseDbi
         $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id,
                     patient_id, mode, guardian_hours, lead, doctor_id, status,
                     sickroom, blood_pressure, height, weight, family_tel,
-                    tentative_diagnose, medical_history, regist_doctor_name)
+                    tentative_diagnose, medical_history, regist_doctor_name, hospitalization_id)
                     values (:device, :regist_hospital, :guard_hospital, :patient, :mode,
                     :hours, :lead, :doctor_id, 1, :sickroom, :blood_pressure, :height,
-                    :weight, :family_tel, :ten_dia, :medical_history, :doctor_name)';
+                    :weight, :family_tel, :ten_dia, :medical_history, :doctor_name, :hospitalization_id)';
         $param = [':device' => $device, ':regist_hospital' => $registHospital, ':guard_hospital' => $guardHospital,
                         ':patient' => $patientId, ':mode' => $mode, ':hours' => $hours, ':lead' => $lead,
                         ':doctor_id' => $doctor, ':sickroom' => $sickRoom, ':blood_pressure' => $bloodPressure,
                         ':height' => $height, ':weight' => $weight, ':family_tel' => $familyTel,
                         ':ten_dia' => $tentativeDiagnose, ':medical_history' => $medicalHistory,
-                        ':doctor_name' => $registDoctorName];
+                        ':doctor_name' => $registDoctorName, ':hospitalization_id' => $hospitalizationId];
         $guardianId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $guardianId) {
             $this->pdo->rollBack();

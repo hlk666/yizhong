@@ -1,12 +1,20 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
 
+/**
+ * two types.
+ * 1:conig data-need update but not overwritten.
+ * 2:cache data-clear every time.
+ */
 class DataFile
 {
     private static $logFile = 'FileData.log';
 
     /**
-     * set arrays to file. the array is at most two dimensional.
+     * set arrays to file. 
+     * the array is at most two dimensional.
+     * data file will be overwritten every time.
+     * 
      * @param string $directory
      * @param string $file
      * @param arrays formatter of 'key => value' is required. 
@@ -40,7 +48,7 @@ class DataFile
                 $template .= "\n";
             } //$arrayKeyValue
         } //$arrayParam
-        $retIO = file_put_contents($file, $template);
+        $retIO = self::writeFile($file, $template);
         if (false === $retIO) {
             Logger::write(self::$logFile, 'Failed to write file of ' . $file);
             return false;
@@ -61,5 +69,20 @@ class DataFile
         } else {
             return false;
         }
+    }
+    
+    private static function writeFile($file, $text)
+    {
+        $handle = fopen($file, 'w+');
+        
+        if (flock($handle, LOCK_EX)) {
+            fwrite($handle, $text);
+            flock($handle, LOCK_UN);
+        } else {
+            return false;
+        }
+        
+        fclose($handle);
+        return true;
     }
 }

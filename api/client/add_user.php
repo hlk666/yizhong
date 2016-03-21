@@ -2,6 +2,7 @@
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Invigilator.php';
+//require_once PATH_LIB . 'Logger.php';
 
 validate_add_user($_POST);
 
@@ -26,6 +27,9 @@ $bloodPressure = isset($_POST['blood_pressure']) ? $_POST['blood_pressure'] : ''
 $sickRoom = isset($_POST['sickroom']) ? $_POST['sickroom'] : '';
 $familyTel = isset($_POST['family_tel']) ? $_POST['family_tel'] : '0';
 $hours = isset($_POST['guard_hours']) ? $_POST['guard_hours'] : 0;
+$hospitalizationId = isset($_POST['hospitalization_id']) ? $_POST['hospitalization_id'] : '0';
+
+//Logger::write('aaa.txt', $hospitalizationId);
 
 $polycardia = PARAM_POLYCARDIA;
 $bradycardia = PARAM_BRADYCARDIA;
@@ -47,7 +51,7 @@ if ('2' == $mode) {
 
 $guardianId = Dbi::getDbi()->flowGuardianAddUser($name, $sex, $age, $tel, $device, $registHospital, 
         $guardHospital, $mode, $hours, $lead, $doctorId, $sickRoom, $bloodPressure, $height, $weight,
-        $familyTel, $tentativeDiagnose, $medicalHistory, $doctorName);
+        $familyTel, $tentativeDiagnose, $medicalHistory, $doctorName, $hospitalizationId);
 if (VALUE_DB_ERROR === $guardianId) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

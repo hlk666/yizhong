@@ -44,12 +44,14 @@ class AppUploadData
             $retIO = file_put_contents($file, $data);
             if ($retIO === false) {
                 $this->setIOError();
+                Logger::write($this->logFile, 'failed to save file on ID of :' . $patientId);
                 return json_encode($this->error);
             }
             
             $urlFile = 'ECG/' . $patientId . '/' . $time . '.bin';
             $retDB = Dbi::getDbi()->flowGuardianAddEcg($patientId, $alert, $time, $urlFile);
             if (VALUE_DB_ERROR === $retDB) {
+                Logger::write($this->logFile, 'failed to save db data on ID of :' . $patientId);
                 $this->setError(5, 'Server DB error.');
                 return json_encode($this->error);
             }
@@ -109,7 +111,9 @@ class AppUploadData
         }
         
         $len = strlen($data);
-        Logger::write($this->logFile, '\r\nlength of data : ' . $len . '\r\n');
+        if ($len != 120000 && $len != 80000) {
+            Logger::write($this->logFile, 'length of data : ' . $len);
+        }
         if ($len % 4000 > 0) {
             $this->setError(5, 'Data size is wrong.');
             return false;

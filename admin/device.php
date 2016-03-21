@@ -76,7 +76,7 @@ echo <<<EOF
       <tr>
         <th>医院名</th>
         <th>设备ID</th>
-        <th>城市代码</th>
+        <th>省份代码</th>
         <th>解除绑定</th>
       </tr>
     </thead>

@@ -30,11 +30,11 @@ if (isset($_POST['submit'])){
     if (true === $isExisted) {
         user_back_after_delay('该设备ID已经和其他医院绑定，请解绑后再操作。');
     }
-    if (strlen($deviceId) == 5) {
-        $city = substr($deviceId, 0, 3);
-    }
-    if (strlen($deviceId) == 8) {
-        $city = substr($deviceId, 0, 4);
+    
+    if (strlen($deviceId) >= 2) {
+        $city = substr($deviceId, 0, 2);
+    } else {
+        $city = '00';
     }
     $ret = DbiAdmin::getDbi()->addDevice($hospitalId, $deviceId, $city);
     if (VALUE_DB_ERROR === $ret) {
