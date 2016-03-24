@@ -8,13 +8,10 @@ if (empty($_GET['device_id'])) {
 }
 $deviceId = $_GET['device_id'];
 
-if (strlen($deviceId) == 5) {
-    $city = substr($deviceId, 0, 3);
-} elseif (strlen($deviceId) == 8) {
-    $city = substr($deviceId, 0, 4);
+if (strlen($deviceId) >= 2) {
+    $city = substr($deviceId, 0, 2);
 } else {
-    echo json_encode(['code' => '1', 'message' => MESSAGE_PARAM]);
-    exit;
+    $city = '00';
 }
 
 $dataFile = DataFile::getDataFile('app_update', $city);

@@ -14,7 +14,6 @@ if (isset($_POST['submit'])) {
     if (true === $_SESSION['post']) {
         user_back_after_delay('请不要刷新页面。');
     }
-    var_dump($_POST);exit;
     $city = isset($_POST['city']) ? $_POST['city'] : null;
     $hospitalId = isset($_POST['hospital']) ? $_POST['hospital'] : null;
     if (empty($city)) {
@@ -44,10 +43,7 @@ if (isset($_POST['submit'])) {
     }
     
     $_SESSION['post'] = true;
-    echo MESSAGE_SUCCESS
-    . '<br /><button type="button" class="btn btn-lg btn-info" style="margin-top:50px;" '
-            . ' onclick="javascript:location.href=\'app_update_info.php?city=' 
-            .$city . '\';">查看更新对象列表</button>';
+    echo MESSAGE_SUCCESS;
 } else {
     $_SESSION['post'] = false;
     $ret = DbiAdmin::getDbi()->getDeviceBloc();

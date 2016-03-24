@@ -6,6 +6,7 @@ define('PATH_ROOT', 'D:\hp\www\yizhong\\');
 define('PATH_LOG', PATH_ROOT . 'log\\');
 define('PATH_LIB', PATH_ROOT . 'lib\\');
 define('PATH_CONFIG', PATH_ROOT . 'config\\');
+define('PATH_UPDATE', PATH_ROOT . 'update\\');
 define('PATH_DATA', PATH_ROOT . 'data\\');
 define('PATH_UPLOAD', PATH_ROOT . 'upload\\');
 define('PATH_ECG', PATH_ROOT . 'ECG\\');
