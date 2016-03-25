@@ -12,16 +12,16 @@ if (isset($_POST['login'])) {
     $pwd = !isset($_POST['password']) ? null : $_POST['password'];
     
     if (empty($user)) {
-        user_goto('请输入用户名。', GOTO_FLAG_BACK);
+        user_back_after_delay('请输入用户名。');
     }
     if (empty($pwd)) {
-        user_goto('请输入密码。', GOTO_FLAG_BACK);
+        user_back_after_delay('请输入密码。');
     }
 
     $pwd = md5($pwd);
     $ret = DbiAdmin::getDbi()->getAdminAcount($user);
     if (VALUE_DB_ERROR === $ret) {
-        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_URL, 'index.php');
+        user_back_after_delay(MESSAGE_DB_ERROR);
     }
     if (empty($ret)) {
         header('location:index.php?error=用户名错误。');

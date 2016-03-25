@@ -128,9 +128,9 @@ class DbiAdmin extends BaseDbi
     {
         $this->pdo->beginTransaction();
     
-        $sql = 'update account set login_name = :login_user 
+        $sql = 'update account set login_name = :login_user, real_name = :real_name 
                 where hospital_id = :hospital and type = 1';
-        $param = [':login_user' => $loginUser, ':hospital' => $hospitalId];
+        $param = [':login_user' => $loginUser, ':hospital' => $hospitalId, ':real_name' => $hospitalName . '管理员',];
         $ret = $this->updateData($sql, $param);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();

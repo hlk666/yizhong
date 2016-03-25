@@ -8,7 +8,7 @@ require 'header.php';
 
 if (isset($_POST['submit'])){
     if (true === $_SESSION['post']) {
-        user_goto('请不要刷新页面。', GOTO_FLAG_URL, 'add_hospital.php');
+        user_back_after_delay('请不要刷新页面。', 2000, 'add_hospital.php');
     }
     
     $hospitalName = !isset($_POST['hospital_name']) ? null : $_POST['hospital_name'];
@@ -19,21 +19,29 @@ if (isset($_POST['submit'])){
     $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
     
     if (empty($hospitalName)) {
-        user_goto('请正确输入医院名。', GOTO_FLAG_BACK);
+        user_back_after_delay('请正确输入医院名。');
     }
     if (empty($hospitalTel)) {
-        user_goto('请正确输入医院电话。', GOTO_FLAG_BACK);
+        user_back_after_delay('请正确输入医院电话。');
     }
     if (empty($hospitalAddress)) {
-        user_goto('请正确输入医院地址。', GOTO_FLAG_BACK);
+        user_back_after_delay('请正确输入医院地址。');
     }
     if (empty($adminUser)) {
-        user_goto('请正确输入初始管理员登录用户。', GOTO_FLAG_BACK);
+        user_back_after_delay('请正确输入初始管理员登录用户。');
+    }
+    
+    $isExisted = DbiAdmin::getDbi()->existedLoginName($adminUser, 0);
+    if (VALUE_DB_ERROR === $isExisted) {
+        user_back_after_delay(MESSAGE_DB_ERROR);
+    }
+    if (true === $isExisted) {
+        user_back_after_delay("登录用户名<font color='red'>$adminUser</font>已被他人使用。");
     }
     
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser);
     if (VALUE_DB_ERROR === $ret) {
-        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+        check_user_existed(MESSAGE_DB_ERROR);
     }
     $_SESSION['post'] = true;
     echo MESSAGE_SUCCESS 
@@ -55,25 +63,25 @@ if (isset($_POST['submit'])){
   <div class="form-group">
     <label for="hospital_name" class="col-sm-2 control-label">医院名<font color="red">*</font></label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="hospital_name" name="hospital_name" placeholder="请输入医院的名字">
+      <input type="text" class="form-control" id="hospital_name" name="hospital_name" placeholder="请输入医院的名字" required>
     </div>
   </div>
   <div class="form-group">
     <label for="hospital_tel" class="col-sm-2 control-label">电话<font color="red">*</font></label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="hospital_tel" name="hospital_tel" placeholder="请输入医院的联系电话">
+      <input type="text" class="form-control" id="hospital_tel" name="hospital_tel" placeholder="请输入医院的联系电话" required>
     </div>
   </div>
   <div class="form-group">
     <label for="hospital_address" class="col-sm-2 control-label">地址<font color="red">*</font></label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="hospital_address" name="hospital_address" placeholder="请输入医院的地址">
+      <input type="text" class="form-control" id="hospital_address" name="hospital_address" placeholder="请输入医院的地址" required>
     </div>
   </div>
   <div class="form-group">
     <label for="admin" class="col-sm-2 control-label">管理员<font color="red">*</font></label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="admin" name="admin" placeholder="请输入管理员登录用户名">
+      <input type="text" class="form-control" id="admin" name="admin" placeholder="请输入管理员登录用户名" required>
     </div>
   </div>
   <div class="form-group">

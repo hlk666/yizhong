@@ -22,7 +22,7 @@ if (isset($_POST['submit'])) {
     
     $ret = DbiAdmin::getDbi()->getDeviceIdList($city, $hospitalId);
     if (VALUE_DB_ERROR === $ret) {
-        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+        check_user_existed(MESSAGE_DB_ERROR);
     }
     
     $dataFile = DataFile::getDataFile('app_update', $city);
@@ -48,11 +48,11 @@ if (isset($_POST['submit'])) {
     $_SESSION['post'] = false;
     $ret = DbiAdmin::getDbi()->getDeviceBloc();
     if (VALUE_DB_ERROR === $ret) {
-        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+        check_user_existed(MESSAGE_DB_ERROR);
     }
     $hospitalInfo = DbiAdmin::getDbi()->getHospitalList();
     if (VALUE_DB_ERROR === $hospitalInfo) {
-        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+        check_user_existed(MESSAGE_DB_ERROR);
     }
     $hospitalNames = array();
     foreach ($hospitalInfo as $row) {

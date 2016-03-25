@@ -83,33 +83,6 @@ function get_rows_by_resolution($height, $webView, $noticeRow = 0)
     return $rows;
 }
 
-/**
- * @param string $message message of notice information.
- * @param integer $gotoFlag only 3 values are allowed
- *      GOTO_FLAG_EXIT | GOTO_FLAG_BACK | GOTO_FLAG_URL) 
- * @param string $url if $gotoFlag is given, $url is requried. if same folder, file name is ok.
- */
-function user_goto($message, $gotoFlag, $url = null)
-{
-    if (GOTO_FLAG_BACK === $gotoFlag) {
-        if (null == $message) {
-            echo '<script language="javascript">history.back();</script>';
-        } else {
-            echo '<script language="javascript">alert("' . $message . '");history.back();</script>';
-        }
-        exit;
-    }
-    if (GOTO_FLAG_URL === $gotoFlag) {
-        if (null == $message) {
-            echo '<script language="javascript">window.location.href="' . $url . '";</script>';
-        } else {
-            echo '<script language="javascript">alert("' . $message . '");window.location.href="' . $url . '";</script>';
-        }
-        exit;
-    }
-    echo MESSAGE_OTHER_ERROR;
-    exit;
-}
 //only for admin folder because using path:tpl/***.
 function user_back_after_delay($message, $delayTime = 2000, $url = null)
 {
@@ -121,16 +94,6 @@ function user_back_after_delay($message, $delayTime = 2000, $url = null)
     }
     include 'tpl/footer.tpl';
     exit;
-}
-
-function check_user_existed($isExisted)
-{
-    if (VALUE_DB_ERROR === $isExisted) {
-        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
-    }
-    if (true === $isExisted) {
-        user_goto('该账号已被他人使用。', GOTO_FLAG_BACK);
-    }
 }
 
 function getPaging($page, $lastPage, $currentPage = null) {

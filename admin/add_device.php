@@ -25,7 +25,7 @@ if (isset($_POST['submit'])){
     
     $isExisted = DbiAdmin::getDbi()->existedDevice($deviceId);
     if (VALUE_DB_ERROR === $isExisted) {
-        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+        check_user_existed(MESSAGE_DB_ERROR);
     }
     if (true === $isExisted) {
         user_back_after_delay('该设备ID已经和其他医院绑定，请解绑后再操作。');
@@ -38,7 +38,7 @@ if (isset($_POST['submit'])){
     }
     $ret = DbiAdmin::getDbi()->addDevice($hospitalId, $deviceId, $city);
     if (VALUE_DB_ERROR === $ret) {
-        user_goto(MESSAGE_DB_ERROR, GOTO_FLAG_BACK);
+        check_user_existed(MESSAGE_DB_ERROR);
     }
     $_SESSION['post'] = true;
     echo MESSAGE_SUCCESS 
@@ -70,7 +70,7 @@ if (isset($_POST['submit'])){
   <div class="form-group">
     <label for="device_id" class="col-sm-2 control-label">设备ID<font color="red">*</font></label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="device_id" name="device_id" placeholder="请输入设备ID">
+      <input type="text" class="form-control" id="device_id" name="device_id" placeholder="请输入设备ID" required>
     </div>
   </div>
   <div class="form-group">
