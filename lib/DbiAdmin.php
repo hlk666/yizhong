@@ -18,6 +18,10 @@ class DbiAdmin extends BaseDbi
         }
         return self::$instance;
     }
+    public function getData($sql)
+    {
+        return $this->getDataAll($sql);
+    }
     public function addDevice($hospital, $device, $city)
     {
         $sql = 'insert into device (device_id, hospital_id, city) values (:device, :hospital, :city)';
