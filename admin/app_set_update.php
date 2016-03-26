@@ -14,8 +14,12 @@ if (isset($_POST['submit'])) {
     if (true === $_SESSION['post']) {
         user_back_after_delay('请不要刷新页面。');
     }
+    $version = isset($_POST['version']) ? $_POST['version'] : null;
     $city = isset($_POST['city']) ? $_POST['city'] : null;
     $hospitalId = isset($_POST['hospital']) ? $_POST['hospital'] : null;
+    if (empty($version)) {
+        user_back_after_delay('请输入版本号。');
+    }
     if (empty($city)) {
         user_back_after_delay('请选择省份。');
     }
@@ -32,10 +36,10 @@ if (isset($_POST['submit'])) {
         include $dataFile;
     }
     foreach ($ret as $value) {
-        $device[] = $value['device_id'];
-        Logger::write($updateLog, 'set update with ID : ' . $value['device_id']);
+        $device[$value['device_id']] = $version;
+        Logger::write($updateLog, 'set update with ID : ' . $value['device_id'] . ', version : ' . $version);
     }
-    $device = array_unique($device);
+    //$device = array_unique($device);
     
     $retIO = DataFile::setDataFile('app_update', $city, ['device' => $device]);
     if (false === $retIO) {
@@ -43,7 +47,9 @@ if (isset($_POST['submit'])) {
     }
     
     $_SESSION['post'] = true;
-    echo MESSAGE_SUCCESS;
+    echo '<font color="red">' . MESSAGE_SUCCESS . '</font><br>' 
+        . '<button type="button" class="btn btn-lg btn-primary" type="margin-top:10px;" 
+                onclick="javascript:location.href=\'app_set_update.php\';">返回前一页</button>';
 } else {
     $_SESSION['post'] = false;
     $ret = DbiAdmin::getDbi()->getDeviceBloc();
@@ -112,6 +118,13 @@ if (isset($_POST['submit'])) {
     
     echo <<<EOF
 <form class="form-horizontal" role="form" method="post" name="formCityHospital">
+  <div class="form-group"><h3 style="color:red">请放置新版本的apk文件后再设置更新信息。</h3></div>
+  <div class="form-group">
+    <label for="version" class="col-sm-2 control-label">版本号<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="version" name="version" placeholder="请输入版本号(必须)" required>
+    </div>
+  </div>
   <div class="form-group">
     <label for="city" class="col-sm-2 control-label">选择省份<font color="red">*</font></label>
     <div class="col-sm-10">

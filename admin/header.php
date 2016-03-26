@@ -54,6 +54,7 @@ EOF;
         <ul class="nav nav-sidebar">
           <li><a href="device.php">设 备 基 本 信 息</a></li>
           <li><a href="add_device.php">绑 定 新 的 设 备</a></li>
+          <li><a href="app_set_update.php">更 新 设 备 版 本</a></li>
         </ul>
         <ul class="nav nav-sidebar">
           <li><a href="logout.php">注 销 本 次 登 录</a></li>

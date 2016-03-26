@@ -32,7 +32,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         if (empty($hospitalAddress)) {
             user_back_after_delay('请正确输入医院地址。');
         }
-        if (empty($parentFlag)) {
+        if (null === $parentFlag) {
             user_back_after_delay('请设置是否可以作为上级医院。');
         }
         if (empty($loginUser)) {

@@ -7,6 +7,7 @@ if (empty($_GET['device_id'])) {
     exit;
 }
 $deviceId = $_GET['device_id'];
+$updateLog = 'app_update.log';
 
 if (strlen($deviceId) >= 2) {
     $city = substr($deviceId, 0, 2);
@@ -14,26 +15,20 @@ if (strlen($deviceId) >= 2) {
     $city = '00';
 }
 
+$result = array();
+$result['code'] = '0';
+$result['message'] = MESSAGE_SUCCESS;
+
 $dataFile = DataFile::getDataFile('app_update', $city);
 if (false === $dataFile) {
-    api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
-    exit;
-}
-include $dataFile;
-
-foreach ($device as $key => $value) {
-    if ($value == $deviceId) {
-        unset($device[$key]);
+    $result['version'] = '0';
+} else {
+    include $dataFile;
+    if (isset($device[$deviceId])) {
+        $result['version'] = $device[$deviceId];
         Logger::write($updateLog, 'get update with ID : ' . $deviceId);
-        DataFile::setDataFile('app_update', $city, ['device' => $device]);
-        
-        $result = array();
-        $result['code'] = '0';
-        $result['message'] = MESSAGE_SUCCESS;
-        $result['update_flag'] = '1';
-        api_exit($result);
+    } else { 
+        $result['version'] = '0';
     }
 }
-
-api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
-exit;
+api_exit($result);
