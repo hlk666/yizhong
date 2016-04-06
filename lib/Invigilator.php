@@ -13,7 +13,14 @@ class Invigilator
             'mode2_record_time', 'mode2_polycardia', 'mode2_bradycardia', 'mode2_exminrate',
             'mode2_combeatrhy', 'mode2_stopbeat', 'mode2_sthigh', 'mode2_stlow', 'mode2_twave',
             'mode2_regular_time', 'mode2_premature_beat', 'mode2_lead',
-            'mode3_polycardia', 'mode3_bradycardia', 'mode3_lead', 'mode3_record_time');
+            'mode3_polycardia', 'mode3_bradycardia', 'mode3_lead', 'mode3_record_time', 
+            's_early_beat', 'v_early_beat', 'v_double', 'v_two', 'v_three', 's_double', 's_two', 's_three', 
+            's_speed', 'v_speed', 'polycardia_hour', 'polycardia_times', 'bradycardia_hour', 'bradycardia_times', 
+            'sthigh_hour', 'sthigh_times', 'stlow_hour', 'stlow_times', 's_early_beat_hour', 's_early_beat_times', 
+            'v_early_beat_hour', 'v_early_beat_times', 'stopbeat_hour', 'stopbeat_times', 'v_double_hour', 'v_double_times', 
+            'v_two_hour', 'v_two_times', 'v_three_hour', 'v_three_times', 's_double_hour', 's_double_times', 's_two_hour', 
+            's_two_times', 's_three_hour', 's_three_times', 's_speed_hour', 's_speed_times', 'v_speed_hour', 'v_speed_times');
+    
     private $commands = array();
     private $file = '';
     private $logFile = 'cmdLog.txt';
