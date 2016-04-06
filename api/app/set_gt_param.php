@@ -1,13 +1,21 @@
 <?php
+require_once PATH_LIB . 'Validate.php';
+
 $data = array_merge($_GET, $_POST);
-if (!isset($data['device_id']) || '' == trim($data['device_id'])) {
-    echo json_encode(['code' => 1, 'message' => MESSAGE_REQUIRED . 'device_id']);
-    exit;
+if (false === Validate::checkRequired($data['device_id'])) {
+    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'device_id.']);
 }
-if (!isset($data['client_id']) || '' == trim($data['client_id'])) {
-    echo json_encode(['code' => 2, 'message' => MESSAGE_REQUIRED . 'client_id']);
-    exit;
+if (false === Validate::checkRequired($data['client_id'])) {
+    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'client_id.']);
 }
+// if (!isset($data['device_id']) || '' == trim($data['device_id'])) {
+//     echo json_encode(['code' => 1, 'message' => MESSAGE_REQUIRED . 'device_id']);
+//     exit;
+// }
+// if (!isset($data['client_id']) || '' == trim($data['client_id'])) {
+//     echo json_encode(['code' => 2, 'message' => MESSAGE_REQUIRED . 'client_id']);
+//     exit;
+// }
 
 $devicdId = $data['device_id'];
 $file = PATH_CACHE_CLIENT . $devicdId . '.php';

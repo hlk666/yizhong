@@ -252,6 +252,11 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
     }
+    public function getHospitalList()
+    {
+        $sql = 'select hospital_id, hospital_name from hospital';
+        return $this->getDataAll($sql);
+    }
     public function getHospitalChild($hospitalId)
     {
         $sql = 'select h.hospital_id, hospital_name from hospital as h
