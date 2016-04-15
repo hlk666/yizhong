@@ -9,9 +9,6 @@ if (false === Validate::checkRequired($_GET['patient_id'])) {
 if (false === Validate::checkRequired($_GET['alert'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'alert.']);
 }
-// if (false === Validate::checkRequired($_GET['time'])) {
-//     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'time.']);
-// }
 
 $patientId = $_GET['patient_id'];
 $alertType = $_GET['alert'];
@@ -33,6 +30,5 @@ if (false === $dataFile) {
 
 Logger::write($logFile, "patient_id is $patientId, type type is $alertType, alert time is $time.");
 DataFile::setDataFile('alert_sum', $patientId, ['alertSum' => $alertSum]);
-
 
 api_exit_success();

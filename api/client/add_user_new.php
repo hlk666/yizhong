@@ -58,6 +58,8 @@ $sSpeedHour = isset($_POST['s_speed_hour']) ? $_POST['s_speed_hour'] : '0';
 $sSpeedTimes = isset($_POST['s_speed_times']) ? $_POST['s_speed_times'] : '0';
 $vSpeedHour = isset($_POST['v_speed_hour']) ? $_POST['v_speed_hour'] : '0';
 $vSpeedTimes = isset($_POST['v_speed_times']) ? $_POST['v_speed_times'] : '0';
+$exminrateHour = isset($_POST['exminrate_hour']) ? $_POST['exminrate_hour'] : '0';
+$exminrateTimes = isset($_POST['exminrate_times']) ? $_POST['exminrate_times'] : '0';
 
 $polycardia = PARAM_POLYCARDIA;
 $bradycardia = PARAM_BRADYCARDIA;
@@ -68,8 +70,8 @@ if ('2' == $mode) {
     $lead = $_POST['lead'];
     $record_seconds = $_POST['record_seconds'];
     $regular_time = $_POST['regular_time'];
-    $premature_beat = $_POST['premature_beat'];
-    $combeatrhy = $_POST['combeatrhy'];
+//     $premature_beat = $_POST['premature_beat'];
+//     $combeatrhy = $_POST['combeatrhy'];
     $exminrate = $_POST['exminrate'];
     $stopbeat = $_POST['stopbeat'];
     $sthigh = $_POST['sthigh'];
@@ -107,9 +109,9 @@ if ('2' == $mode) {
     $param['mode2_bradycardia'] = $bradycardia;
     $param['mode2_lead'] = $lead;
     $param['mode2_regular_time'] = $regular_time;
-    $param['mode2_premature_beat'] = $premature_beat;
+//     $param['mode2_premature_beat'] = $premature_beat;
     $param['mode2_exminrate'] = $exminrate;
-    $param['mode2_combeatrhy'] = $combeatrhy;
+//     $param['mode2_combeatrhy'] = $combeatrhy;
     $param['mode2_stopbeat'] = $stopbeat;
     $param['mode2_sthigh'] = $sthigh;
     $param['mode2_stlow'] = $stlow;
@@ -156,6 +158,8 @@ if ('2' == $mode) {
     $param['s_speed_times'] = $sSpeedTimes;
     $param['v_speed_hour'] = $vSpeedHour;
     $param['v_speed_times'] = $vSpeedTimes;
+    $param['exminrate_hour'] = $exminrateHour;
+    $param['exminrate_times'] = $exminrateTimes;
 }
 if ('3' == $mode) {
     $param['mode3_polycardia'] = $polycardia;
@@ -248,12 +252,12 @@ function validate_add_user($post)
         if (false === Validate::checkRequired($post['regular_time'])) {
             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'regular_time.']);
         }
-        if (false === Validate::checkRequired($post['premature_beat'])) {
-            api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'premature_beat.']);
-        }
-        if (false === Validate::checkRequired($post['combeatrhy'])) {
-            api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'combeatrhy.']);
-        }
+//         if (false === Validate::checkRequired($post['premature_beat'])) {
+//             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'premature_beat.']);
+//         }
+//         if (false === Validate::checkRequired($post['combeatrhy'])) {
+//             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'combeatrhy.']);
+//         }
         if (false === Validate::checkRequired($post['exminrate'])) {
             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'exminrate.']);
         }

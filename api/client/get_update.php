@@ -1,41 +1,36 @@
 <?php
-require_once PATH_LIB . 'Validate.php';
-
-if (false === Validate::checkRequired($_GET['current_version'])) {
-    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'current_version.']);
-}
-$currentVersion = $_GET['current_version'];
 $result = array();
 
-$versionDir = get_real_file_folder(PATH_UPDATE . 'client');
-if (empty($versionDir)) {
-    $result['version'] = $currentVersion;
-    api_exit($result);
-}
-
-$versionDir = $versionDir[0];
-if (version_compare($versionDir, $currentVersion) > 0) {
-    $dir = PATH_UPDATE . 'client' . DIRECTORY_SEPARATOR . $versionDir;
-    
-    $result['version'] = $versionDir;
-    $result['files'] = get_real_file_folder($dir);
-    api_exit($result);
-} else {
-    $result['version'] = $currentVersion;
-    api_exit($result);
-}
-
-function get_real_file_folder($dir)
-{
-    if (!file_exists($dir)) {
-        return array();
+$folders = scandir(PATH_UPDATE . 'client');
+$versionDir = '';
+foreach ($folders as $folder) {
+    if ($folder != '.' && $folder != '..') {
+        $versionDir = $folder;
+        break;
     }
+}
+if ('' == $versionDir) {
+    $result['version'] = '0.0.0.0';
+    api_exit($result);
+}
+
+//if (version_compare($versionDir, $currentVersion) > 0) {
+$dir = PATH_UPDATE . 'client' . DIRECTORY_SEPARATOR . $versionDir;
+$result['version'] = $versionDir;
+
+if (!file_exists($dir)) {
+    $result['files'] = [];
+} else {
     $files = scandir($dir);
-    $ret = array();
+    $tmp = array();
     foreach ($files as $file) {
         if ($file != '.' && $file != '..') {
-            $ret[] = $file;
+            $time = filemtime($dir . DIRECTORY_SEPARATOR . $file);
+            $tmp['file'] = URL_ROOT . 'update/client/' . $versionDir . '/' . $file;
+            $tmp['time'] = date('Y-m-d H:i:s', $time);
+            $result['files'][] = $tmp;
         }
     }
-    return $ret;
 }
+
+api_exit($result);
