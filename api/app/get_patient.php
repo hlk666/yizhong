@@ -16,9 +16,23 @@ if (VALUE_DB_ERROR === $patient) {
     $result['code'] = 2;
     $result['message'] = MESSAGE_DB_NO_DATA;
 } else {
-    $result['code'] = 0;
-    $result['patient_id'] = $patient['guardian_id'];
-    $result['name'] = $patient['patient_name'];
-    $result['mode'] = $patient['mode'];
+    $file = PATH_CACHE_CMD . $patient['guardian_id'] . '.php';
+    if (file_exists($file)) {
+        include $file;
+        if (isset($info) && !empty($info) && !empty($info['end_time'])) {
+            $result['code'] = 0;
+            $result['patient_id'] = $patient['guardian_id'];
+            $result['name'] = $patient['patient_name'];
+            $result['mode'] = $patient['mode'];
+            
+            $result['seconds_left'] = $info['end_time'] - time();
+        } else {
+            $result['code'] = 2;
+            $result['message'] = '剩余时间信息不存在。';
+        }
+    } else {
+        $result['code'] = 2;
+        $result['message'] = '剩余时间信息不存在。';
+    }
 }
 echo json_encode($result);

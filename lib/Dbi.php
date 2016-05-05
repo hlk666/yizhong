@@ -127,6 +127,12 @@ class Dbi extends BaseDbi
         $param = [':guardian_id' => $guardianId];
         return $this->getDataAll($sql, $param);
     }
+    public function getEcgIdFromDiagnosis($guardianId)
+    {
+        $sql = 'select ecg_id from diagnosis where guardian_id = :guardian_id';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getDoctorList($hospitalId)
     {
         $sql = 'select account_id as doctor_id, login_name as user, real_name as doctor_name, type

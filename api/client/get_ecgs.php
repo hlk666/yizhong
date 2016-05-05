@@ -16,6 +16,15 @@ if (VALUE_DB_ERROR === $count) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
+$ecgIdTemp = Dbi::getDbi()->getEcgIdFromDiagnosis($guardianId);
+if (VALUE_DB_ERROR === $ecgIdTemp) {
+    api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+}
+$ecgIds = array();
+foreach ($ecgIdTemp as $key => $value) {
+    $ecgIds[] = $value['ecg_id'];
+}
+
 $ret = Dbi::getDbi()->getEcgs($guardianId, $offset, $rows, $readStatus);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
@@ -23,6 +32,13 @@ if (VALUE_DB_ERROR === $ret) {
 if (empty($ret)) {
     api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 } else {
+    foreach ($ret as $key => $value) {
+        if (in_array($value['ecg_id'], $ecgIds)) {
+            $ret[$key]['diagnosis_flag'] = '1';
+        } else {
+            $ret[$key]['diagnosis_flag'] = '0';
+        }
+    }
     $result = array();
     $result['code'] = '0';
     $result['message'] = MESSAGE_SUCCESS;

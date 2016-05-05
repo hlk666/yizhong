@@ -58,7 +58,7 @@ class BaseDbi
         try {
             $sql = "select count(*) as count from $tableName where $where";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($param);
+            $stmt->execute();
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
