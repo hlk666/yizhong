@@ -96,26 +96,26 @@ class AppUploadData
         }
         
         if (!isset($mode) || trim($mode) == '' || !in_array($mode, [1, 2, 3])) {
-            $this->setError(2, 'Mode is empty or wrong.');
+            $this->setError(2, $patientId . ' : Mode is empty or wrong.');
             return false;
         }
         
         if (!isset($time) || trim($time) == '') {
-            $this->setError(3, 'alert time is required.');
+            $this->setError(3, $patientId . ' : Alert time is required.');
             return false;
         }
         
         if (!isset($data) || trim($data) == '') {
-            $this->setError(4, 'Detail data error.');
+            $this->setError(4, $patientId . ' : Detail data error.');
             return false;
         }
         
         $len = strlen($data);
         if ($len != 120000 && $len != 80000) {
-            Logger::write($this->logFile, 'length of data : ' . $len);
+            Logger::write($this->logFile, $patientId . ' : length of data : ' . $len);
         }
         if ($len % 4000 > 0) {
-            $this->setError(5, 'Data size is wrong.');
+            $this->setError(5, $patientId . ' : Data size is wrong.');
             return false;
         }
         return true;

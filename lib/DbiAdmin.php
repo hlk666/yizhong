@@ -28,12 +28,12 @@ class DbiAdmin extends BaseDbi
         $param = [':device' => $device, ':hospital' => $hospital, ':city' => $city];
         return $this->insertData($sql, $param);
     }
-    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser)
+    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser, $messageTel)
     {
         $this->pdo->beginTransaction();
-        $sql = 'insert into hospital(hospital_name, tel, address, parent_flag)
-                values (:name, :tel, :address, :flag)';
-        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':flag' => $parentFlag];
+        $sql = 'insert into hospital(hospital_name, tel, address, parent_flag, sms_tel)
+                values (:name, :tel, :address, :flag, :sms_tel)';
+        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':flag' => $parentFlag, ':sms_tel' => $messageTel];
         $hospitalId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $hospitalId) {
             $this->pdo->rollBack();
@@ -128,7 +128,7 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital' => $hospitalId];
         return $this->deleteData($sql, $param);
     }
-    public function editHospital($hospitalId, $hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $loginUser)
+    public function editHospital($hospitalId, $hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $loginUser, $messageTel)
     {
         $this->pdo->beginTransaction();
     
@@ -142,14 +142,15 @@ class DbiAdmin extends BaseDbi
         }
         
         $sql = 'update hospital 
-                set hospital_name = :name, tel = :tel, address = :address, parent_flag = :flag
+                set hospital_name = :name, tel = :tel, address = :address, parent_flag = :flag, sms_tel = :sms_tel
                 where hospital_id = :hospital';
         $param = [
             ':hospital' => $hospitalId,
             ':name' => $hospitalName,
             ':tel' => $hospitalTel,
             ':address' => $hospitalAddress,
-            ':flag' => $parentFlag
+            ':flag' => $parentFlag,
+            ':sms_tel' => $messageTel
         ];
         $ret = $this->updateData($sql, $param);
         if (VALUE_DB_ERROR === $ret) {
@@ -238,7 +239,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select h.hospital_id, hospital_name, address, tel, parent_flag, a.login_name
+        $sql = 'select h.hospital_id, hospital_name, address, tel, parent_flag, a.login_name, h.sms_tel
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];
@@ -247,7 +248,7 @@ class DbiAdmin extends BaseDbi
     public function getHospitalList($offset = 0, $rows = null)
     {
         $sql = 'select h.hospital_id, hospital_name, tel, address, parent_flag, a.login_name 
-                from hospital as h left join account as a on h.hospital_id = a.hospital_id where a.type = 1';
+                from hospital as h left join account as a on h.hospital_id = a.hospital_id where a.type = 1 order by h.hospital_id ';
         if (null !== $rows) {
             $sql .= " limit $offset, $rows";
         }

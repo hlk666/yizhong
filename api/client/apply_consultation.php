@@ -1,6 +1,7 @@
 <?php
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
+require_once PATH_LIB . 'ShortMessageService.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
@@ -30,6 +31,7 @@ if (VALUE_DB_ERROR === $ret) {
 }
 
 setNotice($responseHospital, PATH_CACHE_CONSULTATION_APPLY_NOTICE);
+pushShortMessage($responseHospital);
 
 api_exit_success();
 
@@ -39,4 +41,17 @@ function setNotice($hospitalId, $directory)
     if (!file_exists($file)) {
         file_put_contents($file, '1');
     }
+}
+
+function pushShortMessage($hospitalId)
+{
+    $ret = Dbi::getDbi()->getHospitalInfo($hospitalId);
+    if (VALUE_DB_ERROR === $ret) {
+        return;
+    }
+    $tel = $ret['sms_tel'];
+    if ('0' == $tel) {
+        return;
+    }
+    ShortMessageService::send($tel, '有新的会诊请求，请确认。');
 }

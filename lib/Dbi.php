@@ -176,12 +176,11 @@ class Dbi extends BaseDbi
                 g.blood_pressure, g.tentative_diagnose, g.medical_history, g.hospitalization_id, 
                 g.lead, g.regist_doctor_name as doctor_name, g.sickroom
                 from guardian as g left join patient as p on g.patient_id = p.patient_id ';
-        if ($hospitalId == 0) {
+        if ($hospitalId === 0) {
             $sql .= ' where 1 ';
         } else {
             $sql .= ' where guard_hospital_id = ' . $hospitalId; 
         }
-                
         if ($mode != null) {
             $sql .= " and g.mode = $mode ";
         }
@@ -258,7 +257,7 @@ class Dbi extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag
+        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel
                 from hospital where hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);

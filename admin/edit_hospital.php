@@ -17,6 +17,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
     $loginUser = !isset($_POST['login_user']) ? null : $_POST['login_user'];
+    $messageTel = isset($_POST['message_tel']) ? $_POST['message_tel'] : '0';
     
     if (empty($hospitalId)) {
         user_back_after_delay('非法访问');
@@ -38,6 +39,9 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         if (empty($loginUser)) {
             user_back_after_delay('请正确输入管理员登录用户。');
         }
+        if (empty($messageTel)) {
+            user_back_after_delay('请正确输入接收短信的医生手机号。');
+        }
         
         $isExisted = DbiAdmin::getDbi()->existedLoginName($loginUser, $hospitalId);
         if (VALUE_DB_ERROR === $isExisted) {
@@ -48,7 +52,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         }
         
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId,
-            $hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $loginUser);
+            $hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $loginUser, $messageTel);
     }
     
     if (isset($_POST['del'])) {
@@ -79,6 +83,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $address = $hospitalInfo['address'];
     $tel = $hospitalInfo['tel'];
     $loginUser = $hospitalInfo['login_name'];
+    $messageTel = $hospitalInfo['sms_tel'];
     
     if ('1' == $hospitalInfo['parent_flag']) {
         $htmlParentFlagYes = '<input type="radio" name="parent_flag" value="1" checked>可</label>';
@@ -129,6 +134,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <label for="login_user" class="col-sm-2 control-label">管理员登录用户<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="login_user" name="login_user" value="$loginUser">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="message_tel" class="col-sm-2 control-label">接收短信手机号<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="message_tel" name="message_tel" value="$messageTel">
     </div>
   </div>
   <div class="form-group">

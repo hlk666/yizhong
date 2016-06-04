@@ -7,7 +7,7 @@ $file = dirname(PATH_ROOT) . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR 
 $logFile = 'qps.log';
 
 if (!file_exists($file)) {
-    Logger::writeBatch($logFile, "file[$file] not exists." );
+    //Logger::writeBatch($logFile, "file[$file] not exists." );
     
     $dataFile = DataFile::getDataFile('qps', date('Ym', strtotime('-1 hour')));
     if (false === $dataFile) {

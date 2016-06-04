@@ -10,6 +10,7 @@ if (!isset($_GET['entry']) || empty($_GET['entry'])) {
 $_GET['entry'] = str_replace('test_', 'client_', $_GET['entry']);
 
 if ($_GET['entry'] == 'special_get_patients'
+        || $_GET['entry'] == 'sms'
         || $_GET['entry'] == 'clear_real_time_file') {
     $file = $_GET['entry'] . '.php';
 } elseif ($_GET['entry'] == 'app_set_command' 
