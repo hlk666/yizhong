@@ -81,6 +81,8 @@ class Dbi extends BaseDbi
         if (null !== $endTime) {
             $sql .= ' and request_time <= ' . $endTime;
         }
+        $sql .= ' order by consultation_id desc ';
+        
         $param = ['hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
@@ -103,6 +105,8 @@ class Dbi extends BaseDbi
         if (null !== $endTime) {
             $sql .= ' and response_time <= ' . $endTime;
         }
+        $sql .= ' order by consultation_id desc ';
+        
         $param = ['hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
