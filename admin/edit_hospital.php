@@ -39,9 +39,6 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         if (empty($loginUser)) {
             user_back_after_delay('请正确输入管理员登录用户。');
         }
-        if (empty($messageTel)) {
-            user_back_after_delay('请正确输入接收短信的医生手机号。');
-        }
         
         $isExisted = DbiAdmin::getDbi()->existedLoginName($loginUser, $hospitalId);
         if (VALUE_DB_ERROR === $isExisted) {
