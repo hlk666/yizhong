@@ -19,6 +19,7 @@ define('PATH_CACHE_REGIST_NOTICE', PATH_ROOT . 'cache\regist_notice\\');
 define('PATH_CACHE_CONSULTATION_APPLY_NOTICE', PATH_ROOT . 'cache\consultation_apply\\');
 define('PATH_CACHE_CONSULTATION_REPLY_NOTICE', PATH_ROOT . 'cache\consultation_reply\\');
 define('PATH_REPORT', PATH_ROOT . 'report\\');
+define('PATH_HBI', PATH_ROOT . 'hbi\\');
 define('PATH_GETUI', PATH_ROOT . 'vendor\\getui\\');
 
 define('SUFFIX_REAL_TIME_FILE', '_real_time.bin');

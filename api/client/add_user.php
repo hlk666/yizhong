@@ -93,10 +93,10 @@ if (VALUE_DB_ERROR === $ret) {
 setRegistNotice($guardHospital);
 
 if (VALUE_GT_ERROR === $ret) {
-    api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
+    api_exit(['code' => '3', 'message' => '操作成功，但设备未开机!']);
 }
 
-api_exit_success('ID:' . $guardianId);
+api_exit_success();
 
 function setRegistNotice($hospitalId)
 {

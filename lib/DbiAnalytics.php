@@ -37,6 +37,7 @@ class DbiAnalytics extends BaseDbi
             $sql .= ' and end_time <= :end_time ';
             $param[':end_time'] = $endTime;
         }
+        $sql .= ' order by guardian_id desc';
         return $this->getDataAll($sql, $param);
     }
     public function uploadReport($guardianId, $file)
