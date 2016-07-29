@@ -175,7 +175,11 @@ class BaseDbi
     {
         $sql = "update $table set ";
         foreach ($data as $key => $value) {
-            $sql .= $key . ' = "' . $value . '",';
+            if ($value == 'null') {
+                $sql .= $key . ' = ' . $value . ',';
+            } else {
+                $sql .= $key . ' = "' . $value . '",';
+            }
         }
         $sql = substr($sql, 0, -1);
         $sql .= " where $keyName = :key";

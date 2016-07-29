@@ -64,6 +64,12 @@ class Dbi extends BaseDbi
         $param = [':account_id' => $doctorId];
         return $this->getDataRow($sql, $param);
     }
+    public function getAgencyHospitals($agencyId)
+    {
+        $sql = 'select hospital_id, hospital_name from hospital where agency_id = :agency_id';
+        $param = [':agency_id' => $agencyId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getConsultationRequest($hospitalId, $allFlag, $requestHospital, $startTime, $endTime)
     {
         $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, request_message, request_time
@@ -123,6 +129,12 @@ class Dbi extends BaseDbi
         $param = [':guardian_id' => $guardianId];
         return $this->getDataString($sql, $param);
     }
+    public function getDeviceList($hospitalId)
+    {
+        $sql = 'select device_id from device where hospital_id = :hospital_id';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getDiagnosisByGuardian($guardianId)
     {
         $sql = 'select d.ecg_id, d.content, d.content_parent, e.create_time as content_time, e.data_path
@@ -130,6 +142,13 @@ class Dbi extends BaseDbi
                 where d.guardian_id = :guardian_id';
         $param = [':guardian_id' => $guardianId];
         return $this->getDataAll($sql, $param);
+    }
+    public function getDownloadData($guardianId)
+    {
+        $sql = 'select guardian_id, url, upload_time, download_start_time, download_end_time 
+                from guardian_data where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataRow($sql, $param);
     }
     public function getEcgIdFromDiagnosis($guardianId)
     {
@@ -327,6 +346,20 @@ class Dbi extends BaseDbi
         return $this->insertData($sql, $param);
     }
     
+    public function addGuardianData($guardianId, $url)
+    {
+        if ($this->existData('guardian_data', 'guardian_id = ' . $guardianId)) {
+            $sql = 'update guardian_data set url = :url, upload_time = now() where guardian_id = :guardian_id';
+            $param = [':guardian_id' => $guardianId, ':url' => $url];
+            return $this->updateData($sql, $param);
+        }
+        else {
+            $sql = 'insert into guardian_data (guardian_id, url) values (:guardian_id, :url)';
+            $param = [':guardian_id' => $guardianId, ':url' => $url ];
+            return $this->insertData($sql, $param);
+        }
+    }
+    
     public function delEcg($ecgId)
     {
         $sql = 'delete from ecg where ecg_id = :ecg_id';
@@ -505,6 +538,10 @@ class Dbi extends BaseDbi
         $sql = 'update guardian set mark = :mark where guardian_id = :guardian';
         $param = [':guardian' => $guardianId, ':mark' => $mark];
         return $this->updateData($sql, $param);
+    }
+    public function noticeDownloadData($guardianId, array $data)
+    {
+        return $this->updateTableByKey('guardian_data', 'guardian_id', $guardianId, $data);
     }
     public function updatePassword($user, $newPwd)
     {
