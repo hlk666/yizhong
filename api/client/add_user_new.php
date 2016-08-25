@@ -11,8 +11,8 @@ $name = $_POST['name'];
 $age = $_POST['age'];
 $sex = $_POST['sex'];
 $tel = $_POST['tel'];
-$tentativeDiagnose = $_POST['tentative_diagnose'];
-$medicalHistory = $_POST['medical_history'];
+$tentativeDiagnose = isset($_POST['tentative_diagnose']) ? $_POST['tentative_diagnose'] : '';
+$medicalHistory = isset($_POST['medical_history']) ? $_POST['medical_history'] : '';
 $registHospital = $_POST['regist_hospital'];
 $guardHospital = $_POST['guard_hospital'];
 $doctorId = 0;//will be used in future.
@@ -211,12 +211,6 @@ function validate_add_user($post)
     if (false === Validate::checkRequired($post['tel'])) {
         api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'tel.']);
     }
-    if (false === Validate::checkRequired($post['tentative_diagnose'])) {
-        api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'tentative_diagnose.']);
-    }
-    if (false === Validate::checkRequired($post['medical_history'])) {
-        api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'medical_history.']);
-    }
     if (false === Validate::checkRequired($post['regist_hospital'])) {
         api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'regist_hospital.']);
     }
@@ -252,12 +246,6 @@ function validate_add_user($post)
         if (false === Validate::checkRequired($post['regular_time'])) {
             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'regular_time.']);
         }
-//         if (false === Validate::checkRequired($post['premature_beat'])) {
-//             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'premature_beat.']);
-//         }
-//         if (false === Validate::checkRequired($post['combeatrhy'])) {
-//             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'combeatrhy.']);
-//         }
         if (false === Validate::checkRequired($post['exminrate'])) {
             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'exminrate.']);
         }
