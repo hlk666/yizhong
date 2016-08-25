@@ -14,6 +14,7 @@ define('PATH_REAL_TIME', PATH_ROOT . 'RealTime\\');
 define('PATH_CACHE_CMD', PATH_ROOT . 'cache\cmd\\');
 define('PATH_CACHE_CMD_BK', PATH_ROOT . 'cache\cmd_bk\\');
 define('PATH_CACHE_CLIENT', PATH_ROOT . 'cache\client\\');
+define('PATH_CACHE_ECGONLINE', PATH_ROOT . 'cache\ecgonline\\');
 define('PATH_CACHE_ECG_NOTICE', PATH_ROOT . 'cache\ecg_notice\\');
 define('PATH_CACHE_REGIST_NOTICE', PATH_ROOT . 'cache\regist_notice\\');
 define('PATH_CACHE_CONSULTATION_APPLY_NOTICE', PATH_ROOT . 'cache\consultation_apply\\');

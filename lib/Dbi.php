@@ -72,7 +72,8 @@ class Dbi extends BaseDbi
     }
     public function getConsultationRequest($hospitalId, $allFlag, $requestHospital, $startTime, $endTime)
     {
-        $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, request_message, request_time
+        $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, 
+                request_message, request_time, response_message, response_time
                 from consultation as c left join hospital as h on c.request_hospital_id = h.hospital_id
                 where response_hospital_id = :hospital_id ';
         if (0 == $allFlag) {
@@ -82,10 +83,10 @@ class Dbi extends BaseDbi
             $sql .= ' and request_hospital_id = ' . $requestHospital;
         }
         if (null !== $startTime) {
-            $sql .= ' and request_time >= ' . $startTime;
+            $sql .= " and request_time >= '$startTime' ";
         }
         if (null !== $endTime) {
-            $sql .= ' and request_time <= ' . $endTime;
+            $sql .= " and request_time <= '$endTime' ";
         }
         $sql .= ' order by consultation_id desc ';
         
@@ -94,7 +95,8 @@ class Dbi extends BaseDbi
     }
     public function getConsultationResponse($hospitalId, $allFlag, $responseHospital, $startTime, $endTime)
     {
-        $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, response_message, response_time
+        $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, 
+                response_message, response_time, request_message, request_time
                 from consultation as c left join hospital as h on c.response_hospital_id = h.hospital_id
                 where request_hospital_id = :hospital_id ';
         if (1 == $allFlag) {
@@ -106,10 +108,10 @@ class Dbi extends BaseDbi
             $sql .= ' and response_hospital_id = ' . $responseHospital;
         }
         if (null !== $startTime) {
-            $sql .= ' and response_time >= ' . $startTime;
+            $sql .= " and response_time >= '$startTime' ";
         }
         if (null !== $endTime) {
-            $sql .= ' and response_time <= ' . $endTime;
+            $sql .= " and response_time <= '$endTime' ";
         }
         $sql .= ' order by consultation_id desc ';
         
@@ -175,6 +177,20 @@ class Dbi extends BaseDbi
         $param = [':guardian' => $guardianId];
         return $this->getDataAll($sql, $param);
     }
+    public function getEcgsByTime($guardianId, $lastTime)
+    {
+        $sql = "select ecg_id, alert_flag, create_time, read_status, data_path, mark
+                from ecg where guardian_id = :guardian and create_time > '$lastTime'";
+        $param = [':guardian' => $guardianId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getEcgsByTime1($guardianId, $lastTime)
+    {
+        $sql = "select ecg_id, alert_flag, create_time, read_status, data_path, mark
+        from ecg where guardian_id = :guardian and create_time > '$lastTime'";
+        $param = [':guardian' => $guardianId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getGuardianByDevice($deviceId)
     {
         $sql = 'select guardian_id, patient_id, status from guardian
@@ -229,7 +245,7 @@ class Dbi extends BaseDbi
             $sql .= " and g.regist_hospial_id in ($registHospitalId) ";
         }
         if ($doctorName != null) {
-            $sql .= " and g.regist_doctor_name = $doctorName ";
+            $sql .= " and g.regist_doctor_name = '$doctorName' ";
         }
         $sql .= " order by g.guardian_id desc limit $offset, $rows";
         $param = [':hospital_id' => $hospitalId];
@@ -381,7 +397,7 @@ class Dbi extends BaseDbi
     }
     public function flowConsultationReply($consultationId, $result)
     {
-        $sql = 'update consultation set status = 2, response_message = :result
+        $sql = 'update consultation set status = 2, response_message = :result, response_time = now()
                 where consultation_id = :consultation_id';
         $param = [':consultation_id' => $consultationId, ':result' => $result];
         return $this->updateData($sql, $param);
