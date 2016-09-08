@@ -2,6 +2,7 @@
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'ShortMessageService.php';
+require_once PATH_LIB . 'GeTuiECGOnline.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
@@ -32,6 +33,7 @@ if (VALUE_DB_ERROR === $ret) {
 
 setNotice($responseHospital, PATH_CACHE_CONSULTATION_APPLY_NOTICE);
 pushShortMessage($responseHospital);
+GTSendMessage($responseHospital);
 
 api_exit_success();
 
@@ -54,4 +56,14 @@ function pushShortMessage($hospitalId)
         return;
     }
     ShortMessageService::send($tel, '有新的会诊请求，请确认。');
+}
+function GTSendMessage($hospitalId)
+{
+    $file = PATH_CACHE_ECGONLINE . $hospitalId . '.php';
+    if (file_exists($file)) {
+        include $file;
+        GeTuiECGOnline::pushToList($clientIdList, '有新的会诊请求，请确认。');
+    } else {
+        //do nothing.
+    }
 }
