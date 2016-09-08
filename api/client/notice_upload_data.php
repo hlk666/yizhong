@@ -1,5 +1,5 @@
 <?php
-require_once PATH_LIB . 'Dbi.php';
+require_once PATH_LIB . 'DbiAnalytics.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'ShortMessageService.php';
 
@@ -13,10 +13,46 @@ if (false === Validate::checkRequired($_POST['upload_url'])) {
 $guardianId = $_POST['patient_id'];
 $url = $_POST['upload_url'];
 
-$ret = Dbi::getDbi()->addGuardianData($guardianId, $url);
+$ret = DbiAnalytics::getDbi()->addGuardianData($guardianId, $url);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
-ShortMessageService::send('13465596133', "数据文件(id：$guardianId)已上传完毕，请确认。");
+$tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
+if (VALUE_DB_ERROR === $tree || array() == $tree) {
+    //do nothing.
+} else {
+    $vc = createVC($guardianId);
+    pushShortMessage($tree['analysis_hospital'], "病人(id:$guardianId, 验证码:$vc)的数据文件已经上传完毕，请下载、分析。");
+}
+
 api_exit_success();
+
+function createVC($guardianId)
+{
+    $allText = '1234567890';
+    $vc = '';
+    for ($i = 1; $i <= 4; $i++) {
+        $index = rand(0,9);
+        $vc .= substr($allText, $index, 1);
+    }
+    
+    $vcFile = PATH_ROOT . 'VerificationCode' . DIRECTORY_SEPARATOR . $guardianId . '.php';
+    $template = "<?php\n";
+    $template .= '$rightVC = ' . $vc . ";\n";
+    file_put_contents($vcFile, $template);
+    
+    return $vc;
+}
+function pushShortMessage($hospitalId, $message)
+{
+    $ret = DbiAnalytics::getDbi()->getHospitalInfo($hospitalId);
+    if (VALUE_DB_ERROR === $ret) {
+        return;
+    }
+    $tel = $ret['sms_tel'];
+    if ('0' == $tel) {
+        return;
+    }
+    ShortMessageService::send($tel, $message);
+}

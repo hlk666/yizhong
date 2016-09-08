@@ -2,6 +2,19 @@
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_LIB . 'DbiAnalytics.php';
 
+function pushShortMessage($hospitalId, $message)
+{
+    $ret = DbiAnalytics::getDbi()->getHospitalInfo($hospitalId);
+    if (VALUE_DB_ERROR === $ret) {
+        return;
+    }
+    $tel = $ret['sms_tel'];
+    if ('0' == $tel) {
+        return;
+    }
+    ShortMessageService::send($tel, $message);
+}
+
 class AnalyticsUpload
 {
     private $error = array();
@@ -15,23 +28,35 @@ class AnalyticsUpload
             return json_encode($this->error);
         }
         
-        $dir = PATH_REPORT . $param['patient_id'] . DIRECTORY_SEPARATOR;
+        $guardianId = $param['patient_id'];
+        $dir = PATH_REPORT . $param['hospital_id'] . DIRECTORY_SEPARATOR;
         if (!file_exists($dir)) {
             mkdir($dir);
         }
-        $file = $dir . $param['start_time'] . '_' . $param['end_time'] . '.pdf';
+        
+        $file = $dir . $guardianId . '.pdf';
         $ret = file_put_contents($file, $data);
         if (false === $ret) {
             $this->setError(6, 'IO error.');
             return json_encode($this->error);
         }
         
-        $urlFile = 'report/' . $param['patient_id'] . '/' . $param['start_time'] . '_' . $param['end_time'] . '.pdf';
-        $ret = DbiAnalytics::getDbi()->uploadReport($param['patient_id'], $urlFile);
+        $urlFile = 'report/' . $param['hospital_id'] . '/' . $guardianId . '.pdf';
+        $ret = DbiAnalytics::getDbi()->uploadReport($guardianId, $urlFile);
         if (VALUE_DB_ERROR === $ret) {
             $this->setError(7, 'DB error.');
             return json_encode($this->error);
         }
+        
+        $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
+        if (VALUE_DB_ERROR === $tree || array() == $tree) {
+            //do nothing.
+        } elseif ($tree['hospital_id'] != $tree['report_hospital']) {
+            pushShortMessage($tree['hospital_id'], "病人(id=$guardianId)的报告已经上传到服务器，请下载打印。");
+        } else {
+            //do nothing.
+        }
+        
         return json_encode($this->retSuccess);
     }
     

@@ -1,6 +1,20 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_LIB . 'DbiAnalytics.php';
+require_once PATH_LIB . 'ShortMessageService.php';
+
+function pushShortMessage($hospitalId, $message)
+{
+    $ret = DbiAnalytics::getDbi()->getHospitalInfo($hospitalId);
+    if (VALUE_DB_ERROR === $ret) {
+        return;
+    }
+    $tel = $ret['sms_tel'];
+    if ('0' == $tel) {
+        return;
+    }
+    ShortMessageService::send($tel, $message);
+}
 
 class AnalyticsUploadHbi
 {
@@ -15,15 +29,26 @@ class AnalyticsUploadHbi
             return json_encode($this->error);
         }
         
+        $guardianId = $param['patient_id'];
         $dir = PATH_HBI . $param['hospital_id'] . DIRECTORY_SEPARATOR;
         if (!file_exists($dir)) {
             mkdir($dir);
         }
-        $file = $dir . $param['patient_id'] . '.hbi';
+        $file = $dir . $guardianId . '.hbi';
         $ret = file_put_contents($file, $data);
         if (false === $ret) {
             $this->setError(4, 'IO error.');
             return json_encode($this->error);
+        }
+        
+        $message = isset($param['message']) ? $param['message'] : '0';
+        if ($message == '1') {
+            $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
+            if (VALUE_DB_ERROR === $tree || array() == $tree) {
+                //do nothing.
+            } else {
+                pushShortMessage($tree['report_hospital'], "病人(id=$guardianId)的心搏数据文件已经分析完毕，请出报告。");
+            }
         }
         
         return json_encode($this->retSuccess);

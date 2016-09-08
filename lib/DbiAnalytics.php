@@ -19,6 +19,35 @@ class DbiAnalytics extends BaseDbi
         return self::$instance;
     }
     
+    public function getHospitalInfo($hospitalId)
+    {
+        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel
+                from hospital where hospital_id = :hospital_id limit 1';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getHospitalTree($guardianId)
+    {
+        $sql = 'select regist_hospital_id from guardian where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        $hospitalId = $this->getDataString($sql, $param);
+        if (VALUE_DB_ERROR === $hospitalId || '' == $hospitalId) {
+            return array();
+        }
+        
+        $sql = 'select hospital_id, analysis_hospital, report_hospital from hospital_tree
+                where hospital_id = :hospital_id limit 1';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getPatient($guardianId)
+    {
+        $sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported
+                 from guardian as g left join patient as p on g.patient_id = p.patient_id
+                 where guardian_id = :guardian_id';
+        $param = array(':guardian_id' => $guardianId);
+        return $this->getDataRow($sql, $param);
+    }
     public function getPatientsForAnalytics($hospitalId, $reported = null, $startTime = null, $endTime = null)
     {
         $sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported
@@ -39,6 +68,19 @@ class DbiAnalytics extends BaseDbi
         }
         $sql .= ' order by guardian_id desc';
         return $this->getDataAll($sql, $param);
+    }
+    public function addGuardianData($guardianId, $url)
+    {
+        if ($this->existData('guardian_data', 'guardian_id = ' . $guardianId)) {
+            $sql = 'update guardian_data set url = :url, upload_time = now() where guardian_id = :guardian_id';
+            $param = [':guardian_id' => $guardianId, ':url' => $url];
+            return $this->updateData($sql, $param);
+        }
+        else {
+            $sql = 'insert into guardian_data (guardian_id, url) values (:guardian_id, :url)';
+            $param = [':guardian_id' => $guardianId, ':url' => $url ];
+            return $this->insertData($sql, $param);
+        }
     }
     public function uploadReport($guardianId, $file)
     {

@@ -362,20 +362,6 @@ class Dbi extends BaseDbi
         return $this->insertData($sql, $param);
     }
     
-    public function addGuardianData($guardianId, $url)
-    {
-        if ($this->existData('guardian_data', 'guardian_id = ' . $guardianId)) {
-            $sql = 'update guardian_data set url = :url, upload_time = now() where guardian_id = :guardian_id';
-            $param = [':guardian_id' => $guardianId, ':url' => $url];
-            return $this->updateData($sql, $param);
-        }
-        else {
-            $sql = 'insert into guardian_data (guardian_id, url) values (:guardian_id, :url)';
-            $param = [':guardian_id' => $guardianId, ':url' => $url ];
-            return $this->insertData($sql, $param);
-        }
-    }
-    
     public function delEcg($ecgId)
     {
         $sql = 'delete from ecg where ecg_id = :ecg_id';
