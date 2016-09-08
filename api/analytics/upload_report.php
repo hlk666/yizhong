@@ -1,7 +1,7 @@
 <?php
-require PATH_LIB . 'AnalyticsUpload.php';
+require PATH_ROOT . 'lib/analysis/AnalysisUpload.php';
 
 $data = file_get_contents('php://input');
 
-$upload = new AnalyticsUpload();
-echo $upload->run($_GET, $data);
+$upload = new AnalysisUpload();
+echo $upload->run($_GET, $data, 'report');

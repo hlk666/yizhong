@@ -1,7 +1,7 @@
 <?php
 require_once PATH_LIB . 'DbiAnalytics.php';
 require_once PATH_LIB . 'Validate.php';
-require_once PATH_LIB . 'ShortMessageService.php';
+require_once PATH_ROOT . 'lib/tool/HpMessage.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
@@ -23,7 +23,7 @@ if (VALUE_DB_ERROR === $tree || array() == $tree) {
     //do nothing.
 } else {
     $vc = createVC($guardianId);
-    pushShortMessage($tree['analysis_hospital'], "病人(id:$guardianId, 验证码:$vc)的数据文件已经上传完毕，请下载、分析。");
+    HpMessage::sendTelMessage("病人(id:$guardianId, 验证码:$vc)的数据文件已经上传完毕，请下载、分析。", $tree['analysis_hospital']);
 }
 
 api_exit_success();
@@ -43,16 +43,4 @@ function createVC($guardianId)
     file_put_contents($vcFile, $template);
     
     return $vc;
-}
-function pushShortMessage($hospitalId, $message)
-{
-    $ret = DbiAnalytics::getDbi()->getHospitalInfo($hospitalId);
-    if (VALUE_DB_ERROR === $ret) {
-        return;
-    }
-    $tel = $ret['sms_tel'];
-    if ('0' == $tel) {
-        return;
-    }
-    ShortMessageService::send($tel, $message);
 }
