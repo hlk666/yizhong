@@ -26,9 +26,11 @@ if (false === $dataFile) {
     include $dataFile;
     if (isset($device[$deviceId])) {
         $result['version'] = $device[$deviceId];
+        $result['size'] = filesize(PATH_UPDATE . 'app/iMed.apk');
         Logger::write($updateLog, 'get update with ID : ' . $deviceId);
     } else { 
         $result['version'] = '0';
+        $result['size'] = '0';
     }
 }
 api_exit($result);
