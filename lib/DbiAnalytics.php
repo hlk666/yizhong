@@ -19,6 +19,19 @@ class DbiAnalytics extends BaseDbi
         return self::$instance;
     }
     
+    public function addPatientDiagnosis($patientId, $diagnosisId)
+    {
+        $sql = 'select 1 from patient_diagnosis where patient_id = :patient and diagnosis_id = :diagnosis limit 1';
+        $param = [':patient' => $patientId, ':diagnosis' => $diagnosisId];
+        $ret = $this->getDataRow($sql, $param);
+        if (VALUE_DB_ERROR === $ret || !empty($ret)) {
+            return;
+        }
+        
+        $sql = 'insert into patient_diagnosis (patient_id, diagnosis_id) values (:patient, :diagnosis)';
+        return $this->insertData($sql, $param);
+    }
+    
     public function getHospitalInfo($hospitalId)
     {
         $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel
