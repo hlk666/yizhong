@@ -61,6 +61,13 @@ class DbiAnalytics extends BaseDbi
         $param = array(':guardian_id' => $guardianId);
         return $this->getDataRow($sql, $param);
     }
+    public function getPatientByDiagnosis($diagnosisList)
+    {
+        $sql = 'select distinct pd.patient_id, p.patient_name, p.birth_year, p.sex, p.tel
+                from patient as p inner join patient_diagnosis as pd on p.patient_id = pd.patient_id
+                where pd.diagnosis_id in ' . $diagnosisList;
+        return $this->getDataAll($sql);
+    }
     public function getPatientsForAnalytics($hospitalId, $reported = null, $startTime = null, $endTime = null)
     {
         $sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported
