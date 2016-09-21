@@ -2,7 +2,6 @@
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Invigilator.php';
-//require_once PATH_LIB . 'Logger.php';
 
 validate_add_user($_POST);
 
@@ -26,10 +25,8 @@ $weight = isset($_POST['weight']) ? $_POST['weight'] : '0';
 $bloodPressure = isset($_POST['blood_pressure']) ? $_POST['blood_pressure'] : '';
 $sickRoom = isset($_POST['sickroom']) ? $_POST['sickroom'] : '';
 $familyTel = isset($_POST['family_tel']) ? $_POST['family_tel'] : '0';
-$hours = isset($_POST['guard_hours']) ? $_POST['guard_hours'] : 0;
+$hours = isset($_POST['guard_hours']) ? $_POST['guard_hours'] : 24;
 $hospitalizationId = isset($_POST['hospitalization_id']) ? $_POST['hospitalization_id'] : '0';
-
-//Logger::write('aaa.txt', $hospitalizationId);
 
 $polycardia = PARAM_POLYCARDIA;
 $bradycardia = PARAM_BRADYCARDIA;
@@ -40,8 +37,6 @@ if ('2' == $mode) {
     $lead = $_POST['lead'];
     $record_seconds = $_POST['record_seconds'];
     $regular_time = $_POST['regular_time'];
-    $premature_beat = $_POST['premature_beat'];
-    $combeatrhy = $_POST['combeatrhy'];
     $exminrate = $_POST['exminrate'];
     $stopbeat = $_POST['stopbeat'];
     $sthigh = $_POST['sthigh'];
@@ -68,9 +63,9 @@ if ('2' == $mode) {
     $param['mode2_bradycardia'] = $bradycardia;
     $param['mode2_lead'] = $lead;
     $param['mode2_regular_time'] = $regular_time;
-    $param['mode2_premature_beat'] = $premature_beat;
+    $param['mode2_premature_beat'] = '8';
     $param['mode2_exminrate'] = $exminrate;
-    $param['mode2_combeatrhy'] = $combeatrhy;
+    $param['mode2_combeatrhy'] = 'on';
     $param['mode2_stopbeat'] = $stopbeat;
     $param['mode2_sthigh'] = $sthigh;
     $param['mode2_stlow'] = $stlow;
@@ -96,7 +91,7 @@ if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
 }
 
-api_exit_success('ID:' . $guardianId);
+api_exit_success();
 
 function setRegistNotice($hospitalId)
 {
@@ -160,12 +155,6 @@ function validate_add_user($post)
         }
         if (false === Validate::checkRequired($post['regular_time'])) {
             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'regular_time.']);
-        }
-        if (false === Validate::checkRequired($post['premature_beat'])) {
-            api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'premature_beat.']);
-        }
-        if (false === Validate::checkRequired($post['combeatrhy'])) {
-            api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'combeatrhy.']);
         }
         if (false === Validate::checkRequired($post['exminrate'])) {
             api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'exminrate.']);

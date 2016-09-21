@@ -111,7 +111,7 @@ class AppUploadData
         }
         
         $len = strlen($data);
-        if ($len != 120000 && $len != 80000) {
+        if ($len != 20000 && $len != 120000 && $len != 80000) {
             Logger::write($this->logFile, $patientId . ' : length of data : ' . $len);
         }
         if ($len % 4000 > 0) {

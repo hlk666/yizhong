@@ -242,7 +242,7 @@ class Dbi extends BaseDbi
             $sql .= " and g.start_time <= '$eTime' ";
         }
         if ($registHospitalId != null) {
-            $sql .= " and g.regist_hospial_id in ($registHospitalId) ";
+            $sql .= " and g.regist_hospital_id in ($registHospitalId) ";
         }
         if ($doctorName != null) {
             $sql .= " and g.regist_doctor_name = '$doctorName' ";
@@ -287,6 +287,12 @@ class Dbi extends BaseDbi
         $sql .= " order by g.guardian_id desc limit $offset, $rows";
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
+    }
+    public function getHospitalByDevice($diviceId)
+    {
+        $sql = 'select hospital_id from device where device_id = :device limit 1';
+        $param = [':device' => $diviceId];
+        return $this->getDataRow($sql, $param);
     }
     public function getHospitalByGuardian($guardianId)
     {
