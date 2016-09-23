@@ -35,8 +35,7 @@ function after_api(array $returnArray, $time)
     }
     echo json_encode($returnArray, JSON_UNESCAPED_UNICODE);
 
-    if (DEBUG_MODE) {
-        HpLogger::writeDebugLog($_GET['entry'], $time);
-    }
+    HpLogger::writeDebugLog($_GET['entry'], $time);
+    
     exit;
 }

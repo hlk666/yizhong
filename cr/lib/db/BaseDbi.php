@@ -47,6 +47,9 @@ class BaseDbi
             $sql = "insert into $bkTable select *, now() from $table where $keyName = $keyValue";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            if (DEBUG_MODE) {
+                HpLogger::writeCommonLog($stmt->queryString, 'sql.log');
+            }
             return true;
         } catch (Exception $e) {
             HpLogger::writeCommonLog($e->getMessage(), $this->logFile);
@@ -59,6 +62,9 @@ class BaseDbi
             $sql = "select count(*) as count from $tableName where $where";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
+            if (DEBUG_MODE) {
+                HpLogger::writeCommonLog($stmt->queryString, 'sql.log');
+            }
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
@@ -75,6 +81,9 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            if (DEBUG_MODE) {
+                HpLogger::writeCommonLog($stmt->queryString, 'sql.log');
+            }
             return true;
         } catch (Exception $e) {
             HpLogger::writeCommonLog($e->getMessage(), $this->logFile);
@@ -95,6 +104,9 @@ class BaseDbi
             $sql .= ' limit 1';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
+            if (DEBUG_MODE) {
+                HpLogger::writeCommonLog($stmt->queryString, 'sql.log');
+            }
             return $stmt->rowCount() > 0;
         } catch (Exception $e) {
             HpLogger::writeCommonLog($e->getMessage(), $this->logFile);
@@ -106,6 +118,9 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            if (DEBUG_MODE) {
+                HpLogger::writeCommonLog($stmt->queryString, 'sql.log');
+            }
             $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
@@ -122,6 +137,9 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            if (DEBUG_MODE) {
+                HpLogger::writeCommonLog($stmt->queryString, 'sql.log');
+            }
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
@@ -138,6 +156,9 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            if (DEBUG_MODE) {
+                HpLogger::writeCommonLog($stmt->queryString, 'sql.log');
+            }
             $ret = $stmt->fetchColumn();
             if (null === $ret) {
                 return '';
@@ -154,6 +175,9 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            if (DEBUG_MODE) {
+                HpLogger::writeCommonLog($stmt->queryString, 'sql.log');
+            }
             return $this->pdo->lastInsertId();
         } catch (Exception $e) {
             HpLogger::writeCommonLog($e->getMessage(), $this->logFile);
@@ -165,6 +189,9 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            if (DEBUG_MODE) {
+                HpLogger::writeCommonLog($stmt->queryString, 'sql.log');
+            }
             return true;
         } catch (Exception $e) {
             HpLogger::writeCommonLog($e->getMessage(), $this->logFile);

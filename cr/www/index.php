@@ -11,8 +11,14 @@ $class = before_api($_GET);
 
 $startTime = microtime_float();
 
-$obj = new $class();
-$retArray = $obj->run();
+if (class_exists($class)) {
+    $obj = new $class();
+    $retArray = $obj->run();
+} else {
+    HpLogger::writeCommonLog("class[$class] not deined.");
+    $retArray = HpErrorMessage::getError(ERROR_OTHER);
+}
+
 
 $time = microtime_float() - $startTime;
 after_api($retArray, $time);

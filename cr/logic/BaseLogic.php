@@ -1,4 +1,7 @@
 <?php
+require_once PATH_ROOT . 'lib/tool/HpSession.php';
+require_once PATH_ROOT . 'lib/util/HpValidate.php';
+
 class BaseLogic
 {
     protected $retSuccess;
@@ -25,27 +28,16 @@ class BaseLogic
     private function authorize($class)
     {
         $currentAuthorityLevel = HpAuthority::getClassAuthority($class);
-        if ($currentAuthorityLevel === AUTHORITY_OTHER) {
+        if (AUTHORITY_OTHER === $currentAuthorityLevel) {
             return true;
         }
         
         if (!isset($this->param['sid']) || empty($this->param['sid'])) {
             return HpErrorMessage::getError(ERROR_LOGIN_NO);
         }
-        $sessFile = PATH_ROOT . 'session' . DIRECTORY_SEPARATOR . $this->param['sid'] . '.php';
-        if (!file_exists($sessFile)) {
-            return HpErrorMessage::getError(ERROR_LOGIN_NO);
-        }
         
-        include $sessFile;
-        if ($currentAuthorityLevel < $sessType) {
-            return HpErrorMessage::getError(ERROR_NO_PERMISSON);
-        }
-        if (time() > $sessTime + SESSION_TIME) {
-            return HpErrorMessage::getError(ERROR_LOGIN_TIMEOUT);
-        }
-        
-        return true;
+        $session = new HpSession($this->param['sid']);
+        return $session->checkSession($currentAuthorityLevel);
     }
     
     protected function execute()
@@ -55,12 +47,20 @@ class BaseLogic
     
     public function run()
     {
+        //$startTime = microtime_float();
+        
         $noError = $this->validate();
         if (true === $noError)
         {
             $this->retSuccess = HpErrorMessage::getError(ERROR_SUCCESS);
-            return $this->execute();
+            $ret = $this->execute();
+        } else {
+            $ret = $noError;
         }
-        return $noError;
+        
+        //$endTime = microtime_float();
+        //HpLogger::writeDebugLog($this->param['entry'], $endTime - $startTime);
+        
+        return $ret;
     }
 }

@@ -5,14 +5,29 @@ define('AUTHORITY_HOSPITAL_USER', 2);
 define('AUTHORITY_HOSPITAL_PATIENT', 3);
 define('AUTHORITY_OTHER', 9);
 
-define('SESSION_TIME', 14400);
-
 class HpAuthority
 {
     private static $classAuthority = [
-                'GetHospitalList' => AUTHORITY_HOSPITAL_USER, 
-                'Login' => AUTHORITY_OTHER,
-                
+                    'Test' => AUTHORITY_OTHER,
+                    'AddHospital' => AUTHORITY_SUPER_ADMIN,
+                    'GetHospitalList' => AUTHORITY_HOSPITAL_USER, 
+                    'AddHospitalRelation' => AUTHORITY_SUPER_ADMIN,
+                    'AddUser' => AUTHORITY_HOSPITAL_ADMIN,
+                    'Login' => AUTHORITY_OTHER,
+                    'AddCase' => AUTHORITY_HOSPITAL_USER,
+                    'GetParentHospital' => AUTHORITY_HOSPITAL_USER,
+                    'ApplyConsultation' => AUTHORITY_HOSPITAL_USER,
+                    'GetConsultationApply' => AUTHORITY_HOSPITAL_USER,
+                    'ReplyConsultation' => AUTHORITY_HOSPITAL_USER,
+                    'GetConsultationReply' => AUTHORITY_HOSPITAL_USER,
+                    'GetCase' => AUTHORITY_HOSPITAL_USER,
+                    'ApplyReferral' => AUTHORITY_HOSPITAL_USER,
+                    'GetReferralApply' => AUTHORITY_HOSPITAL_USER,
+                    'ReplyReferral' => AUTHORITY_HOSPITAL_USER,
+                    'FinishReferral' => AUTHORITY_HOSPITAL_USER,
+                    'GetReferralInfo' => AUTHORITY_HOSPITAL_USER,
+                    'AddFollow' => AUTHORITY_HOSPITAL_USER,
+                    'GetFollow' => AUTHORITY_HOSPITAL_USER,
     ];
     
     public static function getClassAuthority($class)

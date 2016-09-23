@@ -30,6 +30,13 @@ class Dbi extends BaseDbi
     {
         return $this->existData('device', " device_id = $deviceId and hospital_id = $hospitalId ");
     }
+    public function getHospitalInfo($hospitalId)
+    {
+        $sql = 'select hospital_id, hospital_name, address, tel, sms_tel
+                from hospital where hospital_id = :hospital_id limit 1';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataRow($sql, $param);
+    }
     public function getHospitalList($offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
     {
         $sql = 'select hospital_id, hospital_name, tel from hospital order by hospital_id ';
@@ -37,6 +44,13 @@ class Dbi extends BaseDbi
             $sql .= " limit $offset, $rows";
         }
         return $this->getDataAll($sql);
+    }
+    public function getUserInfo($loginName)
+    {
+        $sql = 'select user_id, real_name as user_name, type as user_type, password, hospital_id
+                from user where login_name = :user limit 1';
+        $param = [':user' => $loginName];
+        return $this->getDataRow($sql, $param);
     }
     public function getHospitalParent($hospitalId)
     {
@@ -46,49 +60,12 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
-    public function getDeviceId($guardianId)
-    {
-        $sql = 'select device_id from guardian where guardian_id = :guardian_id limit 1';
-        $param = [':guardian_id' => $guardianId];
-        return $this->getDataString($sql, $param);
-    }
-    public function getAcountById($doctorId)
-    {
-        $sql = 'select account_id, login_name as user, real_name as name, type, password, hospital_id
-                from account where account_id = :account_id limit 1';
-        $param = [':account_id' => $doctorId];
-        return $this->getDataRow($sql, $param);
-    }
     
-    public function getConsultationRequest($hospitalId, $allFlag, $requestHospital, $startTime, $endTime)
+    public function addHospital($name, $tel, $address, $message_tel)
     {
-        $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, 
-                request_message, request_time, response_message, response_time
-                from consultation as c left join hospital as h on c.request_hospital_id = h.hospital_id
-                where response_hospital_id = :hospital_id ';
-        if (0 == $allFlag) {
-            $sql .= ' and status = 1 ';
-        }
-        if (null !== $requestHospital) {
-            $sql .= ' and request_hospital_id = ' . $requestHospital;
-        }
-        if (null !== $startTime) {
-            $sql .= " and request_time >= '$startTime' ";
-        }
-        if (null !== $endTime) {
-            $sql .= " and request_time <= '$endTime' ";
-        }
-        $sql .= ' order by consultation_id desc ';
-        
-        $param = ['hospital_id' => $hospitalId];
-        return $this->getDataAll($sql, $param);
-    }
-    public function addAccount($loginName, $realName, $password, $type, $hospitalId, $creator)
-    {
-        $sql = 'insert into account (login_name, real_name, password, type, hospital_id, creator)
-                values (:login_name, :real_name, :password, :type, :hospital_id, :creator)';
-        $param = [':login_name' => $loginName, ':real_name' => $realName, ':password' => $password,
-                        ':type' => $type, ':hospital_id' => $hospitalId,':creator' => $creator ];
+        $sql = 'insert into hospital (hospital_name, tel, address, sms_tel)
+                values (:name, :tel, :address, :sms_tel)';
+        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':sms_tel' => $message_tel];
         return $this->insertData($sql, $param);
     }
     

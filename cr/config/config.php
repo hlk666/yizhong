@@ -13,7 +13,7 @@ define('SMS_USER', '100818');
 define('SMS_PASSWORD', '05356395321');
 
 define('DB_SERVER', '101.200.174.235');
-define('DB_DataBase', 'ecg');
+define('DB_DataBase', 'consultation_referral');
 define('DB_USER', 'production');
 define('DB_PASSWORD', 'YrGGCDL3RKJU6VQd');
 
