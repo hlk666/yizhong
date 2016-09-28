@@ -4,7 +4,7 @@ require_once PATH_ROOT . 'lib/db/Dbi.php';
 
 class Login extends BaseLogic
 {
-    protected function validate()
+    protected function validate($class = '')
     {
         $ret = parent::validate(__CLASS__);
         if (true !== $ret) {

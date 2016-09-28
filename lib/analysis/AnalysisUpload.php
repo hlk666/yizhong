@@ -40,6 +40,26 @@ class AnalysisUpload
             return json_encode($this->error);
         }
         
+        //to fix bug of client. start.
+        $dir1 = PATH_ROOT . $type . DIRECTORY_SEPARATOR;
+        if (!file_exists($dir1)) {
+            mkdir($dir1);
+        }
+        
+        if ('hbi' == $type) {
+            $file1 = $dir1 . $guardianId . '.hbi';
+        }
+        if ('report' == $type) {
+            $file1 = $dir1 . $guardianId . '.pdf';
+        }
+        
+        $ret = file_put_contents($file1, $data);
+        if (false === $ret) {
+            $this->setError(5, 'IO error.');
+            return json_encode($this->error);
+        }
+        //end
+        
         if ('hbi' == $type) {
             $message = isset($param['message']) ? $param['message'] : '0';
             if ('1' == $message) {

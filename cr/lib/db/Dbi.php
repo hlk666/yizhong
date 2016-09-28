@@ -26,9 +26,9 @@ class Dbi extends BaseDbi
         }
         return $this->countData('ecg', $where);
     }
-    public function existedDeviceHospital($deviceId, $hospitalId)
+    public function existedUser($user)
     {
-        return $this->existData('device', " device_id = $deviceId and hospital_id = $hospitalId ");
+        return $this->existData('user', ['login_name' => $user]);
     }
     public function getHospitalInfo($hospitalId)
     {
@@ -66,6 +66,22 @@ class Dbi extends BaseDbi
         $sql = 'insert into hospital (hospital_name, tel, address, sms_tel)
                 values (:name, :tel, :address, :sms_tel)';
         $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':sms_tel' => $message_tel];
+        return $this->insertData($sql, $param);
+    }
+    
+    public function addHospitalRelation($parentHospitalId, $childHospitalId)
+    {
+        $sql = 'insert into hospital_relation (hospital_id, parent_hospital_id) values (:child, :parent)';
+        $param = [':child' => $childHospitalId, ':parent' => $parentHospitalId];
+        return $this->insertData($sql, $param);
+    }
+    
+    public function addUser($loginUser, $name, $password, $type, $hospitalId)
+    {
+        $sql = 'insert into user (login_name, real_name, password, type, hospital_id)
+                values (:login_name, :real_name, :password, :type, :hospital_id)';
+        $param = [':login_name' => $loginUser, ':real_name' => $name, ':password' => $password,
+                        ':type' => $type, ':hospital_id' => $hospitalId];
         return $this->insertData($sql, $param);
     }
     

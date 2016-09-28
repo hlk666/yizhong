@@ -56,16 +56,21 @@ class HpSession
     
     public function updateSession()
     {
-        if (null === $this->_file || null === $this->_type) {
-            throw new Exception('Session info not enough when updating session file : ' . $this->_file);
-            return;
-        }
-        
         $this->writeSession($this->_file, $this->_type);
+    }
+    
+    public function getSessionType()
+    {
+        return $this->_type;
     }
     
     private function writeSession($file, $type)
     {
+        if (null === $file || null === $type) {
+            throw new Exception('Session info not enough when writing session file : ' . $this->_file);
+            return;
+        }
+        
         $time = time();
         
         $data = "<?php\n";

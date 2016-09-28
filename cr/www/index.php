@@ -7,6 +7,9 @@ require_once PATH_ROOT . 'lib/function.php';
 require_once PATH_ROOT . 'config/HpErrorMessage.php';
 require_once PATH_ROOT . 'config/HpAuthority.php';
 
+if (DEBUG_MODE) {
+    error_reporting(E_ALL);
+}
 $class = before_api($_GET);
 
 $startTime = microtime_float();

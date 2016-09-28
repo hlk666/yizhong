@@ -2,7 +2,7 @@
 date_default_timezone_set('asia/shanghai');
 
 define('PATH_ROOT', 'E:\wamp\www\\cr\\');
-define('URL_ROOT', 'http://101.200.174.235/cr/');
+define('URL_ROOT', 'http://101.200.174.235/cr/www/');
 
 define('DEBUG_MODE', true);
 define('VALUE_DB_ERROR', -1);
