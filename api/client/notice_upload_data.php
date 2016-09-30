@@ -39,7 +39,7 @@ function createVC($guardianId)
     
     $vcFile = PATH_ROOT . 'VerificationCode' . DIRECTORY_SEPARATOR . $guardianId . '.php';
     $template = "<?php\n";
-    $template .= '$rightVC = ' . $vc . ";\n";
+    $template .= '$rightVC = \'' . $vc . "';\n";
     file_put_contents($vcFile, $template);
     
     return $vc;
