@@ -4,10 +4,12 @@ define('ERROR_NO_DATA', 1);
 define('ERROR_NOT_EXIST_ID', 2);
 define('ERROR_DB', 3);
 define('ERROR_DATA_CONSISTENCY', 4);
+
 define('ERROR_PARAM_REQUIRED', 10);
 define('ERROR_PARAM_NUMERIC', 11);
 define('ERROR_PARAM_PHONE', 12);
 define('ERROR_USER_TYPE', 13);
+
 define('ERROR_USER_NOT_EXISTED', 20);
 define('ERROR_PASSWORD', 21);
 define('ERROR_USER_NAME_USED', 22);
@@ -15,6 +17,13 @@ define('ERROR_LOGIN_NO', 23);
 define('ERROR_NO_PERMISSON', 24);
 define('ERROR_LOGIN_TIMEOUT', 25);
 define('ERROR_CREATE_SESSION', 26);
+
+define('ERROR_UPLOAD_NO_DATA', 30);
+define('ERROR_UPLOAD_NAME', 31);
+define('ERROR_UPLOAD_SUFFIX', 32);
+define('ERROR_UPLOAD_SUCCESS', 33);
+define('ERROR_UPLOAD_FAIL', 34);
+
 define('ERROR_OTHER', 99);
 
 class HpErrorMessage
@@ -25,6 +34,7 @@ class HpErrorMessage
                     ERROR_NOT_EXIST_ID => ['code' => ERROR_NOT_EXIST_ID, 'message' => '操作对象不存在，请确认输入是否正确。'],
                     ERROR_DB => ['code' => ERROR_DB, 'message' => '数据库操作发生错误，请联系管理员。'],
                     ERROR_DATA_CONSISTENCY => ['code' => ERROR_DATA_CONSISTENCY, 'message' => '数据一致性错误，请联系管理员。'],
+                    
                     ERROR_PARAM_REQUIRED => ['code' => ERROR_PARAM_REQUIRED, 'message' => '参数未提供：'],
                     ERROR_PARAM_NUMERIC => ['code' => ERROR_PARAM_NUMERIC, 'message' => '参数类型应该是数字：'],
                     ERROR_PARAM_PHONE => ['code' => ERROR_PARAM_PHONE, 'message' => '请输入正确的手机号码。'],
@@ -37,6 +47,13 @@ class HpErrorMessage
                     ERROR_NO_PERMISSON => ['code' => ERROR_NO_PERMISSON, 'message' => '权限不足，请用更高权限用户登录。'],
                     ERROR_LOGIN_TIMEOUT => ['code' => ERROR_LOGIN_TIMEOUT, 'message' => '登录已经过期，请重新登录。'],
                     ERROR_CREATE_SESSION => ['code' => ERROR_CREATE_SESSION, 'message' => '登录成功，但是获取session失败。请重试或者联系管理员。'],
+                    
+                    ERROR_UPLOAD_NO_DATA => ['code' => ERROR_UPLOAD_NO_DATA, 'message' => '没有上传任何文件。'],
+                    ERROR_UPLOAD_NAME => ['code' => ERROR_UPLOAD_NAME, 'message' => '实验室检查结果的类型错误。'],
+                    ERROR_UPLOAD_SUFFIX => ['code' => ERROR_UPLOAD_SUFFIX, 'message' => '请上传以下类型文件：'],
+                    ERROR_UPLOAD_SUCCESS => ['code' => ERROR_UPLOAD_SUCCESS, 'message' => '上传成功。'],
+                    ERROR_UPLOAD_FAIL => ['code' => ERROR_UPLOAD_FAIL, 'message' => '上传失败，请重试或联系管理员。'],
+                    
                     
                     ERROR_OTHER => ['code' => ERROR_OTHER, 'message' => '未知错误，请联系管理员。'],
     ];

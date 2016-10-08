@@ -10,16 +10,16 @@ class BaseLogic
     protected function validate($class)
     {
         foreach ($_GET as $key => $value) {
-            $_GET[$key] = trim($value);
+            $this->param[$key] = trim($value);
         }
-        foreach ($_POST as $key => $value) {
-            $_POST[$key] = trim($value);
-        }
-        $this->param = array_merge($_GET, $_POST);
         
         $data = file_get_contents('php://input');
         if (!empty($data)) {
             $this->param['data'] = $data;
+        } else {
+            foreach ($_POST as $key => $value) {
+                $this->param[$key] = trim($value);
+            }
         }
         
         return $this->authorize($class);
