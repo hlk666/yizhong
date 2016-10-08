@@ -33,4 +33,19 @@ class HpValidate
         }
         return false;
     }
+    
+    public static function checkBirthYear($value)
+    {
+        $pattern = '/^\d{4}$/';
+        if (!preg_match($pattern, $value)) {
+            return false;
+        }
+        if ($value < 1900) {
+            return false;
+        }
+        if ($value > date('Y')) {
+            return false;
+        }
+        return true;
+    }
 }

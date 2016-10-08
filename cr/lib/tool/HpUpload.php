@@ -25,6 +25,6 @@ class HpUpload
             return false;
         }
         
-        return URL_ROOT . $category . '/' . date('Ymd') . '/' . $fileName;
+        return $category . '/' . date('Ymd') . '/' . $fileName;
     }
 }

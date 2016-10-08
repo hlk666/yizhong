@@ -37,7 +37,7 @@ class AddUser extends BaseLogic
         }
         
         if ($this->param['type'] != '1' && $this->param['type'] != '2') {
-            return HpErrorMessage::getError(ERROR_USER_TYPE);
+            return HpErrorMessage::getError(ERROR_PARAM_RANGE, 'type');
         }
         
         $ret = Dbi::getDbi()->existedUser($this->param['login_user']);
