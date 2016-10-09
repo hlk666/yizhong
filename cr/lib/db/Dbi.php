@@ -45,6 +45,14 @@ class Dbi extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
+    public function getHospitalParent($hospitalId)
+    {
+        $sql = 'select h.hospital_id, hospital_name from hospital as h
+                inner join hospital_relation as r on h.hospital_id = r.parent_hospital_id
+                where r.hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getUserInfo($loginName)
     {
         $sql = 'select user_id, real_name as user_name, type as user_type, password, hospital_id
@@ -52,14 +60,7 @@ class Dbi extends BaseDbi
         $param = [':user' => $loginName];
         return $this->getDataRow($sql, $param);
     }
-    public function getHospitalParent($hospitalId)
-    {
-        $sql = 'select h.hospital_id, hospital_name from hospital as h
-                inner join hospital_relation as r on h.hospital_id = r.parent_hospital_id
-                where r.hospital_id = :hospital_id';
-        $param = [':hospital_id' => $hospitalId];
-        return $this->getDataAll($sql, $param);
-    }
+    
     
     public function addHospital($name, $tel, $address, $message_tel)
     {
