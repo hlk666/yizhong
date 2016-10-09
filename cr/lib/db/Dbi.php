@@ -62,11 +62,11 @@ class Dbi extends BaseDbi
     }
     
     
-    public function addHospital($name, $tel, $address, $message_tel)
+    public function addHospital($name, $tel, $address, $messageTel)
     {
         $sql = 'insert into hospital (hospital_name, tel, address, sms_tel)
                 values (:name, :tel, :address, :sms_tel)';
-        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':sms_tel' => $message_tel];
+        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':sms_tel' => $messageTel];
         return $this->insertData($sql, $param);
     }
     
@@ -94,6 +94,15 @@ class Dbi extends BaseDbi
                 values (:login_name, :real_name, :password, :type, :hospital_id)';
         $param = [':login_name' => $loginUser, ':real_name' => $name, ':password' => $password,
                         ':type' => $type, ':hospital_id' => $hospitalId];
+        return $this->insertData($sql, $param);
+    }
+    
+    public function applyConsultation($caseId, $applyHospitalId, $applyUserId, $applyMessage, $replyHospital)
+    {
+        $sql = 'insert into consultation (case_id, apply_hospital_id, apply_user_id, apply_message, reply_hospital_id)
+                values (:case, :applyHospital, :applyUser, :applyMessage, :replyHospital)';
+        $param = [':case' => $caseId, ':applyHospital' => $applyHospitalId, ':applyUser' => $applyUserId, 
+                        ':applyMessage' => $applyMessage, ':replyHospital' => $replyHospital];
         return $this->insertData($sql, $param);
     }
     
