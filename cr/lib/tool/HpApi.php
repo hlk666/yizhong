@@ -3,6 +3,12 @@ define('API_TIMEOUT', 20);
 
 class HpApi
 {
+    private $_baseUrl;
+    public function __construct($baseUrl = URL_ROOT . '/api/')
+    {
+        $this->_baseUrl = $baseUrl;
+    }
+    
     public function getString($api, $params = array(), $timeout = API_TIMEOUT)
     {
         return $this->request($api, $params, 'GET', $timeout);
@@ -33,7 +39,7 @@ class HpApi
             $startTime = microtime_float();
         }
         
-        $url = URL_ROOT . '/' . $api;
+        $url = $this->_baseUrl . $api;
         
         if ('GET' == $method && !empty($params)) {
             $queryString = '';
@@ -43,7 +49,7 @@ class HpApi
                 $queryString .= "$name=$value&";
             
             }
-            $url = '?' . substr($queryString, 0, -1);
+            $url .= '?' . substr($queryString, 0, -1);
         }
         
         $ch = curl_init();
@@ -54,6 +60,7 @@ class HpApi
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         
         if ('POST' == $method) {
+            $queryString = $params;
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $queryString);
         }
