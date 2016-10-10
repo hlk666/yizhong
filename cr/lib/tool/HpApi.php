@@ -33,7 +33,7 @@ class HpApi
             $startTime = microtime_float();
         }
         
-        $url = URL_ROOT . $api;
+        $url = URL_ROOT . '/' . $api;
         
         if ('GET' == $method && !empty($params)) {
             $queryString = '';

@@ -1,8 +1,8 @@
 <?php
-require_once PATH_ROOT . 'logic/BaseLogic.php';
+require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class Login extends BaseLogic
+class Login extends BaseLogicApi
 {
     protected function validate($class = '')
     {
@@ -11,12 +11,12 @@ class Login extends BaseLogic
             return $ret;
         }
         
-        $ret = HpValidate::checkRequired($this->param['user']);
+        $ret = isset($this->param['user']) ? HpValidate::checkRequired($this->param['user']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'user');
         }
         
-        $ret = HpValidate::checkRequired($this->param['password']);
+        $ret = isset($this->param['password']) ? HpValidate::checkRequired($this->param['password']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'password');
         }

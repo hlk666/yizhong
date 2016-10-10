@@ -1,8 +1,8 @@
 <?php
-require_once PATH_ROOT . 'logic/BaseLogic.php';
+require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class AddHospitalRelation extends BaseLogic
+class AddHospitalRelation extends BaseLogicApi
 {
     protected function validate($class = '')
     {
@@ -11,12 +11,12 @@ class AddHospitalRelation extends BaseLogic
             return $ret;
         }
         
-        $ret = HpValidate::checkRequired($this->param['parent_hospital_id']);
+        $ret = isset($this->param['parent_hospital_id']) ? HpValidate::checkRequired($this->param['parent_hospital_id']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'parent_hospital_id');
         }
         
-        $ret = HpValidate::checkRequired($this->param['child_hospital_id']);
+        $ret = isset($this->param['child_hospital_id']) ? HpValidate::checkRequired($this->param['child_hospital_id']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'child_hospital_id');
         }

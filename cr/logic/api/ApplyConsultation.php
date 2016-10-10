@@ -1,8 +1,8 @@
 <?php
-require_once PATH_ROOT . 'logic/BaseLogic.php';
+require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class ApplyConsultation extends BaseLogic
+class ApplyConsultation extends BaseLogicApi
 {
     protected function validate($class = '')
     {
@@ -11,27 +11,27 @@ class ApplyConsultation extends BaseLogic
             return $ret;
         }
         
-        $ret = HpValidate::checkRequired($this->param['case_id']);
+        $ret = isset($this->param['case_id']) ? HpValidate::checkRequired($this->param['case_id']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'case_id.');
         }
         
-        $ret = HpValidate::checkRequired($this->param['apply_hospital']);
+        $ret = isset($this->param['apply_hospital']) ? HpValidate::checkRequired($this->param['apply_hospital']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'apply_hospital.');
         }
         
-        $ret = HpValidate::checkRequired($this->param['apply_user']);
+        $ret = isset($this->param['apply_user']) ? HpValidate::checkRequired($this->param['apply_user']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'apply_user.');
         }
         
-        $ret = HpValidate::checkRequired($this->param['apply_message']);
+        $ret = isset($this->param['apply_message']) ? HpValidate::checkRequired($this->param['apply_message']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'apply_message');
         }
         
-        $ret = HpValidate::checkRequired($this->param['reply_hospital']);
+        $ret = isset($this->param['reply_hospital']) ? HpValidate::checkRequired($this->param['reply_hospital']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'reply_hospital');
         }

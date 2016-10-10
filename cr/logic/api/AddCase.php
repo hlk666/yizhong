@@ -1,8 +1,8 @@
 <?php
-require_once PATH_ROOT . 'logic/BaseLogic.php';
+require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class AddCase extends BaseLogic
+class AddCase extends BaseLogicApi
 {
     protected function validate($class = '')
     {
@@ -11,32 +11,32 @@ class AddCase extends BaseLogic
             return $ret;
         }
         
-        $ret = HpValidate::checkRequired($this->param['name']);
+        $ret = isset($this->param['name']) ? HpValidate::checkRequired($this->param['name']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'name');
         }
         
-        $ret = HpValidate::checkRequired($this->param['sex']);
+        $ret = isset($this->param['sex']) ? HpValidate::checkRequired($this->param['sex']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'sex');
         }
         
-        $ret = HpValidate::checkRequired($this->param['birth_year']);
+        $ret = isset($this->param['birth_year']) ? HpValidate::checkRequired($this->param['birth_year']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'birth_year');
         }
         
-        $ret = HpValidate::checkRequired($this->param['tel']);
+        $ret = isset($this->param['tel']) ? HpValidate::checkRequired($this->param['tel']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'tel');
         }
         
-        $ret = HpValidate::checkRequired($this->param['diagnosis']);
+        $ret = isset($this->param['diagnosis']) ? HpValidate::checkRequired($this->param['diagnosis']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'diagnosis');
         }
         
-        $ret = HpValidate::checkRequired($this->param['info']);
+        $ret = isset($this->param['info']) ? HpValidate::checkRequired($this->param['info']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'info');
         }

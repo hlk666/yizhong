@@ -1,8 +1,8 @@
 <?php
-require_once PATH_ROOT . 'logic/BaseLogic.php';
+require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/tool/HpUpload.php';
 
-class UploadImage extends BaseLogic
+class UploadImage extends BaseLogicApi
 {
     protected function validate($class = '')
     {
@@ -11,12 +11,12 @@ class UploadImage extends BaseLogic
             return $ret;
         }
         
-        $ret = HpValidate::checkRequired($this->param['data']);
+        $ret = isset($this->param['data']) ? HpValidate::checkRequired($this->param['data']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_UPLOAD_NO_DATA);
         }
         
-        $ret = HpValidate::checkRequired($this->param['name']);
+        $ret = isset($this->param['name']) ? HpValidate::checkRequired($this->param['name']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'name');
         }

@@ -2,7 +2,7 @@
 require_once PATH_ROOT . 'lib/tool/HpSession.php';
 require_once PATH_ROOT . 'lib/util/HpValidate.php';
 
-class BaseLogic
+class BaseLogicApi
 {
     protected $retSuccess;
     protected $param = array();
@@ -42,7 +42,7 @@ class BaseLogic
     
     protected function execute()
     {
-        return array();
+        return $this->retSuccess;
     }
     
     public function run()
@@ -53,14 +53,11 @@ class BaseLogic
         if (true === $noError)
         {
             $this->retSuccess = HpErrorMessage::getError(ERROR_SUCCESS);
-            $ret = $this->execute();
+            $model = $this->execute();
         } else {
-            $ret = $noError;
+            $model = $noError;
         }
         
-        //$endTime = microtime_float();
-        //HpLogger::writeDebugLog($this->param['entry'], $endTime - $startTime);
-        
-        return $ret;
+        echo json_encode($model, JSON_UNESCAPED_UNICODE);
     }
 }

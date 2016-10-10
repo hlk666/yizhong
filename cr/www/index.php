@@ -10,18 +10,12 @@ require_once PATH_ROOT . 'config/HpAuthority.php';
 if (DEBUG_MODE) {
     error_reporting(E_ALL);
 }
-$class = before_api($_GET);
-
 $startTime = microtime_float();
 
-if (class_exists($class)) {
-    $obj = new $class();
-    $retArray = $obj->run();
-} else {
-    HpLogger::writeCommonLog("class[$class] not deined.");
-    $retArray = HpErrorMessage::getError(ERROR_OTHER);
-}
+$class = before($_GET);
+$obj = new $class();
+$obj->run();
 
+save_execute_time($startTime);
 
-$time = microtime_float() - $startTime;
-after_api($retArray, $time);
+exit;

@@ -1,8 +1,8 @@
 <?php
-require_once PATH_ROOT . 'logic/BaseLogic.php';
+require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class GetHospitalList extends BaseLogic
+class GetHospitalList extends BaseLogicApi
 {
     protected function validate($class = '')
     {

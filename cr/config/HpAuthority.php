@@ -30,6 +30,8 @@ class HpAuthority
                     'GetReferralInfo' => AUTHORITY_HOSPITAL_USER,
                     'AddFollow' => AUTHORITY_HOSPITAL_USER,
                     'GetFollow' => AUTHORITY_HOSPITAL_USER,
+                    
+                    'Index' => AUTHORITY_OTHER,
     ];
     
     public static function getClassAuthority($class)
@@ -37,8 +39,8 @@ class HpAuthority
         if (array_key_exists($class, self::$classAuthority)) {
             return self::$classAuthority[$class];
         } else {
-            HpLogger::writeCommonLog('Class authority type does not exist:' . $errorName);
-            return self::$classAuthority[AUTHORITY_SUPER_ADMIN];
+            HpLogger::writeCommonLog('Class authority type does not exist:' . $class);
+            return AUTHORITY_SUPER_ADMIN;
         }
     }
 }
