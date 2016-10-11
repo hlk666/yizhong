@@ -40,6 +40,11 @@ class AddUser extends BaseLogicApi
             return HpErrorMessage::getError(ERROR_PARAM_RANGE, 'type');
         }
         
+        $ret = isset($this->param['tel']) ? HpValidate::checkPhoneNo($this->param['tel']) : false;
+        if (true !== $ret) {
+            return HpErrorMessage::getError(ERROR_PARAM_PHONE);
+        }
+        
         $ret = Dbi::getDbi()->existedUser($this->param['login_user']);
         if (true === $ret) {
             return HpErrorMessage::getError(ERROR_USER_NAME_USED);
@@ -54,8 +59,13 @@ class AddUser extends BaseLogicApi
         if ($session->getSessionType() > $this->param['type']) {
             return HpErrorMessage::getError(ERROR_NO_PERMISSON);
         }
+        if (isset($this->param['tel']) && !empty($this->param['tel'])) {
+            $tel = $this->param['tel'];
+        } else {
+            $tel = '';
+        }
         $ret = Dbi::getDbi()->addUser($this->param['login_user'], $this->param['name'], 
-                md5($this->param['password']), $this->param['type'], $this->param['hospital_id']);
+                md5($this->param['password']), $this->param['type'], $tel, $this->param['hospital_id']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

@@ -9,16 +9,27 @@ class BaseLogicApi
     
     protected function validate($class)
     {
+        $queryString = "access class[$class] with GET : ";
         foreach ($_GET as $key => $value) {
             $this->param[$key] = trim($value);
+            $queryString .= "$key => $value, ";
+        }
+        $queryString = substr($queryString, 0, -2) . "\r\n";
+        $queryString .= "access class[$class] with POST : ";
+        
+        foreach ($_POST as $key => $value) {
+            $this->param[$key] = trim($value);
+            $queryString .= "$key => $value, ";
+        }
+        $queryString = substr($queryString, 0, -2);
+        
+        if (DEBUG_MODE) {
+            HpLogger::writeCommonLog($queryString, 'debug.log');
         }
         
         $data = file_get_contents('php://input');
         if (!empty($data)) {
             $this->param['data'] = $data;
-        }
-        foreach ($_POST as $key => $value) {
-            $this->param[$key] = trim($value);
         }
         
         return $this->authorize($class);

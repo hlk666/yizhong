@@ -44,8 +44,8 @@ function save_execute_time($startTime)
 {
     $time = microtime_float() - $startTime;
     if (!isset($_GET['entry']) || empty($_GET['entry'])) {
-        HpLogger::writeDebugLog('site/index', $time);
+        HpLogger::writeDebugTimeLog('site/index', $time);
     } else {
-        HpLogger::writeDebugLog($_GET['entry'], $time);
+        HpLogger::writeDebugTimeLog($_GET['entry'], $time);
     }
 }

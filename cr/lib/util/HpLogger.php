@@ -6,11 +6,16 @@ class HpLogger
         self::write($fileName, $message);
     }
     
-    public static function writeDebugLog($action, $time)
+    public static function writeDebugTimeLog($action, $time)
     {
         $message = $action . ' took time : ' . $time;
         $file = 'debug.log';
         self::write($file, $message);
+    }
+    
+    public static function writeDebugLog($message, $fileName = 'debug.log')
+    {
+        self::write($fileName, $message);
     }
     
     private static function write($fileName, $message)

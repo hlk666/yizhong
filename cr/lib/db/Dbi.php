@@ -88,12 +88,12 @@ class Dbi extends BaseDbi
                         ':eg' => $imgEchocardiography, ':e' => $imgEcg, ':h' => $imgHolter];
         return $this->insertData($sql, $param);
     }
-    public function addUser($loginUser, $name, $password, $type, $hospitalId)
+    public function addUser($loginUser, $name, $password, $type, $tel, $hospitalId)
     {
-        $sql = 'insert into user (login_name, real_name, password, type, hospital_id)
-                values (:login_name, :real_name, :password, :type, :hospital_id)';
+        $sql = 'insert into user (login_name, real_name, password, type, tel, hospital_id)
+                values (:login_name, :real_name, :password, :type, :tel, :hospital_id)';
         $param = [':login_name' => $loginUser, ':real_name' => $name, ':password' => $password,
-                        ':type' => $type, ':hospital_id' => $hospitalId];
+                        ':type' => $type, ':tel' => $tel, ':hospital_id' => $hospitalId];
         return $this->insertData($sql, $param);
     }
     

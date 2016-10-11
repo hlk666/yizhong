@@ -42,6 +42,7 @@ class UploadImage extends BaseLogicApi
             return HpErrorMessage::getError(ERROR_UPLOAD_FAIL);
         }
         
+        $this->retSuccess['name'] = $this->param['name'];
         $this->retSuccess['url'] = $imgUrl;
         return $this->retSuccess;
     }

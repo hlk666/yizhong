@@ -70,7 +70,7 @@ class HpApi
         
         if (DEBUG_MODE) {
             $time = microtime_float() - $startTime;
-            HpLogger::writeDebugLog('Calling api of ' . $api, $time);
+            HpLogger::writeDebugTimeLog('Calling api of ' . $api, $time);
         }
         
         return $response;
