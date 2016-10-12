@@ -30,6 +30,38 @@ class Dbi extends BaseDbi
     {
         return $this->existData('user', ['login_name' => $user]);
     }
+    public function getCaseList($hospitalId, $offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
+    {
+        $sql = 'select case_id, name as case_name, tel from `case` where hospital_id = :hospital order by case_id desc ';
+        if (VALUE_DEFAULT_OFFSET !== $offset) {
+            $sql .= " limit $offset, $rows";
+        }
+        $param = [':hospital' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getConsultationApply($hospitalId, $applyHospital, $startTime, $endTime)
+    {
+        $param = ['hospital_id' => $hospitalId];
+        $sql = 'select consultation_id, h.hospital_name, case_id, apply_hospital_id, apply_user_id, 
+                apply_message, apply_time, reply_user_id, reply_message, reply_time
+                from consultation as c inner join hospital as h on c.apply_hospital_id = h.hospital_id
+                where reply_hospital_id = :hospital_id ';
+        if (null !== $applyHospital) {
+            $sql .= ' and apply_hospital_id = :apply_hospital ';
+            $param[':apply_hospital'] = $applyHospital;
+        }
+        if (null !== $startTime) {
+            $sql .= ' and apply_time >= :start_time ';
+            $param[':start_time'] = $startTime;
+        }
+        if (null !== $endTime) {
+            $sql .= ' and apply_time <= :end_time ';
+            $param[':end_time'] = $endTime;
+        }
+        $sql .= ' order by consultation_id desc ';
+        
+        return $this->getDataAll($sql, $param);
+    }
     public function getHospitalInfo($hospitalId)
     {
         $sql = 'select hospital_id, hospital_name, address, tel, sms_tel

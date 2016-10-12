@@ -10,6 +10,7 @@ define('ERROR_PARAM_NUMERIC', 11);
 define('ERROR_PARAM_PHONE', 12);
 define('ERROR_PARAM_RANGE', 13);
 define('ERROR_PARAM_SPACE', 14);
+define('ERROR_PARAM_TIME', 15);
 
 define('ERROR_USER_NOT_EXISTED', 20);
 define('ERROR_PASSWORD', 21);
@@ -44,6 +45,7 @@ class HpErrorMessage
                     ERROR_PARAM_PHONE => ['code' => ERROR_PARAM_PHONE, 'message' => '请输入正确的手机号码。'],
                     ERROR_PARAM_RANGE => ['code' => ERROR_PARAM_RANGE, 'message' => '参数值不在范围内：'],
                     ERROR_PARAM_SPACE => ['code' => ERROR_PARAM_SPACE, 'message' => '该参数不能为空白：'],
+                    ERROR_PARAM_TIME => ['code' => ERROR_PARAM_TIME, 'message' => '时间格式错误。'],
                     
                     ERROR_USER_NOT_EXISTED => ['code' => ERROR_USER_NOT_EXISTED, 'message' => '用户不存在。'],
                     ERROR_PASSWORD => ['code' => ERROR_PASSWORD, 'message' => '密码错误。'],
