@@ -109,15 +109,15 @@ class Dbi extends BaseDbi
         return $this->insertData($sql, $param);
     }
     
-    public function addCase($name, $sex, $birthYear, $tel, $diagnosis, $info, 
+    public function addCase($hospitalId, $name, $sex, $birthYear, $tel, $diagnosis, $info, 
             $imgCBC, $imgMyocardialMarkers, $imgSerumElectrolytes, $imgEchocardiography, $imgEcg, $imgHolter)
     {
-        $sql = 'insert into `case` (name, sex, birth_year, tel, diagnosis, info, 
+        $sql = 'insert into `case` (hospital_id, name, sex, birth_year, tel, diagnosis, info, 
                 img_cbc, img_myocardial_markers, img_serum_electrolytes, img_echocardiography, img_ecg, img_holter)
-                values (:name, :sex, :birth, :tel, :diagnosis, :info, :cbc, :mm, :se, :eg, :e, :h)';
-        $param = [':name' => $name, ':sex' => $sex, ':birth' => $birthYear, ':tel' => $tel, ':diagnosis' => $diagnosis, 
-                        ':info' => $info, ':cbc' => $imgCBC, ':mm' => $imgMyocardialMarkers, ':se' => $imgSerumElectrolytes, 
-                        ':eg' => $imgEchocardiography, ':e' => $imgEcg, ':h' => $imgHolter];
+                values (:hospital, :name, :sex, :birth, :tel, :diagnosis, :info, :cbc, :mm, :se, :eg, :e, :h)';
+        $param = [':hospital' => $hospitalId, ':name' => $name, ':sex' => $sex, ':birth' => $birthYear, ':tel' => $tel, 
+                        ':diagnosis' => $diagnosis, ':info' => $info, ':cbc' => $imgCBC, ':mm' => $imgMyocardialMarkers, 
+                        ':se' => $imgSerumElectrolytes, ':eg' => $imgEchocardiography, ':e' => $imgEcg, ':h' => $imgHolter];
         return $this->insertData($sql, $param);
     }
     public function addUser($loginUser, $name, $password, $type, $tel, $hospitalId)

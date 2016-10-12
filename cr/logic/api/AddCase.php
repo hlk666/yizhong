@@ -11,6 +11,15 @@ class AddCase extends BaseLogicApi
             return $ret;
         }
         
+        $ret = isset($this->param['hospital_id']) ? HpValidate::checkRequired($this->param['hospital_id']) : false;
+        if (true !== $ret) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'hospital_id.');
+        }
+        
+        if (false === is_numeric($this->param['hospital_id'])) {
+            return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, 'hospital_id.');
+        }
+        
         $ret = isset($this->param['name']) ? HpValidate::checkRequired($this->param['name']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'name');
