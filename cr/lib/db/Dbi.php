@@ -43,46 +43,40 @@ class Dbi extends BaseDbi
         $param = [':hospital' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
-    public function getConsultationApply($hospitalId, $applyHospital, $startTime, $endTime)
+    public function getConsultationApply($hospitalId)
     {
-        $param = ['hospital_id' => $hospitalId];
-        $sql = 'select consultation_id, case_id, apply_hospital_id, h.hospital_name as apply_hospital_name, 
-                apply_user_id, apply_message, apply_time, reply_user_id, reply_message, reply_time
+        $sql = 'c.consultation_id, c.case_id, h.hospital_name as apply_hospital_name, c.apply_message, c.apply_time
                 from consultation as c inner join hospital as h on c.apply_hospital_id = h.hospital_id
-                where reply_hospital_id = :hospital_id ';
-        if (null !== $applyHospital) {
-            $sql .= ' and apply_hospital_id = :apply_hospital ';
-            $param[':apply_hospital'] = $applyHospital;
-        }
-        if (null !== $startTime) {
-            $sql .= ' and apply_time >= :start_time ';
-            $param[':start_time'] = $startTime;
-        }
-        if (null !== $endTime) {
-            $sql .= ' and apply_time <= :end_time ';
-            $param[':end_time'] = $endTime;
-        }
-        $sql .= ' order by consultation_id desc ';
+                where reply_hospital_id = :hospital_id order by apply_time desc';
+        $param = ['hospital_id' => $hospitalId];
         
         return $this->getDataAll($sql, $param);
     }
-    public function getConsultationReply($hospitalId, $startTime, $endTime)
+    public function getConsultationInfo($consultationId)
     {
-        $param = ['hospital_id' => $hospitalId];
-        $sql = 'select consultation_id, h.hospital_name as reply_hospital_name, case_id, apply_hospital_id, 
-                apply_user_id, apply_message, apply_time, reply_user_id, reply_message, reply_time
-                from consultation as c inner join hospital as h on c.reply_hospital_id = h.hospital_id
-                where apply_hospital_id = :hospital_id ';
-        if (null !== $startTime) {
-            $sql .= ' and reply_time >= :start_time ';
-            $param[':start_time'] = $startTime;
-        }
-        if (null !== $endTime) {
-            $sql .= ' and reply_time <= :end_time ';
-            $param[':end_time'] = $endTime;
-        }
+        
+        $sql = 'select p.name, p.sex, p.birth_year, p.diagnosis as apply_diagnosis,
+                c.apply_message, h1.hospital_name as apply_hospital_name, u1.real_name as apply_doctor_name, u1.tel as apply_doctor_tel,
+                c.apply_time, h2.hospital_name as reply_hospital_name, u2.real_name as reply_doctor_name, u2.tel as reply_doctor_tel,
+                c.reply_time, c.diagnosis as reply_diagnosis, c.advice as reply_advice
+                from consultation as c inner join `case` as p on c.case_id = p.case_id
+                inner join hospital as h1 on c.apply_hospital_id = h1.hospital_id
+                inner join user as u1 on c.apply_user_id = u1.user_id
+                inner join hospital as h2 on c.reply_hospital_id = h2.hospital_id
+                left join user as u2 on c.reply_user_id = u2.user_id
+                where consultation_id = :consultation ';
         $sql .= ' order by consultation_id desc ';
-    
+        $param = ['consultation' => $consultationId];
+        
+        return $this->getDataRow($sql, $param);
+    }
+    public function getConsultationReply($hospitalId)
+    {
+        $sql = 'c.consultation_id, c.case_id, h.hospital_name as reply_hospital_name, c.diagnosis, c.advice, c.reply_time
+                from consultation as c inner join hospital as h on c.reply_hospital_id = h.hospital_id
+                where apply_hospital_id = :hospital_id and reply_user_id is not null order by reply_time desc';
+        $param = ['hospital_id' => $hospitalId];
+        
         return $this->getDataAll($sql, $param);
     }
     public function getHospitalInfo($hospitalId)
@@ -160,11 +154,11 @@ class Dbi extends BaseDbi
                         ':applyMessage' => $applyMessage, ':replyHospital' => $replyHospital];
         return $this->insertData($sql, $param);
     }
-    public function replyConsultation($consultationId, $replyUserId, $replyMessage)
+    public function replyConsultation($consultationId, $replyUserId, $diagnosis, $advice)
     {
-        $sql = 'update consultation set reply_user_id = :user, reply_message = :message, reply_time = now()
+        $sql = 'update consultation set reply_user_id = :user, diagnosis = :diagnosis, advice = :advice, reply_time = now()
                 where consultation_id = :consultation';
-        $param = [':user' => $replyUserId, ':message' => $replyMessage, ':consultation' => $consultationId];
+        $param = [':user' => $replyUserId, ':diagnosis' => $diagnosis, ':advice' => $advice, ':consultation' => $consultationId];
         return $this->updateData($sql, $param);
     }
     

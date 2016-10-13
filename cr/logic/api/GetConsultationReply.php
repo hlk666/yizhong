@@ -20,23 +20,12 @@ class GetConsultationReply extends BaseLogicApi
             return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, 'hospital_id.');
         }
         
-        if (isset($this->param['start_time']) && false === HpValidate::checkTime($this->param['start_time'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_TIME);
-        }
-        
-        if (isset($this->param['end_time']) && false === HpValidate::checkTime($this->param['end_time'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_TIME);
-        }
-        
         return true;
     }
     
     protected function execute()
     {
-        $startTime = isset($this->param['start_time']) ? $this->param['start_time'] : null;
-        $endTime = isset($this->param['end_time']) ? $this->param['end_time'] : null;
-        
-        $consultations = Dbi::getDbi()->getConsultationReply($this->param['hospital_id'], $startTime, $endTime);
+        $consultations = Dbi::getDbi()->getConsultationReply($this->param['hospital_id']);
         if (VALUE_DB_ERROR === $consultations) {
             return HpErrorMessage::getError(ERROR_DB);
         }

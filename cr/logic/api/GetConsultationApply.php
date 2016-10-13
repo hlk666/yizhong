@@ -20,28 +20,12 @@ class GetConsultationApply extends BaseLogicApi
             return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, 'hospital_id.');
         }
         
-        if (isset($this->param['apply_hospital_id']) && false === is_numeric($this->param['apply_hospital_id'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, 'apply_hospital_id.');
-        }
-        
-        if (isset($this->param['start_time']) && false === HpValidate::checkTime($this->param['start_time'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_TIME);
-        }
-        
-        if (isset($this->param['end_time']) && false === HpValidate::checkTime($this->param['end_time'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_TIME);
-        }
-        
         return true;
     }
     
     protected function execute()
     {
-        $applyHospital = isset($this->param['apply_hospital_id']) ? $this->param['apply_hospital_id'] : null;
-        $startTime = isset($this->param['start_time']) ? $this->param['start_time'] : null;
-        $endTime = isset($this->param['end_time']) ? $this->param['end_time'] : null;
-        
-        $consultations = Dbi::getDbi()->getConsultationApply($this->param['hospital_id'], $applyHospital, $startTime, $endTime);
+        $consultations = Dbi::getDbi()->getConsultationApply($this->param['hospital_id']);
         if (VALUE_DB_ERROR === $consultations) {
             return HpErrorMessage::getError(ERROR_DB);
         }

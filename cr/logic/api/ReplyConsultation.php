@@ -11,28 +11,37 @@ class ReplyConsultation extends BaseLogicApi
             return $ret;
         }
         
-        $ret = isset($this->param['case_id']) ? HpValidate::checkRequired($this->param['consultation_id']) : false;
+        $ret = isset($this->param['consultation_id']) ? HpValidate::checkRequired($this->param['consultation_id']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'consultation_id.');
         }
         
         
-        $ret = isset($this->param['apply_user']) ? HpValidate::checkRequired($this->param['reply_user']) : false;
+        $ret = isset($this->param['reply_user']) ? HpValidate::checkRequired($this->param['reply_user']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'reply_user.');
         }
         
-        $ret = isset($this->param['apply_message']) ? HpValidate::checkRequired($this->param['reply_message']) : false;
+        $ret = isset($this->param['diagnosis']) ? HpValidate::checkRequired($this->param['diagnosis']) : false;
         if (true !== $ret) {
-            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'reply_message');
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'diagnosis.');
+        }
+        
+        $ret = isset($this->param['advice']) ? HpValidate::checkRequired($this->param['advice']) : false;
+        if (true !== $ret) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'advice.');
         }
         
         if (false === is_numeric($this->param['reply_user'])) {
             return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, 'reply_user.');
         }
         
-        if ('' == $this->param['reply_message']) {
-            return HpErrorMessage::getError(ERROR_PARAM_SPACE, 'reply_message.');
+        if ('' == $this->param['diagnosis']) {
+            return HpErrorMessage::getError(ERROR_PARAM_SPACE, 'diagnosis.');
+        }
+        
+        if ('' == $this->param['advice']) {
+            return HpErrorMessage::getError(ERROR_PARAM_SPACE, 'advice.');
         }
         
         if (false === Dbi::getDbi()->existedConsultation($this->param['consultation_id'])) {

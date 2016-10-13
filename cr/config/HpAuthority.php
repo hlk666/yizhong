@@ -23,6 +23,7 @@ class HpAuthority
                     'GetConsultationApply' => AUTHORITY_HOSPITAL_USER,
                     'ReplyConsultation' => AUTHORITY_HOSPITAL_USER,
                     'GetConsultationReply' => AUTHORITY_HOSPITAL_USER,
+                    'GetConsultationInfo' => AUTHORITY_HOSPITAL_USER,
                     'GetHolter' => AUTHORITY_HOSPITAL_USER,
                     'ApplyReferral' => AUTHORITY_HOSPITAL_USER,
                     'GetReferralApply' => AUTHORITY_HOSPITAL_USER,
