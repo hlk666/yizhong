@@ -26,6 +26,10 @@ class Dbi extends BaseDbi
         }
         return $this->countData('ecg', $where);
     }
+    public function existedConsultation($consultationId)
+    {
+        return $this->existData('consultation', ['consultation_id' => $consultationId]);
+    }
     public function existedUser($user)
     {
         return $this->existData('user', ['login_name' => $user]);
@@ -42,8 +46,8 @@ class Dbi extends BaseDbi
     public function getConsultationApply($hospitalId, $applyHospital, $startTime, $endTime)
     {
         $param = ['hospital_id' => $hospitalId];
-        $sql = 'select consultation_id, h.hospital_name, case_id, apply_hospital_id, apply_user_id, 
-                apply_message, apply_time, reply_user_id, reply_message, reply_time
+        $sql = 'select consultation_id, case_id, apply_hospital_id, h.hospital_name as apply_hospital_name, 
+                apply_user_id, apply_message, apply_time, reply_user_id, reply_message, reply_time
                 from consultation as c inner join hospital as h on c.apply_hospital_id = h.hospital_id
                 where reply_hospital_id = :hospital_id ';
         if (null !== $applyHospital) {
@@ -60,6 +64,25 @@ class Dbi extends BaseDbi
         }
         $sql .= ' order by consultation_id desc ';
         
+        return $this->getDataAll($sql, $param);
+    }
+    public function getConsultationReply($hospitalId, $startTime, $endTime)
+    {
+        $param = ['hospital_id' => $hospitalId];
+        $sql = 'select consultation_id, h.hospital_name as reply_hospital_name, case_id, apply_hospital_id, 
+                apply_user_id, apply_message, apply_time, reply_user_id, reply_message, reply_time
+                from consultation as c inner join hospital as h on c.reply_hospital_id = h.hospital_id
+                where apply_hospital_id = :hospital_id ';
+        if (null !== $startTime) {
+            $sql .= ' and reply_time >= :start_time ';
+            $param[':start_time'] = $startTime;
+        }
+        if (null !== $endTime) {
+            $sql .= ' and reply_time <= :end_time ';
+            $param[':end_time'] = $endTime;
+        }
+        $sql .= ' order by consultation_id desc ';
+    
         return $this->getDataAll($sql, $param);
     }
     public function getHospitalInfo($hospitalId)
@@ -137,21 +160,19 @@ class Dbi extends BaseDbi
                         ':applyMessage' => $applyMessage, ':replyHospital' => $replyHospital];
         return $this->insertData($sql, $param);
     }
+    public function replyConsultation($consultationId, $replyUserId, $replyMessage)
+    {
+        $sql = 'update consultation set reply_user_id = :user, reply_message = :message, reply_time = now()
+                where consultation_id = :consultation';
+        $param = [':user' => $replyUserId, ':message' => $replyMessage, ':consultation' => $consultationId];
+        return $this->updateData($sql, $param);
+    }
     
     public function delEcg($ecgId)
     {
         $sql = 'delete from ecg where ecg_id = :ecg_id';
         $param = [':ecg_id' => $ecgId];
         return $this->deleteData($sql, $param);
-    }
-    public function editGuardian($guardianId, array $data)
-    {
-        return $this->updateTableByKey('guardian', 'guardian_id', $guardianId, $data);
-    }
-    public function flowConsultationEnd($idList)
-    {
-        $sql = 'update consultation set status = 3 where consultation_id in ' . $idList;
-        return $this->updateData($sql);
     }
     public function flowGuardianAddDiagnosis($ecgId, $guardianId, $doctorId, $content, $type)
     {

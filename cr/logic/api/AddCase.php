@@ -76,9 +76,9 @@ class AddCase extends BaseLogicApi
         $imgEcg = isset($this->param['img_ecg']) ? $this->param['img_ecg'] : '';
         $imgHolter = isset($this->param['img_holter']) ? $this->param['img_holter'] : '';
         
-        $ret = Dbi::getDbi()->addCase($this->param['name'], $this->param['sex'], $this->param['birth_year'], $this->param['tel'], 
-                $this->param['diagnosis'], $this->param['info'], $imgCBC, $imgMyocardialMarkers, $imgSerumElectrolytes, 
-                $imgEchocardiography, $imgEcg, $imgHolter);
+        $ret = Dbi::getDbi()->addCase($this->param['hospital_id'], $this->param['name'], $this->param['sex'], 
+                $this->param['birth_year'], $this->param['tel'], $this->param['diagnosis'], $this->param['info'], 
+                $imgCBC, $imgMyocardialMarkers, $imgSerumElectrolytes, $imgEchocardiography, $imgEcg, $imgHolter);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
