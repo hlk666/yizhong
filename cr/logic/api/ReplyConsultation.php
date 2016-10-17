@@ -54,7 +54,7 @@ class ReplyConsultation extends BaseLogicApi
     protected function execute()
     {
         $ret = Dbi::getDbi()->replyConsultation($this->param['consultation_id'], 
-                $this->param['reply_user'], $this->param['reply_message']);
+                $this->param['reply_user'], $this->param['diagnosis'], $this->param['advice']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

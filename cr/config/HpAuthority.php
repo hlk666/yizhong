@@ -14,22 +14,32 @@ class HpAuthority
                     'AddHospitalRelation' => AUTHORITY_SUPER_ADMIN,
                     'AddUser' => AUTHORITY_HOSPITAL_ADMIN,
                     'Login' => AUTHORITY_OTHER,
+                    
                     'AddCase' => AUTHORITY_HOSPITAL_USER,
                     'UploadImage' => AUTHORITY_HOSPITAL_USER,
+                    'GetHolter' => AUTHORITY_HOSPITAL_USER,
                     'GetParentHospital' => AUTHORITY_HOSPITAL_USER,
+                    
+                    'GetCaseNum' => AUTHORITY_HOSPITAL_USER,
                     'GetCaseList' => AUTHORITY_HOSPITAL_USER,
                     'GetCase' => AUTHORITY_HOSPITAL_USER,
+                    
                     'ApplyConsultation' => AUTHORITY_HOSPITAL_USER,
                     'GetConsultationApply' => AUTHORITY_HOSPITAL_USER,
                     'ReplyConsultation' => AUTHORITY_HOSPITAL_USER,
                     'GetConsultationReply' => AUTHORITY_HOSPITAL_USER,
                     'GetConsultationInfo' => AUTHORITY_HOSPITAL_USER,
-                    'GetHolter' => AUTHORITY_HOSPITAL_USER,
+                    
                     'ApplyReferral' => AUTHORITY_HOSPITAL_USER,
                     'GetReferralApply' => AUTHORITY_HOSPITAL_USER,
                     'ReplyReferral' => AUTHORITY_HOSPITAL_USER,
-                    'FinishReferral' => AUTHORITY_HOSPITAL_USER,
+                    'GetReferralReply' => AUTHORITY_HOSPITAL_USER,
+                    'ConfirmHospitalize' => AUTHORITY_HOSPITAL_USER,
                     'GetReferralInfo' => AUTHORITY_HOSPITAL_USER,
+                    'Discharge' => AUTHORITY_HOSPITAL_USER,
+                    
+                    'GetDischargeList' => AUTHORITY_HOSPITAL_USER,
+                    
                     'AddFollow' => AUTHORITY_HOSPITAL_USER,
                     'GetFollow' => AUTHORITY_HOSPITAL_USER,
                     

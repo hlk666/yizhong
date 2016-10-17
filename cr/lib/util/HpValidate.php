@@ -20,6 +20,17 @@ class HpValidate
         }
     }
     
+    public static function checkRequiredArray(array $valueList)
+    {
+        foreach ($valueList as $key => $value) {
+            if (null === $value || '' == trim($value) || 'null' == trim($value)) {
+                return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, "$key.");
+            } else {
+                return true;
+            }
+        }
+    }
+    
     public static function checkMaxLength($value, $maxLength)
     {
         return (strlen($value) <= $maxLength);

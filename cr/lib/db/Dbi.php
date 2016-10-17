@@ -30,6 +30,10 @@ class Dbi extends BaseDbi
     {
         return $this->existData('consultation', ['consultation_id' => $consultationId]);
     }
+    public function existedReferral($referralId)
+    {
+        return $this->existData('referral', ['reerral_id' => $referralId]);
+    }
     public function existedUser($user)
     {
         return $this->existData('user', ['login_name' => $user]);
@@ -45,9 +49,9 @@ class Dbi extends BaseDbi
     }
     public function getConsultationApply($hospitalId)
     {
-        $sql = 'c.consultation_id, c.case_id, h.hospital_name as apply_hospital_name, c.apply_message, c.apply_time
+        $sql = 'select c.consultation_id, c.case_id, h.hospital_name as apply_hospital_name, c.apply_message, c.apply_time
                 from consultation as c inner join hospital as h on c.apply_hospital_id = h.hospital_id
-                where reply_hospital_id = :hospital_id order by apply_time desc';
+                where reply_hospital_id = :hospital_id order by consultation_id desc';
         $param = ['hospital_id' => $hospitalId];
         
         return $this->getDataAll($sql, $param);
@@ -72,7 +76,7 @@ class Dbi extends BaseDbi
     }
     public function getConsultationReply($hospitalId)
     {
-        $sql = 'c.consultation_id, c.case_id, h.hospital_name as reply_hospital_name, c.diagnosis, c.advice, c.reply_time
+        $sql = 'select c.consultation_id, c.case_id, h.hospital_name as reply_hospital_name, c.diagnosis, c.advice, c.reply_time
                 from consultation as c inner join hospital as h on c.reply_hospital_id = h.hospital_id
                 where apply_hospital_id = :hospital_id and reply_user_id is not null order by reply_time desc';
         $param = ['hospital_id' => $hospitalId];
@@ -100,6 +104,43 @@ class Dbi extends BaseDbi
                 inner join hospital_relation as r on h.hospital_id = r.parent_hospital_id
                 where r.hospital_id = :hospital';
         $param = [':hospital' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getReferralApply($hospitalId)
+    {
+        $sql = 'select r.referral_id, r.case_id, h.hospital_name as apply_hospital_name, r.apply_message, r.apply_time
+                from referral as r inner join hospital as h on r.apply_hospital_id = h.hospital_id
+                where reply_hospital_id = :hospital_id order by referral_id desc';
+        $param = ['hospital_id' => $hospitalId];
+    
+        return $this->getDataAll($sql, $param);
+    }
+    public function getReferralInfo($referralId)
+    {
+    
+        $sql = 'select p.name, p.sex, p.birth_year, p.diagnosis as apply_diagnosis,
+                r.apply_message, h1.hospital_name as apply_hospital_name, u1.real_name as apply_doctor_name, u1.tel as apply_doctor_tel,
+                r.apply_time, r.expect_time, 
+                h2.hospital_name as reply_hospital_name, u2.real_name as reply_doctor_name, u2.tel as reply_doctor_tel,
+                r.reply_time, r.reply_message, r.confirm_time, r.status, r.diagnosis as discharge_diagnosis
+                from referral as r inner join `case` as p on r.case_id = p.case_id
+                inner join hospital as h1 on r.apply_hospital_id = h1.hospital_id
+                inner join user as u1 on r.apply_user_id = u1.user_id
+                inner join hospital as h2 on r.reply_hospital_id = h2.hospital_id
+                left join user as u2 on r.reply_user_id = u2.user_id
+                where referral_id = :referral ';
+        $sql .= ' order by referral_id desc ';
+        $param = ['referral' => $referralId];
+        
+        return $this->getDataRow($sql, $param);
+    }
+    public function getReferralReply($hospitalId)
+    {
+        $sql = 'select r.referral_id, r.case_id, h.hospital_name as reply_hospital_name, r.reply_message, r.reply_time
+                from referral as r inner join hospital as h on r.reply_hospital_id = h.hospital_id
+                where apply_hospital_id = :hospital_id and reply_user_id is not null order by reply_time desc';
+        $param = ['hospital_id' => $hospitalId];
+    
         return $this->getDataAll($sql, $param);
     }
     public function getUserInfo($loginName)
@@ -154,11 +195,34 @@ class Dbi extends BaseDbi
                         ':applyMessage' => $applyMessage, ':replyHospital' => $replyHospital];
         return $this->insertData($sql, $param);
     }
+    public function applyReferral($caseId, $applyHospitalId, $applyUserId, $applyMessage, $expectTime, $replyHospital)
+    {
+        $sql = 'insert into referral (case_id, apply_hospital_id, apply_user_id, apply_message, expect_time, reply_hospital_id, status)
+                values (:case, :applyHospital, :applyUser, :applyMessage, :expectTime, :replyHospital, :status)';
+        $param = [':case' => $caseId, ':applyHospital' => $applyHospitalId, ':applyUser' => $applyUserId,
+                        ':applyMessage' => $applyMessage, ':expectTime' => $expectTime, 
+                        ':replyHospital' => $replyHospital, ':status' => REFERRAL_START];
+        return $this->insertData($sql, $param);
+    }
     public function replyConsultation($consultationId, $replyUserId, $diagnosis, $advice)
     {
         $sql = 'update consultation set reply_user_id = :user, diagnosis = :diagnosis, advice = :advice, reply_time = now()
                 where consultation_id = :consultation';
         $param = [':user' => $replyUserId, ':diagnosis' => $diagnosis, ':advice' => $advice, ':consultation' => $consultationId];
+        return $this->updateData($sql, $param);
+    }
+    public function replyReferral($referralId, $replyUserId, $replyMessage, $status)
+    {
+        $sql = 'update referral set reply_user_id = :user, reply_message = :message, status = :status, reply_time = now()
+                where referral_id = :referral';
+        $param = [':user' => $replyUserId, ':message' => $replyMessage, ':status' => $status, ':referral' => $referralId];
+        return $this->updateData($sql, $param);
+    }
+    public function confirmHospitalize($referralId, $confirmUserId)
+    {
+        $sql = 'update referral set confirm_user_id = :user, status = :status, confirm_time = now()
+                where referral_id = :referral';
+        $param = [':user' => $confirmUserId, ':status' => REFERRAL_CONFIRM, ':referral' => $referralId];
         return $this->updateData($sql, $param);
     }
     
