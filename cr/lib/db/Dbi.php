@@ -204,6 +204,49 @@ class Dbi extends BaseDbi
                         ':replyHospital' => $replyHospital, ':status' => REFERRAL_START];
         return $this->insertData($sql, $param);
     }
+    public function discharge($referralId, $userId, $operateTime, $operateInfo, $course, $diagnosis, $instructions, $medicine, $advice, 
+            $childHospitalName, $childHospitalTel, $parentHospitalName, $caseName, array $planList)
+    {
+        $this->pdo->beginTransaction();
+        
+        if (!empty($planList)) {
+            $sql = 'insert into plan (child_hospital_name, child_hospital_tel, parent_hospital_name, case_name, 
+                    referral_id, follow_time, follow_text)
+                    values (:child_hospital_name, :child_hospital_tel, :parent_hospital_name, :case_name, :referral, :time, :text)';
+            foreach ($planList as $plan) {
+                $param = [':child_hospital_name' => $childHospitalName, ':child_hospital_tel' => $childHospitalTel, 
+                                ':parent_hospital_name' => $parentHospitalName, ':case_name' => $caseName, ':referral' => $referralId, 
+                                ':time' => $plan['time'], ':text' => $plan['message']];
+                $planId = $this->insertData($sql, $param);
+                if (VALUE_DB_ERROR === $planId) {
+                    $this->pdo->rollBack();
+                    return VALUE_DB_ERROR;
+                }
+            }
+        }
+        if (null == $operateTime) {
+            $sql = 'update referral set discharge_user_id = :user, course = :course, diagnosis = :diagnosis, 
+                    instructions = :instructions, medicine = :medicine, advice = :advice, discharge_time = now();
+                where referral_id = :referral';
+            $param = [':user' => $userId, ':course' => $course, ':diagnosis' => $diagnosis, ':instructions' => $instructions, 
+                            ':medicine' => $medicine, ':advice' => $advice, ':referral' => $referralId];
+        } else {
+            $sql = 'update referral set discharge_user_id = :user, operate_time = :operate_time, operate_info = :operate_info, 
+                    course = :course, diagnosis = :diagnosis, instructions = :instructions, medicine = :medicine, 
+                    advice = :advice, discharge_time = now();
+                where referral_id = :referral';
+            $param = [':user' => $userId, ':operate_time' => $operateTime, ':operate_info' => $operateInfo, 
+                            ':course' => $course, ':diagnosis' => $diagnosis, ':instructions' => $instructions,
+                            ':medicine' => $medicine, ':advice' => $advice, ':referral' => $referralId];
+        }
+        $ret = $this->updateData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        $this->pdo->commit();
+        return true;
+    }
     public function replyConsultation($consultationId, $replyUserId, $diagnosis, $advice)
     {
         $sql = 'update consultation set reply_user_id = :user, diagnosis = :diagnosis, advice = :advice, reply_time = now()
@@ -250,52 +293,6 @@ class Dbi extends BaseDbi
         
         $param = [':ecg' => $ecgId, ':guardian' => $guardianId, ':doctor' => $doctorId, ':content' => $content];
         return $this->updateData($sql, $param);
-    }
-    public function flowGuardianAddUser($patientName, $sex, $age, $tel, $device, $registHospital,
-            $guardHospital, $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height,
-            $weight, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName, $hospitalizationId = '0')
-    {
-        $birthYear = date('Y') - $age;
-        $sql = 'select patient_id from patient
-                where patient_name = :name and birth_year = :birth and tel = :tel limit 1';
-        $param = [':name' => $patientName, ':birth' => $birthYear, ':tel' => $tel];
-        $patientId = $this->getDataString($sql, $param);
-        if (VALUE_DB_ERROR === $patientId) {
-            return VALUE_DB_ERROR;
-        }
-        $this->pdo->beginTransaction();
-        //if patient not existed, add to patient table.
-        if ('' == $patientId) {
-            $sql = 'insert into patient(patient_name, sex, birth_year, tel, address)
-                    values(:name, :sex, :birth, :tel, :address)';
-            $param = [':name' => $patientName, ':sex' => $sex, ':birth' => $birthYear,
-                            ':tel' => $tel, ':address' => $sickRoom];
-            $patientId = $this->insertData($sql, $param);
-            if (VALUE_DB_ERROR === $patientId) {
-                $this->pdo->rollBack();
-                return VALUE_DB_ERROR;
-            }
-        }
-        $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id,
-                    patient_id, mode, guardian_hours, lead, doctor_id, status,
-                    sickroom, blood_pressure, height, weight, family_tel,
-                    tentative_diagnose, medical_history, regist_doctor_name, hospitalization_id)
-                    values (:device, :regist_hospital, :guard_hospital, :patient, :mode,
-                    :hours, :lead, :doctor_id, 1, :sickroom, :blood_pressure, :height,
-                    :weight, :family_tel, :ten_dia, :medical_history, :doctor_name, :hospitalization_id)';
-        $param = [':device' => $device, ':regist_hospital' => $registHospital, ':guard_hospital' => $guardHospital,
-                        ':patient' => $patientId, ':mode' => $mode, ':hours' => $hours, ':lead' => $lead,
-                        ':doctor_id' => $doctor, ':sickroom' => $sickRoom, ':blood_pressure' => $bloodPressure,
-                        ':height' => $height, ':weight' => $weight, ':family_tel' => $familyTel,
-                        ':ten_dia' => $tentativeDiagnose, ':medical_history' => $medicalHistory,
-                        ':doctor_name' => $registDoctorName, ':hospitalization_id' => $hospitalizationId];
-        $guardianId = $this->insertData($sql, $param);
-        if (VALUE_DB_ERROR === $guardianId) {
-            $this->pdo->rollBack();
-            return VALUE_DB_ERROR;
-        }
-        $this->pdo->commit();
-        return $guardianId;
     }
     public function flowGuardianDelete($guardianId)
     {
