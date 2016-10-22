@@ -31,6 +31,37 @@ class HpValidate
         }
     }
     
+    public static function checkRequiredParam(array $keys, array $values)
+    {
+        foreach ($keys as $key) {
+            if (!isset($values[$key]) 
+                    || null === $values[$key] 
+                    || '' == trim($values[$key]) 
+                    || 'null' == trim($values[$key])) {
+                return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, "$key.");
+            }
+        }
+        return true;
+    }
+    public static function checkNumeric(array $keys, array $values)
+    {
+        foreach ($keys as $key) {
+            if (isset($values[$key]) && !is_numeric($values[$key])) {
+                return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, "$key.");
+            }
+        }
+        return true;
+    }
+    public static function checkRange(array $keys, array $values, array $ranges)
+    {
+        foreach ($keys as $key) {
+            if (!in_array($values[$key], $ranges)) {
+                return HpErrorMessage::getError(ERROR_PARAM_RANGE, "$key.");
+            }
+        }
+        return true;
+    }
+    
     public static function checkMaxLength($value, $maxLength)
     {
         return (strlen($value) <= $maxLength);

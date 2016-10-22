@@ -16,9 +16,10 @@ class ReplyReferral extends BaseLogicApi
                         'reply_user' => $this->param['reply_user'],
                         'judge' => $this->param['judge'],
                         'message' => $this->param['message'],
+                        'expect_time' => $this->param['expect_time'],
         ];
         $checkRequired = HpValidate::checkRequiredArray($params);
-        if (true !== $required) {
+        if (true !== $checkRequired) {
             return $checkRequired;
         }
         
@@ -38,13 +39,18 @@ class ReplyReferral extends BaseLogicApi
             return HpErrorMessage::getError(ERROR_PARAM_RANGE, 'referral_id.');
         }
         
+        $ret = HpValidate::checkTime($this->param['expect_time']);
+        if (true !== $ret) {
+            return HpErrorMessage::getError(ERROR_PARAM_TIME);
+        }
+        
         return true;
     }
     
     protected function execute()
     {
         $ret = Dbi::getDbi()->replyReferral($this->param['referral_id'], 
-                $this->param['reply_user'], $this->param['message'], $this->param['judge']);
+                $this->param['reply_user'], $this->param['message'], $this->param['judge'], $this->param['expect_time']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

@@ -26,3 +26,5 @@ define('REFERRAL_OK', '1');
 define('REFERRAL_DENY', '2');
 define('REFERRAL_CONFIRM', '3');
 define('REFERRAL_END', '4');
+
+define('NO_FILTER', 'all');

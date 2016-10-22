@@ -2,7 +2,7 @@
 require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class GetCaseList extends BaseLogicApi
+class GetFollowList extends BaseLogicApi
 {
     protected function validate($class = '')
     {
@@ -21,7 +21,7 @@ class GetCaseList extends BaseLogicApi
             return $checkNumeric;
         }
         
-        $checkRange = HpValidate::checkRange(['type'], $this->param, [NO_FILTER, 'consultation', 'referral']);
+        $checkRange = HpValidate::checkRange(['type'], $this->param, ['discharge', 'follow']);
         if (true !== $checkRange) {
             return $checkRange;
         }
@@ -31,7 +31,13 @@ class GetCaseList extends BaseLogicApi
     
     protected function execute()
     {
-        $func = 'getCaseList' . ucwords($this->param['type']);
+        if ($this->param['type'] == 'discharge') {
+            $func = 'getFollowListDischarge';
+        } elseif ($this->param['type'] == 'follow') {
+            $func = 'getFollowListFollow';
+        } else {
+            return HpErrorMessage::getError(ERROR_PARAM_RANGE, 'type.');
+        }
         if (!isset($this->param['page']) && !isset($this->param['rows'])) {
             $cases = Dbi::getDbi()->$func($this->param['hospital_id']);
         } else {

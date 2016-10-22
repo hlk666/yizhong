@@ -16,7 +16,7 @@ class ConfirmHospitalize extends BaseLogicApi
                         'confirm_user' => $this->param['confirm_user'],
         ];
         $checkRequired = HpValidate::checkRequiredArray($params);
-        if (true !== $required) {
+        if (true !== $checkRequired) {
             return $checkRequired;
         }
         

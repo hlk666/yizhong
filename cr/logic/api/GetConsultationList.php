@@ -2,7 +2,7 @@
 require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class GetCaseList extends BaseLogicApi
+class GetConsultationList extends BaseLogicApi
 {
     protected function validate($class = '')
     {
@@ -11,7 +11,7 @@ class GetCaseList extends BaseLogicApi
             return $ret;
         }
         
-        $checkRequired = HpValidate::checkRequiredParam(['hospital_id', 'type'], $this->param);
+        $checkRequired = HpValidate::checkRequiredParam(['hospital_id'], $this->param);
         if (true !== $checkRequired) {
             return $checkRequired;
         }
@@ -21,23 +21,17 @@ class GetCaseList extends BaseLogicApi
             return $checkNumeric;
         }
         
-        $checkRange = HpValidate::checkRange(['type'], $this->param, [NO_FILTER, 'consultation', 'referral']);
-        if (true !== $checkRange) {
-            return $checkRange;
-        }
-        
         return true;
     }
     
     protected function execute()
     {
-        $func = 'getCaseList' . ucwords($this->param['type']);
         if (!isset($this->param['page']) && !isset($this->param['rows'])) {
-            $cases = Dbi::getDbi()->$func($this->param['hospital_id']);
+            $cases = Dbi::getDbi()->getConsultationList($this->param['hospital_id']);
         } else {
             $page = isset($this->param['page']) ? $this->param['page'] : 0;
             $rows = isset($this->param['rows']) ? $this->param['rows'] : VALUE_DEFAUTL_ROWS;
-            $cases = Dbi::getDbi()->$func($this->param['hospital_id'], $page * $rows, $rows);
+            $cases = Dbi::getDbi()->getConsultationList($this->param['hospital_id'], $page * $rows, $rows);
         }
         if (VALUE_DB_ERROR === $cases) {
             return HpErrorMessage::getError(ERROR_DB);

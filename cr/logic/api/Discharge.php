@@ -22,7 +22,7 @@ class Discharge extends BaseLogicApi
                         'plan_info' => $this->param['plan_info'],
         ];
         $checkRequired = HpValidate::checkRequiredArray($params);
-        if (true !== $required) {
+        if (true !== $checkRequired) {
             return $checkRequired;
         }
         

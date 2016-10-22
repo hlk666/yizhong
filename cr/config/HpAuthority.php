@@ -8,28 +8,39 @@ define('AUTHORITY_OTHER', 9);
 class HpAuthority
 {
     private static $classAuthority = [
-                    'Test' => AUTHORITY_OTHER,
+                    /* part1 */
                     'AddHospital' => AUTHORITY_SUPER_ADMIN,
-                    'GetHospitalList' => AUTHORITY_HOSPITAL_USER, 
-                    'AddHospitalRelation' => AUTHORITY_SUPER_ADMIN,
                     'AddUser' => AUTHORITY_HOSPITAL_ADMIN,
+                    'EditHospital' => AUTHORITY_SUPER_ADMIN,
+                    'EditUser' => AUTHORITY_SUPER_ADMIN,
+                    'GetHospitalList' => AUTHORITY_HOSPITAL_USER,
+                    'GetUserList' => AUTHORITY_HOSPITAL_USER,
+                    'AddHospitalRelation' => AUTHORITY_SUPER_ADMIN,
+                    'DelHospitalRelation' => AUTHORITY_SUPER_ADMIN,
+                    
+                    /* part2 */
+                    'Test' => AUTHORITY_OTHER,
+                    'Index' => AUTHORITY_OTHER,
                     'Login' => AUTHORITY_OTHER,
-                    
-                    'AddCase' => AUTHORITY_HOSPITAL_USER,
-                    'UploadImage' => AUTHORITY_HOSPITAL_USER,
+                    'GetInfo' => AUTHORITY_HOSPITAL_USER,
                     'GetHolter' => AUTHORITY_HOSPITAL_USER,
-                    'GetParentHospital' => AUTHORITY_HOSPITAL_USER,
+                    'UploadImage' => AUTHORITY_HOSPITAL_USER,
                     
-                    'GetCaseNum' => AUTHORITY_HOSPITAL_USER,
-                    'GetCaseList' => AUTHORITY_HOSPITAL_USER,
+                    /* part3 */
+                    'GetHospitalParent' => AUTHORITY_HOSPITAL_USER,
+                    'AddCase' => AUTHORITY_HOSPITAL_USER,
                     'GetCase' => AUTHORITY_HOSPITAL_USER,
+                    'EditCase' => AUTHORITY_HOSPITAL_USER,
                     
+                    /* part4 */
                     'ApplyConsultation' => AUTHORITY_HOSPITAL_USER,
                     'GetConsultationApply' => AUTHORITY_HOSPITAL_USER,
                     'ReplyConsultation' => AUTHORITY_HOSPITAL_USER,
                     'GetConsultationReply' => AUTHORITY_HOSPITAL_USER,
                     'GetConsultationInfo' => AUTHORITY_HOSPITAL_USER,
+                    'DelConsultation' => AUTHORITY_HOSPITAL_USER,
                     
+                    /* part5 */
                     'ApplyReferral' => AUTHORITY_HOSPITAL_USER,
                     'GetReferralApply' => AUTHORITY_HOSPITAL_USER,
                     'ReplyReferral' => AUTHORITY_HOSPITAL_USER,
@@ -37,13 +48,20 @@ class HpAuthority
                     'ConfirmHospitalize' => AUTHORITY_HOSPITAL_USER,
                     'GetReferralInfo' => AUTHORITY_HOSPITAL_USER,
                     'Discharge' => AUTHORITY_HOSPITAL_USER,
+                    'DelReferral' => AUTHORITY_HOSPITAL_USER,
                     
-                    'GetDischargeList' => AUTHORITY_HOSPITAL_USER,
-                    
+                    /* part6 */
                     'AddFollow' => AUTHORITY_HOSPITAL_USER,
-                    'GetFollow' => AUTHORITY_HOSPITAL_USER,
+                    'ReplyFollow' => AUTHORITY_HOSPITAL_USER,
+                    'GetFollowReply' => AUTHORITY_HOSPITAL_USER,
+                    'GetFollowInfo' => AUTHORITY_HOSPITAL_USER,
+                    'DelFollow' => AUTHORITY_HOSPITAL_USER,
                     
-                    'Index' => AUTHORITY_OTHER,
+                    /* part7 */
+                    'GetCaseList' => AUTHORITY_HOSPITAL_USER,
+                    'GetConsultationList' => AUTHORITY_HOSPITAL_USER,
+                    'GetReferralList' => AUTHORITY_HOSPITAL_USER,
+                    'GetFollowList' => AUTHORITY_HOSPITAL_USER,
     ];
     
     public static function getClassAuthority($class)
