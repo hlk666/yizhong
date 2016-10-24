@@ -335,6 +335,23 @@ class Dbi extends BaseDbi
         $param = [':patient_id' => $patientId];
         return $this->getDataRow($sql, $param);
     }
+    public function getPatientByNameAndTel($name, $tel)
+    {
+        if (null == $name && null == $tel) {
+            return VALUE_DB_ERROR;
+        }
+        
+        if (null != $name && null != $tel) {
+            $where = " where patient_name LIKE '$name%' and tel LIKE '$tel%'";
+        } elseif (null != $name) {
+            $where = " where patient_name LIKE '$name%'";
+        } else {
+            $where = " where tel LIKE '$tel%'";
+        }
+        $sql = "select patient_name, tel, CONCAT('http://101.200.174.235/', report_file) as report_url
+                from patient as p left join guardian as g on p.patient_id = g.patient_id $where ";
+        return $this->getDataAll($sql);
+    }
     public function getPatientByDevice($deviceId)
     {
         $sql = 'select guardian_id, patient_name, mode

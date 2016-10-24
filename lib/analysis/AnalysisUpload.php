@@ -70,7 +70,7 @@ class AnalysisUpload
             }
         }
         if ('report' == $type) {
-            $urlFile = 'report/' . $param['hospital_id'] . '/' . $guardianId . '.pdf';
+            $urlFile = 'report/' . $guardianId . '.pdf';
             $ret = DbiAnalytics::getDbi()->uploadReport($guardianId, $urlFile);
             if (VALUE_DB_ERROR === $ret) {
                 $this->setError(2, MESSAGE_DB_ERROR);
