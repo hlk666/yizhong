@@ -1,6 +1,7 @@
 <?php
 require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
+require_once PATH_ROOT . 'lib/tool/HpShortMessageService.php';
 
 class ApplyConsultation extends BaseLogicApi
 {
@@ -11,46 +12,16 @@ class ApplyConsultation extends BaseLogicApi
             return $ret;
         }
         
-        $ret = isset($this->param['case_id']) ? HpValidate::checkRequired($this->param['case_id']) : false;
-        if (true !== $ret) {
-            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'case_id.');
+        $required = ['case_id', 'apply_hospital', 'apply_user', 'apply_message', 'reply_hospital'];
+        
+        $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
+        if (true !== $checkRequired) {
+            return $checkRequired;
         }
         
-        $ret = isset($this->param['apply_hospital']) ? HpValidate::checkRequired($this->param['apply_hospital']) : false;
-        if (true !== $ret) {
-            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'apply_hospital.');
-        }
-        
-        $ret = isset($this->param['apply_user']) ? HpValidate::checkRequired($this->param['apply_user']) : false;
-        if (true !== $ret) {
-            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'apply_user.');
-        }
-        
-        $ret = isset($this->param['apply_message']) ? HpValidate::checkRequired($this->param['apply_message']) : false;
-        if (true !== $ret) {
-            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'apply_message');
-        }
-        
-        $ret = isset($this->param['reply_hospital']) ? HpValidate::checkRequired($this->param['reply_hospital']) : false;
-        if (true !== $ret) {
-            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'reply_hospital');
-        }
-        
-        if (false === is_numeric($this->param['case_id'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, 'case_id.');
-        }
-        if (false === is_numeric($this->param['apply_hospital'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, 'apply_hospital.');
-        }
-        if (false === is_numeric($this->param['apply_user'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, 'apply_user.');
-        }
-        if (false === is_numeric($this->param['reply_hospital'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_NUMERIC, 'reply_hospital.');
-        }
-        
-        if ('' == $this->param['apply_message']) {
-            return HpErrorMessage::getError(ERROR_PARAM_SPACE, 'apply_message.');
+        $checkNumeric = HpValidate::checkNumeric(['case_id', 'apply_hospital', 'apply_user', 'reply_hospital'], $this->param);
+        if (true !== $checkNumeric) {
+            return $checkNumeric;
         }
         
         return true;
@@ -58,11 +29,46 @@ class ApplyConsultation extends BaseLogicApi
     
     protected function execute()
     {
-        $ret = Dbi::getDbi()->applyConsultation($this->param['case_id'], $this->param['apply_hospital'], 
-                $this->param['apply_user'], $this->param['apply_message'], $this->param['reply_hospital']);
-        if (VALUE_DB_ERROR === $ret) {
+        $telDoctor = Dbi::getDbi()->getTelList($this->param['reply_hospital']);
+        if (VALUE_DB_ERROR === $telDoctor) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        $telCase = Dbi::getDbi()->getTelCase($this->param['case_id']);
+        if (VALUE_DB_ERROR === $telCase) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $consultationId = Dbi::getDbi()->applyConsultation($this->param['case_id'], $this->param['apply_hospital'], 
+                $this->param['apply_user'], $this->param['apply_message'], $this->param['reply_hospital']);
+        if (VALUE_DB_ERROR === $consultationId) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $consultationInfo = Dbi::getDbi()->getConsultationInfo($consultationId);
+        if (VALUE_DB_ERROR === $consultationInfo || empty($consultationInfo)) {
+            return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+        } else {
+            $contentDoctor = HpErrorMessage::getTelMessageApplyConsultationDoctor($consultationInfo['apply_hospital_name'], 
+                    $consultationInfo['apply_doctor_name']);
+            $contentCase = HpErrorMessage::getTelMessageApplyConsultationCase($consultationInfo['apply_hospital_name'], 
+                    $consultationInfo['apply_doctor_name'], $consultationInfo['reply_hospital_name']);
+        }
+        
+        foreach ($telDoctor as $tel) {
+            if (true === HpValidate::checkPhoneNo($tel)) {
+                $ret = HpShortMessageService::send($tel, $contentDoctor);
+                if (false === $ret) {
+                    return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+                }
+            }
+        }
+        if ('' != $telCase && true === HpValidate::checkPhoneNo($telCase)) {
+            $ret = HpShortMessageService::send($telCase, $contentCase);
+            if (false === $ret) {
+                return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+            }
+        }
+        
         return $this->retSuccess;
     }
 }

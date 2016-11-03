@@ -26,6 +26,10 @@ class Dbi extends BaseDbi
         }
         return $this->countData('ecg', $where);
     }
+    public function existedCase($case)
+    {
+        return $this->existData('`case`', ['case_id' => $case]);
+    }
     public function existedConsultation($consultationId)
     {
         return $this->existData('consultation', ['consultation_id' => $consultationId]);
@@ -34,19 +38,29 @@ class Dbi extends BaseDbi
     {
         return $this->existData('follow', ['follow_id' => $followId]);
     }
+    public function existedHospital($hospital)
+    {
+        return $this->existData('hospital', ['hospital_id' => $hospital]);
+    }
     public function existedReferral($referralId)
     {
         return $this->existData('referral', ['referral_id' => $referralId]);
+    }
+    public function existedRelation($hospitalId, $parentHospitalId)
+    {
+        return $this->existData('hospital_relation', 
+                "hospital_id = $hospitalId and parent_hospital_id = $parentHospitalId");
     }
     public function existedUser($user)
     {
         return $this->existData('user', ['login_name' => $user]);
     }
+    
     public function getCaseCase($caseId)
     {
         $sql = 'select name as case_name, sex, birth_year, tel, diagnosis as treat_diagnosis, info, img_cbc, 
                 img_myocardial_markers, img_serum_electrolytes, img_echocardiography, img_ecg, img_holter, 
-                create_time as treat_time from `case` where case_id = :case_id limit 1';
+                create_date as treat_date from `case` where case_id = :case_id limit 1';
         $param = [':case_id' => $caseId];
         return $this->getDataRow($sql, $param);
     }
@@ -70,9 +84,9 @@ class Dbi extends BaseDbi
                 r.apply_time, r.apply_message,
                 h2.hospital_name as reply_hospital_name, u2.real_name as reply_doctor_name, u2.tel as reply_doctor_tel,
                 r.reply_time, r.reply_message, r.expect_time, 
-                u3.real_name as confirm_doctor_name, u3.tel as confirm_doctor_tel, r.confirm_time, r.advice as reply_advice,
-                u4.real_name as discharge_doctor_name, u4.tel as discharge_doctor_tel,
-                r.operate_time, operate_info, r.course, r.diagnosis as discharge_diagnosis, r.instructions, r.medicine, r.advice
+                u3.real_name as confirm_doctor_name, u3.tel as confirm_doctor_tel, r.confirm_time,
+                u4.real_name as discharge_doctor_name, u4.tel as discharge_doctor_tel, r.operate_time, operate_info, 
+                r.course, r.diagnosis as discharge_diagnosis, r.instructions, r.medicine, r.advice, r.plan_info
                 from referral as r inner join hospital as h1 on r.apply_hospital_id = h1.hospital_id
                 inner join user as u1 on r.apply_user_id = u1.user_id
                 inner join hospital as h2 on r.reply_hospital_id = h2.hospital_id
@@ -86,7 +100,7 @@ class Dbi extends BaseDbi
     public function getCaseFollow($caseId)
     {
         $sql = 'select h1.hospital_name as apply_hospital_name, u1.real_name as apply_doctor_name, u1.tel as apply_doctor_tel,
-                f.follow_time, f.symptom, f.advice as advice, f.question, 
+                f.follow_time, f.symptom, f.advice as follow_advice, f.question, 
                 img_ecg, img_holter, img_echocardiography, img_inr, img_other,
                 h2.hospital_name as reply_hospital_name, u2.real_name as reply_doctor_name, u2.tel as reply_doctor_tel,
                 f.reply_time, f.reply_advice, f.reply_question
@@ -110,7 +124,7 @@ class Dbi extends BaseDbi
     }
     public function getCaseListConsultation($hospitalId, $offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
     {
-        $sql = 'select distinct c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date, 
+        $sql = 'select distinct cn.consultation_id, c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date, 
                 c.diagnosis, h.hospital_name as consultation_hospital_name
                 from `case` as c inner join consultation as cn on c.case_id = cn.case_id
                 inner join hospital as h on cn.reply_hospital_id = h.hospital_id
@@ -123,7 +137,7 @@ class Dbi extends BaseDbi
     }
     public function getCaseListReferral($hospitalId, $offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
     {
-        $sql = 'select distinct c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date,
+        $sql = 'select distinct r.referral_id, c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date,
                 c.diagnosis, h.hospital_name as referral_hospital_name
                 from `case` as c inner join referral as r on c.case_id = r.case_id
                 inner join hospital as h on r.reply_hospital_id = h.hospital_id
@@ -136,7 +150,7 @@ class Dbi extends BaseDbi
     }
     public function getConsultationList($hospitalId, $offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
     {
-        $sql = 'select distinct c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date,
+        $sql = 'select distinct cn.consultation_id, c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date,
                 c.diagnosis, h.hospital_name as apply_hospital_name
                 from consultation as cn inner join `case` as c on cn.case_id = c.case_id
                 inner join hospital as h on cn.apply_hospital_id = h.hospital_id
@@ -165,9 +179,9 @@ class Dbi extends BaseDbi
     }
     public function getConsultationInfo($consultationId)
     {
-        
-        $sql = 'select ca.name, ca.sex, ca.birth_year, ca.diagnosis as apply_diagnosis,
-                c.apply_message, h1.hospital_name as apply_hospital_name, u1.real_name as apply_doctor_name, u1.tel as apply_doctor_tel,
+        $sql = 'select ca.case_id, ca.name, ca.sex, ca.birth_year, ca.diagnosis as apply_diagnosis,
+                c.apply_message, h1.hospital_id as apply_hospital_id, h1.hospital_name as apply_hospital_name, 
+                u1.real_name as apply_doctor_name, u1.tel as apply_doctor_tel,
                 c.apply_time, h2.hospital_name as reply_hospital_name, u2.real_name as reply_doctor_name, u2.tel as reply_doctor_tel,
                 c.reply_time, c.diagnosis as reply_diagnosis, c.advice as reply_advice
                 from consultation as c inner join `case` as ca on c.case_id = ca.case_id
@@ -190,9 +204,9 @@ class Dbi extends BaseDbi
     }
     public function getFollowInfo($followId)
     {
-        $sql = 'select c.name, c.sex, c.birth_year, c.diagnosis as apply_diagnosis,
+        $sql = 'select c.case_id, c.name, c.sex, c.birth_year, c.diagnosis as apply_diagnosis, h1.hospital_id as follow_hospital_id, 
                 h1.hospital_name as follow_hospital_name, u1.real_name as follow_doctor_name, u1.tel as follow_doctor_tel,
-                follow_time, symptom, advice, question, img_ecg, img_holter, img_echocardiography, img_inr, img_other,
+                follow_time, symptom, advice, question, f.img_ecg, f.img_holter, f.img_echocardiography, img_inr, img_other,
                 h2.hospital_name as reply_hospital_name, u2.real_name as reply_doctor_name, u2.tel as reply_doctor_tel,
                 reply_time, reply_advice, reply_question
                 from follow as f inner join `case` as c on f.case_id = c.case_id
@@ -207,7 +221,7 @@ class Dbi extends BaseDbi
     }
     public function getFollowListDischarge($hospitalId, $offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
     {
-        $sql = 'select distinct c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date,
+        $sql = 'select distinct r.referral_id, c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date,
                 c.diagnosis, r.reply_hospital_id as discharge_hospital_id, h.hospital_name as discharge_hospital_name
                 from referral as r inner join `case` as c on r.case_id = c.case_id
                 inner join hospital as h on r.reply_hospital_id = h.hospital_id
@@ -248,7 +262,7 @@ class Dbi extends BaseDbi
     }
     public function getHospitalList($offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
     {
-        $sql = 'select hospital_id, hospital_name, tel from hospital order by hospital_id ';
+        $sql = 'select hospital_id, hospital_name, tel from hospital order by hospital_id desc ';
         if (VALUE_DEFAULT_OFFSET !== $offset) {
             $sql .= " limit $offset, $rows";
         }
@@ -277,8 +291,9 @@ class Dbi extends BaseDbi
     }
     public function getReferralInfo($referralId)
     {
-        $sql = 'select c.name, c.sex, c.birth_year, c.diagnosis as apply_diagnosis,
-                r.apply_message, h1.hospital_name as apply_hospital_name, u1.real_name as apply_doctor_name, u1.tel as apply_doctor_tel,
+        $sql = 'select c.case_id, c.name, c.sex, c.birth_year, c.diagnosis as apply_diagnosis,
+                r.apply_message, h1.hospital_id as apply_hospital_id, h1.hospital_name as apply_hospital_name, 
+                u1.real_name as apply_doctor_name, u1.tel as apply_doctor_tel,
                 r.apply_time, h2.hospital_name as reply_hospital_name, u2.real_name as reply_doctor_name, u2.tel as reply_doctor_tel,
                 r.reply_time, r.reply_message, r.expect_time, r.status
                 from referral as r inner join `case` as c on r.case_id = c.case_id
@@ -292,7 +307,7 @@ class Dbi extends BaseDbi
     }
     public function getReferralList($hospitalId, $status, $offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
     {
-        $sql = 'select distinct c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date,
+        $sql = 'select distinct r.referral_id, c.case_id, name as case_name, sex, birth_year, c.tel, c.create_date as treat_date,
                 c.diagnosis, h.hospital_name as apply_hospital_name
                 from referral as r inner join `case` as c on r.case_id = c.case_id
                 inner join hospital as h on r.apply_hospital_id = h.hospital_id
@@ -316,12 +331,37 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
+    public function getTelCase($caseId)
+    {
+        $sql = 'select tel from `case` where case_id = :case';
+        $param = [':case' => $caseId];
+        return $this->getDataString($sql, $param);
+    }
+    public function getTelList($hospitalId)
+    {
+        $sql = 'select distinct tel from `user` where hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getUserInfo($loginName)
     {
         $sql = 'select user_id, real_name as user_name, type as user_type, password, hospital_id
                 from user where login_name = :user limit 1';
         $param = [':user' => $loginName];
         return $this->getDataRow($sql, $param);
+    }
+    public function getUserList($hospitalId, $offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
+    {
+        if ($hospitalId == null) {
+            $where = '';
+        } else {
+            $where = ' where hospital_id = ' . $hospitalId;
+        }
+        $sql = 'select user_id, login_name, real_name, `type` from user' . $where . ' order by user_id desc';
+        if (VALUE_DEFAULT_OFFSET !== $offset) {
+            $sql .= " limit $offset, $rows";
+        }
+        return $this->getDataAll($sql);
     }
     public function addHospital($name, $tel, $address, $messageTel)
     {
@@ -348,16 +388,16 @@ class Dbi extends BaseDbi
         return $this->insertData($sql, $param);
     }
     public function addFollow($followHospitalId, $dischargeHospitalId, $caseId, $followUserId, $symptom, $advice, $question, 
-            $imgEcg, $imgHolter, $imgEchocardiography, $imgInr, $imgOther)
+            $imgEcg, $imgHolter, $imgEchocardiography, $imgInr, $imgOther, $followDate)
     {
         $sql = 'insert into follow (follow_hospital_id, discharge_hospital_id, case_id, follow_user_id, 
-                symptom, advice, question, img_ecg, img_holter, img_echocardiography, img_inr, img_other)
+                symptom, advice, question, img_ecg, img_holter, img_echocardiography, img_inr, img_other, follow_time)
                 values (:follow_hospital_id, :discharge_hospital_id, :case_id, 
-                :follow_user_id, :symptom, :advice, :question, :e, :h, :eg, :inr, :other)';
+                :follow_user_id, :symptom, :advice, :question, :e, :h, :eg, :inr, :other, :follow_time)';
         $param = [':follow_hospital_id' => $followHospitalId, ':discharge_hospital_id' => $dischargeHospitalId, 
                         ':case_id' => $caseId, ':follow_user_id' => $followUserId, ':symptom' => $symptom, 
                         ':advice' => $advice, ':question' => $question, ':e' => $imgEcg, ':h' => $imgHolter, 
-                        ':eg' => $imgEchocardiography, ':inr' => $imgInr, ':other' => $imgOther];
+                        ':eg' => $imgEchocardiography, ':inr' => $imgInr, ':other' => $imgOther, ':follow_time' => $followDate];
         return $this->insertData($sql, $param);
     }
     public function addUser($loginUser, $name, $password, $type, $tel, $hospitalId)
@@ -391,8 +431,13 @@ class Dbi extends BaseDbi
         $param = [':user' => $confirmUserId, ':status' => REFERRAL_CONFIRM, ':referral' => $referralId];
         return $this->updateData($sql, $param);
     }
+    public function deleteRelation($hospitalId, $parentHospitalId) {
+        $sql = 'delete from hospital_relation where hospital_id = :child and parent_hospital_id = :parent';
+        $param = [':child' => $hospitalId, ':parent' => $parentHospitalId];
+        return $this->deleteData($sql, $param);
+    }
     public function discharge($referralId, $userId, $operateTime, $operateInfo, $course, $diagnosis, $instructions, $medicine, $advice, 
-            $childHospitalName, $childHospitalTel, $parentHospitalName, $caseName, array $planList)
+            $childHospitalName, $childHospitalTel, $parentHospitalName, $caseName, array $planList, $planInfo)
     {
         $this->pdo->beginTransaction();
         
@@ -413,18 +458,18 @@ class Dbi extends BaseDbi
         }
         if (null == $operateTime) {
             $sql = 'update referral set discharge_user_id = :user, course = :course, diagnosis = :diagnosis, 
-                    instructions = :instructions, medicine = :medicine, advice = :advice, discharge_time = now();
+                    instructions = :instructions, medicine = :medicine, advice = :advice, discharge_time = now(), plan_info = :plan
                 where referral_id = :referral';
             $param = [':user' => $userId, ':course' => $course, ':diagnosis' => $diagnosis, ':instructions' => $instructions, 
-                            ':medicine' => $medicine, ':advice' => $advice, ':referral' => $referralId];
+                            ':medicine' => $medicine, ':advice' => $advice, ':referral' => $referralId, ':plan' => $planInfo];
         } else {
             $sql = 'update referral set discharge_user_id = :user, operate_time = :operate_time, operate_info = :operate_info, 
                     course = :course, diagnosis = :diagnosis, instructions = :instructions, medicine = :medicine, 
-                    advice = :advice, discharge_time = now();
+                    advice = :advice, discharge_time = now(), plan_info = :plan
                 where referral_id = :referral';
             $param = [':user' => $userId, ':operate_time' => $operateTime, ':operate_info' => $operateInfo, 
                             ':course' => $course, ':diagnosis' => $diagnosis, ':instructions' => $instructions,
-                            ':medicine' => $medicine, ':advice' => $advice, ':referral' => $referralId];
+                            ':medicine' => $medicine, ':advice' => $advice, ':referral' => $referralId, ':plan' => $planInfo];
         }
         $ret = $this->updateData($sql, $param);
         if (VALUE_DB_ERROR === $ret) {
@@ -433,6 +478,33 @@ class Dbi extends BaseDbi
         }
         $this->pdo->commit();
         return true;
+    }
+    public function editCase($caseId, $name, $sex, $birthYear, $tel, $diagnosis, $info,
+            $imgCBC, $imgMyocardialMarkers, $imgSerumElectrolytes, $imgEchocardiography, $imgEcg, $imgHolter)
+    {
+        $sql = 'update `case` set name = :name, sex = :sex, birth_year = :birth, tel = :tel, 
+                diagnosis = :diagnosis, info = :info, img_cbc = :cbc, img_myocardial_markers = :mm, 
+                img_serum_electrolytes = :se, img_echocardiography = :eg, img_ecg = :e, img_holter = :h
+                where case_id = :case_id';
+        $param = [':case_id' => $caseId, ':name' => $name, ':sex' => $sex, ':birth' => $birthYear, ':tel' => $tel,
+                        ':diagnosis' => $diagnosis, ':info' => $info, ':cbc' => $imgCBC, ':mm' => $imgMyocardialMarkers,
+                        ':se' => $imgSerumElectrolytes, ':eg' => $imgEchocardiography, ':e' => $imgEcg, ':h' => $imgHolter];
+        return $this->updateData($sql, $param);
+    }
+    public function editHospital($hospitalId, $name, $tel, $address, $smsTel)
+    {
+        $sql = 'update hospital set hospital_name = :name, tel = :tel, address = :address, sms_tel = :sms 
+                where hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId, ':name' => $name, ':tel' => $tel, ':address' => $address, ':sms' => $smsTel];
+        return $this->updateData($sql, $param);
+    }
+    public function editUser($userId, $loginName, $realName, $password, $type, $tel)
+    {
+        $sql = 'update user set login_name = :login_name, real_name = :real_name, 
+                password = :password, type = :type, tel = :tel where user_id = :user';
+        $param = [':user' => $userId, ':login_name' => $loginName, ':real_name' => $realName, 
+                        ':password' => $password, ':type' => $type, ':tel' => $tel];
+        return $this->updateData($sql, $param);
     }
     public function replyConsultation($consultationId, $replyUserId, $diagnosis, $advice)
     {

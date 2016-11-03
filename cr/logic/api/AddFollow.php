@@ -18,6 +18,7 @@ class AddFollow extends BaseLogicApi
                         'user_id' => $this->param['user_id'],
                         'symptom' => $this->param['symptom'],
                         'advice' => $this->param['advice'],
+                        'follow_date' => $this->param['follow_date'],
         ];
         $checkRequired = HpValidate::checkRequiredArray($params);
         if (true !== $checkRequired) {
@@ -59,12 +60,47 @@ class AddFollow extends BaseLogicApi
         $imgInr = isset($this->param['img_inr']) ? $this->param['img_inr'] : '';
         $imgOther = isset($this->param['img_other']) ? $this->param['img_other'] : '';
         
-        $ret = Dbi::getDbi()->addFollow($this->param['follow_hospital'], $this->param['discharge_hospital'], 
-                $this->param['case_id'], $this->param['user_id'], $this->param['symptom'], $this->param['advice'], 
-                $question, $imgEcg, $imgHolter, $imgEchocardiography, $imgInr, $imgOther);
-        if (VALUE_DB_ERROR === $ret) {
+        $telDoctor = Dbi::getDbi()->getTelList($this->param['discharge_hospital']);
+        if (VALUE_DB_ERROR === $telDoctor) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        $telCase = Dbi::getDbi()->getTelCase($this->param['case_id']);
+        if (VALUE_DB_ERROR === $telCase) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $followId = Dbi::getDbi()->addFollow($this->param['follow_hospital'], $this->param['discharge_hospital'], 
+                $this->param['case_id'], $this->param['user_id'], $this->param['symptom'], $this->param['advice'], 
+                $question, $imgEcg, $imgHolter, $imgEchocardiography, $imgInr, $imgOther, $this->param['follow_date']);
+        if (VALUE_DB_ERROR === $followId) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $followInfo = Dbi::getDbi()->getFollowInfo($followId);
+        if (VALUE_DB_ERROR === $followInfo || empty($followInfo)) {
+            return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+        } else {
+            $contentDoctor = HpErrorMessage::getTelMessageFollowDoctor($followInfo['follow_hospital_name'],
+                    $followInfo['follow_doctor_name'], $followInfo['name']);
+            $contentCase = HpErrorMessage::getTelMessageFollowCase($followInfo['follow_hospital_name'],
+                    $followInfo['follow_doctor_name'], $followInfo['reply_hospital_name']);
+        }
+        
+        foreach ($telDoctor as $tel) {
+            if (true === HpValidate::checkPhoneNo($tel)) {
+                $ret = HpShortMessageService::send($tel, $contentDoctor);
+                if (false === $ret) {
+                    return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+                }
+            }
+        }
+        if ('' != $telCase && true === HpValidate::checkPhoneNo($telCase)) {
+            $ret = HpShortMessageService::send($telCase, $contentCase);
+            if (false === $ret) {
+                return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+            }
+        }
+        
         return $this->retSuccess;
     }
 }

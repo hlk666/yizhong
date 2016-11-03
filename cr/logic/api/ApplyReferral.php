@@ -45,11 +45,46 @@ class ApplyReferral extends BaseLogicApi
     
     protected function execute()
     {
-        $ret = Dbi::getDbi()->applyReferral($this->param['case_id'], $this->param['apply_hospital'], $this->param['apply_user'], 
-                $this->param['apply_message'], $this->param['reply_hospital']);
-        if (VALUE_DB_ERROR === $ret) {
+        $telDoctor = Dbi::getDbi()->getTelList($this->param['apply_hospital']);
+        if (VALUE_DB_ERROR === $telDoctor) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        $telCase = Dbi::getDbi()->getTelCase($this->param['case_id']);
+        if (VALUE_DB_ERROR === $telCase) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $referralId = Dbi::getDbi()->applyReferral($this->param['case_id'], $this->param['apply_hospital'], $this->param['apply_user'], 
+                $this->param['apply_message'], $this->param['reply_hospital']);
+        if (VALUE_DB_ERROR === $referralId) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $referralInfo = Dbi::getDbi()->getReferralInfo($referralId);
+        if (VALUE_DB_ERROR === $referralInfo || empty($referralInfo)) {
+            return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+        } else {
+            $contentDoctor = HpErrorMessage::getTelMessageApplyReferralDoctor($referralInfo['apply_hospital_name'],
+                    $referralInfo['apply_doctor_name']);
+            $contentCase = HpErrorMessage::getTelMessageApplyReferralCase($referralInfo['apply_hospital_name'],
+                    $referralInfo['apply_doctor_name'], $referralInfo['reply_hospital_name']);
+        }
+        
+        foreach ($telDoctor as $tel) {
+            if (true === HpValidate::checkPhoneNo($tel)) {
+                $ret = HpShortMessageService::send($tel, $contentDoctor);
+                if (false === $ret) {
+                    return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+                }
+            }
+        }
+        if ('' != $telCase && true === HpValidate::checkPhoneNo($telCase)) {
+            $ret = HpShortMessageService::send($telCase, $contentCase);
+            if (false === $ret) {
+                return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+            }
+        }
+        
         return $this->retSuccess;
     }
 }

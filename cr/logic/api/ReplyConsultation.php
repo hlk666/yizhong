@@ -53,11 +53,46 @@ class ReplyConsultation extends BaseLogicApi
     
     protected function execute()
     {
+        $consultationInfo = Dbi::getDbi()->getConsultationInfo($this->param['consultation_id']);
+        if (VALUE_DB_ERROR === $consultationInfo) {
+            return HpErrorMessage::getError(ERROR_DB);
+        } else {
+            $contentDoctor = HpErrorMessage::getTelMessageReplyConsultationDoctor($consultationInfo['reply_hospital_name'],
+                    $consultationInfo['reply_doctor_name']);
+            $contentCase = HpErrorMessage::getTelMessageReplyConsultationCase($consultationInfo['reply_hospital_name'],
+                    $consultationInfo['reply_doctor_name'], $consultationInfo['apply_hospital_name']);
+        }
+        
+        $telDoctor = Dbi::getDbi()->getTelList($consultationInfo['apply_hospital_id']);
+        if (VALUE_DB_ERROR === $telDoctor) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        $telCase = Dbi::getDbi()->getTelCase($consultationInfo['case_id']);
+        if (VALUE_DB_ERROR === $telCase) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
         $ret = Dbi::getDbi()->replyConsultation($this->param['consultation_id'], 
                 $this->param['reply_user'], $this->param['diagnosis'], $this->param['advice']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        foreach ($telDoctor as $tel) {
+            if (true === HpValidate::checkPhoneNo($tel)) {
+                $ret = HpShortMessageService::send($tel, $contentDoctor);
+                if (false === $ret) {
+                    return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+                }
+            }
+        }
+        if ('' != $telCase && true === HpValidate::checkPhoneNo($telCase)) {
+            $ret = HpShortMessageService::send($telCase, $contentCase);
+            if (false === $ret) {
+                return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+            }
+        }
+        
         return $this->retSuccess;
     }
 }

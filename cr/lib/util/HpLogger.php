@@ -9,7 +9,7 @@ class HpLogger
     public static function writeDebugTimeLog($action, $time)
     {
         $message = $action . ' took time : ' . $time;
-        $file = 'debug.log';
+        $file = 'time.log';
         self::write($file, $message);
     }
     

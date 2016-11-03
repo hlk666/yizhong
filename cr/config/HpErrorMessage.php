@@ -4,6 +4,7 @@ define('ERROR_NO_DATA', 1);
 define('ERROR_NOT_EXIST_ID', 2);
 define('ERROR_DB', 3);
 define('ERROR_DATA_CONSISTENCY', 4);
+define('ERROR_SHORT_MESSAGE', 5);
 
 define('ERROR_PARAM_REQUIRED', 10);
 define('ERROR_PARAM_NUMERIC', 11);
@@ -40,6 +41,7 @@ class HpErrorMessage
                     ERROR_NOT_EXIST_ID => ['code' => ERROR_NOT_EXIST_ID, 'message' => '操作对象不存在，请确认输入是否正确。'],
                     ERROR_DB => ['code' => ERROR_DB, 'message' => '数据库操作发生错误，请联系管理员。'],
                     ERROR_DATA_CONSISTENCY => ['code' => ERROR_DATA_CONSISTENCY, 'message' => '数据一致性错误，请联系管理员。'],
+                    ERROR_SHORT_MESSAGE => ['code' => ERROR_SHORT_MESSAGE, 'message' => '操作成功，但是发送短信失败。'],
                     
                     ERROR_PARAM_REQUIRED => ['code' => ERROR_PARAM_REQUIRED, 'message' => '参数未提供：'],
                     ERROR_PARAM_NUMERIC => ['code' => ERROR_PARAM_NUMERIC, 'message' => '参数类型应该是数字：'],
@@ -78,5 +80,88 @@ class HpErrorMessage
             HpLogger::writeCommonLog('Error type does not exist : ' . $errorName);
             return self::$error[ERROR_OTHER];
         }
+    }
+    
+    public static function getTelMessageApplyConsultationDoctor($applyHospital, $applyDoctor)
+    {
+        return "$applyHospital的$applyDoctor医生请求会诊，请确认。";
+    }
+    public static function getTelMessageApplyConsultationCase($applyHospital, $applyDoctor, $replyHospital)
+    {
+        return "$applyHospital的$applyDoctor医生已经将您的病历发给$replyHospital的医生，请求会诊。";
+    }
+    
+    public static function getTelMessageReplyConsultationDoctor($replyHospital, $replyDoctor)
+    {
+        return "$replyHospital的$replyDoctor医生回复会诊，请确认。";
+    }
+    public static function getTelMessageReplyConsultationCase($replyHospital, $replyDoctor, $applyHospital)
+    {
+        return "$replyHospital的$replyDoctor医生已经为您会诊，并给出诊疗意见。请到$applyHospital查询。";
+    }
+    
+    public static function getTelMessageApplyReferralDoctor($applyHospital, $applyDoctor)
+    {
+        return "$applyHospital的$applyDoctor医生请求转诊，请确认。";
+    }
+    public static function getTelMessageApplyReferralCase($applyHospital, $applyDoctor, $replyHospital)
+    {
+        return "$applyHospital的$applyDoctor医生已经向$replyHospital发出您的转诊申请。";
+    }
+    
+    public static function getTelMessageReplyReferralDoctor($replyHospital, $replyDoctor)
+    {
+        return "$replyHospital的$replyDoctor医生回复转诊，请确认。";
+    }
+    public static function getTelMessageReplyReferralCase($replyHospital, $replyDoctor, $applyHospital)
+    {
+        return "$replyHospital的$replyDoctor医生已经回复转诊。请到$applyHospital查询。";
+    }
+    
+    public static function getTelMessageConfirmDoctor($replyHospital, $replyDoctor, $caseName)
+    {
+        return "$replyHospital的$replyDoctor医生已经确认$caseName病人到院。";
+    }
+    public static function getTelMessageConfirmCase($replyHospital, $replyDoctor)
+    {
+        return "$replyHospital的$replyDoctor医生已经确认您到达医院。";
+    }
+    
+    public static function getTelMessageDischargeDoctor($replyHospital, $replyDoctor, $caseName)
+    {
+        return "$replyHospital的$replyDoctor医生已经为$caseName病人办理出院，请从病历信息中查看具体信息。";
+    }
+    public static function getTelMessageDischargeCase($replyHospital, $replyDoctor, $applyHospital)
+    {
+        return "$replyHospital的$replyDoctor医生已经为您办理出院，并将复查计划发送给$applyHospital，请及时进行复查。";
+    }
+    
+    public static function getTelMessageFollowDoctor($caseName, $followTime, $followText)
+    {
+        $date = substr($followTime, 0, 4) . '年' . substr($followTime, 5, 2) . '月' . substr($followTime, 8, 2) . '日';
+        return "$caseName的复查时间($date)快到了，复查内容是$followText，请及时联系患者。";
+    }
+    public static function getTelMessageFollowCase($followTime, $followHospital, $dischargeHospital)
+    {
+        $date = substr($followTime, 0, 4) . '年' . substr($followTime, 5, 2) . '月' . substr($followTime, 8, 2) . '日';
+        return "您的复查时间($date)到了，请您按时到$followHospital复查。结果会发送到$dischargeHospital，并得到诊疗建议。";
+    }
+    
+    public static function getTelMessageFollowDoctor($followHospital, $followDoctor, $caseName)
+    {
+        return "$followHospital的$followDoctor医生为患者$caseName添加随访记录，请确认。";
+    }
+    public static function getTelMessageFollowCase($followHospital, $followDoctor, $dischargeHospital)
+    {
+        return "$followHospital的$followDoctor医生为您添加随访记录，$dischargeHospital的医生会进行确认并回复。";
+    }
+    
+    public static function getTelMessageFollowReplyDoctor($replyHospital, $replyDoctor, $caseName)
+    {
+        return "$replyHospital的$replyDoctor医生回复$caseName的随访记录，请确认。";
+    }
+    public static function getTelMessageFollowReplyCase($replyHospital, $replyDoctor, $applyHospital)
+    {
+        return "$replyHospital的$replyDoctor医生回复您的随访记录，请到$applyHospital确认。";
     }
 }

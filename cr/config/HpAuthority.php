@@ -23,7 +23,6 @@ class HpAuthority
                     'Index' => AUTHORITY_OTHER,
                     'Login' => AUTHORITY_OTHER,
                     'GetInfo' => AUTHORITY_HOSPITAL_USER,
-                    'GetHolter' => AUTHORITY_HOSPITAL_USER,
                     'UploadImage' => AUTHORITY_HOSPITAL_USER,
                     
                     /* part3 */

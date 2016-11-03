@@ -49,11 +49,46 @@ class ReplyReferral extends BaseLogicApi
     
     protected function execute()
     {
+        $referralInfo = Dbi::getDbi()->getReferralInfo($this->param['referral_id']);
+        if (VALUE_DB_ERROR === $referralInfo) {
+            return HpErrorMessage::getError(ERROR_DB);
+        } else {
+            $contentDoctor = HpErrorMessage::getTelMessageReplyReferralDoctor($referralInfo['reply_hospital_name'],
+                    $referralInfo['reply_doctor_name']);
+            $contentCase = HpErrorMessage::getTelMessageReplyReferralCase($referralInfo['reply_hospital_name'],
+                    $referralInfo['reply_doctor_name'], $referralInfo['apply_hospital_name']);
+        }
+        
+        $telDoctor = Dbi::getDbi()->getTelList($referralInfo['apply_hospital_id']);
+        if (VALUE_DB_ERROR === $telDoctor) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        $telCase = Dbi::getDbi()->getTelCase($referralInfo['case_id']);
+        if (VALUE_DB_ERROR === $telCase) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
         $ret = Dbi::getDbi()->replyReferral($this->param['referral_id'], 
                 $this->param['reply_user'], $this->param['message'], $this->param['judge'], $this->param['expect_time']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        foreach ($telDoctor as $tel) {
+            if (true === HpValidate::checkPhoneNo($tel)) {
+                $ret = HpShortMessageService::send($tel, $contentDoctor);
+                if (false === $ret) {
+                    return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+                }
+            }
+        }
+        if ('' != $telCase && true === HpValidate::checkPhoneNo($telCase)) {
+            $ret = HpShortMessageService::send($telCase, $contentCase);
+            if (false === $ret) {
+                return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
+            }
+        }
+        
         return $this->retSuccess;
     }
 }
