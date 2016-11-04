@@ -57,8 +57,9 @@ class HpShortMessageService
     {
         $row = parse_url(self::$url);
         $host = $row['host'];
-        $port = $row['port'] ? $row['port'] : 80;
+        $port = isset($row['port']) ? $row['port'] : 80;
         $file = $row['path'];
+        $post = '';
         while(list($k, $v)= each($data)) {
             $post .= rawurlencode($k). '=' . rawurlencode($v). '&'; //转URL标准码
         }

@@ -1,6 +1,7 @@
 <?php
 require_once PATH_ROOT . 'logic/BaseLogicApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
+require_once PATH_ROOT . 'lib/tool/HpShortMessageService.php';
 
 class ReplyFollow extends BaseLogicApi
 {
