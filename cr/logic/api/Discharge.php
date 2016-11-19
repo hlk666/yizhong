@@ -100,8 +100,8 @@ class Discharge extends BaseLogicApi
         }
         
         foreach ($telDoctor as $tel) {
-            if (true === HpValidate::checkPhoneNo($tel)) {
-                $ret = HpShortMessageService::send($tel, $contentDoctor);
+            if (true === HpValidate::checkPhoneNo($tel['tel'])) {
+                $ret = HpShortMessageService::send($tel['tel'], $contentDoctor);
                 if (false === $ret) {
                     return HpErrorMessage::getError(ERROR_SHORT_MESSAGE);
                 }

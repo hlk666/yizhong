@@ -12,7 +12,7 @@ class HpAuthority
                     'AddHospital' => AUTHORITY_SUPER_ADMIN,
                     'AddUser' => AUTHORITY_HOSPITAL_ADMIN,
                     'EditHospital' => AUTHORITY_SUPER_ADMIN,
-                    'EditUser' => AUTHORITY_SUPER_ADMIN,
+                    'EditUser' => AUTHORITY_HOSPITAL_ADMIN,
                     'GetHospitalList' => AUTHORITY_HOSPITAL_USER,
                     'GetUserList' => AUTHORITY_HOSPITAL_USER,
                     'AddHospitalRelation' => AUTHORITY_SUPER_ADMIN,

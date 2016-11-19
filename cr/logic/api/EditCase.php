@@ -11,9 +11,7 @@ class EditCase extends BaseLogicApi
             return $ret;
         }
         
-        $required = ['case_id', 'name', 'sex', 'birth_year', 'tel', 'diagnosis', 'info', 
-                        'img_cbc', 'img_myocardial_markers', 'img_serum_electrolytes', 
-                        'img_echocardiography', 'img_ecg', 'img_holter'];
+        $required = ['case_id', 'name', 'sex', 'birth_year', 'tel', 'diagnosis', 'info'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -49,10 +47,16 @@ class EditCase extends BaseLogicApi
     
     protected function execute()
     {
+        $imgCBC = isset($this->param['img_cbc']) ? $this->param['img_cbc'] : '';
+        $imgMyocardialMarkers = isset($this->param['img_myocardial_markers']) ? $this->param['img_myocardial_markers'] : '';
+        $imgSerumElectrolytes = isset($this->param['img_serum_electrolytes']) ? $this->param['img_serum_electrolytes'] : '';
+        $imgEchocardiography = isset($this->param['img_echocardiography']) ? $this->param['img_echocardiography'] : '';
+        $imgEcg = isset($this->param['img_ecg']) ? $this->param['img_ecg'] : '';
+        $imgHolter = isset($this->param['img_holter']) ? $this->param['img_holter'] : '';
+        
         $ret = Dbi::getDbi()->editCase($this->param['case_id'], $this->param['name'], $this->param['sex'], 
                 $this->param['birth_year'], $this->param['tel'], $this->param['diagnosis'], $this->param['info'], 
-                $this->param['img_cbc'], $this->param['img_myocardial_markers'], $this->param['img_serum_electrolytes'], 
-                $this->param['img_echocardiography'], $this->param['img_ecg'], $this->param['img_holter']);
+                $imgCBC, $imgMyocardialMarkers, $imgSerumElectrolytes, $imgEchocardiography, $imgEcg, $imgHolter);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
