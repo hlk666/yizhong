@@ -103,6 +103,14 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
+        $sql = 'delete from device where hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId];
+        $ret = $this->deleteData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
         $sql = 'delete from hospital where hospital_id = :hospital';
         $param = [':hospital' => $hospitalId];
         $ret = $this->deleteData($sql, $param);

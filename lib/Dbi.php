@@ -348,8 +348,8 @@ class Dbi extends BaseDbi
         } else {
             $where = " where tel LIKE '$tel%'";
         }
-        $sql = "select patient_name, tel, CONCAT('http://101.200.174.235/', report_file) as report_url
-                from patient as p left join guardian as g on p.patient_id = g.patient_id $where ";
+        $sql = "select patient_name, tel, start_time, CONCAT('http://101.200.174.235/', report_file) as report_url
+                from patient as p left join guardian as g on p.patient_id = g.patient_id $where order by guardian_id desc";
         return $this->getDataAll($sql);
     }
     public function getPatientByDevice($deviceId)

@@ -8,9 +8,9 @@ class AppUploadData
     private $logFile = 'uploadDataLog.txt';
     private $retSuccess = array('code' => 0, 'message' => '');
     
-    public function run($patientId, $mode, $alert = 0, $time = '', $data = array())
+    public function run($patientId, $mode, $alert = 0, $time = '', $data = '', $size = 0)
     {
-        $ret = $this->validate($patientId, $mode, $time, $data);
+        $ret = $this->validate($patientId, $mode, $time, $data, $size);
         if ($ret === false) {
             return json_encode($this->error);
         }
@@ -88,7 +88,7 @@ class AppUploadData
         fclose($handle);
     }
     
-    private function validate($patientId, $mode, $time, $data)
+    private function validate($patientId, $mode, $time, $data, $size)
     {
         if (!isset($patientId) || trim($patientId) == '') {
             $this->setError(1, 'Patient id is required.');
@@ -111,13 +111,21 @@ class AppUploadData
         }
         
         $len = strlen($data);
-        if ($len != 20000 && $len != 120000 && $len != 80000) {
-            Logger::write($this->logFile, $patientId . ' : length of data : ' . $len);
+        if ($size == 0) {
+            if ($len != 20000 && $len != 120000 && $len != 80000) {
+                Logger::write($this->logFile, $patientId . ' : length of data : ' . $len);
+            }
+            if ($len % 4000 > 0) {
+                $this->setError(5, $patientId . ' : Data size is wrong.');
+                return false;
+            }
+        } else {
+            if ($len != $size) {
+                $this->setError(5, $patientId . ' : Data size is wrong.');
+                return false;
+            }
         }
-        if ($len % 4000 > 0) {
-            $this->setError(5, $patientId . ' : Data size is wrong.');
-            return false;
-        }
+        
         return true;
     }
     
