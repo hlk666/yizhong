@@ -4,9 +4,13 @@ define('API_TIMEOUT', 20);
 class HpApi
 {
     private $_baseUrl;
-    public function __construct($baseUrl = URL_ROOT . '/api/')
+    public function __construct($baseUrl = null)
     {
-        $this->_baseUrl = $baseUrl;
+        if (null !== $baseUrl) {
+            $this->_baseUrl = $baseUrl;
+        } else {
+            $this->_baseUrl = URL_ROOT . '/api/';
+        }
     }
     
     public function getString($api, $params = array(), $timeout = API_TIMEOUT)
