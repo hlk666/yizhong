@@ -11,7 +11,7 @@ class EditUser extends BaseLogicApi
             return $ret;
         }
         
-        $required = ['user_id', 'login_name', 'real_name', 'password', 'type', 'tel'];
+        $required = ['user_id', 'real_name', 'type', 'tel'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -33,11 +33,6 @@ class EditUser extends BaseLogicApi
             return HpErrorMessage::getError(ERROR_PARAM_PHONE);
         }
         
-        $ret = Dbi::getDbi()->existedUser($this->param['login_name']);
-        if (true !== $ret) {
-            return HpErrorMessage::getError(ERROR_NOT_EXIST_ID);
-        }
-        
         return true;
     }
     
@@ -48,8 +43,7 @@ class EditUser extends BaseLogicApi
             return HpErrorMessage::getError(ERROR_NO_PERMISSON);
         }
         
-        $ret = Dbi::getDbi()->editUser($this->param['user_id'], $this->param['login_name'], 
-                $this->param['real_name'], md5($this->param['password']), $this->param['type'], $this->param['tel']);
+        $ret = Dbi::getDbi()->editUser($this->param['user_id'], $this->param['real_name'], $this->param['type'], $this->param['tel']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

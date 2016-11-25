@@ -13,6 +13,7 @@ class HpAuthority
                     'AddUser' => AUTHORITY_HOSPITAL_ADMIN,
                     'EditHospital' => AUTHORITY_SUPER_ADMIN,
                     'EditUser' => AUTHORITY_HOSPITAL_ADMIN,
+                    'ResetPassword' => AUTHORITY_HOSPITAL_USER,
                     'GetHospitalList' => AUTHORITY_HOSPITAL_USER,
                     'GetUserList' => AUTHORITY_HOSPITAL_USER,
                     'AddHospitalRelation' => AUTHORITY_SUPER_ADMIN,

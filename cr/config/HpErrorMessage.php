@@ -28,8 +28,7 @@ define('ERROR_UPLOAD_SUFFIX', 32);
 define('ERROR_UPLOAD_SUCCESS', 33);
 define('ERROR_UPLOAD_FAIL', 34);
 
-define('ERROR_SEX', 40);
-define('ERROR_BIRTH_YEAR', 41);
+define('ERROR_SEARCH', 40);
 
 define('ERROR_OTHER', 99);
 
@@ -64,6 +63,8 @@ class HpErrorMessage
                     ERROR_UPLOAD_SUFFIX => ['code' => ERROR_UPLOAD_SUFFIX, 'message' => '请上传以下类型文件：'],
                     ERROR_UPLOAD_SUCCESS => ['code' => ERROR_UPLOAD_SUCCESS, 'message' => '上传成功。'],
                     ERROR_UPLOAD_FAIL => ['code' => ERROR_UPLOAD_FAIL, 'message' => '上传失败，请重试或联系管理员。'],
+                    
+                    ERROR_SEARCH => ['code' => ERROR_SEARCH, 'message' => '搜索条件错误，请确认搜索关键字和值。'],
                     
                     
                     ERROR_OTHER => ['code' => ERROR_OTHER, 'message' => '未知错误，请联系管理员。'],

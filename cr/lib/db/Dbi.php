@@ -498,12 +498,16 @@ class Dbi extends BaseDbi
         $param = [':hospital' => $hospitalId, ':name' => $name, ':tel' => $tel, ':address' => $address, ':sms' => $smsTel];
         return $this->updateData($sql, $param);
     }
-    public function editUser($userId, $loginName, $realName, $password, $type, $tel)
+    public function editUser($userId, $realName, $type, $tel)
     {
-        $sql = 'update user set login_name = :login_name, real_name = :real_name, 
-                password = :password, type = :type, tel = :tel where user_id = :user';
-        $param = [':user' => $userId, ':login_name' => $loginName, ':real_name' => $realName, 
-                        ':password' => $password, ':type' => $type, ':tel' => $tel];
+        $sql = 'update user set real_name = :real_name, type = :type, tel = :tel where user_id = :user';
+        $param = [':user' => $userId, ':real_name' => $realName, ':type' => $type, ':tel' => $tel];
+        return $this->updateData($sql, $param);
+    }
+    public function editUserPassword($loginName, $password)
+    {
+        $sql = 'update user set password = :password where login_name = :login_name';
+        $param = [':login_name' => $loginName, ':password' => $password];
         return $this->updateData($sql, $param);
     }
     public function replyConsultation($consultationId, $replyUserId, $diagnosis, $advice)
