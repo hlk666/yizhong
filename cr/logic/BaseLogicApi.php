@@ -55,6 +55,30 @@ class BaseLogicApi
         return $this->retSuccess;
     }
     
+    protected function filter(array $data, array $names, array $values)
+    {
+        $length = count($names);
+        if ($length == 0 || $length != count($values)) {
+            return false;
+        }
+        
+        $retArray = array();
+        foreach ($data as $row) {
+            for ($i = 0; $i < $length; $i++) {
+                $filterName = $names[$i];
+                $filterValue = $values[$i];
+                if (empty($filterName) || empty($filterValue)) {
+                    return false;
+                }
+                if (false === stripos($row[$filterName], $filterValue)) {
+                    continue 2;
+                }
+            }
+            $retArray[] = $row;
+        }
+        return $retArray;
+    }
+    
     public function run()
     {
         //$startTime = microtime_float();
@@ -69,5 +93,24 @@ class BaseLogicApi
         }
         
         echo json_encode($model, JSON_UNESCAPED_UNICODE);
+    }
+    
+    protected function getStructalData($text)
+    {
+        $data = array();
+        $rows = array_filter(explode(';', $text));
+        foreach ($rows as $row) {
+            $rowData = array();
+            $columns = array_filter(explode(',', $row));
+            foreach ($columns as $column) {
+                $colArray = explode(':', $column);
+                if (2 != count($colArray)) {
+                    return false;
+                }
+                $rowData[$colArray[0]] = $colArray[1];
+            }
+            $data[] = $rowData;
+        }
+        return $data;
     }
 }

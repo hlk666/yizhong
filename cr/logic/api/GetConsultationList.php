@@ -40,6 +40,15 @@ class GetConsultationList extends BaseLogicApi
             return HpErrorMessage::getError(ERROR_NO_DATA);
         }
         
+        if (isset($this->param['filter_name'])) {
+            $filterNames = explode(',', $this->param['filter_name']);
+            $filterValues = explode(',', $this->param['filter_value']);
+            $cases = parent::filter($cases, $filterNames, $filterValues);
+            if (false === $cases) {
+                return HpErrorMessage::getError(ERROR_SEARCH);
+            }
+        }
+        
         $this->retSuccess['cases'] = $cases;
         return $this->retSuccess;
     }
