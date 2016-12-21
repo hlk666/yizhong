@@ -45,6 +45,10 @@ class Dbi extends BaseDbi
     {
         return $this->existData('guardian', 'guardian_id = ' . $guardianId);
     }
+    public function existedOldMode($guardianId, $oldMode)
+    {
+        return $this->existData('guardian', " guardian_id = $guardianId and mode = $oldMode ");
+    }
     //************************* existed methods(public) *************************
     //*********************************** end ***********************************
     
@@ -177,17 +181,19 @@ class Dbi extends BaseDbi
         $param = [':guardian' => $guardianId];
         return $this->getDataAll($sql, $param);
     }
+    public function getEcgsHospital($hospitalId, $startTime)
+    {
+        $sql = 'select ecg_id, alert_flag, e.create_time, data_path
+                from guardian as g inner join ecg as e on g.guardian_id = e.guardian_id 
+                where g.guard_hospital_id = :hospital and read_status = 0 and start_time >= :time 
+                order by ecg_id desc';
+        $param = [':hospital' => $hospitalId, ':time' => $startTime];
+        return $this->getDataAll($sql, $param);
+    }
     public function getEcgsByTime($guardianId, $lastTime)
     {
         $sql = "select ecg_id, alert_flag, create_time, read_status, data_path, mark
                 from ecg where guardian_id = :guardian and create_time > '$lastTime'";
-        $param = [':guardian' => $guardianId];
-        return $this->getDataAll($sql, $param);
-    }
-    public function getEcgsByTime1($guardianId, $lastTime)
-    {
-        $sql = "select ecg_id, alert_flag, create_time, read_status, data_path, mark
-        from ecg where guardian_id = :guardian and create_time > '$lastTime'";
         $param = [':guardian' => $guardianId];
         return $this->getDataAll($sql, $param);
     }
@@ -384,7 +390,28 @@ class Dbi extends BaseDbi
                         ':type' => $type, ':hospital_id' => $hospitalId,':creator' => $creator ];
         return $this->insertData($sql, $param);
     }
-    
+    public function changeMode($guardianId, $oldMode, $newMode)
+    {
+        $this->pdo->beginTransaction();
+        
+        $sql = 'update guardian set mode = :new where guardian_id = :id';
+        $param = [':id' => $guardianId, ':new' => $newMode];
+        $ret = $this->updateData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = 'insert into history_mode (guardian_id, old_mode, new_mode) values (:id, :old, :new)';
+        $param = [':id' => $guardianId, ':old' => $oldMode, ':new' => $newMode];
+        $ret = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        $this->pdo->commit();
+        return true;
+    }
     public function delEcg($ecgId)
     {
         $sql = 'delete from ecg where ecg_id = :ecg_id';

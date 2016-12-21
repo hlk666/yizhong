@@ -8,7 +8,7 @@ class Invigilator
     private $info = array();
     private $gtFlag = true;
     private $allowCommands = array(
-            'action', 'card', 'all_time', 'check_info',
+            'action', 'card', 'all_time', 'check_info', 'new_mode',
             'mode1_polycardia', 'mode1_bradycardia', 'mode1_lead',
             'mode2_record_time', 'mode2_polycardia', 'mode2_bradycardia', 'mode2_exminrate',
             'mode2_combeatrhy', 'mode2_stopbeat', 'mode2_sthigh', 'mode2_stlow', 'mode2_twave',
