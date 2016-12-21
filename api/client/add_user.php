@@ -91,7 +91,7 @@ if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
 }
 
-api_exit_success();
+api_exit_success($guardianId);
 
 function setRegistNotice($hospitalId)
 {
