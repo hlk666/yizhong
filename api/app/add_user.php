@@ -11,6 +11,7 @@ $name = $_POST['name'];
 $age = $_POST['age'];
 $sex = $_POST['sex'];
 $tel = $_POST['tel'];
+$guardHospital = $_POST['guard_hospital'];
 
 $tentativeDiagnose = isset($_POST['tentative_diagnose']) ? $_POST['tentative_diagnose'] : '';
 $medicalHistory = isset($_POST['medical_history']) ? $_POST['medical_history'] : '';
@@ -23,7 +24,7 @@ if (empty($hospitalInfo)) {
     api_exit(['code' => '1', 'message' => MESSAGE_PARAM]);
 }
 $registHospital = $hospitalInfo['hospital_id'];
-$guardHospital = $hospitalInfo['hospital_id'];
+
 check_device($device, $registHospital);
 //$registHospital = $_POST['regist_hospital'];
 //$guardHospital = $_POST['guard_hospital'];
@@ -219,6 +220,9 @@ function validate_add_user($post)
     }
     if (false === Validate::checkRequired($post['tel'])) {
         api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'tel.']);
+    }
+    if (false === Validate::checkRequired($post['guard_hospital'])) {
+        api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'guard_hospital.']);
     }
     if (false === Validate::checkRequired($post['doctor_name'])) {
         api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'doctor_name.']);
