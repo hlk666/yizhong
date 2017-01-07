@@ -363,6 +363,20 @@ class Dbi extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
+    public function addExaminations($caseId, array $examId, array $examResult)
+    {
+        $length = count($examId);
+        if ($length != count($examResult)) {
+            return VALUE_DB_ERROR;
+        }
+        $sql = 'insert into examination (case_id, dictionary_id, result) values ';
+        
+        for ($i = 0; $i < $length; $i++) {
+            $sql .= '(' . $caseId . ',' . $examId[$i] . ',\'' . $examResult[$i] . '\'),';
+        }
+        $sql = substr($sql, 0, -1) . ';';
+        return $this->updateData($sql);
+    }
     public function addHospital($name, $tel, $address, $messageTel)
     {
         $sql = 'insert into hospital (hospital_name, tel, address, sms_tel)

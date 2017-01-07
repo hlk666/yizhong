@@ -39,9 +39,9 @@ define('GOTO_FLAG_EXIT', 1);
 define('GOTO_FLAG_BACK', 2);
 define('GOTO_FLAG_URL', 3);
 
-define('MESSAGE_GT_ERROR', '操作成功，但设备未开机。');
+define('MESSAGE_GT_ERROR', '操作成功，但设备未开机.');
 define('MESSAGE_DB_ERROR', '数据库操作失败，请重试或联系管理员。');
-define('MESSAGE_SUCCESS', '操作成功。');
+define('MESSAGE_SUCCESS', '操作成功.');
 define('MESSAGE_DB_NO_DATA', '当前没有数据。');
 define('MESSAGE_PARAM', '参数错误，请重试或联系管理员。');
 define('MESSAGE_OTHER_ERROR', '系统内部错误。');

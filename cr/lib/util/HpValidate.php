@@ -76,6 +76,15 @@ class HpValidate
         return false;
     }
     
+    public static function checkStructalData($value)
+    {
+        $pattern = '/^((.+:.+,)*.+:.+;)*(.+:.+,)*.+:.+$/';
+        if (preg_match($pattern, $value)) {
+            return true;
+        }
+        return false;
+    }
+    
     public static function checkBirthYear($value)
     {
         $pattern = '/^\d{4}$/';
