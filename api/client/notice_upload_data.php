@@ -22,25 +22,31 @@ $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
 if (VALUE_DB_ERROR === $tree || array() == $tree) {
     //do nothing.
 } else {
-    $vc = createVC($guardianId);
-    HpMessage::sendTelMessage("病人(id:$guardianId, 验证码:$vc)的数据文件已经上传完毕，请下载、分析。", $tree['analysis_hospital']);
+    setUploadNotice($tree['analysis_hospital'], $guardianId);
 }
 
 api_exit_success();
 
-function createVC($guardianId)
+function setUploadNotice($hospital, $guardianId)
 {
-    $allText = '1234567890';
-    $vc = '';
-    for ($i = 1; $i <= 4; $i++) {
-        $index = rand(0,9);
-        $vc .= substr($allText, $index, 1);
+    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'upload_data' . DIRECTORY_SEPARATOR . $hospital . '.php';
+    if (file_exists($file)) {
+        include $file;
+        $patients[] = $guardianId;
+        $patients = array_unique($patients);
+    } else {
+        $patients = array();
+        $patients[] = $guardianId;
     }
-    
-    $vcFile = PATH_ROOT . 'VerificationCode' . DIRECTORY_SEPARATOR . $guardianId . '.php';
     $template = "<?php\n";
-    $template .= '$rightVC = \'' . $vc . "';\n";
-    file_put_contents($vcFile, $template);
-    
-    return $vc;
+    $template .= '$patients = array();' . "\n";
+
+    foreach ($patients as $patient) {
+        $template .= "\$patients[] = '$patient';\n";
+    }
+    $template .= "\n";
+
+    $handle = fopen($file, 'w');
+    fwrite($handle, $template);
+    fclose($handle);
 }

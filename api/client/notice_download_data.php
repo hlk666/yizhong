@@ -3,6 +3,9 @@ require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'ShortMessageService.php';
 
+if (false === Validate::checkRequired($_GET['hospital_id'])) {
+    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'hospital_id.']);
+}
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
 }
@@ -10,6 +13,7 @@ if (false === Validate::checkRequired($_POST['type'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'type.']);
 }
 
+$hospitalId = $_GET['hospital_id'];
 $guardianId = $_POST['patient_id'];
 $ret = Dbi::getDbi()->getDownloadData($guardianId);
 if (VALUE_DB_ERROR === $ret) {
@@ -30,6 +34,7 @@ if ($type == '1') {
     $data['download_end_time'] = 'null';
 } else {
     api_exit(['code' => '2', 'message' => MESSAGE_PARAM]);
+    setUploadNotice($hospitalId, $guardianId);
 }
 
 $ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);
@@ -38,3 +43,27 @@ if (VALUE_DB_ERROR === $ret) {
 }
 
 api_exit_success();
+
+function setUploadNotice($hospital, $guardianId)
+{
+    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'upload_data' . DIRECTORY_SEPARATOR . $hospital . '.php';
+    if (file_exists($file)) {
+        include $file;
+        $patients[] = $guardianId;
+        $patients = array_unique($patients);
+    } else {
+        $patients = array();
+        $patients[] = $guardianId;
+    }
+    $template = "<?php\n";
+    $template .= '$patients = array();' . "\n";
+
+    foreach ($patients as $patient) {
+        $template .= "\$patients[] = '$patient';\n";
+    }
+    $template .= "\n";
+
+    $handle = fopen($file, 'w');
+    fwrite($handle, $template);
+    fclose($handle);
+}

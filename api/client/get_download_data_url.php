@@ -5,22 +5,12 @@ require_once PATH_LIB . 'Validate.php';
 if (false === Validate::checkRequired($_GET['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
 }
-if (empty($_GET['verification_code'])) {
-    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'verification_code.']);
+if (false === Validate::checkRequired($_GET['hospital_id'])) {
+    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'hospital_id.']);
 }
 
 $guardianId = $_GET['patient_id'];
-$vcCode = $_GET['verification_code'];
-$vcFile = PATH_ROOT . 'VerificationCode' . DIRECTORY_SEPARATOR . $guardianId . '.php';
-$vcMessage = "验证码错误。";
-if (!file_exists($vcFile)) {
-    api_exit(['code' => '23', 'message' => $vcMessage]);
-}
-include $vcFile;
-if ($vcCode != $rightVC) {
-    api_exit(['code' => '23', 'message' => $vcMessage]);
-}
-
+$hospitalId = $_GET['hospital_id'];
 
 $ret = Dbi::getDbi()->getDownloadData($guardianId);
 if (VALUE_DB_ERROR === $ret) {
@@ -46,11 +36,36 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
+clearUploadNotice($hospitalId, $guardianId);
+
 $result = array();
 $result['code'] = '0';
 $result['message'] = MESSAGE_SUCCESS;
 $result['url'] = $url;
 api_exit($result);
 
+function clearUploadNotice($hospitalId, $guardianId)
+{
+    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'upload_data' . DIRECTORY_SEPARATOR . $hospitalId . '.php';
+    if (file_exists($file)) {
+        include $file;
+        foreach ($patients as $key => $value) {
+            if ($value == $guardianId) {
+                unset($patients[$key]);
+            }
+        }
+    } else {
+        return;
+    }
+    $template = "<?php\n";
+    $template .= '$patients = array();' . "\n";
 
+    foreach ($patients as $patient) {
+        $template .= "\$patients[] = '$patient';\n";
+    }
+    $template .= "\n";
 
+    $handle = fopen($file, 'w');
+    fwrite($handle, $template);
+    fclose($handle);
+}

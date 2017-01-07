@@ -68,27 +68,31 @@ class DbiAnalytics extends BaseDbi
                 where pd.diagnosis_id in ' . $diagnosisList;
         return $this->getDataAll($sql);
     }
-    public function getPatientsForAnalytics($hospitalId, $reported = null, $startTime = null, $endTime = null)
+    
+    public function getHospitals($hospitalId)
     {
-        $sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported
-                 from guardian as g left join patient as p on g.patient_id = p.patient_id
-                 where regist_hospital_id = :hospital_id';
-        $param = array(':hospital_id' => $hospitalId);
-        if (isset($reported)) {
-            $sql .= ' and reported = :reported ';
-            $param[':reported'] = $reported;
-        }
-        if (isset($startTime)) {
-            $sql .= ' and end_time >= :start_time ';
-            $param[':start_time'] = $startTime;
-        }
-        if (isset($endTime)) {
-            $sql .= ' and end_time <= :end_time ';
-            $param[':end_time'] = $endTime;
-        }
-        $sql .= ' order by guardian_id desc';
+        $sql = 'select hospital_id from hospital_tree where analysis_hospital = :hospital';
+        $param = array(':hospital' => $hospitalId);
         return $this->getDataAll($sql, $param);
     }
+    
+    public function getPatients($hospitalIdList)
+    {
+        $sql = "select h.hospital_name, guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, p.tel, reported
+                from guardian as g left join patient as p on g.patient_id = p.patient_id
+                left join hospital as h on g.regist_hospital_id = h.hospital_id
+                where regist_hospital_id in ($hospitalIdList) order by guardian_id desc ";
+        return $this->getDataAll($sql);
+    }
+    public function getPatientsByIdForAnalytics($patientIdList)
+    {
+        $sql = "select h.hospital_name, guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, p.tel, reported
+                 from guardian as g left join patient as p on g.patient_id = p.patient_id
+                 left join hospital as h on g.regist_hospital_id = h.hospital_id
+                 where guardian_id in ($patientIdList)";
+        return $this->getDataAll($sql);
+    }
+    
     public function addGuardianData($guardianId, $url)
     {
         if ($this->existData('guardian_data', 'guardian_id = ' . $guardianId)) {

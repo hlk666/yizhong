@@ -11,9 +11,13 @@ $fileEcgNotice = PATH_CACHE_ECG_NOTICE . $hospitalId . '.php';
 $fileRegistNotice = PATH_CACHE_REGIST_NOTICE . $hospitalId . '.php';
 $fileConsultationApply = PATH_CACHE_CONSULTATION_APPLY_NOTICE . $hospitalId . '.php';
 $fileConsultationReply = PATH_CACHE_CONSULTATION_REPLY_NOTICE . $hospitalId . '.php';
+$fileUploadData = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'upload_data' . DIRECTORY_SEPARATOR . $hospitalId . '.php';
 
-if (!file_exists($fileEcgNotice) && !file_exists($fileRegistNotice) 
-        && !file_exists($fileConsultationApply) && !file_exists($fileConsultationReply)) {
+if (!file_exists($fileEcgNotice) 
+        && !file_exists($fileRegistNotice) 
+        && !file_exists($fileConsultationApply) 
+        && !file_exists($fileConsultationReply) 
+        && !file_exists($fileUploadData)) {
     api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 }
 
@@ -24,6 +28,7 @@ $result['patients'] = array();
 $result['new_patient'] = '0';
 $result['new_consultation_apply'] = '0';
 $result['new_consultation_reply'] = '0';
+$result['upload_data'] = array();
 
 if (file_exists($fileEcgNotice)) {
     include $fileEcgNotice;
@@ -44,6 +49,11 @@ if (file_exists($fileConsultationApply)) {
 if (file_exists($fileConsultationReply)) {
     $result['new_consultation_reply'] = '1';
     unlink($fileConsultationReply);
+}
+
+if (file_exists($fileUploadData)) {
+    include $fileUploadData;
+    $result['upload_data'] = $patients;
 }
 
 api_exit($result);

@@ -1,28 +1,13 @@
 <?php
 require PATH_LIB . 'DbiAnalytics.php';
 
-if (empty($_GET['hospital_id'])) {
-    analytics_exit(['code' => '1', 'message' => MESSAGE_REQUIRED .'hospital_id']);
+if (empty($_GET['patient_list'])) {
+    analytics_exit(['code' => '1', 'message' => MESSAGE_REQUIRED .'patient_list']);
 }
 
-$hospitalId = $_GET['hospital_id'];
-if (!is_numeric($hospitalId)) {
-    analytics_exit(['code' => '2', 'message' => MESSAGE_FORMAT . 'hospital_id']);
-    exit;
-}
+$patientIdList = $_GET['patient_list'];
 
-$ret = DbiAnalytics::getDbi()->getHospitals($hospitalId);
-if (VALUE_DB_ERROR === $ret) {
-    analytics_exit(['code' => '3', 'message' => 'error']);
-}
-
-$hospitalIdList = '';
-foreach ($ret as $row) {
-    $hospitalIdList = $row['hospital_id'] . ',';
-}
-$hospitalIdList .= $hospitalId;
-
-$patients = DbiAnalytics::getDbi()->getPatients($hospitalIdList);
+$patients = DbiAnalytics::getDbi()->getPatientsByIdForAnalytics($patientIdList);
 if (VALUE_DB_ERROR === $patients) {
     analytics_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
 }
@@ -31,6 +16,7 @@ foreach ($patients as $key => $row) {
     $patients[$key]['sex'] = $row['sex'] == 1 ? '男' : '女';
     unset($patients[$key]['birth_year']);
 }
+
 //$sortHbi = array();
 //$sortId = array();
 foreach ($patients as $key => $value) {
