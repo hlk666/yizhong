@@ -1,7 +1,6 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_ROOT . 'lib/DbiAnalytics.php';
-require_once PATH_ROOT . 'lib/tool/HpMessage.php';
 
 class AnalysisUpload
 {
@@ -60,30 +59,44 @@ class AnalysisUpload
         }
         //end
         
-        if ('hbi' == $type) {
-            $message = isset($param['message']) ? $param['message'] : '0';
-            if ('1' == $message) {
-                $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
-                if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
-                    HpMessage::sendTelMessage("病人(id=$guardianId)的心搏数据文件已经分析完毕，请出报告。", $tree['report_hospital']);
-                }
-            }
-        }
-        if ('report' == $type) {
-            $urlFile = 'report/' . $guardianId . '.pdf';
-            $ret = DbiAnalytics::getDbi()->uploadReport($guardianId, $urlFile);
-            if (VALUE_DB_ERROR === $ret) {
-                $this->setError(2, MESSAGE_DB_ERROR);
-                return json_encode($this->error);
-            }
-            
+        $message = isset($param['message']) ? $param['message'] : '0';
+        if ('1' == $message) {
             $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
-            if (VALUE_DB_ERROR !== $tree && array() !== $tree && $tree['hospital_id'] != $tree['report_hospital']) {
-                HpMessage::sendTelMessage("病人(id=$guardianId)的报告已经上传到服务器，请下载打印。", $tree['hospital_id']);
+            if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
+                if ('hbi' == $type) {
+                    $this->setNotice($type, $tree['report_hospital'], $guardianId);
+                }
+                if ('report' == $type && $tree['hospital_id'] != $tree['report_hospital']) {
+                    $this->setNotice($type, $tree['hospital_id'], $guardianId);
+                }
             }
         }
         
         return json_encode($this->retSuccess);
+    }
+    
+    private function setNotice($type, $hospital, $guardianId)
+    {
+        $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $hospital . '.php';
+        if (file_exists($file)) {
+            include $file;
+            $patients[] = $guardianId;
+            $patients = array_unique($patients);
+        } else {
+            $patients = array();
+            $patients[] = $guardianId;
+        }
+        $template = "<?php\n";
+        $template .= '$patients = array();' . "\n";
+        
+        foreach ($patients as $patient) {
+            $template .= "\$patients[] = '$patient';\n";
+        }
+        $template .= "\n";
+        
+        $handle = fopen($file, 'w');
+        fwrite($handle, $template);
+        fclose($handle);
     }
     
     private function validate($param, $data)
