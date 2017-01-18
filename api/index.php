@@ -67,9 +67,17 @@ function setRegistNotice($hospitalId, $mode = '2')
     }
 }
 
-function setNotice($hospital, $type, $guardianId)
+function setNotice($hospital, $type, $guardianId = '')
 {
     $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $hospital . '.php';
+    
+    if ($guardianId == '') {
+        if (!file_exists($file)) {
+            file_put_contents($file, '1');
+        }
+        return;
+    }
+    
     if (file_exists($file)) {
         include $file;
         $patients[] = $guardianId;
@@ -89,12 +97,4 @@ function setNotice($hospital, $type, $guardianId)
     $handle = fopen($file, 'w');
     fwrite($handle, $template);
     fclose($handle);
-}
-
-function setConsultationNotice($hospitalId, $directory)
-{
-    $file = $directory . $hospitalId . '.php';
-    if (!file_exists($file)) {
-        file_put_contents($file, '1');
-    }
 }

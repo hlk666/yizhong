@@ -28,7 +28,7 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
-setConsultationNotice($requestHospital, PATH_CACHE_CONSULTATION_REPLY_NOTICE);
+setNotice($requestHospital, 'consultation_reply');
 HpMessage::sendTelMessage('有新的会诊回复，请确认。', $requestHospital);
 GTSendMessage($requestHospital);
 
