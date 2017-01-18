@@ -67,7 +67,7 @@ class DbiAdmin extends BaseDbi
         $sql = 'insert into hospital_relation(hospital_id, parent_hospital_id)
             values (:hospital_id, :parent_hospital_id)';
         $param = [':hospital_id' => $hospitalId, ':parent_hospital_id' => $parentHospital];
-        return  $this->insertData($sql, $param);
+        return $this->insertData($sql, $param);
     }
     public function delDevice($deviceId)
     {
@@ -166,6 +166,22 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         $this->pdo->commit();
+        return true;
+    }
+    public function editTree($hospitalId, $analysisHospital, $reportHospital)
+    {
+        $param = [':hospital' => $hospitalId, ':analysis' => $analysisHospital, ':report' => $reportHospital];
+        if ($this->existData('hospital_tree', 'hospital_id = ' . $hospitalId)) {
+            $sql = 'update hospital_tree set analysis_hospital = :analysis, report_hospital = :report where hospital_id = :hospital';
+            $ret = $this->updateData($sql, $param);
+        } else {
+            $sql = 'insert into hospital_tree(hospital_id, analysis_hospital, report_hospital) values (:hospital, :analysis, :report)';
+            $ret = $this->insertData($sql, $param);
+        }
+        
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
         return true;
     }
     public function existedDevice($deviceId)
@@ -274,6 +290,13 @@ class DbiAdmin extends BaseDbi
     {
         $sql = 'select hospital_id, hospital_name from hospital where parent_flag = 1';
         return $this->getDataAll($sql);
+    }
+    public function getHospitalTree($hospitalId)
+    {
+        $sql = 'select hospital_id, analysis_hospital, report_hospital from hospital_tree
+                where hospital_id = :hospital_id limit 1';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataRow($sql, $param);
     }
     /*
     public function existedLoginName($loginName)

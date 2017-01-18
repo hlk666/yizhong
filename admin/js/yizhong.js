@@ -16,6 +16,12 @@ function editRelation(id)
     window.location = 'edit_relation.php?id=' + id;
 
 }
+function editTree(id)
+{
+
+    window.location = 'edit_tree.php?id=' + id;
+
+}
 function deleteHospital(id)
 {
     if (confirm('确定删除该医院相关信息么？')) {

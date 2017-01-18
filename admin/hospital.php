@@ -33,6 +33,8 @@ foreach ($ret as $value) {
                 . $value['hospital_id'] . ')">修改</button></td><td>'
             . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editRelation(' 
                 . $value['hospital_id'] . ')">配置</button></td><td>'
+            . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editTree(' 
+                . $value['hospital_id'] . ')">配置</button></td><td>'
             . '<button type="button" class="btn btn-xs btn-danger" onclick="javascript:deleteHospital(' 
                 . $value['hospital_id'] . ')">删除</button></td></tr>';
 }
@@ -47,6 +49,7 @@ echo <<<EOF
     <th>管理员用户</th>
     <th>基本信息</th>
     <th>上级医院</th>
+    <th>长程分析</th>
     <th>删除医院</th>
   </tr>
 </thead>
