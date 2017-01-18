@@ -64,39 +64,15 @@ class AnalysisUpload
             $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
             if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
                 if ('hbi' == $type) {
-                    $this->setNotice($type, $tree['report_hospital'], $guardianId);
+                    setNotice($tree['report_hospital'], $type, $guardianId);
                 }
                 if ('report' == $type && $tree['hospital_id'] != $tree['report_hospital']) {
-                    $this->setNotice($type, $tree['hospital_id'], $guardianId);
+                    setNotice($tree['hospital_id'], $type, $guardianId);
                 }
             }
         }
         
         return json_encode($this->retSuccess);
-    }
-    
-    private function setNotice($type, $hospital, $guardianId)
-    {
-        $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $hospital . '.php';
-        if (file_exists($file)) {
-            include $file;
-            $patients[] = $guardianId;
-            $patients = array_unique($patients);
-        } else {
-            $patients = array();
-            $patients[] = $guardianId;
-        }
-        $template = "<?php\n";
-        $template .= '$patients = array();' . "\n";
-        
-        foreach ($patients as $patient) {
-            $template .= "\$patients[] = '$patient';\n";
-        }
-        $template .= "\n";
-        
-        $handle = fopen($file, 'w');
-        fwrite($handle, $template);
-        fclose($handle);
     }
     
     private function validate($param, $data)

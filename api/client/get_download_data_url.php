@@ -20,7 +20,7 @@ if (VALUE_DB_ERROR === $ret) {
 if (empty($ret)) {
     api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 }
-
+/*
 if (!empty($ret['download_start_time'])) {
     if (empty($ret['download_end_time'])) {
         api_exit(['code' => '21', 'message' => '其他分析人员正在下载，请稍后再试。']);
@@ -28,7 +28,7 @@ if (!empty($ret['download_start_time'])) {
         api_exit(['code' => '22', 'message' => '其他分析人员已接单，请选择其他用户文件。']);
     }
 }
-
+*/
 $url = $ret['url'];
 $data = ['download_start_time' => date('Y-m-d H:i:s')];
 $ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);

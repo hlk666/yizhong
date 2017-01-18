@@ -53,3 +53,48 @@ function api_exit_success($otherMsg = '')
 {
     api_exit(['code' => '0', 'message' => MESSAGE_SUCCESS . $otherMsg]);
 }
+
+function setRegistNotice($hospitalId, $mode = '2')
+{
+    $file = PATH_CACHE_REGIST_NOTICE . $hospitalId . '.php';
+    if (!file_exists($file)) {
+        file_put_contents($file, $mode);
+    } else {
+        $oldArray = explode(',', file_get_contents($file));
+        $oldArray[] = $mode;
+        $newArray = array_unique($oldArray);
+        file_put_contents($file, implode(',', $newArray));
+    }
+}
+
+function setNotice($hospital, $type, $guardianId)
+{
+    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $hospital . '.php';
+    if (file_exists($file)) {
+        include $file;
+        $patients[] = $guardianId;
+        $patients = array_unique($patients);
+    } else {
+        $patients = array();
+        $patients[] = $guardianId;
+    }
+    $template = "<?php\n";
+    $template .= '$patients = array();' . "\n";
+
+    foreach ($patients as $patient) {
+        $template .= "\$patients[] = '$patient';\n";
+    }
+    $template .= "\n";
+
+    $handle = fopen($file, 'w');
+    fwrite($handle, $template);
+    fclose($handle);
+}
+
+function setConsultationNotice($hospitalId, $directory)
+{
+    $file = $directory . $hospitalId . '.php';
+    if (!file_exists($file)) {
+        file_put_contents($file, '1');
+    }
+}

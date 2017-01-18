@@ -22,31 +22,10 @@ $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
 if (VALUE_DB_ERROR === $tree || array() == $tree) {
     //do nothing.
 } else {
-    setUploadNotice($tree['analysis_hospital'], $guardianId);
+    setNotice($tree['analysis_hospital'], 'upload_data', $guardianId);
+    if ($tree['hospital_id'] != $tree['report_hospital']) {
+        setNotice($tree['report_hospital'], 'upload_data', $guardianId);
+    }
 }
 
 api_exit_success();
-
-function setUploadNotice($hospital, $guardianId)
-{
-    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'upload_data' . DIRECTORY_SEPARATOR . $hospital . '.php';
-    if (file_exists($file)) {
-        include $file;
-        $patients[] = $guardianId;
-        $patients = array_unique($patients);
-    } else {
-        $patients = array();
-        $patients[] = $guardianId;
-    }
-    $template = "<?php\n";
-    $template .= '$patients = array();' . "\n";
-
-    foreach ($patients as $patient) {
-        $template .= "\$patients[] = '$patient';\n";
-    }
-    $template .= "\n";
-
-    $handle = fopen($file, 'w');
-    fwrite($handle, $template);
-    fclose($handle);
-}

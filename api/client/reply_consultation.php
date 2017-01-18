@@ -28,19 +28,11 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
-setNotice($requestHospital, PATH_CACHE_CONSULTATION_REPLY_NOTICE);
+setConsultationNotice($requestHospital, PATH_CACHE_CONSULTATION_REPLY_NOTICE);
 HpMessage::sendTelMessage('有新的会诊回复，请确认。', $requestHospital);
 GTSendMessage($requestHospital);
 
 api_exit_success();
-
-function setNotice($hospitalId, $directory)
-{
-    $file = $directory . $hospitalId . '.php';
-    if (!file_exists($file)) {
-        file_put_contents($file, '1');
-    }
-}
 
 function GTSendMessage($hospitalId)
 {

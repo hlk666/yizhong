@@ -43,7 +43,7 @@ if (file_exists($fileEcgNotice)) {
 }
 
 if (file_exists($fileRegistNotice)) {
-    $result['new_patient'] = '1';
+    $result['new_patient'] = file_get_contents($fileRegistNotice);
     unlink($fileRegistNotice);
 }
 

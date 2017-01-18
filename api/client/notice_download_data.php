@@ -34,7 +34,7 @@ if ($type == '1') {
     $data['download_end_time'] = 'null';
 } else {
     api_exit(['code' => '2', 'message' => MESSAGE_PARAM]);
-    setUploadNotice($hospitalId, $guardianId);
+    setNotice($hospitalId, 'upload_data', $guardianId);
 }
 
 $ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);
@@ -43,27 +43,3 @@ if (VALUE_DB_ERROR === $ret) {
 }
 
 api_exit_success();
-
-function setUploadNotice($hospital, $guardianId)
-{
-    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'upload_data' . DIRECTORY_SEPARATOR . $hospital . '.php';
-    if (file_exists($file)) {
-        include $file;
-        $patients[] = $guardianId;
-        $patients = array_unique($patients);
-    } else {
-        $patients = array();
-        $patients[] = $guardianId;
-    }
-    $template = "<?php\n";
-    $template .= '$patients = array();' . "\n";
-
-    foreach ($patients as $patient) {
-        $template .= "\$patients[] = '$patient';\n";
-    }
-    $template .= "\n";
-
-    $handle = fopen($file, 'w');
-    fwrite($handle, $template);
-    fclose($handle);
-}
