@@ -8,8 +8,14 @@ $startTime = isset($_GET['start_time']) ? trim($_GET['start_time']) : null;
 $endTime = isset($_GET['end_time']) ? trim($_GET['end_time']) : null;
 
 if (!isValue($identityCard) && !(isValue($name) && isValue($tel))) {
-    $data = ['code' => 1, 'message' => '查询条件不足，请提供参数：name。'];
-    gotoExit($data);
+    if (!isValue($name)) {
+        $data = ['code' => 1, 'message' => '查询条件不足，请提供参数：name。'];
+        gotoExit($data);
+    }
+    if (!isValue($tel)) {
+        $data = ['code' => 1, 'message' => '查询条件不足，请提供参数：tel。'];
+        gotoExit($data);
+    }
 }
 if (null != $startTime && !isTime($startTime)) {
     $data = ['code' => 2, 'message' => '参数类型或格式错误：start_time。'];
