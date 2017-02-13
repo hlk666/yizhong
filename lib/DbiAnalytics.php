@@ -39,6 +39,12 @@ class DbiAnalytics extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
     }
+    public function getHospitalByPatient($guardianId)
+    {
+        $sql = 'select regist_hospital_id from guardian where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataString($sql, $param);
+    }
     public function getHospitalTree($guardianId)
     {
         $sql = 'select regist_hospital_id from guardian where guardian_id = :guardian_id limit 1';
@@ -93,16 +99,16 @@ class DbiAnalytics extends BaseDbi
         return $this->getDataAll($sql);
     }
     
-    public function addGuardianData($guardianId, $url)
+    public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
         if ($this->existData('guardian_data', 'guardian_id = ' . $guardianId)) {
-            $sql = 'update guardian_data set url = :url, upload_time = now() where guardian_id = :guardian_id';
-            $param = [':guardian_id' => $guardianId, ':url' => $url];
+            $sql = 'update guardian_data set url = :url, upload_time = now(), device_type = :device where guardian_id = :guardian_id';
+            $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
             return $this->updateData($sql, $param);
         }
         else {
-            $sql = 'insert into guardian_data (guardian_id, url) values (:guardian_id, :url)';
-            $param = [':guardian_id' => $guardianId, ':url' => $url ];
+            $sql = 'insert into guardian_data (guardian_id, url, device_type) values (:guardian_id, :url, :device)';
+            $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
             return $this->insertData($sql, $param);
         }
     }

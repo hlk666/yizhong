@@ -18,7 +18,7 @@ if (VALUE_DB_ERROR === $ret) {
 
 $hospitalIdList = '';
 foreach ($ret as $row) {
-    $hospitalIdList = $row['hospital_id'] . ',';
+    $hospitalIdList .= $row['hospital_id'] . ',';
 }
 $hospitalIdList .= $hospitalId;
 

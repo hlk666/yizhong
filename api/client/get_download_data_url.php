@@ -30,6 +30,7 @@ if (!empty($ret['download_start_time'])) {
 }
 */
 $url = $ret['url'];
+$deviceType = $ret['device_type'];
 $data = ['download_start_time' => date('Y-m-d H:i:s')];
 $ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);
 if (VALUE_DB_ERROR === $ret) {
@@ -42,6 +43,7 @@ $result = array();
 $result['code'] = '0';
 $result['message'] = MESSAGE_SUCCESS;
 $result['url'] = $url;
+$result['device_type'] = $deviceType;
 api_exit($result);
 
 function clearUploadNotice($hospitalId, $guardianId)
