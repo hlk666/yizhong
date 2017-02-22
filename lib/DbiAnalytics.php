@@ -82,17 +82,42 @@ class DbiAnalytics extends BaseDbi
         return $this->getDataAll($sql, $param);
     }
     
-    public function getPatients($hospitalIdList)
+    public function getPatients($hospitalIdList, $patientName = null, $startTime = null, $endTime = null, 
+            $status = null, $hbiDoctor = null, $reportDoctor = null)
     {
-        $sql = "select h.hospital_name, guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, p.tel, reported
+        $sql = "select h.hospital_id, h.hospital_name, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor, 
+                g.guardian_id as patient_id, start_time, end_time, reported, 
+                patient_name as name, birth_year, sex, p.tel
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id
-                where regist_hospital_id in ($hospitalIdList) order by guardian_id desc ";
+                left join guardian_data as d on g.guardian_id = d.guardian_id
+                left join account as a1 on d.hbi_doctor = a1.account_id
+                left join account as a2 on d.report_doctor = a2.account_id
+                where regist_hospital_id in ($hospitalIdList) ";
+        if (null !== $patientName) {
+            $sql .= " and patient_name = '$patientName' ";
+        }
+        if (null !== $startTime) {
+            $sql .= " and start_time >= '$startTime' ";
+        }
+        if (null !== $endTime) {
+            $sql .= " and start_time <= '$endTime' ";
+        }
+        if (null !== $status) {
+            $sql .= " and d.status in ($status) ";
+        }
+        if (null !== $hbiDoctor) {
+            $sql .= ' and d.hbi_doctor = ' . $hbiDoctor;
+        }
+        if (null !== $reportDoctor) {
+            $sql .= ' and d.report_doctor = ' . $reportDoctor;
+        }
+        $sql .= ' order by g.guardian_id desc ';
         return $this->getDataAll($sql);
     }
     public function getPatientsByIdForAnalytics($patientIdList)
     {
-        $sql = "select h.hospital_name, guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, p.tel, reported
+        $sql = "select h.hospital_name, device_id, guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, p.tel, reported
                  from guardian as g left join patient as p on g.patient_id = p.patient_id
                  left join hospital as h on g.regist_hospital_id = h.hospital_id
                  where guardian_id in ($patientIdList)";

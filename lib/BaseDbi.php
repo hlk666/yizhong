@@ -3,6 +3,7 @@ class BaseDbi
 {
     protected $pdo = null;
     protected $logFile = 'dbLog.txt';
+    protected $sqlLog = 'sql.log';
     protected $server = '101.200.174.235';
     protected $db = 'ecg';
     protected $user = 'production';
@@ -47,6 +48,7 @@ class BaseDbi
             $sql = "insert into $bkTable select *, now() from $table where $keyName = $keyValue";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            Logger::write($this->sqlLog, $stmt->queryString);
             return true;
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
@@ -59,6 +61,7 @@ class BaseDbi
             $sql = "select count(*) as count from $tableName where $where";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
+            Logger::write($this->sqlLog, $stmt->queryString);
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
@@ -75,6 +78,7 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            Logger::write($this->sqlLog, $stmt->queryString);
             return true;
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
@@ -95,6 +99,7 @@ class BaseDbi
             $sql .= ' limit 1';
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
+            Logger::write($this->sqlLog, $stmt->queryString);
             return $stmt->rowCount() > 0;
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
@@ -106,6 +111,7 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            Logger::write($this->sqlLog, $stmt->queryString);
             $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
@@ -122,6 +128,7 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            Logger::write($this->sqlLog, $stmt->queryString);
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
@@ -138,6 +145,7 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            Logger::write($this->sqlLog, $stmt->queryString);
             $ret = $stmt->fetchColumn();
             if (null === $ret) {
                 return '';
@@ -154,6 +162,7 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            Logger::write($this->sqlLog, $stmt->queryString);
             return $this->pdo->lastInsertId();
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());
@@ -165,6 +174,7 @@ class BaseDbi
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
+            Logger::write($this->sqlLog, $stmt->queryString);
             return true;
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage());

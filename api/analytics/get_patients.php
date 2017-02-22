@@ -22,7 +22,13 @@ foreach ($ret as $row) {
 }
 $hospitalIdList .= $hospitalId;
 
-$patients = DbiAnalytics::getDbi()->getPatients($hospitalIdList);
+$patientName = isset($_GET['patient_name']) ? $_GET['patient_name'] : null;
+$startTime = isset($_GET['start_time']) ? $_GET['start_time'] : null;
+$endTime = isset($_GET['end_time']) ? $_GET['end_time'] : null;
+$status = isset($_GET['status']) ? $_GET['status'] : null;
+$hbiDoctor = isset($_GET['hbi_doctor']) ? $_GET['hbi_doctor'] : null;
+$reportDoctor = isset($_GET['report_doctor']) ? $_GET['report_doctor'] : null; 
+$patients = DbiAnalytics::getDbi()->getPatients($hospitalIdList, $patientName, $startTime, $endTime, $status, $hbiDoctor, $reportDoctor);
 if (VALUE_DB_ERROR === $patients) {
     analytics_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
 }
@@ -31,20 +37,24 @@ foreach ($patients as $key => $row) {
     $patients[$key]['sex'] = $row['sex'] == 1 ? '男' : '女';
     unset($patients[$key]['birth_year']);
 }
-//$sortHbi = array();
-//$sortId = array();
+
 foreach ($patients as $key => $value) {
+    if ($value['status'] == 3) {
+        $patients[$key]['status'] = '已上传';
+    } elseif ($value['status'] == 4) {
+        $patients[$key]['status'] = '已分析';
+    } elseif ($value['status'] == 5) {
+        $patients[$key]['status'] = '已出报告';
+    } else {
+        $patients[$key]['status'] = '未上传';
+    }
+    
     if (file_exists(PATH_HBI . $value['patient_id'] . '.hbi')) {
         $patients[$key]['hbi'] = '是';
-        //$sortHbi = 1;
     } else {
         $patients[$key]['hbi'] = '否';
-        //$sortHbi = 0;
     }
-    //$sortId = $value['patient_id'];
 }
-
-//array_multisort($sortHbi, SORT_NUMERIC, SORT_DESC, $sortId, SORT_NUMERIC, SORT_DESC, $patients);
 
 $ret = array();
 $ret['code'] = 0;
