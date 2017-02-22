@@ -52,4 +52,21 @@ class DbiYlt extends BaseDbi
         
         return $this->getDataAll($sql);
     }
+    public function getEcgsHistory($guardianStr, $startTime, $endTime)
+    {
+        $sql = "select ecg_id, alert_flag, create_time as alert_time, data_path from ecg_history where guardian_id in $guardianStr";
+        if (null != $startTime) {
+            $sql .= " and create_time >= '$startTime' ";
+        }
+        if (null != $endTime) {
+            $sql .= " and create_time <= '$endTime' ";
+        }
+    
+        return $this->getDataAll($sql);
+    }
+    public function getDiffEcgIdFrom()
+    {
+        $sql = 'select ecg_id from difference';
+        return $this->getDataString($sql);
+    }
 }

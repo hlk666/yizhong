@@ -36,18 +36,37 @@ if (empty($guardians)) {
     $data = ['code' => 4, 'message' => '没有符合条件的结果。'];
     gotoExit($data);
 }
+
+$isNeedQueryHistory = false;
+$diffEcgId = DbiYlt::getDbi()->getDiffEcgIdFrom();
+if (VALUE_DB_ERROR === $diffEcgId) {
+    $data = ['code' => 3, 'message' => '数据库错误，请联系管理员。'];
+    gotoExit($data);
+}
+
 $patientName = $guardians[0]['patient_name'];
 $guardianStr = '(';
 foreach ($guardians as $guardian) {
     $guardianStr .= $guardian['guardian_id'] . ',';
+    if ($guardian['guardian_id'] <= $diffEcgId) {
+        $isNeedQueryHistory = true;
+    }
 }
 $guardianStr = substr($guardianStr, 0, -1) . ')';
 
-$ecgs = DbiYlt::getDbi()->getEcgs($guardianStr, $startTime, $endTime);
-if (VALUE_DB_ERROR === $ecgs) {
+$ecgs1 = DbiYlt::getDbi()->getEcgs($guardianStr, $startTime, $endTime);
+if (VALUE_DB_ERROR === $ecgs1) {
     $data = ['code' => 3, 'message' => '数据库错误，请联系管理员。'];
     gotoExit($data);
 }
+if ($isNeedQueryHistory) {
+    $ecgs2 = DbiYlt::getDbi()->getEcgsHistory($guardianStr, $startTime, $endTime);
+    if (VALUE_DB_ERROR === $ecgs2) {
+        $data = ['code' => 3, 'message' => '数据库错误，请联系管理员。'];
+        gotoExit($data);
+    }
+}
+$ecgs = array_merge($ecgs1, $ecgs2);
 if (empty($ecgs)) {
     $data = ['code' => 4, 'message' => '没有符合条件的结果。'];
     gotoExit($data);

@@ -21,11 +21,23 @@ class Dbi extends BaseDbi
     
     public function countEcgs($guardianId, $readStatus)
     {
+        $sql = 'select ecg_id from difference';
+        $diffEcgId = $this->getDataString($sql);
+        if (VALUE_DB_ERROR === $diffEcgId) {
+            return VALUE_DB_ERROR;
+        }
+        
+        if ($guardianId > $diffEcgId) {
+            $table = 'ecg';
+        } else {
+            $table = 'ecg_history';
+        }
+        
         $where = ' guardian_id = ' . $guardianId;
         if ($readStatus != null) {
             $where .= " and read_status = $readStatus ";
         }
-        return $this->countData('ecg', $where);
+        return $this->countData($table, $where);
     }
     //************************* existed methods(public) *************************
     //********************************** start **********************************
@@ -169,10 +181,23 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
+    
     public function getEcgs($guardianId, $offset, $rows, $readStatus)
     {
-        $sql = 'select ecg_id, alert_flag, create_time, read_status, data_path, mark 
-                from ecg where guardian_id = :guardian ';
+        $sql = 'select ecg_id from difference';
+        $diffEcgId = $this->getDataString($sql);
+        if (VALUE_DB_ERROR === $diffEcgId) {
+            return VALUE_DB_ERROR;
+        }
+        
+        if ($guardianId > $diffEcgId) {
+            $table = 'ecg';
+        } else {
+            $table = 'ecg_history';
+        }
+        
+        $sql = "select ecg_id, alert_flag, create_time, read_status, data_path, mark 
+                from $table where guardian_id = :guardian ";
         if ($readStatus != null) {
             $sql .= " and read_status = $readStatus ";
         }
