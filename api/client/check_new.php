@@ -12,6 +12,8 @@ $fileRegistNotice = PATH_CACHE_REGIST_NOTICE . $hospitalId . '.php';
 $fileConsultationApply = PATH_CACHE_CONSULTATION_APPLY_NOTICE . $hospitalId . '.php';
 $fileConsultationReply = PATH_CACHE_CONSULTATION_REPLY_NOTICE . $hospitalId . '.php';
 $fileUploadData = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'upload_data' . DIRECTORY_SEPARATOR . $hospitalId . '.php';
+$fileUploadDataFail = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'upload_data_fail' . DIRECTORY_SEPARATOR . $hospitalId . '.php';
+$fileMoveData = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'move_data' . DIRECTORY_SEPARATOR . $hospitalId . '.php';
 $fileHbi = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'hbi' . DIRECTORY_SEPARATOR . $hospitalId . '.php';
 $fileReport = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'report' . DIRECTORY_SEPARATOR . $hospitalId . '.php';
 
@@ -20,6 +22,8 @@ if (!file_exists($fileEcgNotice)
         && !file_exists($fileConsultationApply) 
         && !file_exists($fileConsultationReply) 
         && !file_exists($fileUploadData)
+        && !file_exists($fileUploadDataFail)
+        && !file_exists($fileMoveData)
         && !file_exists($fileHbi)
         && !file_exists($fileReport)) {
     api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
@@ -33,6 +37,8 @@ $result['new_patient'] = '0';
 $result['new_consultation_apply'] = '0';
 $result['new_consultation_reply'] = '0';
 $result['upload_data'] = array();
+$result['upload_data_fail'] = array();
+$result['move_data'] = array();
 $result['hbi'] = array();
 $result['report'] = array();
 
@@ -60,6 +66,16 @@ if (file_exists($fileConsultationReply)) {
 if (file_exists($fileUploadData)) {
     include $fileUploadData;
     $result['upload_data'] = $patients;
+}
+
+if (file_exists($fileUploadDataFail)) {
+    include $fileUploadDataFail;
+    $result['upload_data_fail'] = $patients;
+}
+
+if (file_exists($fileMoveData)) {
+    include $fileMoveData;
+    $result['move_data'] = $patients;
 }
 
 if (file_exists($fileHbi)) {
