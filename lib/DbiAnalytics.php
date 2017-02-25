@@ -45,6 +45,12 @@ class DbiAnalytics extends BaseDbi
         $param = [':guardian_id' => $guardianId];
         return $this->getDataString($sql, $param);
     }
+    public function getHospitalFrom($guardianId, $hospitalTo)
+    {
+        $sql = 'select hospital_from from history_move_data where guardian_id = :guardian and hospital_to = :to limit 1';
+        $param = [':guardian' => $guardianId, ':to' => $hospitalTo];
+        return $this->getDataString($sql, $param);
+    }
     public function getHospitalTree($guardianId)
     {
         $sql = 'select regist_hospital_id from guardian where guardian_id = :guardian_id limit 1';
@@ -136,6 +142,29 @@ class DbiAnalytics extends BaseDbi
             $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
             return $this->insertData($sql, $param);
         }
+    }
+    public function moveData($guardianId, $hospitalFrom, $hospitalTo, $operator)
+    {
+        $this->pdo->beginTransaction();
+        $sql = 'insert into history_move_data(guardian_id, hospital_from, hospital_to, move_operator)
+                values (:guardian, :from, :to, :operator)';
+        $param = [':guardian' => $guardianId, ':from' => $hospitalFrom, ':to' => $hospitalTo, ':operator' => $operator];
+        $hospitalId = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR === $hospitalId) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = 'update guardian set regist_hospital_id = :to where guardian_id = :guardian';
+        $param = [':guardian' => $guardianId, ':to' => $hospitalTo];
+        $ret = $this->updateData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        $this->pdo->commit();
+        return true;
     }
     public function uploadReport($guardianId, $file)
     {
