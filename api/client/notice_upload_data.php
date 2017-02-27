@@ -6,7 +6,8 @@ require_once PATH_ROOT . 'lib/tool/HpMessage.php';
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
 }
-if (false === Validate::checkRequired($_POST['upload_url'])) {
+
+if (false === Validate::checkRequired($_POST['upload_url']) && false === Validate::checkRequired($_POST['fail_flag'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'upload_url.']);
 }
 /*
@@ -15,9 +16,19 @@ if (false === Validate::checkRequired($_POST['device_type'])) {
 }*/
 
 $guardianId = $_POST['patient_id'];
-$url = $_POST['upload_url'];
+$url = isset($_POST['upload_url']) ? $_POST['upload_url'] : '';
 $deviceType = isset($_POST['device_type']) ? $_POST['device_type'] : 0;
+$failFlag = isset($_POST['fail_flag']) ? $_POST['fail_flag'] : 0;
 
+if (1 == $failFlag) {
+    $hospitalId = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
+    if (VALUE_DB_ERROR === $hospitalId || empty($hospitalId)) {
+        //do nothing.
+    } else {
+        setNotice($hospitalId, 'upload_data_fail', $guardianId);
+    }
+    api_exit_success();
+}
 $ret = DbiAnalytics::getDbi()->addGuardianData($guardianId, $url, $deviceType);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);

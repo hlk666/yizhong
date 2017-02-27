@@ -133,7 +133,8 @@ class DbiAnalytics extends BaseDbi
     public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
         if ($this->existData('guardian_data', 'guardian_id = ' . $guardianId)) {
-            $sql = 'update guardian_data set url = :url, upload_time = now(), device_type = :device where guardian_id = :guardian_id';
+            $sql = 'update guardian_data set url = :url, upload_time = now(), device_type = :device, status = 2
+                    where guardian_id = :guardian_id';
             $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
             return $this->updateData($sql, $param);
         }
@@ -170,6 +171,21 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = 'update guardian set reported = 1, report_file = :file where guardian_id = :guardian';
         $param = [':file' => $file, ':guardian' => $guardianId];
+        return $this->updateData($sql, $param);
+    }
+    
+    public function setDataStatus($guardianId, $statusName, $hbiDoctor, $reportDoctor)
+    {
+        if ($statusName == 'hbi') {
+            $set = 'set status = 4, hbi_doctor = ' . $hbiDoctor;
+        } elseif ($statusName == 'report') {
+            $set = 'set status = 5, report_doctor = ' . $reportDoctor;
+        } else {
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = "update guardian_data $set where guardian_id = :guardian";
+        $param = [':guardian' => $guardianId];
         return $this->updateData($sql, $param);
     }
 }

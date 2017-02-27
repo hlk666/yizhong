@@ -600,9 +600,21 @@ class Dbi extends BaseDbi
     }
     public function flowGuardianStartGuard($guardianId)
     {
+        $this->pdo->beginTransaction();
+        $sql = 'insert into guardian_data(guardian_id, url, status) values (:guardian, "", 1)';
+        $param = [':guardian' => $guardianId];
+        $guardianId = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR === $guardianId) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
         $sql = 'update guardian set status = 1, start_time = now() where guardian_id = :guardian_id';
         $param = [':guardian_id' => $guardianId];
-        return $this->updateData($sql, $param);
+        $this->updateData($sql, $param);
+        
+        $this->pdo->commit();
+        return true;
     }
     public function markEcg($ecgId, $mark)
     {

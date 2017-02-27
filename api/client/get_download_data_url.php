@@ -11,6 +11,7 @@ if (false === Validate::checkRequired($_GET['hospital_id'])) {
 
 $guardianId = $_GET['patient_id'];
 $hospitalId = $_GET['hospital_id'];
+$downloadDoctor = isset($_GET['download_doctor']) ? $_GET['download_doctor'] : 0; 
 
 $ret = Dbi::getDbi()->getDownloadData($guardianId);
 if (VALUE_DB_ERROR === $ret) {
@@ -31,7 +32,10 @@ if (!empty($ret['download_start_time'])) {
 */
 $url = $ret['url'];
 $deviceType = $ret['device_type'];
-$data = ['download_start_time' => date('Y-m-d H:i:s')];
+$data = array();
+$data['download_start_time'] = date('Y-m-d H:i:s');
+$data['status'] = 3;
+$data['download_doctor'] = $downloadDoctor;
 $ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);

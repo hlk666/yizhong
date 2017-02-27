@@ -32,9 +32,10 @@ if ($type == '1') {
 } elseif ($type == '2'){
     $data['download_start_time'] = 'null';
     $data['download_end_time'] = 'null';
+    $data['status'] = 2;
+    $data['download_doctor'] = 0;
 } else {
     api_exit(['code' => '2', 'message' => MESSAGE_PARAM]);
-    setNotice($hospitalId, 'upload_data', $guardianId);
 }
 
 $ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);

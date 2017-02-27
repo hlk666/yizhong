@@ -25,6 +25,7 @@ $hospitalIdList .= $hospitalId;
 $patientName = isset($_GET['patient_name']) ? $_GET['patient_name'] : null;
 $startTime = isset($_GET['start_time']) ? $_GET['start_time'] : null;
 $endTime = isset($_GET['end_time']) ? $_GET['end_time'] : null;
+//$status = isset($_GET['status']) ? $_GET['status'] : '0,1,2,3';
 $status = isset($_GET['status']) ? $_GET['status'] : null;
 $hbiDoctor = isset($_GET['hbi_doctor']) ? $_GET['hbi_doctor'] : null;
 $reportDoctor = isset($_GET['report_doctor']) ? $_GET['report_doctor'] : null; 
@@ -39,8 +40,10 @@ foreach ($patients as $key => $row) {
 }
 
 foreach ($patients as $key => $value) {
-    if ($value['status'] == 3) {
+    if ($value['status'] == 2) {
         $patients[$key]['status'] = '已上传';
+    } elseif ($value['status'] == 3) {
+        $patients[$key]['status'] = '已下载';
     } elseif ($value['status'] == 4) {
         $patients[$key]['status'] = '已分析';
     } elseif ($value['status'] == 5) {
