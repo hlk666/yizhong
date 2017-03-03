@@ -1,6 +1,7 @@
 <?php
 header("Content-Type:text/html;charset=utf-8");
 require '../config/config.php';
+require_once PATH_LIB . 'Logger.php';
 
 if (!isset($_GET['entry']) || empty($_GET['entry'])) {
     echo 'Permission denied!';
@@ -31,6 +32,14 @@ foreach ($_GET as $key => $value) {
 foreach ($_POST as $key => $value) {
     $_POST[$key] = trim($value);
 }
+
+$params = $_GET;
+foreach ($_POST as $postKey => $postValue) {
+    if (!empty($postKey) && $postKey != 'data') {
+        $params[$postKey] = $postValue;
+    }
+}
+Logger::writeByHour('all_params.log', var_export($params, true));
 
 include $file;
 
