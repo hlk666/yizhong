@@ -155,9 +155,21 @@ class Dbi extends BaseDbi
     }
     public function getDiagnosisByGuardian($guardianId)
     {
-        $sql = 'select d.ecg_id, d.content, d.content_parent, e.create_time as content_time, e.data_path
-                from diagnosis as d left join ecg as e on d.ecg_id = e.ecg_id
-                where d.guardian_id = :guardian_id';
+        $sql = 'select ecg_id from difference';
+        $diffEcgId = $this->getDataString($sql);
+        if (VALUE_DB_ERROR === $diffEcgId) {
+            return VALUE_DB_ERROR;
+        }
+        
+        if ($guardianId > $diffEcgId) {
+            $table = 'ecg';
+        } else {
+            $table = 'ecg_history';
+        }
+        
+        $sql = "select d.ecg_id, d.content, d.content_parent, d.create_time as content_time, e.data_path
+                from diagnosis as d left join $table as e on d.ecg_id = e.ecg_id
+                where d.guardian_id = :guardian_id";
         $param = [':guardian_id' => $guardianId];
         return $this->getDataAll($sql, $param);
     }
