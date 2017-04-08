@@ -34,7 +34,12 @@ $url = $ret['url'];
 $deviceType = $ret['device_type'];
 $data = array();
 $data['download_start_time'] = date('Y-m-d H:i:s');
-$data['status'] = 3;
+
+$status = Dbi::getDbi()->getDataStatus($guardianId);
+if (VALUE_DB_ERROR !== $status && $status < 4) {
+    $data['status'] = 3;
+}
+
 $data['download_doctor'] = $downloadDoctor;
 $ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);
 if (VALUE_DB_ERROR === $ret) {

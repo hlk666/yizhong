@@ -35,7 +35,7 @@ foreach ($_POST as $key => $value) {
 
 $params = $_GET;
 foreach ($_POST as $postKey => $postValue) {
-    if (!empty($postKey) && $postKey != 'data') {
+    if (!empty($postKey) && $postKey != 'data' && $_GET['entry'] != 'app_upload_data') {
         $params[$postKey] = $postValue;
     }
 }

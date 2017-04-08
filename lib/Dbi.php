@@ -141,6 +141,12 @@ class Dbi extends BaseDbi
         $param = [':consultation_id' => $consultationId];
         return $this->getDataRow($sql, $param);
     }
+    public function getDataStatus($guardianId)
+    {
+        $sql = 'select status from guardian_data where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataString($sql, $param);
+    }
     public function getDeviceId($guardianId)
     {
         $sql = 'select device_id from guardian where guardian_id = :guardian_id limit 1';

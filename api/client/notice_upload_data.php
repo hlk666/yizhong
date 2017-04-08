@@ -16,6 +16,10 @@ if (false === Validate::checkRequired($_POST['device_type'])) {
 }*/
 
 $guardianId = $_POST['patient_id'];
+if (strpos($guardianId, '.') !== false) {
+    $guardianId = substr($guardianId, 0, -1);
+}
+
 $url = isset($_POST['upload_url']) ? $_POST['upload_url'] : '';
 $deviceType = isset($_POST['device_type']) ? $_POST['device_type'] : 0;
 $failFlag = isset($_POST['fail_flag']) ? $_POST['fail_flag'] : 0;

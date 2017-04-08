@@ -88,17 +88,18 @@ class DbiAnalytics extends BaseDbi
         return $this->getDataAll($sql, $param);
     }
     
-    public function getPatients($hospitalIdList, $patientName = null, $startTime = null, $endTime = null, 
+    public function getPatients($hospitalIdList, $offset, $rows, $patientName = null, $startTime = null, $endTime = null, 
             $status = null, $hbiDoctor = null, $reportDoctor = null)
     {
-        $sql = "select h.hospital_id, h.hospital_name, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor, 
-                g.guardian_id as patient_id, start_time, end_time, reported, 
+        $sql = "select h.hospital_id, h.hospital_name, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor, 
+                g.guardian_id as patient_id, start_time, end_time, reported, g.device_id, sickroom, hospitalization_id,
                 patient_name as name, birth_year, sex, p.tel
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id
                 left join guardian_data as d on g.guardian_id = d.guardian_id
                 left join account as a1 on d.hbi_doctor = a1.account_id
                 left join account as a2 on d.report_doctor = a2.account_id
+                left join account as a3 on d.download_doctor = a3.account_id
                 where regist_hospital_id in ($hospitalIdList) ";
         if (null !== $patientName) {
             $sql .= " and patient_name = '$patientName' ";
@@ -113,12 +114,12 @@ class DbiAnalytics extends BaseDbi
             $sql .= " and d.status in ($status) ";
         }
         if (null !== $hbiDoctor) {
-            $sql .= ' and d.hbi_doctor = ' . $hbiDoctor;
+            $sql .= " and a1.real_name = '$hbiDoctor'";
         }
         if (null !== $reportDoctor) {
-            $sql .= ' and d.report_doctor = ' . $reportDoctor;
+            $sql .= " and a2.real_name = '$reportDoctor'";
         }
-        $sql .= ' order by g.guardian_id desc ';
+        $sql .= " order by g.guardian_id desc limit $offset, $rows";
         return $this->getDataAll($sql);
     }
     public function getPatientsByIdForAnalytics($patientIdList)
@@ -133,8 +134,13 @@ class DbiAnalytics extends BaseDbi
     public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
         if ($this->existData('guardian_data', 'guardian_id = ' . $guardianId)) {
-            $sql = 'update guardian_data set url = :url, upload_time = now(), device_type = :device, status = 2
-                    where guardian_id = :guardian_id';
+            $status = $this->getDataStatus($guardianId);
+            if ($status == 4 || $status == 5) {
+                $set = 'set url = :url, upload_time = now(), device_type = :device';
+            } else {
+                $set = 'set url = :url, upload_time = now(), device_type = :device, status = 2';
+            }
+            $sql = "update guardian_data $set where guardian_id = :guardian_id";
             $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
             return $this->updateData($sql, $param);
         }
@@ -174,10 +180,21 @@ class DbiAnalytics extends BaseDbi
         return $this->updateData($sql, $param);
     }
     
+    private function getDataStatus($guardianId)
+    {
+        $sql = 'select status from guardian_data where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        return $this->getDataString($sql, $param);
+    }
     public function setDataStatus($guardianId, $statusName, $hbiDoctor, $reportDoctor)
     {
+        $status = $this->getDataStatus($guardianId);
         if ($statusName == 'hbi') {
-            $set = 'set status = 4, hbi_doctor = ' . $hbiDoctor;
+            if ($status == 5) {
+                $set = 'set hbi_doctor = ' . $hbiDoctor;
+            } else {
+                $set = 'set status = 4, hbi_doctor = ' . $hbiDoctor;
+            }
         } elseif ($statusName == 'report') {
             $set = 'set status = 5, report_doctor = ' . $reportDoctor;
         } else {

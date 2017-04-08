@@ -3,9 +3,6 @@ require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'ShortMessageService.php';
 
-if (false === Validate::checkRequired($_GET['hospital_id'])) {
-    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'hospital_id.']);
-}
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
 }
@@ -13,7 +10,6 @@ if (false === Validate::checkRequired($_POST['type'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'type.']);
 }
 
-$hospitalId = $_GET['hospital_id'];
 $guardianId = $_POST['patient_id'];
 $ret = Dbi::getDbi()->getDownloadData($guardianId);
 if (VALUE_DB_ERROR === $ret) {
