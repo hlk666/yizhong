@@ -29,7 +29,12 @@ $endTime = isset($_GET['end_time']) ? $_GET['end_time'] : null;
 $status = isset($_GET['status']) ? $_GET['status'] : null;
 $hbiDoctor = isset($_GET['hbi_doctor']) ? $_GET['hbi_doctor'] : null;
 $reportDoctor = isset($_GET['report_doctor']) ? $_GET['report_doctor'] : null; 
-$patients = DbiAnalytics::getDbi()->getPatients($hospitalIdList, $patientName, $startTime, $endTime, $status, $hbiDoctor, $reportDoctor);
+$page = isset($_GET['page']) ? $_GET['page'] : 0;
+$rows = isset($_GET['rows']) ? $_GET['rows'] : VALUE_DEFAULT_ROWS;
+$offset = $page * $rows;
+
+$patients = DbiAnalytics::getDbi()->getPatients($hospitalIdList, $offset, $rows, 
+        $patientName, $startTime, $endTime, $status, $hbiDoctor, $reportDoctor);
 if (VALUE_DB_ERROR === $patients) {
     analytics_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
 }
