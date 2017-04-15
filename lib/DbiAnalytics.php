@@ -19,6 +19,11 @@ class DbiAnalytics extends BaseDbi
         return self::$instance;
     }
     
+    public function existedHospital($hospital)
+    {
+        return $this->existData('hospital', ['hospital_id' => $hospital]);
+    }
+    
     public function addPatientDiagnosis($patientId, $diagnosisId)
     {
         $sql = 'select 1 from patient_diagnosis where patient_id = :patient and diagnosis_id = :diagnosis limit 1';

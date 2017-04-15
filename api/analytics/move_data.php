@@ -19,9 +19,14 @@ if (false === Validate::checkRequired($_POST['operator'])) {
 }
 
 $guardianId = $_POST['patient_id'];
+$operator = $_POST['operator'];
 //$hospitalFrom = $_POST['hospital_from'];
 $hospitalTo = $_POST['hospital_to'];
-$operator = $_POST['operator'];
+
+if (false == DbiAnalytics::getDbi()->existedHospital($hospitalTo)) {
+    api_exit(['code' => '1', 'message' => MESSAGE_PARAM . 'hospital_to.']);
+}
+
 
 //$hospitalFromDB = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
 $hospitalFrom = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
