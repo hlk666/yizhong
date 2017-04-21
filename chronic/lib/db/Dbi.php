@@ -50,6 +50,15 @@ class Dbi extends BaseDbi
         $this->pdo->commit();
         return $caseId;
     }
+    public function addChronicPatient($chronicId, $patientId)
+    {
+        if ($this->existData('chronic_patient', "chronic_id = $chronicId and patient_id = $patientId")) {
+            return;
+        }
+        $sql = 'insert into chronic_patient (chronic_id, patient_id) values (:chronic_id, :patient_id)';
+        $param = [':chronic_id' => $chronicId, ':patient_id' => $patientId];
+        return $this->insertData($sql, $param);
+    }
     public function addHospital($name, $level, $tel, $area, $province, $city, $address)
     {
         $sql = 'insert into hospital (name, level, tel, area, province, city, address)
@@ -85,6 +94,12 @@ class Dbi extends BaseDbi
                         ':native_place' => $nativePlace, ':hospitalization' => $hospitalization, 
                         ':family_name' => $familyName, ':family_tel' => $familyTel, ':deparment1' => $departmentId];
         return $this->insertData($sql, $param);
+    }
+    public function isPatientInDepartment($patientId, $department)
+    {
+        $where = " id = $patientId and (department1 = $department 
+            or department2 = $department or department3 = $department or department_once = $department)";
+        return $this->existData('patient', $where);
     }
     public function existedChronic($chronicId)
     {
