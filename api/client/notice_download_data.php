@@ -1,5 +1,6 @@
 <?php
 require_once PATH_LIB . 'Dbi.php';
+require_once PATH_LIB . 'DbiAnalytics.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'ShortMessageService.php';
 
@@ -15,10 +16,10 @@ $ret = Dbi::getDbi()->getDownloadData($guardianId);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
-
+/*
 if (empty($ret) || empty($ret['download_start_time'])) {
     api_exit(['code' => '20', 'message' => '该用户文件尚未开始下载。']);
-}
+}*/
 
 $type = $_POST['type'];
 $data = array();
@@ -30,6 +31,16 @@ if ($type == '1') {
     $data['download_end_time'] = 'null';
     $data['status'] = 2;
     $data['download_doctor'] = 0;
+    
+    $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
+    if (VALUE_DB_ERROR === $tree || array() == $tree) {
+        //do nothing.
+    } else {
+        setNotice($tree['analysis_hospital'], 'upload_data', $guardianId);
+        if ($tree['hospital_id'] != $tree['report_hospital']) {
+            setNotice($tree['report_hospital'], 'upload_data', $guardianId);
+        }
+    }
 } else {
     api_exit(['code' => '2', 'message' => MESSAGE_PARAM]);
 }

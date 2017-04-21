@@ -3,6 +3,11 @@ require_once PATH_LIB . 'DbiAnalytics.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_ROOT . 'lib/tool/HpMessage.php';
 
+//2017/04/20
+if (isset($_POST['device_type']) && $_POST['device_type'] == '1') {
+    api_exit_success();
+}
+
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
 }

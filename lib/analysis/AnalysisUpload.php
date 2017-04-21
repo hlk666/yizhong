@@ -21,6 +21,17 @@ class AnalysisUpload
         }
         
         $guardianId = $param['patient_id'];
+        
+        $oldReportDoctor = DbiAnalytics::getDbi()->getReportDoctor($guardianId);
+        if (VALUE_DB_ERROR === $oldReportDoctor) {
+            api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+        }
+        if ($oldReportDoctor != '0' 
+                && $oldReportDoctor != '' 
+                && $oldReportDoctor != $param['report_doctor']) {
+                    api_exit(['code' => '2', 'message' => '只有本人才能修改已经出过的报告。']);
+        }
+        
         $dir = PATH_ROOT . $type . DIRECTORY_SEPARATOR . $param['hospital_id'] . DIRECTORY_SEPARATOR;
         if (!file_exists($dir)) {
             mkdir($dir);

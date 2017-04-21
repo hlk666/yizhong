@@ -191,6 +191,13 @@ class DbiAnalytics extends BaseDbi
         $param = [':guardian_id' => $guardianId];
         return $this->getDataString($sql, $param);
     }
+    public function getReportDoctor($guardianId)
+    {
+        $sql = 'select report_doctor from guardian_data 
+                where guardian_id = :guardian and status = 5 limit 1;';
+        $param = [':guardian' => $guardianId];
+        return $this->getDataString($sql, $param);
+    }
     public function setDataStatus($guardianId, $statusName, $hbiDoctor, $reportDoctor)
     {
         $status = $this->getDataStatus($guardianId);
