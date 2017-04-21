@@ -26,3 +26,6 @@ define('DIMENSION_TWO', 2);
 
 define('LOG_TIME_HOUR', 'hour');
 define('LOG_TIME_DAY', 'day');
+
+define('DIMENSION_ONE', 1);
+define('DIMENSION_TWO', 2);
