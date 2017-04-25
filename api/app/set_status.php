@@ -28,6 +28,7 @@ $template .= '$phone_power = \'' . $data['phone_power'] . "';\n";
 $template .= '$collection_power = \'' . $data['collection_power'] . "';\n";
 $template .= '$bluetooth = \'' . $data['bluetooth'] . "';\n";
 $template .= '$line = \'' . $data['line'] . "';\n";
+$template .= '$time = \'' . date('Y-m-d H:i:s') . "';\n";
 
 $handle = fopen($file, 'w');
 fwrite($handle, $template);

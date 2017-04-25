@@ -377,6 +377,17 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
+    public function getInfoByDevice($deviceId)
+    {
+        $sql = 'select g.regist_hospital_id as hopital_id, h.hospital_name, h.tel as hospitl_tel, 
+                p.patient_name, p.tel as patient_tel from guardian as g 
+                inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                inner join patient as p on g.patient_id = p.patient_id
+                where g.device_id = :device_id
+                order by g.guardian_id desc limit 1;';
+        $param = [':device_id' => $deviceId];
+        return $this->getDataRow($sql, $param);
+    }
     public function getPatient($patientId)
     {
         $sql = 'select patient_id, patient_name, sex, birth_year, tel, address
