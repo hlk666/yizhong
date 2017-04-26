@@ -50,6 +50,12 @@ class Dbi extends BaseDbi
         $this->pdo->commit();
         return $caseId;
     }
+    public function addChronic($name)
+    {
+        $sql = 'insert into chronic (name) values (:name)';
+        $param = [':name' => $name];
+        return $this->insertData($sql, $param);
+    }
     public function addChronicPatient($chronicId, $patientId)
     {
         if ($this->existData('chronic_patient', "chronic_id = $chronicId and patient_id = $patientId")) {
@@ -82,6 +88,39 @@ class Dbi extends BaseDbi
         $param = [':hospial' => $hospitalId, ':name' => $name,  ':tel' => $tel];
         return $this->insertData($sql, $param);
     }
+    public function addOutpatient($departmentId, $patientId, $chiefComplaint, $descption, 
+            $medicineHistory, $medicineAdvice, $examination, $examinationList, $diagnosis, $doctorId)
+    {
+        $this->pdo->beginTransaction();
+        
+        $sql = 'insert into outpatient (department_id, patient_id, 
+                chief_complaint, descption, medicine_history, medicine_advice, examination, diagnosis, doctor_id)
+                values (:department_id, :patient_id, 
+                :chief_complaint, :descption, :medicine_history, :medicine_advice, :examination, :diagnosis, :doctor_id)';
+        $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':chief_complaint' => $chiefComplaint,
+                        ':descption' => $descption, ':medicine_history' => $$medicineHistory, ':medicine_advice' => $medicineAdvice, 
+                        ':examination' => $examination,  ':diagnosis' => $diagnosis, ':doctor_id' => $doctorId];
+        $outpatientId = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR === $outpatientId) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        foreach ($examinationList as $exam) {
+            $sql = 'insert into examinatin_patient (department_id, patient_id, type, examination_id, examination_value)
+                values (:department_id, :patient_id, :type, :examination_id, :examination_value)';
+            $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':type' => 'outpatient',
+                            ':examination_id' => $exam[0], ':examination_value' => $exam[1]];
+            $ret = $this->insertData($sql, $param);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
+        }
+        
+        $this->pdo->commit();
+        return $outpatientId;
+    }
     public function addPatient($identityCard, $name, $birthYear, $sex, $tel, $address, 
             $ethnic, $nativePlace, $hospitalization, $familyName, $familyTel, $departmentId)
     {
@@ -95,6 +134,12 @@ class Dbi extends BaseDbi
                         ':family_name' => $familyName, ':family_tel' => $familyTel, ':deparment1' => $departmentId];
         return $this->insertData($sql, $param);
     }
+    public function deleteChronicPatient($chronicId, $patientId)
+    {
+        $sql = 'delete from chronic_patient where chronic_id = :chronic_id and patient_id = :patient_id';
+        $param = [':chronic_id' => $chronicId, ':patient_id' => $patientId];
+        return $this->deleteData($sql, $param);
+    }
     public function isPatientInDepartment($patientId, $department)
     {
         $where = " id = $patientId and (department1 = $department 
@@ -105,6 +150,10 @@ class Dbi extends BaseDbi
     {
         return $this->existData('chronic', ['id' => $chronicId]);
     }
+    public function existedChronicByName($chronicName)
+    {
+        return $this->existData('chronic', ['name' => $chronicName]);
+    }
     public function existedDepartment($departmentId)
     {
         return $this->existData('department', ['id' => $departmentId]);
@@ -112,6 +161,14 @@ class Dbi extends BaseDbi
     public function existedDoctor($loginName)
     {
         return $this->existData('doctor', ['login_name' => $loginName]);
+    }
+    public function existedDoctorById($doctorId)
+    {
+        return $this->existData('doctor', ['id' => $doctorId]);
+    }
+    public function existedExamination($examinatinId)
+    {
+        return $this->existData('examinatin', ['id' => $examinatinId]);
     }
     public function existedHospital($hospitalId)
     {

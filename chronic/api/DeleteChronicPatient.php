@@ -2,7 +2,7 @@
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class AddChronicPatient extends BaseApi
+class DeleteChronicPatient extends BaseApi
 {
     protected function validate($class = '')
     {
@@ -42,7 +42,7 @@ class AddChronicPatient extends BaseApi
     
     protected function execute()
     {
-        $ret = Dbi::getDbi()->addChronicPatient($this->param['chronic_id'], $this->param['patient_id']);
+        $ret = Dbi::getDbi()->deleteChronicPatient($this->param['chronic_id'], $this->param['patient_id']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

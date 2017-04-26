@@ -102,6 +102,17 @@ class BaseApi
         foreach ($rows as $row) {
             $rowData = array();
             $columns = array_filter(explode(',', $row));
+            $data[] = $columns;
+        }
+        return $data;
+    }
+    protected function getStructalDataWithHeader($text)
+    {
+        $data = array();
+        $rows = array_filter(explode(';', $text));
+        foreach ($rows as $row) {
+            $rowData = array();
+            $columns = array_filter(explode(',', $row));
             foreach ($columns as $column) {
                 $colArray = explode(':', $column);
                 if (2 != count($colArray)) {
