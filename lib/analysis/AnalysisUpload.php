@@ -26,7 +26,8 @@ class AnalysisUpload
         if (VALUE_DB_ERROR === $oldReportDoctor) {
             api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
         }
-        if ($oldReportDoctor != '0' 
+        if ($type == 'report' 
+                && $oldReportDoctor != '0' 
                 && $oldReportDoctor != '' 
                 && $oldReportDoctor != $param['report_doctor']) {
                     api_exit(['code' => '2', 'message' => '只有本人才能修改已经出过的报告。']);
