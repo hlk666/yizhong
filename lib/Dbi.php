@@ -182,7 +182,7 @@ class Dbi extends BaseDbi
     public function getDownloadData($guardianId)
     {
         $sql = 'select guardian_id, url, upload_time, download_start_time, download_end_time, device_type 
-                from guardian_data where guardian_id = :guardian_id limit 1';
+                from guardian_data where guardian_id = :guardian_id and url <> "" limit 1';
         $param = [':guardian_id' => $guardianId];
         return $this->getDataRow($sql, $param);
     }
