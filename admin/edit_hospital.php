@@ -18,6 +18,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
     $loginUser = !isset($_POST['login_user']) ? null : $_POST['login_user'];
     $messageTel = isset($_POST['message_tel']) ? $_POST['message_tel'] : '0';
+    $salesman = isset($_POST['salesman']) ? $_POST['salesman'] : '';
     
     if (empty($hospitalId)) {
         user_back_after_delay('非法访问');
@@ -48,8 +49,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
             user_back_after_delay("登录用户名<font color='red'>$loginUser</font>已被他人使用。");
         }
         
-        $ret = DbiAdmin::getDbi()->editHospital($hospitalId,
-            $hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $loginUser, $messageTel);
+        $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $hospitalTel, $hospitalAddress, 
+                $parentFlag, $loginUser, $messageTel, $salesman);
     }
     
     if (isset($_POST['del'])) {
@@ -81,6 +82,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $tel = $hospitalInfo['tel'];
     $loginUser = $hospitalInfo['login_name'];
     $messageTel = $hospitalInfo['sms_tel'];
+    $salesman = $hospitalInfo['salesman'];
     
     if ('1' == $hospitalInfo['parent_flag']) {
         $htmlParentFlagYes = '<input type="radio" name="parent_flag" value="1" checked>可</label>';
@@ -137,6 +139,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <label for="message_tel" class="col-sm-2 control-label">接收短信手机号<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="message_tel" name="message_tel" value="$messageTel">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="salesman" class="col-sm-2 control-label">业务员<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="salesman" name="salesman" value="$salesman">
     </div>
   </div>
   <div class="form-group">

@@ -18,6 +18,7 @@ if (isset($_POST['submit'])){
     $hospitalParent = !isset($_POST['hospital_parent']) ? null : $_POST['hospital_parent'];
     $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
     $messageTel = (isset($_POST['message_tel']) && !empty($_POST['message_tel'])) ? $_POST['message_tel'] : '0';
+    $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '';
     
     if (empty($hospitalName)) {
         user_back_after_delay('请正确输入医院名。');
@@ -40,9 +41,10 @@ if (isset($_POST['submit'])){
         user_back_after_delay("登录用户名<font color='red'>$adminUser</font>已被他人使用。");
     }
     
-    $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser, $messageTel);
+    $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, 
+            $parentFlag, $hospitalParent, $adminUser, $messageTel, $salesman);
     if (VALUE_DB_ERROR === $ret) {
-        check_user_existed(MESSAGE_DB_ERROR);
+        user_back_after_delay(MESSAGE_DB_ERROR);
     }
     $_SESSION['post'] = true;
     echo MESSAGE_SUCCESS 
@@ -89,6 +91,12 @@ if (isset($_POST['submit'])){
     <label for="message_tel" class="col-sm-2 control-label">接收短信手机号</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="message_tel" name="message_tel" placeholder="请输入值班医生手机号(接收短信)">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="salesman" class="col-sm-2 control-label">业务员</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="salesman" name="salesman" placeholder="请输入业务员姓名">
     </div>
   </div>
   <div class="form-group">

@@ -28,12 +28,13 @@ class DbiAdmin extends BaseDbi
         $param = [':device' => $device, ':hospital' => $hospital, ':city' => $city];
         return $this->insertData($sql, $param);
     }
-    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser, $messageTel)
+    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser, $messageTel, $salesman)
     {
         $this->pdo->beginTransaction();
-        $sql = 'insert into hospital(hospital_name, tel, address, parent_flag, sms_tel)
-                values (:name, :tel, :address, :flag, :sms_tel)';
-        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':flag' => $parentFlag, ':sms_tel' => $messageTel];
+        $sql = 'insert into hospital(hospital_name, tel, address, parent_flag, sms_tel, salesman)
+                values (:name, :tel, :address, :flag, :sms_tel, :salesman)';
+        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':flag' => $parentFlag, 
+                        ':sms_tel' => $messageTel, ':salesman' => $salesman];
         $hospitalId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $hospitalId) {
             $this->pdo->rollBack();
@@ -48,7 +49,7 @@ class DbiAdmin extends BaseDbi
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
-    
+        
         if (!empty($parentHospital)) {
             $sql = 'insert into hospital_relation(hospital_id, parent_hospital_id)
                 values (:hospital_id, :parent_hospital_id)';
@@ -136,7 +137,8 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital' => $hospitalId];
         return $this->deleteData($sql, $param);
     }
-    public function editHospital($hospitalId, $hospitalName, $hospitalTel, $hospitalAddress, $parentFlag, $loginUser, $messageTel)
+    public function editHospital($hospitalId, $hospitalName, $hospitalTel, $hospitalAddress, 
+            $parentFlag, $loginUser, $messageTel, $salesman)
     {
         $this->pdo->beginTransaction();
     
@@ -149,17 +151,11 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = 'update hospital 
-                set hospital_name = :name, tel = :tel, address = :address, parent_flag = :flag, sms_tel = :sms_tel
+        $sql = 'update hospital set hospital_name = :name, tel = :tel, address = :address, 
+                parent_flag = :flag, sms_tel = :sms_tel, salesman = :salesman
                 where hospital_id = :hospital';
-        $param = [
-            ':hospital' => $hospitalId,
-            ':name' => $hospitalName,
-            ':tel' => $hospitalTel,
-            ':address' => $hospitalAddress,
-            ':flag' => $parentFlag,
-            ':sms_tel' => $messageTel
-        ];
+        $param = [':hospital' => $hospitalId, ':name' => $hospitalName, ':tel' => $hospitalTel,
+            ':address' => $hospitalAddress, ':flag' => $parentFlag, ':sms_tel' => $messageTel, ':salesman' => $salesman];
         $ret = $this->updateData($sql, $param);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
@@ -263,7 +259,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select h.hospital_id, hospital_name, address, tel, parent_flag, a.login_name, h.sms_tel
+        $sql = 'select h.hospital_id, hospital_name, address, tel, parent_flag, a.login_name, h.sms_tel, h.salesman
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];
@@ -297,6 +293,36 @@ class DbiAdmin extends BaseDbi
                 where hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
+    }
+    public function getSalesmanList()
+    {
+        $sql = 'select distinct salesman from hospital where salesman <> "";';
+        return $this->getDataAll($sql);
+    }
+    public function getSalesmanData($salesman, $startTime = null, $endTime = null, $offset = 0, $rows = null)
+    {
+        if (empty($salesman)) {
+            return array();
+        }
+        $sql = 'select h.hospital_name, p.patient_name, regist_time, g.regist_doctor_name as doctor_name
+                from guardian as g inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                inner join patient as p on g.patient_id = p.patient_id
+                where regist_hospital_id in (select hospital_id from hospital where salesman = :salesman) ';
+        if (null !== $startTime) {
+            $sql .= " and regist_time >= '$startTime' ";
+        }
+        if (null !== $endTime) {
+            $sql .= " and regist_time <= '$endTime' ";
+        }
+        
+        $sql .= ' order by g.guardian_id desc';
+        
+        if (null !== $rows) {
+            $sql .= " limit $offset, $rows";
+        }
+        
+        $param = [':salesman' => $salesman];
+        return $this->getDataAll($sql, $param);
     }
     /*
     public function existedLoginName($loginName)

@@ -57,6 +57,9 @@ EOF;
           <li><a href="app_set_update.php">更 新 设 备 版 本</a></li>
         </ul>
         <ul class="nav nav-sidebar">
+          <li><a href="salesman_data.php">查询业务员开单</a></li>
+        </ul>
+        <ul class="nav nav-sidebar">
           <li><a href="logout.php">注 销 本 次 登 录</a></li>
         </ul>
       </div>
