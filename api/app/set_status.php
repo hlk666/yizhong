@@ -1,6 +1,7 @@
 <?php
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Logger.php';
+require_once PATH_LIB . 'Dbi.php';
 
 $data = array_merge($_GET, $_POST);
 if (false === Validate::checkRequired($data['device_id'])) {
@@ -33,5 +34,11 @@ $template .= '$time = \'' . date('Y-m-d H:i:s') . "';\n";
 $handle = fopen($file, 'w');
 fwrite($handle, $template);
 fclose($handle);
+
+$ret = Dbi::getDbi()->addDeviceStatus($data['device_id'], 
+        $data['phone_power'], $data['collection_power'], $data['bluetooth'], $data['line']);
+if (VALUE_DB_ERROR === $ret) {
+    api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+}
 
 api_exit_success();

@@ -159,6 +159,13 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
+    public function getDeviceStatusHistory($deviceId)
+    {
+        $sql = 'select device_id, create_time, phone_power, collection_power, bluetooth, line
+                from history_app_status where device_id = :id';
+        $param = [':id' => $deviceId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getDiagnosisByGuardian($guardianId)
     {
         $sql = 'select ecg_id from difference';
@@ -442,6 +449,14 @@ class Dbi extends BaseDbi
                 values (:login_name, :real_name, :password, :type, :hospital_id, :creator)';
         $param = [':login_name' => $loginName, ':real_name' => $realName, ':password' => $password,
                         ':type' => $type, ':hospital_id' => $hospitalId,':creator' => $creator ];
+        return $this->insertData($sql, $param);
+    }
+    public function addDeviceStatus($deviceId, $phonePower, $collectionPower, $bluetooth, $line)
+    {
+        $sql = 'insert into history_app_status (device_id, phone_power, collection_power, bluetooth, line)
+                values (:device_id, :phone_power, :collection_power, :bluetooth, :line)';
+        $param = [':device_id' => $deviceId, ':phone_power' => $phonePower, ':collection_power' => $collectionPower,
+                        ':bluetooth' => $bluetooth, ':line' => $line];
         return $this->insertData($sql, $param);
     }
     public function changeMode($guardianId, $oldMode, $newMode)
