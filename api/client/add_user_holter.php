@@ -24,6 +24,10 @@ $medicalHistory = isset($_POST['medical_history']) ? $_POST['medical_history'] :
 $doctorName = $_POST['doctor_name'];
 $hospitalizationId = isset($_POST['hospitalization_id']) ? $_POST['hospitalization_id'] : '0';
 
+if (!isset($_POST['ignore_repeat'])) {
+    check_patient_repeat($registHospital, $name);
+}
+
 $guardianId = Dbi::getDbi()->flowGuardianAddUser($name, $sex, $age, $tel, $device, $registHospital, 
         $guardHospital, $mode, $hours, PARAM_LEAD, $doctorId, $sickRoom, $bloodPressure, $height, $weight,
         $familyTel, $tentativeDiagnose, $medicalHistory, $doctorName, $hospitalizationId);
@@ -57,3 +61,14 @@ function validate_add_user($post)
         api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'doctor_name.']);
     }
 }
+function check_patient_repeat($hospital, $name)
+{
+    $ret = Dbi::getDbi()->getRepeatPatient($hospital, $name);
+    if (VALUE_DB_ERROR === $ret) {
+        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+    }
+    if (!empty($ret)) {
+        api_exit(['code' => '18', 'message' => '重复注册。', 'data' => $ret]);
+    }
+}
+

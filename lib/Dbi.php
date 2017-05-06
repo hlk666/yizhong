@@ -438,6 +438,15 @@ class Dbi extends BaseDbi
         $param = [':guardian_id' => $guardianId];
         return $this->getDataRow($sql, $param);
     }
+    public function getRepeatPatient($hospital, $name)
+    {
+        $sql = 'select g.device_id, g.start_time, g.regist_doctor_name as doctor_name
+                from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                where g.regist_hospital_id = :hospital and p.patient_name = :name 
+                and g.regist_time > date_add(now(), interval "-12" hour)';
+        $param = [':hospital' => $hospital, ':name' => $name];
+        return $this->getDataAll($sql, $param);
+    }
     //************************** query methods(public) **************************
     //*********************************** end ***********************************
     

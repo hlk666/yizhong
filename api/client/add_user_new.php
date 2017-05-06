@@ -19,6 +19,9 @@ $doctorId = 0;//will be used in future.
 $doctorName = $_POST['doctor_name'];
 
 check_device($device, $registHospital);
+if (!isset($_POST['ignore_repeat'])) {
+    check_patient_repeat($registHospital, $name);
+}
 
 $height = isset($_POST['height']) ? $_POST['height'] : '0';
 $weight = isset($_POST['weight']) ? $_POST['weight'] : '0';
@@ -305,5 +308,15 @@ function check_device($device, $hospital)
         if ('0' == $guardian['status'] || '1' == $guardian['status']) {
             api_exit(['code' => '17', 'message' => $otherPatient . '正在使用该设备。']);
         }
+    }
+}
+function check_patient_repeat($hospital, $name)
+{
+    $ret = Dbi::getDbi()->getRepeatPatient($hospital, $name);
+    if (VALUE_DB_ERROR === $ret) {
+        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+    }
+    if (!empty($ret)) {
+        api_exit(['code' => '18', 'message' => '重复注册。', 'data' => $ret]);
     }
 }
