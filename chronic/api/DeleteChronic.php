@@ -2,7 +2,7 @@
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class AddChronic extends BaseApi
+class DeleteChronic extends BaseApi
 {
     protected function validate($class = '')
     {
@@ -11,15 +11,20 @@ class AddChronic extends BaseApi
             return $ret;
         }
         
-        $required = ['name'];
+        $required = ['id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
             return $checkRequired;
         }
         
-        if (Dbi::getDbi()->existedChronicByName($this->param['name'])) {
-            return HpErrorMessage::getError(ERROR_DATA_EXISTED);
+        $checkNumeric = HpValidate::checkNumeric(['id'], $this->param);
+        if (true !== $checkNumeric) {
+            return $checkNumeric;
+        }
+        
+        if (false === Dbi::getDbi()->existedChronic($this->param['id'])) {
+            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'id.');
         }
         
         return true;
@@ -27,12 +32,10 @@ class AddChronic extends BaseApi
     
     protected function execute()
     {
-        
-        $chronicId = Dbi::getDbi()->addChronic($this->param['name']);
-        if (VALUE_DB_ERROR === $chronicId) {
+        $ret = Dbi::getDbi()->deleteChronic($this->param['id']);
+        if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
-        $this->retSuccess['chronic_id'] = $chronicId;
         return $this->retSuccess;
     }
 }

@@ -67,7 +67,7 @@ class HpErrorMessage
                     ERROR_UPLOAD_FAIL => ['code' => ERROR_UPLOAD_FAIL, 'message' => '上传失败，请重试或联系管理员。'],
                     
                     ERROR_SEARCH => ['code' => ERROR_SEARCH, 'message' => '搜索条件错误，请确认搜索关键字和值。'],
-                    ERROR_NOT_IN_DEPARTMENT => ['code' => ERROR_NOT_IN_DEPARTMENT, 'message' => '该患者不属于本科室管理。'],
+                    ERROR_NOT_IN_DEPARTMENT => ['code' => ERROR_NOT_IN_DEPARTMENT, 'message' => '该信息不属于本科室管理。'],
                     ERROR_DATA_EXISTED => ['code' => ERROR_DATA_EXISTED, 'message' => '该数据已存在，请勿重复操作。'],
                     
                     

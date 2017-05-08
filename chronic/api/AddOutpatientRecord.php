@@ -4,7 +4,6 @@ require_once PATH_ROOT . 'lib/db/Dbi.php';
 
 class AddOutpatientRecord extends BaseApi
 {
-    private $chronic = array();
     private $examinationList = array();
     protected function validate($class = '')
     {
