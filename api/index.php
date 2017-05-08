@@ -107,3 +107,36 @@ function setNotice($hospital, $type, $guardianId = '')
     fwrite($handle, $template);
     fclose($handle);
 }
+
+function clearNotice($hospital, $type, $guardianId)
+{
+    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $hospital . '.php';
+
+    if (!file_exists($file)) {
+        return;
+    }
+    
+    include $file;
+    $newPatients = array();
+    foreach ($patients as $p) {
+        if ($p != $guardianId) {
+            $newPatients[] = $p;
+        }
+    }
+    
+    if (empty($newPatients)) {
+        unlink($file);
+        return;
+    }
+    
+    $template = "<?php\n";
+    $template .= '$patients = array();' . "\n";
+    foreach ($newPatients as $patient) {
+        $template .= "\$patients[] = '$patient';\n";
+    }
+    $template .= "\n";
+    
+    $handle = fopen($file, 'w');
+    fwrite($handle, $template);
+    fclose($handle);
+}

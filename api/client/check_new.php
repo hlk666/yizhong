@@ -87,7 +87,7 @@ if (file_exists($fileHbi)) {
 if (file_exists($fileReport)) {
     include $fileReport;
     $result['report'] = $patients;
-    unlink($fileReport);
+    //unlink($fileReport);
 }
 
 api_exit($result);
