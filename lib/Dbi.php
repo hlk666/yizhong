@@ -358,7 +358,7 @@ class Dbi extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel
+        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel, upload_flag
                 from hospital where hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
@@ -562,7 +562,8 @@ class Dbi extends BaseDbi
     }
     public function flowGuardianAddUser($patientName, $sex, $age, $tel, $device, $registHospital,
             $guardHospital, $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height,
-            $weight, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName, $hospitalizationId = '0')
+            $weight, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName, 
+            $hospitalizationId = '0', $startTime = null)
     {
         $birthYear = date('Y') - $age;
         $sql = 'select patient_id from patient
@@ -602,6 +603,16 @@ class Dbi extends BaseDbi
         if (VALUE_DB_ERROR === $guardianId) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
+        }
+        
+        if ($startTime != null) {
+            $sql = 'update guardian set start_time = :start_time where guardian_id = :guardian_id';
+            $param = [':start_time' => $startTime, ':guardian_id' => $guardianId];
+            $ret = $this->updateData($sql, $param);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
         }
         $this->pdo->commit();
         return $guardianId;

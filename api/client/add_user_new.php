@@ -91,9 +91,11 @@ if ('2' == $mode) {
     $vSpeed = $_POST['v_speed'];
 }
 
+$startTime = isset($_POST['start_time']) ? $_POST['start_time'] : null;
+
 $guardianId = Dbi::getDbi()->flowGuardianAddUser($name, $sex, $age, $tel, $device, $registHospital, 
         $guardHospital, $mode, $hours, $lead, $doctorId, $sickRoom, $bloodPressure, $height, $weight,
-        $familyTel, $tentativeDiagnose, $medicalHistory, $doctorName, $hospitalizationId);
+        $familyTel, $tentativeDiagnose, $medicalHistory, $doctorName, $hospitalizationId, $startTime);
 if (VALUE_DB_ERROR === $guardianId) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

@@ -29,14 +29,19 @@ $url = isset($_POST['upload_url']) ? $_POST['upload_url'] : '';
 $deviceType = isset($_POST['device_type']) ? $_POST['device_type'] : 0;
 $failFlag = isset($_POST['fail_flag']) ? $_POST['fail_flag'] : 0;
 
+$hospitalId = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
 if (1 == $failFlag) {
-    $hospitalId = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
     if (VALUE_DB_ERROR === $hospitalId || empty($hospitalId)) {
         //do nothing.
     } else {
         setNotice($hospitalId, 'upload_data_fail', $guardianId);
     }
     api_exit_success();
+} else {
+    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'upload_data_fail' . DIRECTORY_SEPARATOR . $hospitalId . '.php';
+    if (file_exists($file)) {
+        clearNotice($hospitalId, 'upload_data_fail', $guardianId);
+    }
 }
 $ret = DbiAnalytics::getDbi()->addGuardianData($guardianId, $url, $deviceType);
 if (VALUE_DB_ERROR === $ret) {
@@ -44,7 +49,6 @@ if (VALUE_DB_ERROR === $ret) {
 }
 
 if (1 == $deviceType) {
-    $hospitalId = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
     if (VALUE_DB_ERROR === $hospitalId || empty($hospitalId)) {
         //do nothing.
     } else {

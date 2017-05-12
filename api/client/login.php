@@ -34,5 +34,6 @@ if (empty($ret)) {
         api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
     }
     $result['hospital_name'] = $ret['hospital_name'];
+    $result['upload_flag'] = $ret['upload_flag'];
     api_exit($result);
 }
