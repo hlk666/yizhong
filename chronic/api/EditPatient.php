@@ -2,7 +2,7 @@
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class EditCase extends BaseApi
+class EditPatient extends BaseApi
 {
     protected function validate($class = '')
     {

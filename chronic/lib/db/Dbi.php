@@ -152,6 +152,24 @@ class Dbi extends BaseDbi
         $param = [':chronic_id' => $chronicId, ':patient_id' => $patientId];
         return $this->deleteData($sql, $param);
     }
+    public function deleteDepartment($departmentId)
+    {
+        $sql = 'delete from department where id = :id';
+        $param = [':id' => $departmentId];
+        return $this->deleteData($sql, $param);
+    }
+    public function deleteDoctor($doctorId)
+    {
+        $sql = 'delete from doctor where id = :id';
+        $param = [':id' => $doctorId];
+        return $this->deleteData($sql, $param);
+    }
+    public function deleteHospital($hospitalId)
+    {
+        $sql = 'delete from hospital where id = :id';
+        $param = [':id' => $hospitalId];
+        return $this->deleteData($sql, $param);
+    }
     public function deletePatient($patientId, $departmentId)
     {
         $sql = 'select department1, department2, department3, department_once from patient where id = :id limit 1';
@@ -186,6 +204,18 @@ class Dbi extends BaseDbi
         $sql = 'update chronic set name = :name where id = :id';
         $param = [':id' => $id, ':name' => $name];
         return $this->updateData($sql, $param);
+    }
+    public function editDepartment($departmentId, array $data)
+    {
+        return $this->updateTableByKey('department', 'id', $departmentId, $data);
+    }
+    public function editDoctor($doctorId, array $data)
+    {
+        return $this->updateTableByKey('doctor', 'id', $doctorId, $data);
+    }
+    public function editHospital($hospitalId, array $data)
+    {
+        return $this->updateTableByKey('hospital', 'id', $hospitalId, $data);
     }
     public function editPatient($patientId, array $data)
     {
@@ -272,6 +302,12 @@ class Dbi extends BaseDbi
         $param = [':dpt' => $departmentId];
         return $this->getDataAll($sql, $param);
     }
+    public function getDepartmentList($hospitalId)
+    {
+        $sql = 'select id as department_id, name as department_name from department where hospital_id = :hospital_id';
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getDoctorInfo($loginName)
     {
         $sql = 'select d.id as doctor_id, d.real_name as doctor_name, d.type, d.password,
@@ -281,6 +317,19 @@ class Dbi extends BaseDbi
                 where login_name = :user limit 1';
         $param = [':user' => $loginName];
         return $this->getDataRow($sql, $param);
+    }
+    public function getDoctorPassword($doctorId)
+    {
+        $sql = 'select password from doctor where id = :id limit 1';
+        $param = [':id' => $doctorId];
+        return $this->getDataString($sql, $param);
+    }
+    public function getDoctorList($departmentId)
+    {
+        $sql = 'select id as doctor_id, login_name, real_name as doctor_name, type, tel, phone
+                from doctor where department_id = :department_id';
+        $param = [':department_id' => $departmentId];
+        return $this->getDataAll($sql, $param);
     }
     public function getExaminationList($patientId, $departmentId = null, $startTime = null, $endTime = null)
     {
@@ -304,6 +353,11 @@ class Dbi extends BaseDbi
         }
         $sql .= ' order by ep.id desc';
         $param = [':patient_id' => $patientId];
+        return $this->getDataAll($sql);
+    }
+    public function getHospitalList()
+    {
+        $sql = 'select id as hospital_id, name as hospital_name, level, tel, area, province, city, address from hospital';
         return $this->getDataAll($sql);
     }
     public function getPatientInfo($patientId)
