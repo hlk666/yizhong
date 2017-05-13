@@ -31,6 +31,8 @@ define('ERROR_UPLOAD_FAIL', 34);
 define('ERROR_SEARCH', 40);
 define('ERROR_NOT_IN_DEPARTMENT', 41);
 define('ERROR_DATA_EXISTED', 42);
+define('ERROR_TIME_ERROR', 43);
+define('ERROR_DATA_DELETE_DENY', 44);
 
 define('ERROR_OTHER', 99);
 
@@ -69,6 +71,8 @@ class HpErrorMessage
                     ERROR_SEARCH => ['code' => ERROR_SEARCH, 'message' => '搜索条件错误，请确认搜索关键字和值。'],
                     ERROR_NOT_IN_DEPARTMENT => ['code' => ERROR_NOT_IN_DEPARTMENT, 'message' => '该信息不属于本科室管理。'],
                     ERROR_DATA_EXISTED => ['code' => ERROR_DATA_EXISTED, 'message' => '该数据已存在，请勿重复操作。'],
+                    ERROR_TIME_ERROR => ['code' => ERROR_TIME_ERROR, 'message' => '时间错误。'],
+                    ERROR_DATA_DELETE_DENY => ['code' => ERROR_DATA_DELETE_DENY, 'message' => '该随访计划已经有记录存在，无法删除。'],
                     
                     
                     ERROR_OTHER => ['code' => ERROR_OTHER, 'message' => '未知错误，请联系管理员。'],

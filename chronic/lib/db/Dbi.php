@@ -121,6 +121,34 @@ class Dbi extends BaseDbi
         $this->pdo->commit();
         return $outpatientId;
     }
+    public function addFollowPlan($departmentId, $patientId, $planText, $planList, $doctorId)
+    {
+        $this->pdo->beginTransaction();
+    
+        $sql = 'insert into follow_plan (department_id, patient_id, plan_text, doctor_id)
+                values (:department_id, :patient_id, :plan_text, :doctor_id)';
+        $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':plan_text' => $planText, ':doctor_id' => $doctorId];
+        $followPlanId = $this->insertData($sql, $param);
+        if (VALUE_DB_ERROR === $followPlanId) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+    
+        foreach ($planList as $plan) {
+            $sql = 'insert into plan (department_id, patient_id, follow_plan_id, plan_time, plan_value)
+                values (:department_id, :patient_id, :follow_plan_id, :plan_time, :plan_value)';
+            $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':follow_plan_id' => $followPlanId,
+                            ':plan_time' => $plan[0], ':plan_value' => $plan[1]];
+            $ret = $this->insertData($sql, $param);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
+        }
+    
+        $this->pdo->commit();
+        return $followPlanId;
+    }
     public function addPatient($identityCard, $name, $birthYear, $sex, $tel, $address, 
             $ethnic, $nativePlace, $hospitalization, $familyName, $familyTel, $departmentId)
     {
@@ -162,6 +190,12 @@ class Dbi extends BaseDbi
     {
         $sql = 'delete from doctor where id = :id';
         $param = [':id' => $doctorId];
+        return $this->deleteData($sql, $param);
+    }
+    public function deleteFollowPlan($followPlanId)
+    {
+        $sql = 'delete from follow_plan where id = :id';
+        $param = [':id' => $followPlanId];
         return $this->deleteData($sql, $param);
     }
     public function deleteHospital($hospitalId)
@@ -213,6 +247,50 @@ class Dbi extends BaseDbi
     {
         return $this->updateTableByKey('doctor', 'id', $doctorId, $data);
     }
+    public function editFollowPlan($followPlanId, $planText, $planList, $doctorId)
+    {
+        $sql = 'select department_id, patient_id from follow_plan where id = :id limit 1';
+        $param = [':id' => $followPlanId];
+        $followPlan = $this->getDataRow($sql, $param);
+        if (VALUE_DB_ERROR === $followPlan) {
+            return VALUE_DB_ERROR;
+        }
+        $departmentId = $followPlan['department_id'];
+        $patientId = $followPlan['patient_id'];
+        
+        $this->pdo->beginTransaction();
+        
+        $sql = 'update follow_plan set plan_text = :plan_text, doctor_id = :doctor where id = :id';
+        $param = [':id' => $followPlanId, ':doctor' => $doctorId];
+        $ret = $this->updateData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = 'delete from follow_plan where id = :id and notice_time is null';
+        $param = [':id' => $followPlanId];
+        $ret = $this->deleteData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
+        foreach ($planList as $plan) {
+            $sql = 'insert into plan (department_id, patient_id, follow_plan_id, plan_time, plan_value)
+                values (:department_id, :patient_id, :follow_plan_id, :plan_time, :plan_value)';
+            $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':follow_plan_id' => $followPlanId,
+                            ':plan_time' => $plan[0], ':plan_value' => $plan[1]];
+            $ret = $this->insertData($sql, $param);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
+        }
+        
+        $this->pdo->commit();
+        return $followPlanId;
+    }
     public function editHospital($hospitalId, array $data)
     {
         return $this->updateTableByKey('hospital', 'id', $hospitalId, $data);
@@ -259,6 +337,14 @@ class Dbi extends BaseDbi
     public function existedExamination($examinatinId)
     {
         return $this->existData('examinatin', ['id' => $examinatinId]);
+    }
+    public function existedFollowPlan($followPlanId)
+    {
+        return $this->existData('follow_plan', ['id' => $followPlanId]);
+    }
+    public function existedFollowPlanNoticed($followPlanId)
+    {
+        return $this->existData('follow_plan', "id = $followPlanId and notice_time is not null");
     }
     public function existedHospital($hospitalId)
     {
