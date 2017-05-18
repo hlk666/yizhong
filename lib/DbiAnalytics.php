@@ -135,7 +135,63 @@ class DbiAnalytics extends BaseDbi
                  where guardian_id in ($patientIdList)";
         return $this->getDataAll($sql);
     }
-    
+    public function getPatientsMoved($hospitalId, $offset, $rows, $patientName = null, $startTime = null, $endTime = null,
+            $status = null, $hbiDoctor = null, $reportDoctor = null)
+    {
+        $sql = 'select m1.guardian_id from history_move_data as m1 
+                left join history_move_data as m2 on m1.hospital_from = m2.hospital_to and m1.hospital_to = m2.hospital_from
+                where m1.hospital_from = :hospital and m2.guardian_id is null';
+        $param = [':hospital' => $hospitalId];
+        $guardians = $this->getDataAll($sql, $param);
+        if (VALUE_DB_ERROR === $guardians) {
+            return VALUE_DB_ERROR;
+        }
+        
+        if (empty($guardians)) {
+            return array();
+        }
+        $guardianList = '';
+        foreach ($guardians as $guardian) {
+            $guardianList .= $guardian['guardian_id'] . ',';
+        }
+        $guardianList = substr($guardianList, 0, -1);
+        /*
+        $sql = "select h.hospital_id, h.hospital_name, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor,
+        g.guardian_id as patient_id, start_time, end_time, reported, g.device_id, sickroom, hospitalization_id,
+        patient_name as name, birth_year, sex, p.tel, d.upload_time, d.report_time
+        from guardian as g left join patient as p on g.patient_id = p.patient_id
+        left join hospital as h on g.regist_hospital_id = h.hospital_id
+        left join guardian_data as d on g.guardian_id = d.guardian_id
+        left join account as a1 on d.hbi_doctor = a1.account_id
+        left join account as a2 on d.report_doctor = a2.account_id
+        left join account as a3 on d.download_doctor = a3.account_id
+        where g.guardian_id in ($guardianList) ";
+        if (null !== $patientName) {
+            $sql .= " and patient_name = '$patientName' ";
+        }
+        if (null !== $startTime) {
+            $sql .= " and start_time >= '$startTime' ";
+        }
+        if (null !== $endTime) {
+            $sql .= " and start_time <= '$endTime' ";
+        }
+        if (null !== $status) {
+            $sql .= " and d.status in ($status) ";
+        }
+        if (null !== $hbiDoctor) {
+            $sql .= " and a1.real_name = '$hbiDoctor'";
+        }
+        if (null !== $reportDoctor) {
+            $sql .= " and a2.real_name = '$reportDoctor'";
+        }
+        $sql .= " order by g.guardian_id desc limit $offset, $rows";
+        */
+        $sql = "select p.patient_id, patient_name, h.move_time
+                from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                left join history_move_data as h on g.guardian_id = h.guardian_id
+                where g.guardian_id in ($guardianList) ";
+        return $this->getDataAll($sql);
+    }
     public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
         if ($this->existData('guardian_data', 'guardian_id = ' . $guardianId)) {

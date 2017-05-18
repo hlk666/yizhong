@@ -67,6 +67,14 @@ foreach ($patients as $key => $value) {
 $ret = array();
 $ret['code'] = 0;
 $ret['patients'] = $patients;
+
+$patients = DbiAnalytics::getDbi()->getPatientsMoved($hospitalId, $offset, $rows,
+        $patientName, $startTime, $endTime, $status, $hbiDoctor, $reportDoctor);
+if (VALUE_DB_ERROR === $patients) {
+    analytics_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
+}
+$ret['patients_moved'] = $patients;
+
 analytics_exit($ret);
 
 function analytics_exit(array $ret)

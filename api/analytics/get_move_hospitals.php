@@ -1,10 +1,8 @@
 <?php
 $ret = array();
 $ret['code'] = 0;
-$hospital1 = ['hospital_id' => 1, 'hospital_name' => '羿中医疗1'];
-$hospital2 = ['hospital_id' => 40, 'hospital_name' => '羿中医疗40'];
-$ret['hospitals'][] = $hospital1;
-$ret['hospitals'][] = $hospital2;
+$hospital = ['hospital_id' => '119', 'hospital_name' => '羿中医疗分析中心'];
+$ret['hospitals'][] = $hospital;
 
 analytics_exit($ret);
 
