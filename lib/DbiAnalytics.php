@@ -70,6 +70,35 @@ class DbiAnalytics extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
     }
+    public function getHospitalConfig($guardianId)
+    {
+        $sql = 'select regist_hospital_id from guardian where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        $hospitalId = $this->getDataString($sql, $param);
+        if (VALUE_DB_ERROR === $hospitalId) {
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = 'select t.hospital_id, analysis_hospital, report_hospital, title_hospital, h.hospital_name as title_hospital_name 
+                from hospital_tree as t inner join hospital as h on title_hospital = h.hospital_id
+                where t.hospital_id = :hospital_id limit 1';
+        $param = [':hospital_id' => $hospitalId];
+        $hospitalConfig = $this->getDataRow($sql, $param);
+        if (VALUE_DB_ERROR === $hospitalConfig) {
+            return VALUE_DB_ERROR;
+        }
+        
+        if (empty($hospitalConfig)) {
+            $hospitalInfo = $this->getHospitalInfo($hospitalId);
+            if (VALUE_DB_ERROR === $hospitalInfo) {
+                return VALUE_DB_ERROR;
+            }
+            $hospitalConfig = ['hospital_id' => $hospitalId, 'analysis_hospital' => $hospitalId,  'report_hospital' => $hospitalId, 
+                            'title_hospital' => $hospitalId, 'title_hospital_name' => $hospitalInfo['hospital_name']];
+        }
+        
+        return $hospitalConfig;
+    }
     public function getPatient($guardianId)
     {
         $sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported

@@ -164,14 +164,16 @@ class DbiAdmin extends BaseDbi
         $this->pdo->commit();
         return true;
     }
-    public function editTree($hospitalId, $analysisHospital, $reportHospital)
+    public function editTree($hospitalId, $analysisHospital, $reportHospital, $titleHospital)
     {
-        $param = [':hospital' => $hospitalId, ':analysis' => $analysisHospital, ':report' => $reportHospital];
+        $param = [':hospital' => $hospitalId, ':analysis' => $analysisHospital, ':report' => $reportHospital, 'title' => $titleHospital];
         if ($this->existData('hospital_tree', 'hospital_id = ' . $hospitalId)) {
-            $sql = 'update hospital_tree set analysis_hospital = :analysis, report_hospital = :report where hospital_id = :hospital';
+            $sql = 'update hospital_tree set analysis_hospital = :analysis, report_hospital = :report, title_hospital = :title
+                    where hospital_id = :hospital';
             $ret = $this->updateData($sql, $param);
         } else {
-            $sql = 'insert into hospital_tree(hospital_id, analysis_hospital, report_hospital) values (:hospital, :analysis, :report)';
+            $sql = 'insert into hospital_tree(hospital_id, analysis_hospital, report_hospital, title_hospital)
+                    values (:hospital, :analysis, :report, :title)';
             $ret = $this->insertData($sql, $param);
         }
         
@@ -289,7 +291,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalTree($hospitalId)
     {
-        $sql = 'select hospital_id, analysis_hospital, report_hospital from hospital_tree
+        $sql = 'select hospital_id, analysis_hospital, report_hospital, title_hospital from hospital_tree
                 where hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);

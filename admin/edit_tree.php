@@ -14,6 +14,7 @@ if (isset($_POST['edit'])){
     $hospitalId = !isset($_POST['hospital_id']) ? null : $_POST['hospital_id'];
     $analysisHospital = !isset($_POST['hospital_analysis']) ? null : $_POST['hospital_analysis'];
     $reportHospital = !isset($_POST['hospital_report']) ? null : $_POST['hospital_report'];
+    $titleHospital = !isset($_POST['hospital_title']) ? null : $_POST['hospital_title'];
     
     if (empty($hospitalId)) {
         user_back_after_delay('非法访问');
@@ -24,8 +25,11 @@ if (isset($_POST['edit'])){
     if (empty($reportHospital)) {
         user_back_after_delay('请选择出报告医院。');
     }
+    if (empty($titleHospital)) {
+        user_back_after_delay('请选择抬头医院。');
+    }
     
-    $ret = DbiAdmin::getDbi()->editTree($hospitalId, $analysisHospital, $reportHospital);
+    $ret = DbiAdmin::getDbi()->editTree($hospitalId, $analysisHospital, $reportHospital, $titleHospital);
     
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
@@ -54,11 +58,12 @@ if (isset($_POST['edit'])){
     if (empty($hospitalTree)) {
         $analysisHospital = '0';
         $reportHospital = '0';
+        $titleHospital = '0';
     } else {
         $analysisHospital = $hospitalTree['analysis_hospital'];
         $reportHospital = $hospitalTree['report_hospital'];
+        $titleHospital = $hospitalTree['title_hospital'];
     }
-    
     
     $ret = DbiAdmin::getDbi()->getHospitalList();
     if (VALUE_DB_ERROR === $ret) {
@@ -82,6 +87,15 @@ if (isset($_POST['edit'])){
         }
     }
     
+    $htmlTitleHospitals = '';
+    foreach ($ret as $value) {
+        if ($value['hospital_id'] == $titleHospital) {
+            $htmlTitleHospitals .= '<option value="' . $value['hospital_id'] . '" selected>' . $value['hospital_name'] . '</option>';
+        } else {
+            $htmlTitleHospitals .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
+        }
+    }
+    
     echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
   <input type="hidden" name="hospital_id" value="$hospitalId">
@@ -101,6 +115,13 @@ if (isset($_POST['edit'])){
     <div class="col-sm-10">
       <select class="form-control" name="hospital_report">
         <option value="0">请选择出报告医院</option>$htmlReportHospitals
+    </select></div>
+  </div>
+  <div class="form-group">
+    <label for="hospital_title" class="col-sm-2 control-label">抬头医院</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="hospital_title">
+        <option value="0">请选择抬头医院</option>$htmlTitleHospitals
     </select></div>
   </div>
   <div class="form-group">
