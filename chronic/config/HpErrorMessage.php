@@ -5,6 +5,8 @@ define('ERROR_NOT_EXIST_ID', 2);
 define('ERROR_DB', 3);
 define('ERROR_DATA_CONSISTENCY', 4);
 define('ERROR_SHORT_MESSAGE', 5);
+define('ERROR_TEL_EMPTY', 6);
+define('ERROR_VC', 7);
 
 define('ERROR_PARAM_REQUIRED', 10);
 define('ERROR_PARAM_NUMERIC', 11);
@@ -45,6 +47,8 @@ class HpErrorMessage
                     ERROR_DB => ['code' => ERROR_DB, 'message' => '数据库操作发生错误，请联系管理员。'],
                     ERROR_DATA_CONSISTENCY => ['code' => ERROR_DATA_CONSISTENCY, 'message' => '数据一致性错误，请联系管理员。'],
                     ERROR_SHORT_MESSAGE => ['code' => ERROR_SHORT_MESSAGE, 'message' => '操作成功，但是发送短信失败。'],
+                    ERROR_TEL_EMPTY => ['code' => ERROR_TEL_EMPTY, 'message' => '操作成功，手机号码空。'],
+                    ERROR_VC => ['code' => ERROR_VC, 'message' => '验证码错误。'],
                     
                     ERROR_PARAM_REQUIRED => ['code' => ERROR_PARAM_REQUIRED, 'message' => '参数未提供：'],
                     ERROR_PARAM_NUMERIC => ['code' => ERROR_PARAM_NUMERIC, 'message' => '参数类型应该是数字：'],
@@ -72,7 +76,7 @@ class HpErrorMessage
                     ERROR_NOT_IN_DEPARTMENT => ['code' => ERROR_NOT_IN_DEPARTMENT, 'message' => '该信息不属于本科室管理。'],
                     ERROR_DATA_EXISTED => ['code' => ERROR_DATA_EXISTED, 'message' => '该数据已存在，请勿重复操作。'],
                     ERROR_TIME_ERROR => ['code' => ERROR_TIME_ERROR, 'message' => '时间错误。'],
-                    ERROR_DATA_DELETE_DENY => ['code' => ERROR_DATA_DELETE_DENY, 'message' => '该随访计划已经有记录存在，无法删除。'],
+                    ERROR_DATA_DELETE_DENY => ['code' => ERROR_DATA_DELETE_DENY, 'message' => '该数据无法删除。'],
                     
                     
                     ERROR_OTHER => ['code' => ERROR_OTHER, 'message' => '未知错误，请联系管理员。'],

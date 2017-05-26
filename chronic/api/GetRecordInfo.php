@@ -33,18 +33,23 @@ class GetRecordInfo extends BaseApi
     
     protected function execute()
     {
-        $departmentId = isset($this->param['department_id']) ? $this->param['department_id'] : null;
-        $startTime = isset($this->param['start_time']) ? $this->param['start_time'] : null;
-        $endTime = isset($this->param['end_time']) ? $this->param['end_time'] : null;
-        
-        $recordList = Dbi::getDbi()->getRecordList($this->param['patient_id'], $departmentId, $startTime, $endTime);
-        if (VALUE_DB_ERROR === $recordList) {
+        if ($this->param['type'] == 'outpatient') {
+            $recordInfo = Dbi::getDbi()->getRecordInfoOutpatient($this->param['record_id']);
+        } elseif ($this->param['type'] == 'follow') {
+            
+        } elseif ($this->param['type'] == 'consultation') {
+            
+        } elseif ($this->param['type'] == 'referral') {
+            
+        } else {
+            return HpErrorMessage::getError(ERROR_PARAM_RANGE, 'type');
+        }
+        if (VALUE_DB_ERROR === $recordInfo) {
             return HpErrorMessage::getError(ERROR_DB);
         }
-        if (empty($recordList)) {
+        if (empty($recordInfo)) {
             return HpErrorMessage::getError(ERROR_NO_DATA);
         }
-        $this->retSuccess['record_list'] = $recordList;
-        return $this->retSuccess;
+        return array_merge($this->retSuccess, $recordInfo);
     }
 }

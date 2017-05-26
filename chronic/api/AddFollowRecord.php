@@ -2,9 +2,9 @@
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class AddFollowPlan extends BaseApi
+class AddFollowRecord extends BaseApi
 {
-    private $planList = array();
+    private $examinationList = array();
     protected function validate($class = '')
     {
         $ret = parent::validate(__CLASS__);
@@ -12,16 +12,20 @@ class AddFollowPlan extends BaseApi
             return $ret;
         }
         
-        $required = ['department_id', 'patient_id', 'plan_text', 'doctor_id', 'name'];
+        $required = ['department_id', 'patient_id', 'plan_id', 'record_text', 'diagnosis', 'doctor_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
             return $checkRequired;
         }
         
-        $checkNumeric = HpValidate::checkNumeric(['department_id', 'patient_id', 'doctor_id'], $this->param);
+        $checkNumeric = HpValidate::checkNumeric(['department_id', 'patient_id', 'plan_id', 'doctor_id'], $this->param);
         if (true !== $checkNumeric) {
             return $checkNumeric;
+        }
+        
+        if (false === Dbi::getDbi()->existedFollowPlan($this->param['plan_id'])) {
+            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'plan_id.');
         }
         
         if (false === Dbi::getDbi()->existedDepartment($this->param['department_id'])) {
@@ -40,9 +44,13 @@ class AddFollowPlan extends BaseApi
             return HpErrorMessage::getError(ERROR_NOT_IN_DEPARTMENT);
         }
         
-        $this->planList = $this->getStructalData($this->param['plan_text']);
-        if (empty($this->planList)) {
-            return HpErrorMessage::getError(ERROR_PARAM_FORMAT, 'plan_text.');
+        if (isset($this->param['examination'])) {
+            $this->examinationList = $this->getStructalData($this->param['examination']);
+            foreach ($this->examinationList as $exam) {
+                if (false === Dbi::getDbi()->existedExamination($exam[0])) {
+                    return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'examination_id.');
+                }
+            }
         }
         
         return true;
@@ -50,12 +58,13 @@ class AddFollowPlan extends BaseApi
     
     protected function execute()
     {
-        $followPlanId = Dbi::getDbi()->addFollowPlan($this->param['department_id'], $this->param['patient_id'], 
-                $this->param['plan_text'], $this->planList, $this->param['doctor_id'], $this->param['name']);
-        if (VALUE_DB_ERROR === $followPlanId) {
+        $followRecordId = Dbi::getDbi()->addFollowRecord($this->param['department_id'], $this->param['patient_id'], 
+                $this->param['plan_id'], $this->param['record_text'], $this->param['examination'], $this->examinationList, 
+                $this->param['diagnosis'], $this->param['doctor_id']);
+        if (VALUE_DB_ERROR === $followRecordId) {
             return HpErrorMessage::getError(ERROR_DB);
         }
-        $this->retSuccess['follow_plan_id'] = $followPlanId;
+        $this->retSuccess['follow_record_id'] = $followRecordId;
         return $this->retSuccess;
     }
 }

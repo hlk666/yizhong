@@ -42,13 +42,28 @@ class GetRecordList extends BaseApi
         $startTime = isset($this->param['start_time']) ? $this->param['start_time'] : null;
         $endTime = isset($this->param['end_time']) ? $this->param['end_time'] : null;
         
-        $recordList = Dbi::getDbi()->getRecordList($this->param['patient_id'], $departmentId, $startTime, $endTime);
-        if (VALUE_DB_ERROR === $recordList) {
+        $outpatients = Dbi::getDbi()->getRecordListOutpatient($this->param['patient_id'], $departmentId, $startTime, $endTime);
+        if (VALUE_DB_ERROR === $outpatients) {
             return HpErrorMessage::getError(ERROR_DB);
         }
-        if (empty($recordList)) {
-            return HpErrorMessage::getError(ERROR_NO_DATA);
+        
+        $follows = Dbi::getDbi()->getRecordListFollow($this->param['patient_id'], $departmentId, $startTime, $endTime);
+        if (VALUE_DB_ERROR === $follows) {
+            return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        $consultations = Dbi::getDbi()->getRecordListConsultation($this->param['patient_id'], $departmentId, $startTime, $endTime);
+        if (VALUE_DB_ERROR === $consultations) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $referrals = Dbi::getDbi()->getRecordListReferral($this->param['patient_id'], $departmentId, $startTime, $endTime);
+        if (VALUE_DB_ERROR === $referrals) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $recordList = array_merge($outpatients, $follows, $consultations, $referrals);
+        
         $this->retSuccess['record_list'] = $recordList;
         return $this->retSuccess;
     }

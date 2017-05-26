@@ -26,7 +26,7 @@ class HpVerificationCode
         return $vc;
     }
     
-    public static function getFileNumericVC($sid, $length = 4)
+    public static function createFileNumericVC($sid, $length = 4)
     {
         $vc = self::getNumericVC($length);
         self::writeVerificationCodeFile($sid, $vc);
@@ -34,7 +34,17 @@ class HpVerificationCode
         return $vc;
     }
     
-    public static function getFileLetterVC($sid, $length = 4)
+    public static function getVC($sid)
+    {
+        $vcFile = PATH_ROOT . 'vc' . DIRECTORY_SEPARATOR . $sid . '.php';
+        if (!file_exists($vcFile)) {
+            return null;
+        }
+        include $vcFile;
+        return $vcServer;
+    }
+    
+    public static function createFileLetterVC($sid, $length = 4)
     {
         $vc = self::getLetterVC($length);
         self::writeVerificationCodeFile($sid, $vc);
@@ -44,9 +54,13 @@ class HpVerificationCode
     
     private static function writeVerificationCodeFile($sid, $vc)
     {
-        $vcFile = PATH_ROOT . 'vc' . DIRECTORY_SEPARATOR . $sid . '.php';
+        $dir = PATH_ROOT . 'vc' . DIRECTORY_SEPARATOR;
+        if (!file_exists($dir)) {
+            mkdir($dir);
+        }
+        $vcFile =  $dir . $sid . '.php';
         $template = "<?php\n";
-        $template .= '$vcServer = ' . $vc . ";\n";
+        $template .= '$vcServer = \'' . $vc . "';\n";
         file_put_contents($vcFile, $template);
     }
 }

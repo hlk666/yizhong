@@ -1,4 +1,5 @@
 <?php
+require_once PATH_ROOT . 'lib/util/HpLogger.php';
 class BaseDbi
 {
     protected $pdo = null;

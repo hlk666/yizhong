@@ -7,10 +7,9 @@ class HpNoticeQuery
     private $_cacheFile;
     private $_dimension;
     private $_logFile = 'notice_query.log';
-    public function __construct($category, $type, $id, $dimension)
+    public function __construct($type, $id, $dimension = DIMENSION_TWO, $category = 'message')
     {
         $this->_dimension = $dimension;
-        
         if (DIMENSION_ONE === $dimension) {
             $this->_cacheFile = new HpCacheFile($category, $type, $id);
         } elseif (DIMENSION_TWO === $dimension) {
