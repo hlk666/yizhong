@@ -300,7 +300,7 @@ class Dbi extends BaseDbi
         $param = [':id' => $hospitalId];
         return $this->deleteData($sql, $param);
     }
-    public function deletePatient($patientId, $departmentId)
+    public function deletePatient($patientId, $departmentId, $newDepartmentId = '0')
     {
         $sql = 'select department1, department2, department3, department_once from patient where id = :id limit 1';
         $param = [':id' => $patientId];
@@ -311,16 +311,16 @@ class Dbi extends BaseDbi
         
         $data = array();
         if ($ret['department1'] == $departmentId) {
-            $data['department1'] = '0';
+            $data['department1'] = $newDepartmentId;
         }
         if ($ret['department2'] == $departmentId) {
-            $data['department2'] = '0';
+            $data['department2'] = $newDepartmentId;
         }
         if ($ret['department3'] == $departmentId) {
-            $data['department3'] = '0';
+            $data['department3'] = $newDepartmentId;
         }
         if ($ret['department_once'] == $departmentId) {
-            $data['department_once'] = '0';
+            $data['department_once'] = $newDepartmentId;
         }
         
         return $this->updateTableByKey('patient', 'id', $patientId, $data);
@@ -699,11 +699,46 @@ class Dbi extends BaseDbi
         $param = [':dpt' => $departmentId];
         return $this->getDataAll($sql, $param);
     }
+    public function getRecordInfoConsultation($consultationId)
+    {
+        $sql = 'select h1.id as hospital_id, h1.name as hospital_name, de1.id as department_id, de1.name as department_name,
+                c.patient_id, p.name as patient_name, d1.id as doctor_id, d1.real_name as doctor_name, 
+                apply_time, apply_message, 
+                h2.id as reply_hospital_id, h2.name as reply_hospital_name, de2.id as reply_department_id, de2.name as reply_department_name,
+                reply_doctor_id, d2.real_name as reply_doctor_name, reply_time, diagnosis, advice
+                from consultation as c
+                inner join department as de1 on c.apply_department_id = de1.id
+                inner join hospital as h1 on de1.hospital_id = h1.id
+                inner join patient as p on c.patient_id = p.id
+                inner join doctor as d1 on c.apply_doctor_id = d1.id
+                inner join department as de2 on c.reply_department_id = de2.id
+                inner join hospital as h2 on de2.hospital_id = h2.id
+                left join doctor as d2 on c.reply_doctor_id = d2.id
+                where c.id = :id ';
+        $param = [':id' => $consultationId];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getRecordInfoFollow($followRecordId)
+    {
+        $sql = 'select h.id as hospital_id, h.name as hospital_name, de.id as department_id, de.name as department_name,
+                f.patient_id, p.name as patient_name, doctor_id, d.real_name as doctor_name, 
+                pl.plan_time, pl.plan_value, f.create_time as follow_time, record_text, examination, diagnosis
+                from follow_record as f
+                left join plan as pl on f.plan_id = pl.id
+                inner join department as de on f.department_id = de.id
+                inner join hospital as h on de.hospital_id = h.id
+                inner join patient as p on f.patient_id = p.id
+                inner join doctor as d on f.doctor_id = d.id
+                where f.id = :id ';
+        $param = [':id' => $followRecordId];
+        return $this->getDataRow($sql, $param);
+    }
     public function getRecordInfoOutpatient($outpatientId)
     {
         $sql = 'select h.id as hospital_id, h.name as hospital_name, de.id as department_id, de.name as department_name,
-                o.patient_id, p.name as patient_name, o.create_time as outpatient_time, chief_complaint, description,
-                medicine_history, medicine_advice, examination, diagnosis, doctor_id, d.real_name as doctor_name
+                o.patient_id, p.name as patient_name, doctor_id, d.real_name as doctor_name, 
+                o.create_time as outpatient_time, chief_complaint, description,
+                medicine_history, medicine_advice, examination, diagnosis
                 from outpatient as o
                 inner join department as de on o.department_id = de.id
                 inner join hospital as h on de.hospital_id = h.id
@@ -711,6 +746,30 @@ class Dbi extends BaseDbi
                 inner join doctor as d on o.doctor_id = d.id
                 where o.id = :id ';
         $param = [':id' => $outpatientId];
+        return $this->getDataRow($sql, $param);
+    }
+    public function getRecordInfoReferral($referralId)
+    {
+        $sql = 'select h1.id as hospital_id, h1.name as hospital_name, de1.id as department_id, de1.name as department_name,
+                r.patient_id, p.name as patient_name, d1.id as doctor_id, d1.real_name as doctor_name, 
+                apply_time, apply_message, 
+                h2.id as reply_hospital_id, h2.name as reply_hospital_name, de2.id as reply_department_id, de2.name as reply_department_name,
+                reply_doctor_id, d2.real_name as reply_doctor_name, reply_time, reply_message, 
+                confirm_time, confirm_doctor_id, d3.real_name as confirm_doctor_name, 
+                discharge_time, discharge_doctor_id, d4.real_name as discharge_doctor_name, diagnosis, info, follow_plan_id, fp.name as follow_plan_name, fp.plan_text
+                from referral as r
+                inner join department as de1 on r.apply_department_id = de1.id
+                inner join hospital as h1 on de1.hospital_id = h1.id
+                inner join patient as p on r.patient_id = p.id
+                inner join doctor as d1 on r.apply_doctor_id = d1.id
+                inner join department as de2 on r.reply_department_id = de2.id
+                inner join hospital as h2 on de2.hospital_id = h2.id
+                left join doctor as d2 on r.reply_doctor_id = d2.id
+                left join doctor as d3 on r.confirm_doctor_id = d3.id
+                left join doctor as d4 on r.discharge_doctor_id = d4.id
+                left join follow_plan as fp on r.follow_plan_id = fp.id
+                where r.id = :id ';
+        $param = [':id' => $referralId];
         return $this->getDataRow($sql, $param);
     }
     public function getRecordListConsultation($patientId, $departmentId = null, $startTime = null, $endTime = null)
@@ -874,7 +933,7 @@ class Dbi extends BaseDbi
             $address = null, $hospitalization = null)
     {
         $sql = 'select id, identity_card, name, birth_year, sex,  tel, address, ethnic, native_place, hospitalization, 
-                family_name, family_tel from patient where 1 ';
+                family_name, family_tel, department1, department2, department3, department_once from patient where 1 ';
         if ($name != null) {
             $sql .= " and name like '%$name%' ";
         }

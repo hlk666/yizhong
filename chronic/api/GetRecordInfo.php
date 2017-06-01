@@ -36,11 +36,11 @@ class GetRecordInfo extends BaseApi
         if ($this->param['type'] == 'outpatient') {
             $recordInfo = Dbi::getDbi()->getRecordInfoOutpatient($this->param['record_id']);
         } elseif ($this->param['type'] == 'follow') {
-            
+            $recordInfo = Dbi::getDbi()->getRecordInfoFollow($this->param['record_id']);
         } elseif ($this->param['type'] == 'consultation') {
-            
+            $recordInfo = Dbi::getDbi()->getRecordInfoConsultation($this->param['record_id']);
         } elseif ($this->param['type'] == 'referral') {
-            
+            $recordInfo = Dbi::getDbi()->getRecordInfoReferral($this->param['record_id']);
         } else {
             return HpErrorMessage::getError(ERROR_PARAM_RANGE, 'type');
         }
