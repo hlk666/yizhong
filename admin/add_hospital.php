@@ -19,6 +19,7 @@ if (isset($_POST['submit'])){
     $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
     $messageTel = (isset($_POST['message_tel']) && !empty($_POST['message_tel'])) ? $_POST['message_tel'] : '0';
     $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '';
+    $comment = (isset($_POST['comment']) && !empty($_POST['comment'])) ? $_POST['comment'] : '';
     
     if (empty($hospitalName)) {
         user_back_after_delay('请正确输入医院名。');
@@ -42,7 +43,7 @@ if (isset($_POST['submit'])){
     }
     
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, 
-            $parentFlag, $hospitalParent, $adminUser, $messageTel, $salesman);
+            $parentFlag, $hospitalParent, $adminUser, $messageTel, $salesman, $comment);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -114,6 +115,12 @@ if (isset($_POST['submit'])){
       <select class="form-control" name="hospital_parent">
         <option value="0">请选择上级医院(非必须)</option>$htmlParentHospitals
     </select></div>
+  </div>
+  <div class="form-group">
+    <label for="comment" class="col-sm-2 control-label">报告底部文字</label>
+    <div class="col-sm-10">
+      <textarea class="form-control" rows="5" name="comment"></textarea>
+    </div>
   </div>
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">

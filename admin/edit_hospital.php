@@ -19,6 +19,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $loginUser = !isset($_POST['login_user']) ? null : $_POST['login_user'];
     $messageTel = isset($_POST['message_tel']) ? $_POST['message_tel'] : '0';
     $salesman = isset($_POST['salesman']) ? $_POST['salesman'] : '';
+    $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
     
     if (empty($hospitalId)) {
         user_back_after_delay('非法访问');
@@ -50,7 +51,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         }
         
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $hospitalTel, $hospitalAddress, 
-                $parentFlag, $loginUser, $messageTel, $salesman);
+                $parentFlag, $loginUser, $messageTel, $salesman, $comment);
     }
     
     if (isset($_POST['del'])) {
@@ -83,6 +84,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $loginUser = $hospitalInfo['login_name'];
     $messageTel = $hospitalInfo['sms_tel'];
     $salesman = $hospitalInfo['salesman'];
+    $comment = $hospitalInfo['comment'];
     
     if ('1' == $hospitalInfo['parent_flag']) {
         $htmlParentFlagYes = '<input type="radio" name="parent_flag" value="1" checked>可</label>';
@@ -145,6 +147,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <label for="salesman" class="col-sm-2 control-label">业务员<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="salesman" name="salesman" value="$salesman">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="comment" class="col-sm-2 control-label">报告底部文字</label>
+    <div class="col-sm-10">
+      <textarea class="form-control" rows="5" name="comment">$comment</textarea>
     </div>
   </div>
   <div class="form-group">

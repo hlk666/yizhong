@@ -79,7 +79,7 @@ class DbiAnalytics extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = 'select t.hospital_id, analysis_hospital, report_hospital, title_hospital, h.hospital_name as title_hospital_name 
+        $sql = 'select t.hospital_id, analysis_hospital, report_hospital, title_hospital, h.hospital_name as title_hospital_name, h.comment
                 from hospital_tree as t inner join hospital as h on title_hospital = h.hospital_id
                 where t.hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
@@ -98,6 +98,11 @@ class DbiAnalytics extends BaseDbi
         }
         
         return $hospitalConfig;
+    }
+    public function getHospitalConfigAll()
+    {
+        $sql = 'select * from hospital_tree';
+        return $this->getDataAll($sql);
     }
     public function getPatient($guardianId)
     {
@@ -120,6 +125,19 @@ class DbiAnalytics extends BaseDbi
         $sql = 'select hospital_id from hospital_tree where analysis_hospital = :hospital';
         $param = array(':hospital' => $hospitalId);
         return $this->getDataAll($sql, $param);
+    }
+    
+    public function getPatientsNeedFollow()
+    {
+        $sql = 'select d.guardian_id as patient_id, p.patient_name, h.hospital_id, h.hospital_name, 
+                upload_time, download_end_time as download_time, 
+                case d.status when 2 then "已上传" when 3 then "已下载" when 4 then "已分析" else "" end as status
+                from guardian_data as d inner join guardian as g on d.guardian_id = g.guardian_id
+                inner join patient as p on g.patient_id = p.patient_id
+                inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                where d.status in (2, 3, 4) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
+                order by upload_time';
+        return $this->getDataAll($sql);
     }
     
     public function getPatients($hospitalIdList, $offset, $rows, $patientName = null, $startTime = null, $endTime = null, 
@@ -172,7 +190,7 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = 'select m1.guardian_id from history_move_data as m1 
                 left join history_move_data as m2 on m1.hospital_from = m2.hospital_to and m1.hospital_to = m2.hospital_from
-                where m1.hospital_from = :hospital and m2.guardian_id is null';
+                where m1.hospital_from = :hospital and m2.guardian_id is null order by m1.guardian_id desc';
         $param = [':hospital' => $hospitalId];
         $guardians = $this->getDataAll($sql, $param);
         if (VALUE_DB_ERROR === $guardians) {
