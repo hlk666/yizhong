@@ -63,6 +63,10 @@ class EditCase extends BaseApi
         if (isset($this->param['body_examination'])) {
             $data['body_examination'] = $this->param['body_examination'];
         }
+        if (empty($data)) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
+        }
+        
         $ret = Dbi::getDbi()->editCase($caseId, $data);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);

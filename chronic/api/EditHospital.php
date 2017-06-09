@@ -54,6 +54,9 @@ class EditHospital extends BaseApi
         if (isset($this->param['address'])) {
             $data['address'] = $this->param['address'];
         }
+        if (empty($data)) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
+        }
         
         $ret = Dbi::getDbi()->editHospital($this->param['hospital_id'], $data);
         if (VALUE_DB_ERROR === $ret) {

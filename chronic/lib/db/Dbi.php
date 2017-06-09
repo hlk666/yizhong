@@ -549,7 +549,7 @@ class Dbi extends BaseDbi
     }
     public function getDepartmentList($hospitalId)
     {
-        $sql = 'select id as department_id, name as department_name from department where hospital_id = :hospital_id';
+        $sql = 'select id as department_id, name as department_name, tel from department where hospital_id = :hospital_id';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }

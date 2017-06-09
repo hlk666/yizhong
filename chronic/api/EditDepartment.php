@@ -39,6 +39,9 @@ class EditDepartment extends BaseApi
         if (isset($this->param['tel'])) {
             $data['tel'] = $this->param['tel'];
         }
+        if (empty($data)) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
+        }
         
         $ret = Dbi::getDbi()->editDepartment($this->param['department_id'], $data);
         if (VALUE_DB_ERROR === $ret) {

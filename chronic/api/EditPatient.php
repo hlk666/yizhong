@@ -72,6 +72,9 @@ class EditPatient extends BaseApi
         if (isset($this->param['family_tel'])) {
             $data['family_tel'] = $this->param['family_tel'];
         }
+        if (empty($data)) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
+        }
         
         $ret = Dbi::getDbi()->editPatient($this->param['patient_id'], $data);
         if (VALUE_DB_ERROR === $ret) {

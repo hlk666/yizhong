@@ -65,6 +65,9 @@ class EditDoctor extends BaseApi
         if (isset($this->param['phone'])) {
             $data['phone'] = $this->param['phone'];
         }
+        if (empty($data)) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
+        }
         
         $ret = Dbi::getDbi()->editDoctor($this->param['doctor_id'], $data);
         if (VALUE_DB_ERROR === $ret) {
