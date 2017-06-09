@@ -16,7 +16,7 @@ class GetFollowPlanList extends BaseApi
         }
         
         if (isset($this->param['department_id'])) {
-            if (fasle === HpValidate::checkRequired($this->param['department_id'])) {
+            if (false === HpValidate::checkRequired($this->param['department_id'])) {
                 return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'department_id.');
             }
             $checkNumeric = HpValidate::checkNumeric(['department_id'], $this->param);
@@ -26,7 +26,7 @@ class GetFollowPlanList extends BaseApi
         }
         
         if (isset($this->param['patient_id'])) {
-            if (fasle === HpValidate::checkRequired($this->param['patient_id'])) {
+            if (false === HpValidate::checkRequired($this->param['patient_id'])) {
                 return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'patient_id.');
             }
             $checkNumeric = HpValidate::checkNumeric(['patient_id'], $this->param);

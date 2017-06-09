@@ -12,7 +12,7 @@ class DeleteNotice extends BaseApi
             return $ret;
         }
         
-        $required = ['type', 'id', 'notice_id'];
+        $required = ['id', 'notice_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -24,7 +24,7 @@ class DeleteNotice extends BaseApi
     
     protected function execute()
     {
-        $notice = new HpNoticeQuery($this->param['type'], $this->param['id']);
+        $notice = new HpNoticeQuery('department', $this->param['id']);
         $notice->delete($this->param['notice_id']);
         return $this->retSuccess;
     }

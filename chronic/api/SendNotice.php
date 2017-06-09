@@ -2,7 +2,7 @@
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/util/HpNoticeQuery.php';
 
-class AddNotice extends BaseApi
+class SendNotice extends BaseApi
 {
     private $dataList = array();
     protected function validate($class = '')
@@ -12,7 +12,7 @@ class AddNotice extends BaseApi
             return $ret;
         }
         
-        $required = ['type', 'id', 'data'];
+        $required = ['id', 'data'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -29,7 +29,7 @@ class AddNotice extends BaseApi
     
     protected function execute()
     {
-        $notice = new HpNoticeQuery($this->param['type'], $this->param['id']);
+        $notice = new HpNoticeQuery('department', $this->param['id']);
         $messages = $notice->set($this->dataList);
         return $this->retSuccess;
     }

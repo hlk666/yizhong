@@ -16,7 +16,7 @@ class GetConsultationList extends BaseApi
         }
         
         if (isset($this->param['department_id'])) {
-            if (fasle === HpValidate::checkRequired($this->param['department_id'])) {
+            if (false === HpValidate::checkRequired($this->param['department_id'])) {
                 return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'department_id.');
             }
             $checkNumeric = HpValidate::checkNumeric(['department_id'], $this->param);
@@ -26,7 +26,7 @@ class GetConsultationList extends BaseApi
         }
         
         if (isset($this->param['patient_id'])) {
-            if (fasle === HpValidate::checkRequired($this->param['patient_id'])) {
+            if (false === HpValidate::checkRequired($this->param['patient_id'])) {
                 return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'patient_id.');
             }
             $checkNumeric = HpValidate::checkNumeric(['patient_id'], $this->param);
@@ -45,18 +45,21 @@ class GetConsultationList extends BaseApi
         //$startTime = isset($this->param['start_time']) ? $this->param['start_time'] : null;
         //$endTime = isset($this->param['end_time']) ? $this->param['end_time'] : null;
         
-        $consultationApplied = Dbi::getDbi()->getConsultationListApplied($departmentId, $patientId);
-        if (VALUE_DB_ERROR === $consultationApplied) {
+        $consultationApply = Dbi::getDbi()->getConsultationList($departmentId, $patientId, 'apply');
+        if (VALUE_DB_ERROR === $consultationApply) {
             return HpErrorMessage::getError(ERROR_DB);
         }
-        
-        $consultationReplied = Dbi::getDbi()->getConsultationListReplied($departmentId, $patientId);
-        if (VALUE_DB_ERROR === $consultationReplied) {
-            return HpErrorMessage::getError(ERROR_DB);
+        if (empty($departmentId)) {
+            $consultationReply = array();
+        } else {
+            $consultationReply = Dbi::getDbi()->getConsultationList($departmentId, $patientId, 'reply');
+            if (VALUE_DB_ERROR === $consultationReply) {
+                return HpErrorMessage::getError(ERROR_DB);
+            }
         }
 
-        $this->retSuccess['consultation_apply'] = $consultationApplied;
-        $this->retSuccess['consultation_reply'] = $consultationReplied;
+        $this->retSuccess['consultation_apply'] = $consultationApply;
+        $this->retSuccess['consultation_reply'] = $consultationReply;
         return $this->retSuccess;
     }
 }

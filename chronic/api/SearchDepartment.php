@@ -12,7 +12,6 @@ class SearchDepartment extends BaseApi
         }
         
         if (empty($this->param['name']) 
-                && empty($this->param['level'])
                 && empty($this->param['tel'])) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
         }
@@ -32,7 +31,7 @@ class SearchDepartment extends BaseApi
         if (empty($department)) {
             return HpErrorMessage::getError(ERROR_NO_DATA);
         }
-        $this->retSuccess['department'] = $department;
+        $this->retSuccess['department_list'] = $department;
         return $this->retSuccess;
     }
 }

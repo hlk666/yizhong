@@ -1,6 +1,6 @@
 <?php
 require '../config/config.php';
-require PATH_ROOT . 'lib/notice/HpNoticeQuery.php';
+require PATH_ROOT . 'lib/util/HpNoticeQuery.php';
 
 $data1 = ['name' => 'test1', 'message' => 'message1', 'time' => '2017-01-01 00:00:00'];
 $data2 = [
@@ -10,8 +10,8 @@ $data2 = [
                 
 ];
 
-$notice1 = new HpNoticeQuery('message', 'hospital', '1', DIMENSION_ONE);
-$notice2 = new HpNoticeQuery('message', 'hospital', '2', DIMENSION_TWO);
+$notice1 = new HpNoticeQuery('hospital', '1', DIMENSION_ONE, 'message');
+$notice2 = new HpNoticeQuery('hospital', '2', DIMENSION_TWO, 'message');
 
 
 $notice1->set($data1);

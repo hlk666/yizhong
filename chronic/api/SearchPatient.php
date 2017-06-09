@@ -41,7 +41,7 @@ class SearchPatient extends BaseApi
         if (empty($patient)) {
             return HpErrorMessage::getError(ERROR_NO_DATA);
         }
-        $this->retSuccess['patient'] = $patient;
+        $this->retSuccess['patient_list'] = $patient;
         return $this->retSuccess;
     }
 }

@@ -24,7 +24,7 @@ class GetExaminationList extends BaseApi
         }
         
         if (isset($this->param['department_id'])) {
-            if (fasle === HpValidate::checkRequired($this->param['department_id'])) {
+            if (false === HpValidate::checkRequired($this->param['department_id'])) {
                 return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'department_id.');
             }
             $checkNumeric = HpValidate::checkNumeric(['department_id'], $this->param);

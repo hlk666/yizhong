@@ -11,7 +11,7 @@ class GetNotice extends BaseApi
             return $ret;
         }
         
-        $required = ['type', 'id'];
+        $required = ['id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -23,7 +23,7 @@ class GetNotice extends BaseApi
     
     protected function execute()
     {
-        $notice = new HpNoticeQuery($this->param['type'], $this->param['id']);
+        $notice = new HpNoticeQuery('department', $this->param['id']);
         $messages = $notice->getAll();
         $this->retSuccess['notice'] = $messages;
         return $this->retSuccess;
