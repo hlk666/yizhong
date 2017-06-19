@@ -344,6 +344,11 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
+    public function getGuardianError()
+    {
+        $sql = 'select guardian_id, create_time, content from guardian_error where notice_flag = 0';
+        return $this->getDataAll($sql);
+    }
     public function getHospitalByDevice($diviceId)
     {
         $sql = 'select hospital_id from device where device_id = :device limit 1';
@@ -442,7 +447,7 @@ class Dbi extends BaseDbi
     {
         $sql = 'select g.device_id, g.start_time, g.regist_doctor_name as doctor_name
                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
-                where g.regist_hospital_id = :hospital and p.patient_name = :name 
+                where g.regist_hospital_id = :hospital and p.patient_name = :name and g.status = 1 
                 and g.regist_time > date_add(now(), interval "-12" hour)';
         $param = [':hospital' => $hospital, ':name' => $name];
         return $this->getDataAll($sql, $param);
@@ -489,6 +494,12 @@ class Dbi extends BaseDbi
         }
         $this->pdo->commit();
         return true;
+    }
+    public function addGuardError($guardianId, $content)
+    {
+        $sql = 'insert into guardian_error (guardian_id, content) values (:id, :content)';
+        $param = [':id' => $guardianId, ':content' => $content];
+        return $this->insertData($sql, $param);
     }
     public function delEcg($ecgId)
     {
@@ -695,6 +706,12 @@ class Dbi extends BaseDbi
     public function noticeDownloadData($guardianId, array $data)
     {
         return $this->updateTableByKey('guardian_data', 'guardian_id', $guardianId, $data);
+    }
+    public function noticeGuardianError($guardianId)
+    {
+        $sql = 'update guardian_error set notice_flag = 1 where guardian_id = :id';
+        $param = [':id' => $guardianId];
+        return $this->updateData($sql, $param);
     }
     public function updatePassword($user, $newPwd)
     {
