@@ -71,15 +71,18 @@ class AnalysisUpload
         }
         //end
         
+        $message = isset($param['message']) ? $param['message'] : '0';
         $hbiDoctor = isset($param['hbi_doctor']) ? $param['hbi_doctor'] : '0';
         $reportDoctor = isset($param['report_doctor']) ? $param['report_doctor'] : '0';
+        
         //need check user and password here.
-        $ret = DbiAnalytics::getDbi()->setDataStatus($guardianId, $type, $hbiDoctor, $reportDoctor);
-        if (VALUE_DB_ERROR === $ret) {
-            api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+        if ($message == '1' || $message == '2') {
+            $ret = DbiAnalytics::getDbi()->setDataStatus($guardianId, $type, $hbiDoctor, $reportDoctor);
+            if (VALUE_DB_ERROR === $ret) {
+                api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+            }
         }
         
-        $message = isset($param['message']) ? $param['message'] : '0';
         if ('1' == $message) {
             $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
             if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
