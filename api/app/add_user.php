@@ -2,6 +2,7 @@
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Invigilator.php';
+require_once PATH_LIB . 'ShortMessageService.php';
 
 validate_add_user($_POST);
 
@@ -187,6 +188,8 @@ setRegistNotice($guardHospital, $mode);
 if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
 }
+
+ShortMessageService::send('15684158646', '有新的注册信息，病人姓名：' . $name);
 
 api_exit_success();
 

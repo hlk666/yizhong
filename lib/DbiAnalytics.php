@@ -37,6 +37,13 @@ class DbiAnalytics extends BaseDbi
         return $this->insertData($sql, $param);
     }
     
+    public function getDiagnosisByPatient($patientId)
+    {
+        $sql = 'select distinct diagnosis_id, create_time from patient_diagnosis where patient_id = :id';
+        $param = [':id' => $patientId];
+        return $this->getDataAll($sql, $param);
+    }
+    
     public function getHospitalInfo($hospitalId)
     {
         $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel

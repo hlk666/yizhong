@@ -2,7 +2,6 @@
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'DbiAnalytics.php';
 require_once PATH_LIB . 'Validate.php';
-require_once PATH_LIB . 'ShortMessageService.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
