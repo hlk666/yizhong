@@ -675,9 +675,25 @@ class Dbi extends BaseDbi
     }
     public function flowGuardianStartGuard($guardianId)
     {
+        $sql = 'select regist_hospital_id from guardian where guardian_id = :guardian_id limit 1';
+        $param = [':guardian_id' => $guardianId];
+        $hospitalId = $this->getDataString($sql, $param);
+        if (VALUE_DB_ERROR === $hospitalId || '' == $hospitalId) {
+            return VALUE_DB_ERROR;
+        }
+        $sql = 'select analysis_hospital from hospital_tree where hospital_id = :hospital_id limit 1';
+        $param = [':hospital_id' => $hospitalId];
+        $analysisHospital = $this->getDataString($sql, $param);
+        if (VALUE_DB_ERROR === $analysisHospital) {
+            return VALUE_DB_ERROR;
+        }
+        if (empty($analysisHospital)) {
+            $analysisHospital = $hospitalId;
+        }
+        
         $this->pdo->beginTransaction();
-        $sql = 'insert into guardian_data(guardian_id, url, status) values (:guardian, "", 1)';
-        $param = [':guardian' => $guardianId];
+        $sql = 'insert into guardian_data(guardian_id, url, status, moved_hospital) values (:guardian, "", 1, :movedHospital)';
+        $param = [':guardian' => $guardianId, ':movedHospital' => $analysisHospital];
         $guardianId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $guardianId) {
             $this->pdo->rollBack();
