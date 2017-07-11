@@ -93,31 +93,6 @@ class AnalysisUpload
                     setNotice($tree['hospital_id'], $type, $guardianId);
                 }
             }
-            
-            $hospitalTo = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
-            if (VALUE_DB_ERROR === $hospitalTo) {
-                api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
-            }
-            $hospitalFrom = DbiAnalytics::getDbi()->getHospitalFrom($guardianId, $hospitalTo);
-            if (VALUE_DB_ERROR !== $hospitalFrom && !empty($hospitalFrom)) {
-                if ('hbi' == $type) {
-                    $ret = DbiAnalytics::getDbi()->moveData($guardianId, $hospitalTo, $hospitalFrom, '1');
-                    if (VALUE_DB_ERROR === $ret) {
-                        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
-                    }
-                    //setNotice($hospitalFrom, 'hbi', $guardianId);
-                    $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
-                    if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
-                        setNotice($tree['report_hospital'], 'hbi', $guardianId);
-                    }
-                    else {
-                        setNotice($hospitalFrom, 'hbi', $guardianId);
-                    }
-                }
-                if ('report' == $type) {
-                    //not exist.
-                }
-            }
         }
         
         return json_encode($this->retSuccess);
