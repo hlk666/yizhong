@@ -15,7 +15,7 @@ class AnalysisUpload
             return json_encode($this->error);
         }
         
-        $ret = $this->validate($param, $data);
+        $ret = $this->validate($param, $data, $type);
         if (false === $ret) {
             return json_encode($this->error);
         }
@@ -123,7 +123,7 @@ class AnalysisUpload
         return json_encode($this->retSuccess);
     }
     
-    private function validate($param, $data)
+    private function validate($param, $data, $type)
     {
         if (!isset($param['hospital_id']) || trim($param['hospital_id']) == '') {
             $this->setError(1, 'hospital_id is empty.');
@@ -137,6 +137,17 @@ class AnalysisUpload
             $this->setError(1, 'no file uploaded.');
             return false;
         }
+        
+        if ($type == 'report') {
+            $len = strlen($data);
+            $size = isset($param['size']) ? $param['size'] : 0;
+            Logger::write($this->logFile, $param['patient_id'] . ' : ' . $size);
+            if ($size != 0 && $len != $size) {
+                $this->setError(2, $param['patient_id'] . ' : Data size is wrong.');
+                return false;
+            }
+        }
+        
         return true;
     }
     
