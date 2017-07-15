@@ -55,13 +55,13 @@ class AddOutpatientRecord extends BaseApi
     protected function execute()
     {
         $chiefComplaint = isset($this->param['chief_complaint']) ? $this->param['chief_complaint'] : '';
-        $description = isset($this->param['descption']) ? $this->param['descption'] : '';
+        $description = isset($this->param['description']) ? $this->param['description'] : '';
         $medicineHistory = isset($this->param['medicine_history']) ? $this->param['medicine_history'] : '';
         $medicineAdvice = isset($this->param['medicine_advice']) ? $this->param['medicine_advice'] : '';
         $examination = isset($this->param['examination']) ? $this->param['examination'] : '';
         
         $outpatientId = Dbi::getDbi()->addOutpatient($this->param['department_id'], $this->param['patient_id'], 
-                $chiefComplaint, $descption, $medicineHistory, $medicineAdvice, $examination, $this->examinationList, 
+                $chiefComplaint, $description, $medicineHistory, $medicineAdvice, $examination, $this->examinationList, 
                 $this->param['diagnosis'], $this->param['doctor_id']);
         if (VALUE_DB_ERROR === $outpatientId) {
             return HpErrorMessage::getError(ERROR_DB);

@@ -23,7 +23,7 @@ class DeletePatient extends BaseApi
             return $checkNumeric;
         }
         
-        if (false === Dbi::getDbi()->existedCase($this->param['patient_id'])) {
+        if (false === Dbi::getDbi()->existedPatient($this->param['patient_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'patient_id.');
         }
         if (false === Dbi::getDbi()->existedDepartment($this->param['department_id'])) {

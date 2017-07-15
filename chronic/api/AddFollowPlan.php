@@ -12,7 +12,7 @@ class AddFollowPlan extends BaseApi
             return $ret;
         }
         
-        $required = ['department_id', 'patient_id', 'plan_text', 'doctor_id', 'name'];
+        $required = ['department_id', 'patient_id', 'name', 'plan_text', 'doctor_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {

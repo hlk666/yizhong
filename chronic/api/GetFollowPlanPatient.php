@@ -11,12 +11,38 @@ class GetFollowPlanPatient extends BaseApi
             return $ret;
         }
         
+        if (!isset($this->param['department_id']) && !isset($this->param['patient_id'])) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'department_id | patient_id.');
+        }
+        
+        if (isset($this->param['department_id'])) {
+            if (false === HpValidate::checkRequired($this->param['department_id'])) {
+                return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'department_id.');
+            }
+            $checkNumeric = HpValidate::checkNumeric(['department_id'], $this->param);
+            if (true !== $checkNumeric) {
+                return $checkNumeric;
+            }
+        }
+        
+        if (isset($this->param['patient_id'])) {
+            if (false === HpValidate::checkRequired($this->param['patient_id'])) {
+                return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'patient_id.');
+            }
+            $checkNumeric = HpValidate::checkNumeric(['patient_id'], $this->param);
+            if (true !== $checkNumeric) {
+                return $checkNumeric;
+            }
+        }
+        
         return true;
     }
     
     protected function execute()
     {
-        $followPlanPatient = Dbi::getDbi()->getFollowPlanPatient();
+        $departmentId = isset($this->param['department_id']) ? $this->param['department_id'] : null;
+        $patientId = isset($this->param['patient_id']) ? $this->param['patient_id'] : null;
+        $followPlanPatient = Dbi::getDbi()->getFollowPlanPatient($departmentId, $patientId);
         if (VALUE_DB_ERROR === $followPlanPatient) {
             return HpErrorMessage::getError(ERROR_DB);
         }

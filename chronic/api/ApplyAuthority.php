@@ -12,7 +12,7 @@ class ApplyAuthority extends BaseApi
             return $ret;
         }
         
-        $required = ['new_department', 'old_department', 'patient_id', 'vc'];
+        $required = ['patient_id', 'new_department', 'vc'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -24,18 +24,12 @@ class ApplyAuthority extends BaseApi
             return $checkNumeric;
         }
         
-        if (false === Dbi::getDbi()->existedDepartment($this->param['new_department'])) {
-            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'new_department.');
-        }
-        if (false === Dbi::getDbi()->existedDepartment($this->param['old_department'])) {
-            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'old_department.');
-        }
-        if (false === Dbi::getDbi()->isPatientInDepartment($this->param['patient_id'], $this->param['old_department'])) {
-            return HpErrorMessage::getError(ERROR_NOT_IN_DEPARTMENT);
-        }
-        
         if (false === Dbi::getDbi()->existedPatient($this->param['patient_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'patient_id.');
+        }
+        
+        if (false === Dbi::getDbi()->existedDepartment($this->param['new_department'])) {
+            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'new_department.');
         }
         
         if ($this->param['vc'] != HpVerificationCode::getVC('Patient' . $this->param['patient_id'])) {
@@ -47,8 +41,41 @@ class ApplyAuthority extends BaseApi
     
     protected function execute()
     {
-        $ret = Dbi::getDbi()->deletePatient($this->param['patient_id'], 
-                $this->param['old_department'], $this->param['new_department']);
+        $patientInfo = Dbi::getDbi()->getPatientDepartment($this->param['patient_id']);
+        if (VALUE_DB_ERROR === $patientInfo) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        if (empty($patientInfo)) {
+            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY);
+        }
+        $data = array();
+        if ($patientInfo['department1'] == '0') {
+            $data['department1'] = $this->param['new_department'];
+        } elseif ($patientInfo['department2'] == '0') {
+            $data['department2'] = $this->param['new_department'];
+        } elseif ($patientInfo['department3'] == '0') {
+            $data['department3'] = $this->param['new_department'];
+        } else {
+            $checkRequired = HpValidate::checkRequiredParam(['old_department'], $this->param);
+            if (true !== $checkRequired) {
+                return $checkRequired;
+            }
+            if (false === Dbi::getDbi()->existedDepartment($this->param['old_department'])) {
+                return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'old_department.');
+            }
+            if (false === Dbi::getDbi()->isPatientInDepartment($this->param['patient_id'], $this->param['old_department'])) {
+                return HpErrorMessage::getError(ERROR_NOT_IN_DEPARTMENT);
+            }
+            
+            $ret = Dbi::getDbi()->deletePatient($this->param['patient_id'],
+                    $this->param['old_department'], $this->param['new_department']);
+            if (VALUE_DB_ERROR === $ret) {
+                return HpErrorMessage::getError(ERROR_DB);
+            }
+            return $this->retSuccess;
+        }
+        
+        $ret = Dbi::getDbi()->setManageDepartment($this->param['patient_id'], $data);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

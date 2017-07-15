@@ -50,6 +50,9 @@ class EditDoctor extends BaseApi
     protected function execute()
     {
         $data = array();
+        if (isset($this->param['login_name'])) {
+            $data['login_name'] = $this->param['login_name'];
+        }
         if (isset($this->param['real_name'])) {
             $data['real_name'] = $this->param['real_name'];
         }

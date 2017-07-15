@@ -67,7 +67,7 @@ class EditCase extends BaseApi
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
         }
         
-        $ret = Dbi::getDbi()->editCase($caseId, $data);
+        $ret = Dbi::getDbi()->editCase($this->param['case_id'], $data);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

@@ -52,21 +52,12 @@ class AddReferralDischarge extends BaseApi
     
     protected function execute()
     {
-        Dbi::getDbi()->beginTran();
-        $followPlanId = Dbi::getDbi()->addFollowPlan($this->param['department_id'], $this->param['patient_id'],
-                $this->param['plan_text'], $this->planList, $this->param['doctor_id'], $this->param['plan_name']);
-        if (VALUE_DB_ERROR === $followPlanId) {
-            Dbi::getDbi()->rollBack();
-            return HpErrorMessage::getError(ERROR_DB);
-        }
-        
-        $ret = Dbi::getDbi()->addReferralReply($this->param['referral_id'], $this->param['doctor_id'], 
-                $this->param['diagnosis'], $this->param['info'], $followPlanId);
+        $ret = Dbi::getDbi()->addReferralDischarge($this->param['department_id'], $this->param['patient_id'],
+                $this->param['plan_text'], $this->planList, $this->param['doctor_id'], $this->param['plan_name'], 
+                $this->param['referral_id'], $this->param['doctor_id'], $this->param['diagnosis'], $this->param['info']);
         if (VALUE_DB_ERROR === $ret) {
-            Dbi::getDbi()->rollBack();
             return HpErrorMessage::getError(ERROR_DB);
         }
-        Dbi::getDbi()->commit();
         return $this->retSuccess;
     }
 }

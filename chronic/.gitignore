@@ -1,2 +1,5 @@
 /log/
 /cache/
+/vc/
+/session/
+/test/

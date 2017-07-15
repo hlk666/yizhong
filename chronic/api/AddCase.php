@@ -32,6 +32,10 @@ class AddCase extends BaseApi
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'patient_id.');
         }
         
+        if (false === Dbi::getDbi()->isPatientInDepartment($this->param['patient_id'], $this->param['department_id'])) {
+            return HpErrorMessage::getError(ERROR_NOT_IN_DEPARTMENT);
+        }
+        
         if (isset($this->param['chronic_label'])) {
             $this->chronic = explode('-', $this->param['chronic_label']);
             foreach ($this->chronic as $chronicId) {

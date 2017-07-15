@@ -38,7 +38,7 @@ class DeleteCase extends BaseApi
     
     protected function execute()
     {
-        $ret = Dbi::getDbi()->deleteCase($caseId);
+        $ret = Dbi::getDbi()->deleteCase($this->param['case_id']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

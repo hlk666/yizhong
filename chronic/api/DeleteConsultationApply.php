@@ -36,7 +36,7 @@ class DeleteConsultationApply extends BaseApi
     
     protected function execute()
     {
-        $ret = Dbi::getDbi()->deleteFollowApply($this->param['consultation_id']);
+        $ret = Dbi::getDbi()->deleteConsultationApply($this->param['consultation_id']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

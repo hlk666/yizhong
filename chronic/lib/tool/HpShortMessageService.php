@@ -6,7 +6,7 @@ class HpShortMessageService
     
     public static function send($mobile, $content)
     {
-        HpLogger::writeCommonLog('tel number:' . $mobile, self::$log);
+        HpLogger::write('tel number:' . $mobile, self::$log);
         $data = array(
             'uid' => SMS_USER,
             'pwd' => strtolower(md5(SMS_PASSWORD)),
@@ -81,7 +81,7 @@ class HpShortMessageService
                 $receive .= fgets($fp, 128);
             }
             fclose($fp);
-            HpLogger::writeCommonLog($receive, self::$log);
+            HpLogger::write($receive, self::$log);
             $receive = explode("\r\n\r\n", $receive);
             unset($receive[0]);
         
