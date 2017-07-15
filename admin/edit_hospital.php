@@ -14,6 +14,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $hospitalId = !isset($_POST['hospital_id']) ? null : $_POST['hospital_id'];
     $hospitalName = !isset($_POST['hospital_name']) ? null : $_POST['hospital_name'];
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
+    $province = isset($_POST['province']) ? $_POST['province'] : '';
+    $city = isset($_POST['city']) ? $_POST['city'] : '';
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
     $loginUser = !isset($_POST['login_user']) ? null : $_POST['login_user'];
@@ -32,6 +34,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         if (empty($hospitalTel)) {
             user_back_after_delay('请正确输入医院电话。');
         }
+        if (empty($province)) {
+            user_back_after_delay('请选择省/市/自治区。');
+        }
+        if (empty($city)) {
+            user_back_after_delay('请选择城市。');
+        }
         if (empty($hospitalAddress)) {
             user_back_after_delay('请正确输入医院地址。');
         }
@@ -49,9 +57,9 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         if (true === $isExisted) {
             user_back_after_delay("登录用户名<font color='red'>$loginUser</font>已被他人使用。");
         }
-        
-        $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $hospitalTel, $hospitalAddress, 
-                $parentFlag, $loginUser, $messageTel, $salesman, $comment);
+
+        $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $hospitalTel, $province, $city, 
+                $hospitalAddress, $parentFlag, $loginUser, $messageTel, $salesman, $comment);
     }
     
     if (isset($_POST['del'])) {
@@ -79,6 +87,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     }
     
     $hospitalName = $hospitalInfo['hospital_name'];
+    $province = $hospitalInfo['province'];
+    $city = $hospitalInfo['city'];
     $address = $hospitalInfo['address'];
     $tel = $hospitalInfo['tel'];
     $loginUser = $hospitalInfo['login_name'];
@@ -120,8 +130,14 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
   </div>
   <div class="form-group">
     <label for="hospital_address" class="col-sm-2 control-label">地址<font color="red">*</font></label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="hospital_address" name="hospital_address" value="$address">
+    <div class="col-sm-2">
+      <select class="form-control" name="province" id="proS" onchange="loadCity()"><option value="0">请选择</option></select>
+    </div>
+    <div class="col-sm-2">
+      <select class="form-control" name="city" id="cityS"><option value="0">请选择</option></select>
+    </div>
+    <div class="col-sm-6">
+      <input type="text" class="form-control" id="hospital_address1" name="hospital_address" value="$address">
     </div>
   </div>
   <div class="form-group">
@@ -163,6 +179,13 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     </div>
   </div>
 </form>
+<script src="js/proCity.js"></script>
+<script src="js/yizhong.js"></script>
+<script>
+    var proS=document.getElementById("proS"),cityS=document.getElementById("cityS");
+    loadProvince($province);
+    loadCity($city);
+</script>
 EOF;
 }
 

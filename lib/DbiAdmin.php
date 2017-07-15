@@ -28,13 +28,14 @@ class DbiAdmin extends BaseDbi
         $param = [':device' => $device, ':hospital' => $hospital, ':city' => $city];
         return $this->insertData($sql, $param);
     }
-    public function addHospital($name, $tel, $address, $parentFlag, $parentHospital, $adminUser, $messageTel, $salesman, $comment)
+    public function addHospital($name, $tel, $province, $city, $address, 
+            $parentFlag, $parentHospital, $adminUser, $messageTel, $salesman, $comment)
     {
         $this->pdo->beginTransaction();
-        $sql = 'insert into hospital(hospital_name, tel, address, parent_flag, sms_tel, salesman, comment)
-                values (:name, :tel, :address, :flag, :sms_tel, :salesman, :comment)';
-        $param = [':name' => $name, ':tel' => $tel, ':address' => $address, ':flag' => $parentFlag, 
-                        ':sms_tel' => $messageTel, ':salesman' => $salesman, ':comment' => $comment];
+        $sql = 'insert into hospital(hospital_name, tel, province, city, address, parent_flag, sms_tel, salesman, comment)
+                values (:name, :tel, :province, :city, :address, :flag, :sms_tel, :salesman, :comment)';
+        $param = [':name' => $name, ':tel' => $tel, ':province' => $province, ':city' => $city, ':address' => $address, 
+                        ':flag' => $parentFlag, ':sms_tel' => $messageTel, ':salesman' => $salesman, ':comment' => $comment];
         $hospitalId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $hospitalId) {
             $this->pdo->rollBack();
@@ -112,6 +113,15 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
+        $sql = 'delete from hospital_tree 
+                where hospital_id = :hospital or analysis_hospital = :hospital or report_hospital = :hospital';
+        $param = [':hospital' => $hospitalId];
+        $ret = $this->deleteData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
         $sql = 'delete from hospital where hospital_id = :hospital';
         $param = [':hospital' => $hospitalId];
         $ret = $this->deleteData($sql, $param);
@@ -137,7 +147,7 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital' => $hospitalId];
         return $this->deleteData($sql, $param);
     }
-    public function editHospital($hospitalId, $hospitalName, $hospitalTel, $hospitalAddress, 
+    public function editHospital($hospitalId, $hospitalName, $hospitalTel, $province, $city, $hospitalAddress, 
             $parentFlag, $loginUser, $messageTel, $salesman, $comment)
     {
         $this->pdo->beginTransaction();
@@ -151,11 +161,11 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = 'update hospital set hospital_name = :name, tel = :tel, address = :address, 
+        $sql = 'update hospital set hospital_name = :name, tel = :tel, province = :province, city = :city, address = :address, 
                 parent_flag = :flag, sms_tel = :sms_tel, salesman = :salesman, comment = :comment
                 where hospital_id = :hospital';
-        $param = [':hospital' => $hospitalId, ':name' => $hospitalName, ':tel' => $hospitalTel,
-                        ':address' => $hospitalAddress, ':flag' => $parentFlag, ':sms_tel' => $messageTel, 
+        $param = [':hospital' => $hospitalId, ':name' => $hospitalName, ':tel' => $hospitalTel, ':province' => $province, 
+                        ':city' => $city, ':address' => $hospitalAddress, ':flag' => $parentFlag, ':sms_tel' => $messageTel, 
                         ':salesman' => $salesman, ':comment' => $comment];
         $ret = $this->updateData($sql, $param);
         if (VALUE_DB_ERROR === $ret) {
@@ -262,7 +272,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select h.hospital_id, hospital_name, address, tel, parent_flag, a.login_name, h.sms_tel, h.salesman, h.comment
+        $sql = 'select h.hospital_id, hospital_name, province, city, address, tel, parent_flag, a.login_name, h.sms_tel, h.salesman, h.comment
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];

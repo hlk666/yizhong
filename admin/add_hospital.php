@@ -13,6 +13,8 @@ if (isset($_POST['submit'])){
     
     $hospitalName = !isset($_POST['hospital_name']) ? null : $_POST['hospital_name'];
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
+    $province = isset($_POST['province']) ? $_POST['province'] : '';
+    $city = isset($_POST['city']) ? $_POST['city'] : '';
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
     $hospitalParent = !isset($_POST['hospital_parent']) ? null : $_POST['hospital_parent'];
@@ -26,6 +28,12 @@ if (isset($_POST['submit'])){
     }
     if (empty($hospitalTel)) {
         user_back_after_delay('请正确输入医院电话。');
+    }
+    if (empty($province)) {
+        user_back_after_delay('请选择省/市/自治区。');
+    }
+    if (empty($city)) {
+        user_back_after_delay('请选择城市。');
     }
     if (empty($hospitalAddress)) {
         user_back_after_delay('请正确输入医院地址。');
@@ -42,7 +50,7 @@ if (isset($_POST['submit'])){
         user_back_after_delay("登录用户名<font color='red'>$adminUser</font>已被他人使用。");
     }
     
-    $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $hospitalTel, $hospitalAddress, 
+    $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $hospitalTel, $province, $city, $hospitalAddress, 
             $parentFlag, $hospitalParent, $adminUser, $messageTel, $salesman, $comment);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
@@ -78,7 +86,13 @@ if (isset($_POST['submit'])){
   </div>
   <div class="form-group">
     <label for="hospital_address" class="col-sm-2 control-label">地址<font color="red">*</font></label>
-    <div class="col-sm-10">
+    <div class="col-sm-2">
+      <select class="form-control" name="province" id="proS" onchange="loadCity()"><option value="0">请选择</option></select>
+    </div>
+    <div class="col-sm-2">
+      <select class="form-control" name="city" id="cityS"><option value="0">请选择</option></select>
+    </div>
+    <div class="col-sm-6">
       <input type="text" class="form-control" id="hospital_address" name="hospital_address" placeholder="请输入医院的地址" required>
     </div>
   </div>
@@ -130,6 +144,13 @@ if (isset($_POST['submit'])){
     </div>
   </div>
 </form>
+<script src="js/proCity.js"></script>
+<script src="js/yizhong.js"></script>
+<script>
+    var proS=document.getElementById("proS"),cityS=document.getElementById("cityS");
+    loadProvince();
+    loadCity();
+</script>
 EOF;
 }
 require 'tpl/footer.tpl';

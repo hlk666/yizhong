@@ -30,3 +30,63 @@ function deleteHospital(id)
         //do nothing.
     }
 }
+function move_patient(id, from, to, jump)
+{
+    /*
+    if (confirm('确定要移动监护【id = ' + id + '】么？') {
+        $.post("http://101.200.174.235/api/analytics_move_data", 
+            {patient_id:id, hospital_from:from, hospital_to:to, operator:1},
+            function(result){
+                alert(result);
+            });
+        window.location = jump;
+    } else {
+        //do nothing.
+    }
+    */
+    var x = document.getElementById('patient');
+    alert(x);
+}
+function loadProvince(currentProvince)
+{
+    var tempFragment = document.createDocumentFragment();
+    for(var i=0;i<proData_.length;i++){
+        var option=document.createElement("option");
+        option.setAttribute("value",proData_[i].pk);
+        option.innerHTML=proData_[i].pv;
+        if (proData_[i].pk == currentProvince) {
+            option.setAttribute('selected', 'selected');
+        }
+        tempFragment.appendChild(option);
+    }
+    //使用dom碎片，减少对dom的重复操作
+    proS.appendChild(tempFragment);
+}
+function loadCity(currentCity){
+    if(proS.value==0){
+        return;
+    }else{
+        cityS.innerHTML="<option value='0'>请选择</option>";
+        var hasFound=false;
+        var tempFragment = document.createDocumentFragment();
+        for(var i=0;i<cityData_.length;i++){
+            if(proS.value==cityData_[i].pk){
+                hasFound=true;
+                var option=document.createElement("option");
+                option.setAttribute("value",cityData_[i].ck);
+                option.innerHTML=cityData_[i].cv;
+                if (cityData_[i].ck == currentCity) {
+                    option.setAttribute('selected', 'selected');
+                }
+                tempFragment.appendChild(option);
+                
+            }else{
+                //需要查找的数据都是放一块的，如果匹配过，又出现不匹配，那么之后数据肯定都是不匹配的。可以pass掉，减少循环次数
+                if(hasFound){
+                    break;
+                }
+            }
+        }
+        cityS.appendChild(tempFragment);
+    }
+}
