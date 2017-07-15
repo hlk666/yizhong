@@ -20,24 +20,20 @@ if (false === Validate::checkRequired($_POST['operator'])) {
 
 $guardianId = $_POST['patient_id'];
 $operator = $_POST['operator'];
-//$hospitalFrom = $_POST['hospital_from'];
+$hospitalFrom = isset($_POST['hospital_from']) ? $_POST['hospital_from'] : '';
 $hospitalTo = $_POST['hospital_to'];
 
 if (false == DbiAnalytics::getDbi()->existedHospital($hospitalTo)) {
     api_exit(['code' => '1', 'message' => MESSAGE_PARAM . 'hospital_to.']);
 }
 
+if (empty($hospitalFrom)) {
+    $hospitalFrom = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
+    if (VALUE_DB_ERROR === $ret) {
+        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+    }
+}
 
-//$hospitalFromDB = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
-$hospitalFrom = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
-if (VALUE_DB_ERROR === $ret) {
-    api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
-}
-/*
-if ($hospitalFrom != $hospitalFromDB) {
-    api_exit(['code' => '3', 'message' => '移动对象医院的ID错误。']);
-}
-*/
 $ret = DbiAnalytics::getDbi()->moveData($guardianId, $hospitalFrom, $hospitalTo, $operator);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);

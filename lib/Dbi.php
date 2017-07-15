@@ -346,7 +346,11 @@ class Dbi extends BaseDbi
     }
     public function getGuardianError()
     {
-        $sql = 'select guardian_id, create_time, content from guardian_error where notice_flag = 0';
+        $sql = 'select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content 
+                from guardian_error as e inner join guardian as g on e.guardian_id = g.guardian_id
+                inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                inner join patient as p on g.patient_id = p.patient_id
+                where notice_flag = 0';
         return $this->getDataAll($sql);
     }
     public function getHospitalByDevice($diviceId)

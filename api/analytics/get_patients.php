@@ -33,7 +33,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 0;
 $rows = isset($_GET['rows']) ? $_GET['rows'] : VALUE_DEFAULT_ROWS;
 $offset = $page * $rows;
 
-$patients = DbiAnalytics::getDbi()->getPatients($hospitalIdList, $offset, $rows, 
+$patients = DbiAnalytics::getDbi()->getPatients($hospitalIdList, $hospitalId, $offset, $rows, 
         $patientName, $startTime, $endTime, $status, $hbiDoctor, $reportDoctor);
 if (VALUE_DB_ERROR === $patients) {
     analytics_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
@@ -67,13 +67,7 @@ foreach ($patients as $key => $value) {
 $ret = array();
 $ret['code'] = 0;
 $ret['patients'] = $patients;
-
-$patients = DbiAnalytics::getDbi()->getPatientsMoved($hospitalId, $offset, $rows,
-        $patientName, $startTime, $endTime, $status, $hbiDoctor, $reportDoctor);
-if (VALUE_DB_ERROR === $patients) {
-    analytics_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
-}
-$ret['patients_moved'] = $patients;
+$ret['patients_moved'] = [];
 
 analytics_exit($ret);
 

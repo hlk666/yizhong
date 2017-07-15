@@ -57,12 +57,6 @@ class DbiAnalytics extends BaseDbi
         $param = [':guardian_id' => $guardianId];
         return $this->getDataString($sql, $param);
     }
-    public function getHospitalFrom($guardianId, $hospitalTo)
-    {
-        $sql = 'select hospital_from from history_move_data where guardian_id = :guardian and hospital_to = :to limit 1';
-        $param = [':guardian' => $guardianId, ':to' => $hospitalTo];
-        return $this->getDataString($sql, $param);
-    }
     public function getHospitalTree($guardianId)
     {
         $sql = 'select regist_hospital_id from guardian where guardian_id = :guardian_id limit 1';
@@ -129,7 +123,7 @@ class DbiAnalytics extends BaseDbi
     
     public function getHospitals($hospitalId)
     {
-        $sql = 'select hospital_id from hospital_tree where analysis_hospital = :hospital';
+        $sql = 'select distinct hospital_id from hospital_tree where report_hospital = :hospital';
         $param = array(':hospital' => $hospitalId);
         return $this->getDataAll($sql, $param);
     }
@@ -137,30 +131,30 @@ class DbiAnalytics extends BaseDbi
     public function getPatientsNeedFollow()
     {
         $sql = 'select d.guardian_id as patient_id, p.patient_name, h.hospital_id, h.hospital_name, 
-                upload_time, download_end_time as download_time, 
-                case d.status when 2 then "已上传" when 3 then "已下载" when 4 then "已分析" else "" end as status
+                upload_time, download_end_time as download_time, d.moved_hospital,
+                case d.status when 2 then "已上传" when 3 then "已下载" else "" end as status
                 from guardian_data as d inner join guardian as g on d.guardian_id = g.guardian_id
                 inner join patient as p on g.patient_id = p.patient_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
-                where d.status in (2, 3, 4) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
+                where d.status in (2, 3) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
                 order by upload_time';
         return $this->getDataAll($sql);
     }
     
-    public function getPatients($hospitalIdList, $offset, $rows, $patientName = null, $startTime = null, $endTime = null, 
-            $status = null, $hbiDoctor = null, $reportDoctor = null)
+    public function getPatients($hospitalIdList, $currentHospital, $offset, $rows, $patientName = null, 
+            $startTime = null, $endTime = null, $status = null, $hbiDoctor = null, $reportDoctor = null)
     {
         $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel,
                 d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor, 
-                g.guardian_id as patient_id, start_time, end_time, reported, g.device_id, sickroom, hospitalization_id,
-                patient_name as name, birth_year, sex, p.tel, d.upload_time, d.report_time
+                g.guardian_id as patient_id, start_time, end_time, g.device_id, sickroom, hospitalization_id,
+                patient_name as name, birth_year, sex, p.tel, d.upload_time, d.report_time, d.moved_hospital
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id
                 left join guardian_data as d on g.guardian_id = d.guardian_id
                 left join account as a1 on d.hbi_doctor = a1.account_id
                 left join account as a2 on d.report_doctor = a2.account_id
                 left join account as a3 on d.download_doctor = a3.account_id
-                where regist_hospital_id in ($hospitalIdList) ";
+                where (regist_hospital_id in ($hospitalIdList) or d.moved_hospital = $currentHospital) ";
         if (null !== $patientName) {
             $sql .= " and patient_name = '$patientName' ";
         }
@@ -251,22 +245,15 @@ class DbiAnalytics extends BaseDbi
     }
     public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
-        if ($this->existData('guardian_data', 'guardian_id = ' . $guardianId)) {
-            $status = $this->getDataStatus($guardianId);
-            if ($status == 4 || $status == 5) {
-                $set = 'set url = :url, upload_time = now(), device_type = :device';
-            } else {
-                $set = 'set url = :url, upload_time = now(), device_type = :device, status = 2';
-            }
-            $sql = "update guardian_data $set where guardian_id = :guardian_id";
-            $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
-            return $this->updateData($sql, $param);
+        $status = $this->getDataStatus($guardianId);
+        if ($status == 4 || $status == 5) {
+            $set = 'set url = :url, upload_time = now(), device_type = :device';
+        } else {
+            $set = 'set url = :url, upload_time = now(), device_type = :device, status = 2';
         }
-        else {
-            $sql = 'insert into guardian_data (guardian_id, url, device_type) values (:guardian_id, :url, :device)';
-            $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
-            return $this->insertData($sql, $param);
-        }
+        $sql = "update guardian_data $set where guardian_id = :guardian_id";
+        $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
+        return $this->updateData($sql, $param);
     }
     public function moveData($guardianId, $hospitalFrom, $hospitalTo, $operator)
     {
@@ -280,7 +267,7 @@ class DbiAnalytics extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = 'update guardian set regist_hospital_id = :to where guardian_id = :guardian';
+        $sql = 'update guardian_data set moved_hospital = :to where guardian_id = :guardian';
         $param = [':guardian' => $guardianId, ':to' => $hospitalTo];
         $ret = $this->updateData($sql, $param);
         if (VALUE_DB_ERROR === $ret) {
