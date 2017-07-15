@@ -51,10 +51,11 @@ if ($type == '1') {
 } else {
     api_exit(['code' => '2', 'message' => MESSAGE_PARAM]);
 }
-
-$ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);
-if (VALUE_DB_ERROR === $ret) {
-    api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+if (!empty($data)) {
+    $ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);
+    if (VALUE_DB_ERROR === $ret) {
+        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+    }
 }
 
 api_exit_success();
