@@ -33,7 +33,7 @@ class AnalysisUpload
                     api_exit(['code' => '2', 'message' => '只有本人才能修改已经出过的报告。']);
         }
         
-        $dir = PATH_ROOT . $type . DIRECTORY_SEPARATOR . $param['hospital_id'] . DIRECTORY_SEPARATOR;
+        $dir = PATH_ROOT . $type . DIRECTORY_SEPARATOR;
         if (!file_exists($dir)) {
             mkdir($dir);
         }
@@ -50,26 +50,6 @@ class AnalysisUpload
             $this->setError(5, 'IO error.');
             return json_encode($this->error);
         }
-        
-        //to fix bug of client. start.
-        $dir1 = PATH_ROOT . $type . DIRECTORY_SEPARATOR;
-        if (!file_exists($dir1)) {
-            mkdir($dir1);
-        }
-        
-        if ('hbi' == $type) {
-            $file1 = $dir1 . $guardianId . '.hbi';
-        }
-        if ('report' == $type) {
-            $file1 = $dir1 . $guardianId . '.pdf';
-        }
-        
-        $ret = file_put_contents($file1, $data);
-        if (false === $ret) {
-            $this->setError(5, 'IO error.');
-            return json_encode($this->error);
-        }
-        //end
         
         $message = isset($param['message']) ? $param['message'] : '0';
         $hbiDoctor = isset($param['hbi_doctor']) ? $param['hbi_doctor'] : '0';
@@ -100,10 +80,6 @@ class AnalysisUpload
     
     private function validate($param, $data, $type)
     {
-        if (!isset($param['hospital_id']) || trim($param['hospital_id']) == '') {
-            $this->setError(1, 'hospital_id is empty.');
-            return false;
-        }
         if (!isset($param['patient_id']) || trim($param['patient_id']) == '') {
             $this->setError(1, 'patient_id is empty.');
             return false;
