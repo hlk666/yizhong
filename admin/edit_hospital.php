@@ -13,6 +13,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     
     $hospitalId = !isset($_POST['hospital_id']) ? null : $_POST['hospital_id'];
     $hospitalName = !isset($_POST['hospital_name']) ? null : $_POST['hospital_name'];
+    $type = isset($_POST['type']) ? $_POST['type'] : '';
+    $level = isset($_POST['level']) ? $_POST['level'] : '';
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
     $province = isset($_POST['province']) ? $_POST['province'] : '';
     $city = isset($_POST['city']) ? $_POST['city'] : '';
@@ -30,6 +32,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     if (isset($_POST['edit'])) {
         if (empty($hospitalName)) {
             user_back_after_delay('请正确输入医院名。');
+        }
+        if (empty($type)) {
+            user_back_after_delay('请选择类型。');
+        }
+        if (empty($level)) {
+            user_back_after_delay('请选择级别。');
         }
         if (empty($hospitalTel)) {
             user_back_after_delay('请正确输入医院电话。');
@@ -58,7 +66,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
             user_back_after_delay("登录用户名<font color='red'>$loginUser</font>已被他人使用。");
         }
 
-        $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $hospitalTel, $province, $city, 
+        $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $salesman, $comment);
     }
     
@@ -86,6 +94,17 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
     
+    $type = $hospitalInfo['type'];
+    $typeSelected = '<option value="0">请选择</option> 
+        <option value="1"' . ($type == '1' ? ' selected ' : '') . '>云平台</option>
+        <option value="2"' . ($type == '2' ? ' selected ' : '') . '>分析中心</option>
+        <option value="3"' . ($type == '3' ? ' selected ' : '') . '>下级医院</option>
+        <option value="4"' . ($type == '4' ? ' selected ' : '') . '>独立医院</option>';
+    $level = $hospitalInfo['level'];
+    $levelSelected = '<option value="0">请选择</option>  
+        <option value="3"' . ($level == '3' ? ' selected ' : '') . '>三级</option>
+        <option value="2"' . ($level == '2' ? ' selected ' : '') . '>二级</option>
+        <option value="1"' . ($level == '1' ? ' selected ' : '') . '>一级</option>';
     $hospitalName = $hospitalInfo['hospital_name'];
     $province = $hospitalInfo['province'];
     $city = $hospitalInfo['city'];
@@ -121,6 +140,20 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <div class="col-sm-10">
       <input type="text" class="form-control" id="hospital_name" name="hospital_name" value="$hospitalName">
     </div>
+  </div>
+  <div class="form-group">
+    <label for="type" class="col-sm-2 control-label">定位/类型</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="type">
+        $typeSelected
+    </select></div>
+  </div>
+  <div class="form-group">
+    <label for="level" class="col-sm-2 control-label">医院级别</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="level">
+        $levelSelected
+    </select></div>
   </div>
   <div class="form-group">
     <label for="hospital_tel" class="col-sm-2 control-label">电话<font color="red">*</font></label>
@@ -168,7 +201,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
   <div class="form-group">
     <label for="comment" class="col-sm-2 control-label">报告底部文字</label>
     <div class="col-sm-10">
-      <textarea class="form-control" rows="5" name="comment">$comment</textarea>
+      <textarea class="form-control" rows="3" name="comment">$comment</textarea>
     </div>
   </div>
   <div class="form-group">

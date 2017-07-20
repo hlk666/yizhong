@@ -12,6 +12,8 @@ if (isset($_POST['submit'])){
     }
     
     $hospitalName = !isset($_POST['hospital_name']) ? null : $_POST['hospital_name'];
+    $type = isset($_POST['type']) ? $_POST['type'] : '';
+    $level = isset($_POST['level']) ? $_POST['level'] : '';
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
     $province = isset($_POST['province']) ? $_POST['province'] : '';
     $city = isset($_POST['city']) ? $_POST['city'] : '';
@@ -22,9 +24,18 @@ if (isset($_POST['submit'])){
     $messageTel = (isset($_POST['message_tel']) && !empty($_POST['message_tel'])) ? $_POST['message_tel'] : '0';
     $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '';
     $comment = (isset($_POST['comment']) && !empty($_POST['comment'])) ? $_POST['comment'] : '';
+    $analysisHospital = (isset($_POST['hospital_analysis']) && !empty($_POST['hospital_analysis'])) ? $_POST['hospital_analysis'] : '';
+    $reportHospital = (isset($_POST['hospital_report']) && !empty($_POST['hospital_report'])) ? $_POST['hospital_report'] : '';
+    $titleHospital = (isset($_POST['hospital_title']) && !empty($_POST['hospital_title'])) ? $_POST['hospital_title'] : '';
     
     if (empty($hospitalName)) {
         user_back_after_delay('请正确输入医院名。');
+    }
+    if (empty($type)) {
+        user_back_after_delay('请选择类型。');
+    }
+    if (empty($level)) {
+        user_back_after_delay('请选择级别。');
     }
     if (empty($hospitalTel)) {
         user_back_after_delay('请正确输入医院电话。');
@@ -41,6 +52,13 @@ if (isset($_POST['submit'])){
     if (empty($adminUser)) {
         user_back_after_delay('请正确输入初始管理员登录用户。');
     }
+    if (empty($analysisHospital) && empty($reportHospital) && empty($titleHospital)) {
+        //no hospital => OK.
+    } elseif (!empty($analysisHospital) && !empty($reportHospital) && !empty($titleHospital)) {
+        //all hospitals => OK.
+    } else {
+        user_back_after_delay('请同时设置分析、出报告和抬头医院。');
+    }
     
     $isExisted = DbiAdmin::getDbi()->existedLoginName($adminUser, 0);
     if (VALUE_DB_ERROR === $isExisted) {
@@ -50,8 +68,9 @@ if (isset($_POST['submit'])){
         user_back_after_delay("登录用户名<font color='red'>$adminUser</font>已被他人使用。");
     }
     
-    $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $hospitalTel, $province, $city, $hospitalAddress, 
-            $parentFlag, $hospitalParent, $adminUser, $messageTel, $salesman, $comment);
+    $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $type, $level, $hospitalTel, 
+            $province, $city, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser, 
+            $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -70,6 +89,42 @@ if (isset($_POST['submit'])){
         $htmlParentHospitals .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
     }
     
+    $ret = DbiAdmin::getDbi()->getHospitalListHigh(0);
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    
+    $analysisHospital = '0';
+    $reportHospital = '0';
+    $titleHospital = '0';
+    
+    $htmlAnalysisHospitals = '';
+    foreach ($ret as $value) {
+        if ($value['hospital_id'] == $analysisHospital) {
+            $htmlAnalysisHospitals .= '<option value="' . $value['hospital_id'] . '" selected>' . $value['hospital_name'] . '</option>';
+        } else {
+            $htmlAnalysisHospitals .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
+        }
+    }
+    
+    $htmlReportHospitals = '';
+    foreach ($ret as $value) {
+        if ($value['hospital_id'] == $reportHospital) {
+            $htmlReportHospitals .= '<option value="' . $value['hospital_id'] . '" selected>' . $value['hospital_name'] . '</option>';
+        } else {
+            $htmlReportHospitals .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
+        }
+    }
+    
+    $htmlTitleHospitals = '';
+    foreach ($ret as $value) {
+        if ($value['hospital_id'] == $titleHospital) {
+            $htmlTitleHospitals .= '<option value="' . $value['hospital_id'] . '" selected>' . $value['hospital_name'] . '</option>';
+        } else {
+            $htmlTitleHospitals .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
+        }
+    }
+    
     echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
   <div class="form-group">
@@ -77,6 +132,27 @@ if (isset($_POST['submit'])){
     <div class="col-sm-10">
       <input type="text" class="form-control" id="hospital_name" name="hospital_name" placeholder="请输入医院的名字" required>
     </div>
+  </div>
+  <div class="form-group">
+    <label for="type" class="col-sm-2 control-label">定位/类型</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="type">
+        <option value="0">请选择类型</option>
+        <option value="1">云平台</option>
+        <option value="2">分析中心</option>
+        <option value="3">下级医院</option>
+        <option value="4">独立医院</option>
+    </select></div>
+  </div>
+  <div class="form-group">
+    <label for="level" class="col-sm-2 control-label">医院级别</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="level">
+        <option value="0">请选择级别</option>
+        <option value="3">三级</option>
+        <option value="2">二级</option>
+        <option value="1">一级</option>
+    </select></div>
   </div>
   <div class="form-group">
     <label for="hospital_tel" class="col-sm-2 control-label">电话<font color="red">*</font></label>
@@ -116,16 +192,14 @@ if (isset($_POST['submit'])){
   </div>
   <div class="form-group">
     <label for="parent_flag" class="col-sm-2 control-label">可否作为上级医院<font color="red">*</font></label>
-    <div class="col-sm-10">
+    <div class="col-sm-2">
       <label class="checkbox-inline">
       <input type="radio" name="parent_flag" value="1">可</label>
       <label class="checkbox-inline">
       <input type="radio" name="parent_flag" value="0" checked>否</label>
     </div>
-  </div>
-  <div class="form-group">
     <label for="hospital_parent" class="col-sm-2 control-label">本院的上级医院</label>
-    <div class="col-sm-10">
+    <div class="col-sm-6">
       <select class="form-control" name="hospital_parent">
         <option value="0">请选择上级医院(非必须)</option>$htmlParentHospitals
     </select></div>
@@ -133,8 +207,31 @@ if (isset($_POST['submit'])){
   <div class="form-group">
     <label for="comment" class="col-sm-2 control-label">报告底部文字</label>
     <div class="col-sm-10">
-      <textarea class="form-control" rows="5" name="comment"></textarea>
+      <textarea class="form-control" rows="3" name="comment"></textarea>
     </div>
+  </div>
+  <hr style="border-top:1px ridge red;" />
+  <div style="margin-top:10px;margin-bottom:10px;font-size:x-large;text-align:center;"><h2>长程分析(本院则无需配置)</h2></div>
+  <div class="form-group">
+    <label for="hospital_analysis" class="col-sm-2 control-label">分析医院</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="hospital_analysis">
+        <option value="0">请选择分析医院</option>$htmlAnalysisHospitals
+    </select></div>
+  </div>
+  <div class="form-group">
+    <label for="hospital_report" class="col-sm-2 control-label">出报告医院</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="hospital_report">
+        <option value="0">请选择出报告医院</option>$htmlReportHospitals
+    </select></div>
+  </div>
+  <div class="form-group">
+    <label for="hospital_title" class="col-sm-2 control-label">抬头医院</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="hospital_title">
+        <option value="0">请选择抬头医院</option>$htmlTitleHospitals
+    </select></div>
   </div>
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">

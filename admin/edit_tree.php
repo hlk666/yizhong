@@ -65,7 +65,7 @@ if (isset($_POST['edit'])){
         $titleHospital = $hospitalTree['title_hospital'];
     }
     
-    $ret = DbiAdmin::getDbi()->getHospitalList();
+    $ret = DbiAdmin::getDbi()->getHospitalListHigh($hospitalId);
     if (VALUE_DB_ERROR === $ret) {
         $ret = array();
     }

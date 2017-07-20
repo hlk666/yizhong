@@ -28,13 +28,14 @@ class DbiAdmin extends BaseDbi
         $param = [':device' => $device, ':hospital' => $hospital, ':city' => $city];
         return $this->insertData($sql, $param);
     }
-    public function addHospital($name, $tel, $province, $city, $address, 
-            $parentFlag, $parentHospital, $adminUser, $messageTel, $salesman, $comment)
+    public function addHospital($name, $type, $level, $tel, $province, $city, $address, $parentFlag, $parentHospital, 
+            $adminUser, $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital)
     {
         $this->pdo->beginTransaction();
-        $sql = 'insert into hospital(hospital_name, tel, province, city, address, parent_flag, sms_tel, salesman, comment)
-                values (:name, :tel, :province, :city, :address, :flag, :sms_tel, :salesman, :comment)';
-        $param = [':name' => $name, ':tel' => $tel, ':province' => $province, ':city' => $city, ':address' => $address, 
+        $sql = 'insert into hospital(hospital_name, type, level, tel, province, city, address, parent_flag, sms_tel, salesman, comment)
+                values (:name, :type, :level, :tel, :province, :city, :address, :flag, :sms_tel, :salesman, :comment)';
+        $param = [':name' => $name, ':type' => $type, ':level' => $level, ':tel' => $tel, ':province' => $province, ':city' => $city, 
+                        ':address' => $address, 
                         ':flag' => $parentFlag, ':sms_tel' => $messageTel, ':salesman' => $salesman, ':comment' => $comment];
         $hospitalId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $hospitalId) {
@@ -61,6 +62,19 @@ class DbiAdmin extends BaseDbi
                 return VALUE_DB_ERROR;
             }
         }
+        
+        if (!empty($analysisHospital) && !empty($reportHospital) && !empty($titleHospital)) {
+            $sql = 'insert into hospital_tree(hospital_id, analysis_hospital, report_hospital, title_hospital)
+                values (:hospital, :analysis, :report, :title)';
+            $param = [':hospital' => $hospitalId, ':analysis' => $analysisHospital, 
+                        ':report' => $reportHospital, 'title' => $titleHospital];
+            $ret = $this->insertData($sql, $param);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
+        }
+        
         $this->pdo->commit();
         return true;
     }
@@ -147,8 +161,8 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital' => $hospitalId];
         return $this->deleteData($sql, $param);
     }
-    public function editHospital($hospitalId, $hospitalName, $hospitalTel, $province, $city, $hospitalAddress, 
-            $parentFlag, $loginUser, $messageTel, $salesman, $comment)
+    public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
+            $hospitalAddress, $parentFlag, $loginUser, $messageTel, $salesman, $comment)
     {
         $this->pdo->beginTransaction();
     
@@ -161,12 +175,12 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = 'update hospital set hospital_name = :name, tel = :tel, province = :province, city = :city, address = :address, 
-                parent_flag = :flag, sms_tel = :sms_tel, salesman = :salesman, comment = :comment
+        $sql = 'update hospital set hospital_name = :name, type = :type, level = :level, tel = :tel, province = :province, city = :city, 
+                address = :address, parent_flag = :flag, sms_tel = :sms_tel, salesman = :salesman, comment = :comment
                 where hospital_id = :hospital';
-        $param = [':hospital' => $hospitalId, ':name' => $hospitalName, ':tel' => $hospitalTel, ':province' => $province, 
-                        ':city' => $city, ':address' => $hospitalAddress, ':flag' => $parentFlag, ':sms_tel' => $messageTel, 
-                        ':salesman' => $salesman, ':comment' => $comment];
+        $param = [':hospital' => $hospitalId, ':name' => $hospitalName, ':type' => $type, ':level' => $level, ':tel' => $hospitalTel, 
+                        ':province' => $province, ':city' => $city, ':address' => $hospitalAddress, ':flag' => $parentFlag, 
+                        ':sms_tel' => $messageTel, ':salesman' => $salesman, ':comment' => $comment];
         $ret = $this->updateData($sql, $param);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
@@ -252,7 +266,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getDeviceList($hospital = null, $offset = 0, $rows = null)
     {
-        $sql = 'select hospital_name, device_id, city from device as d
+        $sql = 'select hospital_name, device_id, d.city from device as d
                 inner join hospital as h on d.hospital_id = h.hospital_id';
         if (null !== $hospital){
             $sql .= ' where d.hospital_id = ' . $hospital;
@@ -272,20 +286,44 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select h.hospital_id, hospital_name, province, city, address, tel, parent_flag, a.login_name, h.sms_tel, h.salesman, h.comment
+        $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, address, tel, 
+                parent_flag, a.login_name, h.sms_tel, h.salesman, h.comment
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
     }
-    public function getHospitalList($offset = 0, $rows = null)
+    public function getHospitalList($type = '', $level = '', $salesman = '', $name = '', $offset = 0, $rows = null)
     {
-        $sql = 'select h.hospital_id, hospital_name, tel, address, parent_flag, a.login_name 
-                from hospital as h left join account as a on h.hospital_id = a.hospital_id where a.type = 1 order by h.hospital_id ';
+        $sql = 'select h.hospital_id, hospital_name, tel, address, parent_flag, a.login_name, ifnull(d.quantity,0) as quantity
+                from hospital as h left join account as a on h.hospital_id = a.hospital_id 
+                left join (select hospital_id, count(device_id) as quantity from device group by hospital_id) as d 
+                    on h.hospital_id = d.hospital_id
+                where a.type = 1 ';
+        if (!empty($type)) {
+            $sql .= " and h.type = '$type' ";
+        }
+        if (!empty($level)) {
+            $sql .= " and h.level = '$level' ";
+        }
+        if (!empty($salesman)) {
+            $sql .= " and h.salesman = '$salesman' ";
+        }
+        if (!empty($name)) {
+            $sql .= " and h.hospital_name like '%$name%' ";
+        }
+        $sql .= ' order by h.hospital_id ';
         if (null !== $rows) {
             $sql .= " limit $offset, $rows";
         }
         return $this->getDataAll($sql);
+    }
+    public function getHospitalListHigh($hospitalId)
+    {
+        $sql = 'select distinct hospital_id, hospital_name from hospital 
+                where type in (1,2) or hospital_id = :hospital';
+        $param = [':hospital' => $hospitalId];
+        return $this->getDataAll($sql, $param);
     }
     public function getHospitalParent($hospitalId)
     {
