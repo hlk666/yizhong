@@ -12,16 +12,9 @@ if (VALUE_DB_ERROR === $hospitalConfig) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
-$doubleHospitals = [131];
 if (empty($hospitalConfig)) {
     api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 } else {
-    if (in_array($hospitalConfig['hospital_id'], $doubleHospitals)) {
-        $hospitalConfig['double'] = '1';
-    } else {
-        $hospitalConfig['double'] = '0';
-    }
-
     $hospitalConfig['code'] = '0';
     $hospitalConfig['message'] = MESSAGE_SUCCESS;
     api_exit($hospitalConfig);

@@ -80,7 +80,8 @@ class DbiAnalytics extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = 'select t.hospital_id, analysis_hospital, report_hospital, title_hospital, h.hospital_name as title_hospital_name, h.comment
+        $sql = 'select t.hospital_id, analysis_hospital, report_hospital, title_hospital, 
+                h.hospital_name as title_hospital_name, h.comment, double_title as `double`
                 from hospital_tree as t inner join hospital as h on title_hospital = h.hospital_id
                 where t.hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
@@ -95,7 +96,7 @@ class DbiAnalytics extends BaseDbi
                 return VALUE_DB_ERROR;
             }
             $hospitalConfig = ['hospital_id' => $hospitalId, 'analysis_hospital' => $hospitalId,  'report_hospital' => $hospitalId, 
-                            'title_hospital' => $hospitalId, 'title_hospital_name' => $hospitalInfo['hospital_name']];
+                            'title_hospital' => $hospitalId, 'title_hospital_name' => $hospitalInfo['hospital_name'], 'double' => '0'];
         }
         
         return $hospitalConfig;
