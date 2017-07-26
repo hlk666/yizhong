@@ -67,7 +67,7 @@ class DbiAdmin extends BaseDbi
             $sql = 'insert into hospital_tree(hospital_id, analysis_hospital, report_hospital, title_hospital)
                 values (:hospital, :analysis, :report, :title)';
             $param = [':hospital' => $hospitalId, ':analysis' => $analysisHospital, 
-                        ':report' => $reportHospital, 'title' => $titleHospital];
+                        ':report' => $reportHospital, ':title' => $titleHospital];
             $ret = $this->insertData($sql, $param);
             if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
@@ -189,16 +189,18 @@ class DbiAdmin extends BaseDbi
         $this->pdo->commit();
         return true;
     }
-    public function editTree($hospitalId, $analysisHospital, $reportHospital, $titleHospital)
+    public function editTree($hospitalId, $analysisHospital, $reportHospital, $titleHospital, $doubleTitle)
     {
-        $param = [':hospital' => $hospitalId, ':analysis' => $analysisHospital, ':report' => $reportHospital, 'title' => $titleHospital];
+        $param = [':hospital' => $hospitalId, ':analysis' => $analysisHospital, ':report' => $reportHospital, 
+                        ':title' => $titleHospital, ':double_title' => $doubleTitle];
         if ($this->existData('hospital_tree', 'hospital_id = ' . $hospitalId)) {
-            $sql = 'update hospital_tree set analysis_hospital = :analysis, report_hospital = :report, title_hospital = :title
+            $sql = 'update hospital_tree set analysis_hospital = :analysis, report_hospital = :report, 
+                    title_hospital = :title, double_title = :double_title
                     where hospital_id = :hospital';
             $ret = $this->updateData($sql, $param);
         } else {
-            $sql = 'insert into hospital_tree(hospital_id, analysis_hospital, report_hospital, title_hospital)
-                    values (:hospital, :analysis, :report, :title)';
+            $sql = 'insert into hospital_tree(hospital_id, analysis_hospital, report_hospital, title_hospital, double_title)
+                    values (:hospital, :analysis, :report, :title, :double_title)';
             $ret = $this->insertData($sql, $param);
         }
         
@@ -222,6 +224,25 @@ class DbiAdmin extends BaseDbi
                 from account where login_name = :user and type = 0 limit 1';
         $param = [':user' => $loginName];
         return $this->getDataRow($sql, $param);
+    }
+    public function getDeviceGuardianCount($hospital, $startTime = null, $endTime = null)
+    {
+        if (empty($hospital)) {
+            return array();
+        }
+        $sql = 'select d.device_id, count(g.guardian_id) as quantity
+                from device as d left join
+                (select * from guardian where regist_hospital_id = :hospital';
+        if (!empty($startTime)) {
+            $sql .= " and regist_time >= '$startTime'";
+        }
+        if (!empty($endTime)) {
+            $sql .= " and regist_time <= '$endTime'";
+        }
+        $sql .= ') as g on d.device_id = g.device_id and d.hospital_id = g.regist_hospital_id
+                where d.hospital_id = :hospital group by d.device_id';
+        $param = [':hospital' => $hospital];
+        return $this->getDataAll($sql, $param);
     }
     public function getGuardiansByRegistTime($startTime, $endTime, $exceptHospitalList)
     {
@@ -264,13 +285,22 @@ class DbiAdmin extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
-    public function getDeviceList($hospital = null, $offset = 0, $rows = null)
+    public function getDeviceById($id)
     {
-        $sql = 'select hospital_name, device_id, d.city from device as d
-                inner join hospital as h on d.hospital_id = h.hospital_id';
-        if (null !== $hospital){
-            $sql .= ' where d.hospital_id = ' . $hospital;
+        if (empty($id)) {
+            return array();
         }
+        $sql = 'select hospital_name, device_id, d.city from device as d
+                inner join hospital as h on d.hospital_id = h.hospital_id  where d.device_id like "%' . $id . '"';
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceList($hospital, $offset = 0, $rows = null)
+    {
+        if (empty($hospital)) {
+            return array();
+        }
+        $sql = 'select hospital_name, device_id, d.city from device as d
+                inner join hospital as h on d.hospital_id = h.hospital_id  where d.hospital_id = ' . $hospital;
         if (null !== $rows) {
             $sql .= " limit $offset, $rows";
         }
@@ -283,6 +313,34 @@ class DbiAdmin extends BaseDbi
             $sql .= " and hospital_id not in ($exceptHospitalList)";
         }
         return $this->getDataRow($sql);
+    }
+    public function getDeviceGuardianLow($hospital)
+    {
+        if (empty($hospital)) {
+            return array();
+        }
+        $sql = 'select t.hospital_id, analysis_hospital, report_hospital, h.hospital_name
+                from hospital_tree as t inner join hospital as h on t.hospital_id = h.hospital_id
+                where analysis_hospital = :hospital or report_hospital = :hospital';
+        $param = [':hospital' => $hospital];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getGuardiansStatistics($hospitalList, $sTime = null, $eTime = null)
+    {
+        $sql = "select g.guardian_id, g.device_id, g.regist_hospital_id, g.start_time, g.end_time, d.status,
+                p.patient_name, p.sex, p.birth_year, p.tel, g.regist_doctor_name as doctor_name
+                from guardian as g left join patient as p on g.patient_id = p.patient_id 
+                left join guardian_data as d on g.guardian_id = d.guardian_id
+                where regist_hospital_id in ($hospitalList) ";
+        if ($sTime != null) {
+            $sql .= " and g.regist_time >= '$sTime' ";
+        }
+        if ($eTime != null) {
+            $sql .= " and g.regist_time <= '$eTime' ";
+        }
+        $sql .= " order by g.guardian_id desc";
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataAll($sql, $param);
     }
     public function getHospitalInfo($hospitalId)
     {
@@ -340,8 +398,8 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalTree($hospitalId)
     {
-        $sql = 'select hospital_id, analysis_hospital, report_hospital, title_hospital from hospital_tree
-                where hospital_id = :hospital_id limit 1';
+        $sql = 'select hospital_id, analysis_hospital, report_hospital, title_hospital, double_title
+                from hospital_tree where hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
     }
@@ -375,6 +433,25 @@ class DbiAdmin extends BaseDbi
         $param = [':salesman' => $salesman];
         return $this->getDataAll($sql, $param);
     }
+    public function getHospitalGuardian($hospital, $device, $startTime, $endTime)
+    {
+        if (empty($hospital) || empty($device)) {
+            return array();
+        }
+        $sql = 'select g.device_id, g.regist_time, p.patient_name, g.regist_doctor_name
+                from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                where g.regist_hospital_id = :hospital and device_id = :device ';
+        if (null !== $startTime) {
+            $sql .= " and regist_time >= '$startTime' ";
+        }
+        if (null !== $endTime) {
+            $sql .= " and regist_time <= '$endTime' ";
+        }
+        $sql .= ' order by regist_time desc';
+        $param = [':hospital' => $hospital, ':device' => $device];
+        return $this->getDataAll($sql, $param);
+    }
+    
     /*
     public function existedLoginName($loginName)
     {
