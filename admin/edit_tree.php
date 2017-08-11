@@ -15,6 +15,7 @@ if (isset($_POST['edit'])){
     $analysisHospital = !isset($_POST['hospital_analysis']) ? null : $_POST['hospital_analysis'];
     $reportHospital = !isset($_POST['hospital_report']) ? null : $_POST['hospital_report'];
     $titleHospital = !isset($_POST['hospital_title']) ? null : $_POST['hospital_title'];
+    $doubleTitle = isset($_POST['double_title']) ? $_POST['double_title'] : '0';
     
     if (empty($hospitalId)) {
         user_back_after_delay('非法访问');
@@ -29,7 +30,7 @@ if (isset($_POST['edit'])){
         user_back_after_delay('请选择抬头医院。');
     }
     
-    $ret = DbiAdmin::getDbi()->editTree($hospitalId, $analysisHospital, $reportHospital, $titleHospital);
+    $ret = DbiAdmin::getDbi()->editTree($hospitalId, $analysisHospital, $reportHospital, $titleHospital, $doubleTitle);
     
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
@@ -59,10 +60,12 @@ if (isset($_POST['edit'])){
         $analysisHospital = '0';
         $reportHospital = '0';
         $titleHospital = '0';
+        $doubleTitle = '0';
     } else {
         $analysisHospital = $hospitalTree['analysis_hospital'];
         $reportHospital = $hospitalTree['report_hospital'];
         $titleHospital = $hospitalTree['title_hospital'];
+        $doubleTitle = $hospitalTree['double_title'];
     }
     
     $ret = DbiAdmin::getDbi()->getHospitalListHigh($hospitalId);
@@ -96,6 +99,11 @@ if (isset($_POST['edit'])){
         }
     }
     
+    $htmlDoubleTitle = '<label class="checkbox-inline">' 
+            . '<input type="radio" name="double_title" value="1"' . ($doubleTitle == '1' ? ' checked ' : '') . '>是</label>' 
+            . '<label class="checkbox-inline">' 
+            . '<input type="radio" name="double_title" value="0"' . ($doubleTitle == '0' ? ' checked ' : '') . '>否</label>';
+    
     echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
   <input type="hidden" name="hospital_id" value="$hospitalId">
@@ -123,6 +131,12 @@ if (isset($_POST['edit'])){
       <select class="form-control" name="hospital_title">
         <option value="0">请选择抬头医院</option>$htmlTitleHospitals
     </select></div>
+  </div>
+  <div class="form-group">
+    <label for="parent_flag" class="col-sm-2 control-label">是否双抬头<font color="red">*</font></label>
+    <div class="col-sm-2">
+      $htmlDoubleTitle
+    </div>
   </div>
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">

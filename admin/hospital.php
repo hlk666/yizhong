@@ -17,10 +17,10 @@ if (VALUE_DB_ERROR === $ret) {
 }
 $htmlSalesman = '<option value="0">请选择业务员</option>';
 foreach ($ret as $value) {
-    if ($salesman == $value['salesman']) {
-        $htmlSalesman .= '<option value="' . $value['salesman'] . '" selected>' . $value['salesman'] . '</option>';
+    if ($salesman == $value['name']) {
+        $htmlSalesman .= '<option value="' . $value['name'] . '" selected>' . $value['name'] . '</option>';
     } else {
-        $htmlSalesman .= '<option value="' . $value['salesman'] . '">' . $value['salesman'] . '</option>';
+        $htmlSalesman .= '<option value="' . $value['name'] . '">' . $value['name'] . '</option>';
     }
 }
 
@@ -54,11 +54,16 @@ if (1 === $page) {
 
 $htmlHospitals = '';
 foreach ($ret as $value) {
+    if ($value['quantity'] == 0) {
+        $link = '0';
+    } else {
+        $link = '<a href="hospital_device.php?hospital=' . $value['hospital_id'] . '">' . $value['quantity'] . '</a>';
+    }
     $htmlHospitals .= '<tr><td>' 
             . $value['hospital_id'] . '</td><td>'
             . $value['hospital_name'] . '</td><td>'
             . $value['login_name'] . '</td><td>'
-            . $value['quantity'] . '</td><td>'
+            . $link . '</td><td>'
             . '<button type="button" class="btn btn-xs btn-warning" onclick="javascript:editHospital(' 
                 . $value['hospital_id'] . ')">修改</button></td><td>'
             . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editRelation(' 

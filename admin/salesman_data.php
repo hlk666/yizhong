@@ -18,10 +18,10 @@ if (VALUE_DB_ERROR === $ret) {
 }
 $htmlSalesman = '<option value="0">请选择业务员</option>';
 foreach ($ret as $value) {
-    if ($currentSalesman == $value['salesman']) {
-        $htmlSalesman .= '<option value="' . $value['salesman'] . '" selected>' . $value['salesman'] . '</option>';
+    if ($currentSalesman == $value['name']) {
+        $htmlSalesman .= '<option value="' . $value['name'] . '" selected>' . $value['name'] . '</option>';
     } else {
-        $htmlSalesman .= '<option value="' . $value['salesman'] . '">' . $value['salesman'] . '</option>';
+        $htmlSalesman .= '<option value="' . $value['name'] . '">' . $value['name'] . '</option>';
     }
 }
 
@@ -133,7 +133,7 @@ echo <<<EOF
 $htmlData
 <div style="text-align:right;">
 <ul class="pagination">$paging</ul>
-<div>
+</div>
 <script type="text/javascript" src="js/adddate.js"></script>
 EOF;
 require 'tpl/footer.tpl';

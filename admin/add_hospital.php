@@ -27,6 +27,7 @@ if (isset($_POST['submit'])){
     $analysisHospital = (isset($_POST['hospital_analysis']) && !empty($_POST['hospital_analysis'])) ? $_POST['hospital_analysis'] : '';
     $reportHospital = (isset($_POST['hospital_report']) && !empty($_POST['hospital_report'])) ? $_POST['hospital_report'] : '';
     $titleHospital = (isset($_POST['hospital_title']) && !empty($_POST['hospital_title'])) ? $_POST['hospital_title'] : '';
+    $agency = (isset($_POST['agency']) && !empty($_POST['agency'])) ? $_POST['agency'] : '';
     
     if (empty($hospitalName)) {
         user_back_after_delay('请正确输入医院名。');
@@ -70,7 +71,7 @@ if (isset($_POST['submit'])){
     
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $type, $level, $hospitalTel, 
             $province, $city, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser, 
-            $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital);
+            $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital, $agency);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -87,6 +88,15 @@ if (isset($_POST['submit'])){
     $htmlParentHospitals = '';
     foreach ($ret as $value) {
         $htmlParentHospitals .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
+    }
+    
+    $ret = DbiAdmin::getDbi()->getAgencyList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlAgency = '';
+    foreach ($ret as $value) {
+        $htmlAgency .= '<option value="' . $value['agency_id'] . '">' . $value['name'] . '</option>';
     }
     
     $ret = DbiAdmin::getDbi()->getHospitalListHigh(0);
@@ -182,6 +192,12 @@ if (isset($_POST['submit'])){
     <label for="message_tel" class="col-sm-2 control-label">接收短信手机号</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="message_tel" name="message_tel" placeholder="请输入值班医生手机号(接收短信)">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="salesman" class="col-sm-2 control-label">代理商</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="agency"><option value="0">请选择代理商(如果不存在则需提前创建)</option>$htmlAgency</select>
     </div>
   </div>
   <div class="form-group">

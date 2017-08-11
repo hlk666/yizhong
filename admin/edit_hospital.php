@@ -22,6 +22,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
     $loginUser = !isset($_POST['login_user']) ? null : $_POST['login_user'];
     $messageTel = isset($_POST['message_tel']) ? $_POST['message_tel'] : '0';
+    $agency = isset($_POST['agency']) ? $_POST['agency'] : '';
     $salesman = isset($_POST['salesman']) ? $_POST['salesman'] : '';
     $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
     
@@ -67,7 +68,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         }
 
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
-                $hospitalAddress, $parentFlag, $loginUser, $messageTel, $salesman, $comment);
+                $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment);
     }
     
     if (isset($_POST['del'])) {
@@ -89,9 +90,21 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     if (empty($action) || empty($hospitalId)) {
         user_back_after_delay('非法访问');
     }
+    
     $hospitalInfo = DbiAdmin::getDbi()->getHospitalInfo($hospitalId);
     if (VALUE_DB_ERROR === $hospitalInfo) {
         user_back_after_delay(MESSAGE_DB_ERROR);
+    }
+    
+    $agency = $hospitalInfo['agency_id'];
+    $ret = DbiAdmin::getDbi()->getAgencyList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlAgency = '';
+    foreach ($ret as $value) {
+        $htmlAgency .= '<option value="' . $value['agency_id'] . '"' 
+                . ($agency == $value['agency_id'] ? ' selected ' : '') . '>' . $value['name'] . '</option>';
     }
     
     $type = $hospitalInfo['type'];
@@ -190,6 +203,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <label for="message_tel" class="col-sm-2 control-label">接收短信手机号<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="message_tel" name="message_tel" value="$messageTel">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="salesman" class="col-sm-2 control-label">代理商</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="agency"><option value="0">请选择代理商(如果不存在则需提前创建)</option>$htmlAgency</select>
     </div>
   </div>
   <div class="form-group">
