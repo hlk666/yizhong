@@ -1,7 +1,8 @@
 <?php
 require_once PATH_LIB . 'DbiAnalytics.php';
 require_once PATH_LIB . 'Validate.php';
-require_once PATH_ROOT . 'lib/tool/HpMessage.php';
+//require_once PATH_ROOT . 'lib/tool/HpMessage.php';
+require_once PATH_LIB . 'ShortMessageService.php';
 
 //2017/04/20
 if (isset($_POST['device_type']) && $_POST['device_type'] == '1') {
@@ -61,6 +62,11 @@ if (1 == $deviceType) {
     if (VALUE_DB_ERROR === $tree || array() == $tree) {
         //do nothing.
     } else {
+        //add special action for WeiFangZhongYiYuan.
+        if ($tree['analysis_hospital'] == 114) {
+            ShortMessageService::send('13793616212', '有新的上传数据，请分析。');
+        }
+        
         setNotice($tree['analysis_hospital'], 'upload_data', $guardianId);
         if ($tree['hospital_id'] != $tree['report_hospital']) {
             setNotice($tree['report_hospital'], 'upload_data', $guardianId);
