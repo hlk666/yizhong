@@ -116,10 +116,25 @@ class DbiAnalytics extends BaseDbi
     }
     public function getPatientByDiagnosis($diagnosisList)
     {
-        $sql = 'select distinct pd.patient_id, p.patient_name, p.birth_year, p.sex, p.tel
+        $sql = "select distinct pd.patient_id, p.patient_name, p.birth_year, p.sex, p.tel
                 from patient as p inner join patient_diagnosis as pd on p.patient_id = pd.patient_id
-                where pd.diagnosis_id in ' . $diagnosisList;
+                where pd.diagnosis_id in $diagnosisList order by pd.patient_id desc";
         return $this->getDataAll($sql);
+    }
+    public function getPatientLastHospital($patientId, $startTime, $endTime)
+    {
+        $sql = 'select h.hospital_name, g.regist_time
+                from guardian as g inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                where patient_id = :id ';
+        if (!empty($startTime)) {
+            $sql .= " and g.regist_time >= '$startTime' ";
+        }
+        if (!empty($endTime)) {
+            $sql .= " and g.regist_time <= '$endTime' ";
+        }
+        $sql .= ' order by guardian_id desc limit 1;';
+        $param = array(':id' => $patientId);
+        return $this->getDataRow($sql, $param);
     }
     
     public function getHospitals($hospitalId)
