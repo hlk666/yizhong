@@ -11,7 +11,7 @@ class AddHospital extends BaseApi
             return $ret;
         }
         
-        $required = ['name', 'level', 'tel', 'area', 'province', 'city', 'address'];
+        $required = ['name', 'level', 'tel', 'area', 'province', 'city', 'address', 'login_name', 'real_name', 'password'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -28,13 +28,18 @@ class AddHospital extends BaseApi
             return $checkRange;
         }
         
+        if (true === Dbi::getDbi()->existedDoctor($this->param['login_name'])) {
+            return HpErrorMessage::getError(ERROR_USER_NAME_USED);
+        }
+        
         return true;
     }
     
     protected function execute()
     {
         $ret = Dbi::getDbi()->addHospital($this->param['name'], $this->param['level'], $this->param['tel'], 
-                $this->param['area'], $this->param['province'], $this->param['city'], $this->param['address']);
+                $this->param['area'], $this->param['province'], $this->param['city'], $this->param['address'], 
+                $this->param['login_name'], $this->param['real_name'], md5($this->param['password']));
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

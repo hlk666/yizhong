@@ -10,7 +10,7 @@ class HpUpload
         
         $category = 'image';
         
-        $dir = PATH_ROOT . 'www' . DIRECTORY_SEPARATOR . $category . DIRECTORY_SEPARATOR . date('Ymd') . DIRECTORY_SEPARATOR;
+        $dir = PATH_ROOT . $category . DIRECTORY_SEPARATOR . date('Ymd') . DIRECTORY_SEPARATOR;
         if (!file_exists($dir)) {
             mkdir($dir);
         }

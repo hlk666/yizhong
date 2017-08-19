@@ -45,8 +45,8 @@ class EditPatient extends BaseApi
         if (isset($this->param['name'])) {
             $data['name'] = $this->param['name'];
         }
-        if (isset($this->param['birth_year'])) {
-            $data['birth_year'] = $this->param['birth_year'];
+        if (isset($this->param['age'])) {
+            $data['birth_year'] = date('Y') - $this->param['age'];
         }
         if (isset($this->param['sex'])) {
             $data['sex'] = $this->param['sex'];

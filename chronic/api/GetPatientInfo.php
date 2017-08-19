@@ -35,6 +35,7 @@ class GetPatientInfo extends BaseApi
         if (empty($patientInfo)) {
             return HpErrorMessage::getError(ERROR_NO_DATA);
         }
+        $patientInfo['age'] = date('Y') - $patientInfo['birth_year'];
         return array_merge($this->retSuccess, $patientInfo);
     }
 }

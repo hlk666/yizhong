@@ -43,7 +43,7 @@ class AddDoctor extends BaseApi
     {
         $phone = isset($this->param['phone']) ? $this->param['phone'] : '0';
         $ret = Dbi::getDbi()->addDoctor($this->param['login_name'], $this->param['real_name'], 
-                md5($this->param['login_name']), $this->param['type'], $this->param['tel'], $phone, $this->param['department_id']);
+                md5($this->param['password']), $this->param['type'], $this->param['tel'], $phone, $this->param['department_id']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

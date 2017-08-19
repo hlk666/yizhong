@@ -11,7 +11,7 @@ class AddDepartment extends BaseApi
             return $ret;
         }
         
-        $required = ['hospital_id', 'name', 'tel'];
+        $required = ['hospital_id', 'name', 'tel', 'login_name', 'real_name', 'password'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -27,12 +27,17 @@ class AddDepartment extends BaseApi
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'hospital_id.');
         }
         
+        if (true === Dbi::getDbi()->existedDoctor($this->param['login_name'])) {
+            return HpErrorMessage::getError(ERROR_USER_NAME_USED);
+        }
+        
         return true;
     }
     
     protected function execute()
     {
-        $ret = Dbi::getDbi()->addDepartment($this->param['hospital_id'], $this->param['name'], $this->param['tel']);
+        $ret = Dbi::getDbi()->addDepartment($this->param['hospital_id'], $this->param['name'], $this->param['tel'],
+                $this->param['login_name'], $this->param['real_name'], md5($this->param['password']));
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
