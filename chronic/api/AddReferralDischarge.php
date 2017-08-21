@@ -13,7 +13,7 @@ class AddReferralDischarge extends BaseApi
         }
         
         $required = ['referral_id', 'department_id', 'doctor_id', 'diagnosis', 'info', 
-                        'patient_id', 'plan_text', 'plan_name'];
+                        'patient_id', 'plan_text', 'plan_name', 'apply_department_id'];
         
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
@@ -58,6 +58,9 @@ class AddReferralDischarge extends BaseApi
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        send_notice($this->param['apply_department_id'], '转诊病人出院，转诊ID：' . $this->param['referral_id']);
+        
         return $this->retSuccess;
     }
 }

@@ -54,6 +54,9 @@ class AddConsultationApply extends BaseApi
         if (VALUE_DB_ERROR === $consultationId) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        send_notice($this->param['reply_department_id'], '有新的会诊申请，请确认。');
+        
         $this->retSuccess['consultation_id'] = $consultationId;
         return $this->retSuccess;
     }

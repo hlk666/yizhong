@@ -11,7 +11,7 @@ class DeleteConsultationApply extends BaseApi
             return $ret;
         }
         
-        $required = ['consultation_id'];
+        $required = ['consultation_id', 'reply_department_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -40,6 +40,9 @@ class DeleteConsultationApply extends BaseApi
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        send_notice($this->param['reply_department_id'], '有新的会诊申请被删除，会诊ID：' . $this->param['consultation_id']);
+        
         return $this->retSuccess;
     }
 }

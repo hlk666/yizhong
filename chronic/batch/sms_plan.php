@@ -6,55 +6,43 @@ $day = date('Y-m-d', strtotime('+1 day'));
 $startTime = $day . ' 00:00:00';
 $endTime = $day . ' 23:59:59';
 
-HpLogger::writeCommonLog('starts', $logFile);
+HpLogger::write('start.', $logFile, LOG_TIME_DAY);
 
 $plans = DbiBatch::getDbi()->getPlans($startTime, $endTime);
 if (VALUE_DB_ERROR === $plans) {
-    HpLogger::writeCommonLog('db error-failed to get plans.', $logFile);
+    HpLogger::write('db error.', $logFile, LOG_TIME_DAY);
     exit(-1);
 }
 
 foreach ($plans as $plan) {
-    $textCase = HpErrorMessage::getTelMessagePlanCase($plan['follow_time'], $plan['child_hospital_name'], $plan['parent_hospital_name']);
-    $sendCase = sendSMS($plan['tel'], $plan['case_name'], $textCase, $logFile);
+    $date = substr($plan['plan_time'], 0, 4) . '年' . substr($plan['plan_time'], 5, 2) . '月' . substr($plan['plan_time'], 8, 2) . '日';
+    $value = $plan['plan_value'];
+    $message = "您的复查时间({$date})到了，请您按时复查(项目:$value)。";
+    $sendCase = sendSMS($plan['tel'], $plan['name'], $message, $logFile);
     
-    $telDoctor = DbiBatch::getDbi()->getTelList($plan['apply_hospital_id']);
-    if (VALUE_DB_ERROR === $telDoctor) {
-        HpLogger::writeCommonLog('db error-failed to get tel list.', $logFile);
-        exit(-1);
-    }
-    
-    $textDoctor = HpErrorMessage::getTelMessagePlanDoctor($plan['case_name'], $plan['follow_time'], $plan['follow_text']);
-    $sendDoctor = false;
-    foreach ($telDoctor as $row) {
-        $send = sendSMS($row['tel'], $plan['child_hospital_name'] . '的医生', $textDoctor, $logFile);
-        if ($send) {
-            $sendDoctor = true;
-        }
-    }
-    if (true == $sendCase && true == $sendDoctor) {
+    if (true == $sendCase) {
         $ret = DbiBatch::getDbi()->setMessageSend($plan['plan_id']);
         if (VALUE_DB_ERROR === $ret) {
-            HpLogger::writeCommonLog('db error-failed to update message_time.', $logFile);
+            HpLogger::write('db error-failed to update message_time.', $logFile, LOG_TIME_DAY);
         }
     }
 }
-HpLogger::writeCommonLog('ends', $logFile);
+HpLogger::write('ends', $logFile, LOG_TIME_DAY);
 exit(0);
 
 function sendSMS($tel, $destination, $content, $logFile)
 {
     if (true !== HpValidate::checkPhoneNo($tel)) {
-        HpLogger::writeCommonLog('tel number error with tel : ' . $tel, $logFile);
+        HpLogger::write('tel number error with tel : ' . $tel, $logFile, LOG_TIME_DAY);
         return false;
     }
-    HpLogger::writeCommonLog("send message to $destination($tel) with content[$content].", $logFile);
+    HpLogger::write("send message to $destination($tel) with content[$content].", $logFile, LOG_TIME_DAY);
     $ret = HpShortMessageService::send($tel, $content);
     if (false === $ret) {
-        HpLogger::writeCommonLog('failed.', $logFile);
+        HpLogger::write('failed.', $logFile, LOG_TIME_DAY);
         return false;
     }
     
-    HpLogger::writeCommonLog('succeed.', $logFile);
+    HpLogger::write('succeed.', $logFile, LOG_TIME_DAY);
     return true;
 }

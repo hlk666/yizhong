@@ -54,6 +54,9 @@ class AddReferralApply extends BaseApi
         if (VALUE_DB_ERROR === $referralId) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        send_notice($this->param['reply_department_id'], '有新的转诊申请，请确认。');
+        
         $this->retSuccess['referral_id'] = $referralId;
         return $this->retSuccess;
     }

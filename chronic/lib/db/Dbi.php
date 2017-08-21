@@ -272,16 +272,16 @@ class Dbi extends BaseDbi
                         ':apply_message' => $message, ':reply_department_id' => $replyDepartmentId];
         return $this->insertData($sql, $param);
     }
-    public function addReferralReply($referralId, $doctorId, $message)
+    public function addReferralReply($referralId, $doctorId, $message, $status)
     {
-        $sql = 'update referral set reply_doctor_id = :doctor, reply_time = now(), reply_message = :message
-                where id = :id';
-        $param = [':id' => $referralId, ':doctor' => $doctorId, ':message' => $message];
+        $sql = 'update referral set reply_doctor_id = :doctor, reply_time = now(), 
+                reply_message = :message, status = :status where id = :id';
+        $param = [':id' => $referralId, ':doctor' => $doctorId, ':message' => $message, ':status' => $status];
         return $this->updateData($sql, $param);
     }
     public function addReferralConfirm($referralId, $doctorId)
     {
-        $sql = 'update referral set confirm_doctor_id = :doctor, confirm_time = now() where id = :id';
+        $sql = 'update referral set confirm_doctor_id = :doctor, confirm_time = now(), status = 4 where id = :id';
         $param = [':id' => $referralId, ':doctor' => $doctorId];
         return $this->updateData($sql, $param);
     }
@@ -312,7 +312,7 @@ class Dbi extends BaseDbi
             }
         }
         
-        $sql = 'update referral set discharge_doctor_id = :doctor, discharge_time = now(),
+        $sql = 'update referral set discharge_doctor_id = :doctor, discharge_time = now(), status = 5, 
                 diagnosis = :diagnosis, info = :info, follow_plan_id = :follow_plan_id where id = :id';
         $param = [':id' => $referralId, ':doctor' => $doctorId,
                         ':diagnosis' => $diagnosis, ':info' => $info, ':follow_plan_id' => $followPlanId];
@@ -1043,10 +1043,16 @@ class Dbi extends BaseDbi
     public function searchPatient($name = null, $identityCard = null, $birthYear = null, $sex = null, $tel = null, 
             $address = null, $hospitalization = null)
     {
-        $sql = 'select id, identity_card, name, birth_year, sex,  tel, address, ethnic, native_place, hospitalization, 
-                family_name, family_tel, department1, department2, department3, department_once from patient where 1 ';
+        $sql = 'select p.id, identity_card, p.name, birth_year, sex,  p.tel, address, ethnic, native_place, hospitalization, 
+                family_name, family_tel, department1, d1.name as department1_name, department2, d2.name as department2_name, 
+                department3, d3.name as department3_name, department_once, d4.name as department_once_name 
+                from patient as p left join department as d1 on p.department1 = d1.id
+                left join department as d2 on p.department2 = d2.id
+                left join department as d3 on p.department3 = d3.id
+                left join department as d4 on p.department_once = d4.id 
+                where 1 ';
         if ($name != null) {
-            $sql .= " and name like '%$name%' ";
+            $sql .= " and p.name like '%$name%' ";
         }
         if ($identityCard != null) {
             $sql .= " and identity_card like '%$identityCard%' ";
@@ -1058,7 +1064,7 @@ class Dbi extends BaseDbi
             $sql .= " and sex = '$sex'";
         }
         if ($tel != null) {
-            $sql .= " and tel like '%$tel%' ";
+            $sql .= " and p.tel like '%$tel%' ";
         }
         if ($address != null) {
             $sql .= " and address like '%$address%' ";

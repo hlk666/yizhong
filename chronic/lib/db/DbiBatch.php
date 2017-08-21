@@ -20,23 +20,22 @@ class DbiBatch extends BaseDbi
     
     public function getPlans($startTime, $endTime)
     {
-        $sql = 'select plan_id, case_name, child_hospital_name, child_hospital_tel, parent_hospital_name, 
-                follow_time, follow_text, r.apply_hospital_id, c.tel from plan as p 
-                inner join referral as r on p.referral_id = r.referral_id
-                inner join `case` as c on r.case_id = c.case_id 
-                where follow_time >= :start and follow_time <= :end and message_time is null';
+        $sql = 'select p.id as plan_id, p.patient_id, pa.name, pa.tel, plan_time, plan_value 
+                from plan as p inner join patient as pa on p.patient_id = pa.id
+                where plan_time >= :start and plan_time <= :end 
+                and notice_time is null and execute_time is null';
         $param = [':start' => $startTime, ':end' => $endTime];
         return $this->getDataAll($sql, $param);
     }
-    public function getTelList($hospitalId)
+    public function getTel($patientId)
     {
-        $sql = 'select distinct tel from `user` where hospital_id = :hospital';
-        $param = [':hospital' => $hospitalId];
-        return $this->getDataAll($sql, $param);
+        $sql = 'select tel from patient where id = :id';
+        $param = [':id' => $patientId];
+        return $this->getDataString($sql, $param);
     }
     public function setMessageSend($planId)
     {
-        $sql = 'update plan set message_time = now() where plan_id = :plan';
+        $sql = 'update plan set notice_time = now() where plan_id = :plan';
         $param = [':plan' => $planId];
         return $this->updateData($sql, $param);
     }

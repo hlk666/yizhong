@@ -33,3 +33,13 @@ function save_execute_time($startTime)
         HpLogger::writeDebugTimeLog($_GET['entry'], $time);
     }
 }
+
+function send_notice($id, $message)
+{
+    include_once PATH_ROOT . 'lib/util/HpNoticeQuery.php';
+    
+    $notice = new HpNoticeQuery('department', $id);
+    $success = $notice->set(['time' => date('Y-m-d H:i:s'), 'message' => $message]);
+    
+    return $success;
+}

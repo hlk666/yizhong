@@ -11,7 +11,7 @@ class DeleteReferralApply extends BaseApi
             return $ret;
         }
         
-        $required = ['referral_id'];
+        $required = ['referral_id', 'reply_department_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -40,6 +40,9 @@ class DeleteReferralApply extends BaseApi
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        send_notice($this->param['reply_department_id'], '有新的转诊申请被删除，转诊ID：' . $this->param['referral_id']);
+        
         return $this->retSuccess;
     }
 }

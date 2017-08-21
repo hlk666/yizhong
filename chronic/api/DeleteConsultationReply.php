@@ -40,6 +40,9 @@ class DeleteConsultationReply extends BaseApi
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        send_notice($this->param['reply_department_id'], '有新的会诊回复被删除，会诊ID：' . $this->param['consultation_id']);
+        
         return $this->retSuccess;
     }
 }

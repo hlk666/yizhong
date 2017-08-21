@@ -11,14 +11,14 @@ class AddConsultationReply extends BaseApi
             return $ret;
         }
         
-        $required = ['consultation_id', 'department_id', 'doctor_id', 'diagnosis', 'advice'];
+        $required = ['consultation_id', 'apply_department_id', 'doctor_id', 'diagnosis', 'advice'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
             return $checkRequired;
         }
         
-        $checkNumeric = HpValidate::checkNumeric(['consultation_id', 'department_id', 'doctor_id'], $this->param);
+        $checkNumeric = HpValidate::checkNumeric(['consultation_id', 'apply_department_id', 'doctor_id'], $this->param);
         if (true !== $checkNumeric) {
             return $checkNumeric;
         }
@@ -27,8 +27,8 @@ class AddConsultationReply extends BaseApi
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'consultation_id.');
         }
         
-        if (false === Dbi::getDbi()->existedDepartment($this->param['department_id'])) {
-            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'department_id.');
+        if (false === Dbi::getDbi()->existedDepartment($this->param['apply_department_id'])) {
+            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'apply_department_id.');
         }
         
         if (false === Dbi::getDbi()->existedDoctorById($this->param['doctor_id'])) {
@@ -45,6 +45,9 @@ class AddConsultationReply extends BaseApi
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        send_notice($this->param['apply_department_id'], '有新的会诊回复，请确认。');
+        
         return $this->retSuccess;
     }
 }
