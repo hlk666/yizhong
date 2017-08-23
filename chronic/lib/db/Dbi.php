@@ -631,8 +631,8 @@ class Dbi extends BaseDbi
     public function getCaseList($patientId, $departmentId = null)
     {
         $sql = 'select c.id as case_id, d.id as department_id, d.`name` as department_name, 
-                c.diagnosis, c.chief_complaint, c.present_illness, 
-                c.past_illness, c.allergies, c.smoking, c.drinking, c.body_examination
+                c.diagnosis, c.chief_complaint, c.present_illness, c.past_illness, c.allergies, 
+                c.smoking, c.drinking, c.body_examination, c.create_time
                 from `case` as c inner join department as d on c.department_id = d.id
                 where c.patient_id = :patient_id ';
         if ($departmentId != null) {
@@ -658,6 +658,14 @@ class Dbi extends BaseDbi
                 on c.id = p.chronic_id
                 order by c.id, p.patient_id';
         $param = [':dpt' => $departmentId];
+        return $this->getDataAll($sql, $param);
+    }
+    public function getChronicByPatient($patientId)
+    {
+        $sql = 'select cp.chronic_id, c.name as chronic_name
+                from chronic_patient as cp inner join chronic as c on cp.chronic_id = c.id
+                where cp.patient_id = :id';
+        $param = [':id' => $patientId];
         return $this->getDataAll($sql, $param);
     }
     public function getConsultationList($departmentId = null, $patientId = null, $type = 'apply', $startTime = null, $endTime = null)
@@ -738,6 +746,11 @@ class Dbi extends BaseDbi
         $sql .= ' order by ep.id desc';
         $param = [':patient_id' => $patientId];
         return $this->getDataAll($sql, $param);
+    }
+    public function getExaminationMst()
+    {
+        $sql = 'select * from examination';
+        return $this->getDataAll($sql);
     }
     public function getFollowPlanList($departmentId = null, $patientId = null, $startTime = null, $endTime = null)
     {

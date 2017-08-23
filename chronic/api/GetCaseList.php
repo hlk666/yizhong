@@ -47,7 +47,14 @@ class GetCaseList extends BaseApi
         if (empty($caseList)) {
             return HpErrorMessage::getError(ERROR_NO_DATA);
         }
+        
+        $chronicList = Dbi::getDbi()->getChronicByPatient($this->param['patient_id']);
+        if (VALUE_DB_ERROR === $chronicList) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
         $this->retSuccess['case_list'] = $caseList;
+        $this->retSuccess['chronic_list'] = $chronicList;
         return $this->retSuccess;
     }
 }
