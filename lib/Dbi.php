@@ -274,7 +274,7 @@ class Dbi extends BaseDbi
         if ($hospitalId === 0) {
             $sql .= ' where 1 ';
         } else {
-            $sql .= ' where guard_hospital_id = ' . $hospitalId; 
+            $sql .= ' where guard_hospital_id in (' . $hospitalId . ')'; 
         }
         if ($mode != null) {
             $sql .= " and g.mode = $mode ";
