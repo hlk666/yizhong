@@ -2,7 +2,7 @@
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/tool/HpUpload.php';
 
-class UploadImage extends BaseApi
+class UploadFile extends BaseApi
 {
     protected function validate($class = '')
     {
@@ -11,19 +11,26 @@ class UploadImage extends BaseApi
             return $ret;
         }
         
+        $required = ['name', 'size'];
+        
+        $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
+        if (true !== $checkRequired) {
+            return $checkRequired;
+        }
+        
         $ret = isset($this->param['data']) ? HpValidate::checkRequired($this->param['data']) : false;
         if (true !== $ret) {
             return HpErrorMessage::getError(ERROR_UPLOAD_NO_DATA);
         }
         
-        $ret = isset($this->param['name']) ? HpValidate::checkRequired($this->param['name']) : false;
-        if (true !== $ret) {
-            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'name');
+        $checkRange = HpValidate::checkRange(['suffix'], $this->param, ['jpg', 'png', 'gif', 'jpeg', 'pdf']);
+        if (true !== $checkRange) {
+            return $checkRange;
         }
         
-        $suffixs = ['jpg', 'png', 'gif', 'jpeg'];
-        if (isset($this->param['suffix']) && !in_array($this->param['suffix'], $suffixs)) {
-            return HpErrorMessage::getError(ERROR_UPLOAD_SUFFIX);
+        $len = strlen($this->param['data']);
+        if ($len != $this->param['size']) {
+            return HpErrorMessage::getError(ERROR_PARAM_SIZE);
         }
         
         return true;

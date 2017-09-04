@@ -4,11 +4,11 @@ class HpUpload
     public static function uploadImage($data, $name, $suffix)
     {
         if (empty($data)) {
-            HpLogger::writeCommonLog('No data uploaded.');
+            HpLogger::write('No data uploaded.', 'upload.log');
             return false;
         }
         
-        $category = 'image';
+        $category = 'upload';
         
         $dir = PATH_ROOT . $category . DIRECTORY_SEPARATOR . date('Ymd') . DIRECTORY_SEPARATOR;
         if (!file_exists($dir)) {
@@ -18,10 +18,10 @@ class HpUpload
         if (empty($suffix)) {
             $suffix = 'jpg';
         }
-        $fileName = $name . date('His') . '.' . $suffix;
+        $fileName = $name . '_' . date('His') . '.' . $suffix;
         
         if (false === file_put_contents($dir . $fileName, $data)) {
-            HpLogger::writeCommonLog('Failed to write file : ' . $dir . $fileName);
+            HpLogger::write('Failed to write file : ' . $dir . $fileName, 'upload.log');
             return false;
         }
         

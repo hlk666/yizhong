@@ -57,11 +57,11 @@ class GetReferralList extends BaseApi
                 return HpErrorMessage::getError(ERROR_DB);
             }
         }
-        
+        /*
         $referralList = Dbi::getDbi()->getReferralList($departmentId, $patientId);
         if (VALUE_DB_ERROR === $referralList) {
             return HpErrorMessage::getError(ERROR_DB);
-        }
+        }*/
 
         $this->retSuccess['referral_apply'] = $referralApply;
         $this->retSuccess['referral_reply'] = $referralReply;

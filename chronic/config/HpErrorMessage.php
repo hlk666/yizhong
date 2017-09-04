@@ -15,6 +15,7 @@ define('ERROR_PARAM_RANGE', 13);
 define('ERROR_PARAM_SPACE', 14);
 define('ERROR_PARAM_TIME', 15);
 define('ERROR_PARAM_FORMAT', 16);
+define('ERROR_PARAM_SIZE', 17);
 
 define('ERROR_USER_NOT_EXISTED', 20);
 define('ERROR_PASSWORD', 21);
@@ -57,6 +58,7 @@ class HpErrorMessage
                     ERROR_PARAM_SPACE => ['code' => ERROR_PARAM_SPACE, 'message' => '该参数不能为空白：'],
                     ERROR_PARAM_TIME => ['code' => ERROR_PARAM_TIME, 'message' => '时间格式错误。'],
                     ERROR_PARAM_FORMAT => ['code' => ERROR_PARAM_FORMAT, 'message' => '参数格式错误。'],
+                    ERROR_PARAM_SIZE => ['code' => ERROR_PARAM_SIZE, 'message' => '参数大小错误。'],
                     
                     ERROR_USER_NOT_EXISTED => ['code' => ERROR_USER_NOT_EXISTED, 'message' => '用户不存在。'],
                     ERROR_PASSWORD => ['code' => ERROR_PASSWORD, 'message' => '密码错误。'],

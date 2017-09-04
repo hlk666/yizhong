@@ -752,6 +752,12 @@ class Dbi extends BaseDbi
         $sql = 'select * from examination';
         return $this->getDataAll($sql);
     }
+    public function getFollowPlanDetail($followPlanId)
+    {
+        $sql = 'select id as plan_id, plan_time, plan_value, notice_time, execute_time from plan where follow_plan_id = :id';
+        $param = [':id' => $followPlanId];
+        return $this->getDataAll($sql, $param);
+    }
     public function getFollowPlanList($departmentId = null, $patientId = null, $startTime = null, $endTime = null)
     {
         $sql = 'select f.id, f.department_id, d.`name` as department_name, f.patient_id, p.`name` as patient_name, 

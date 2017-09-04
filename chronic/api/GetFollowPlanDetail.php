@@ -2,9 +2,8 @@
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
 
-class DeleteFollowRecord extends BaseApi
+class GetFollowPlanDetail extends BaseApi
 {
-    private $examinationList = array();
     protected function validate($class = '')
     {
         $ret = parent::validate(__CLASS__);
@@ -12,20 +11,16 @@ class DeleteFollowRecord extends BaseApi
             return $ret;
         }
         
-        $required = ['follow_record_id'];
+        $required = ['follow_plan_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
             return $checkRequired;
         }
         
-        $checkNumeric = HpValidate::checkNumeric(['follow_record_id'], $this->param);
+        $checkNumeric = HpValidate::checkNumeric(['follow_plan_id'], $this->param);
         if (true !== $checkNumeric) {
             return $checkNumeric;
-        }
-        
-        if (false === Dbi::getDbi()->existedFollowRecord($this->param['follow_record_id'])) {
-            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'follow_record_id.');
         }
         
         return true;
@@ -33,10 +28,14 @@ class DeleteFollowRecord extends BaseApi
     
     protected function execute()
     {
-        $ret = Dbi::getDbi()->deleteFollowRecord($this->param['follow_record_id']);
-        if (VALUE_DB_ERROR === $ret) {
+        $detail = Dbi::getDbi()->getFollowPlanDetail($this->param['follow_plan_id']);
+        if (VALUE_DB_ERROR === $detail) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        if (empty($detail)) {
+            return HpErrorMessage::getError(ERROR_NO_DATA);
+        }
+        $this->retSuccess['plans'] = $detail;
         return $this->retSuccess;
     }
 }
