@@ -41,7 +41,8 @@ class AppUploadData
                 mkdir($dir);
             }
             $file = $dir . $time . '.bin';
-            $retIO = file_put_contents($file, $data);
+            //$retIO = file_put_contents($file, $data);
+            $retIO = file_put_contents($file, gzdecode($data));
             if ($retIO === false) {
                 $this->setIOError();
                 Logger::write($this->logFile, 'failed to save file on ID of :' . $patientId);
