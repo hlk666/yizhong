@@ -389,6 +389,33 @@ class DbiAdmin extends BaseDbi
         $param = [':agency' => $agency];
         return $this->getDataAll($sql, $param);
     }
+    public function getHospitalAgencyList()
+    {
+        $sql = 'select h1.hospital_id, h1.hospital_name, h2.hospital_name as agency_name
+                from hospital as h1 left join hospital as h2 on h1.agency_id = h2.hospital_id';
+        return $this->getDataAll($sql);
+    }
+    public function getHospitalDiagnosis($level, $reportHospital, $agency, $salesman)
+    {
+        $sql = 'select h.hospital_id, h.hospital_name
+                from hospital as h 
+                left join hospital_tree as t on h.hospital_id = t.hospital_id
+                left join hospital as a on h.agency_id = a.hospital_id
+                where 1 ';
+        if (!empty($level)) {
+            $sql .= " and h.level in ($level) ";
+        }
+        if (!empty($reportHospital)) {
+            $sql .= " and t.report_hospital = $reportHospital ";
+        }
+        if (!empty($agency)) {
+            $sql .= " and a.hospital_name = '$agency' ";
+        }
+        if (!empty($salesman)) {
+            $sql .= " and h.salesman = '$salesman' ";
+        }
+        return $this->getDataAll($sql);
+    }
     public function getHospitalGuardian($hospital, $device, $startTime, $endTime)
     {
         if (empty($hospital) || empty($device)) {
@@ -448,6 +475,14 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
+    public function getHospitalReport()
+    {
+        $sql = 'select distinct t.report_hospital as hospital_id, h.hospital_name 
+                from hospital_tree as t inner join hospital as h on t.report_hospital = h.hospital_id
+                where t.hospital_id <> t.report_hospital
+                order by t.report_hospital';
+        return $this->getDataAll($sql);
+    }
     public function getHospitalParent($hospitalId)
     {
         $sql = 'select h.hospital_id, hospital_name from hospital as h
@@ -476,6 +511,23 @@ class DbiAdmin extends BaseDbi
         $sql = 'select hospital_id from hospital where salesman = :salesman';
         $param = [':salesman' => $salesman];
         return $this->getDataAll($sql, $param);
+    }
+    public function getPatientDiagnosis($hospital, $diagnosis, $startTime, $endTime)
+    {
+        $sql = "select d.patient_id, d.diagnosis_id, d.create_time, h.hospital_id, h.hospital_name,
+                p.patient_name as name, p.sex, year(now()) - p.birth_year as age
+                from patient_diagnosis as d 
+                inner join guardian as g on d.patient_id = g.guardian_id
+                inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                inner join patient as p on g.patient_id = p.patient_id
+                where g.regist_hospital_id in ($hospital) and d.diagnosis_id in ($diagnosis)";
+        if (null !== $startTime) {
+            $sql .= " and d.create_time >= '$startTime' ";
+        }
+        if (null !== $endTime) {
+            $sql .= " and d.create_time <= '$endTime' ";
+        }
+        return $this->getDataAll($sql);
     }
     public function getSalesmanData($salesman, $startTime = null, $endTime = null, $offset = 0, $rows = null)
     {
