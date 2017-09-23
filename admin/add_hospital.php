@@ -28,6 +28,9 @@ if (isset($_POST['submit'])){
     $reportHospital = (isset($_POST['hospital_report']) && !empty($_POST['hospital_report'])) ? $_POST['hospital_report'] : '';
     $titleHospital = (isset($_POST['hospital_title']) && !empty($_POST['hospital_title'])) ? $_POST['hospital_title'] : '';
     $agency = (isset($_POST['agency']) && !empty($_POST['agency'])) ? $_POST['agency'] : '';
+    $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
+    $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
+    $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
     
     if (empty($hospitalName)) {
         user_back_after_delay('请正确输入医院名。');
@@ -71,7 +74,8 @@ if (isset($_POST['submit'])){
     
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $type, $level, $hospitalTel, 
             $province, $city, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser, 
-            $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital, $agency);
+            $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital, 
+            $agency, $contractFlag, $deviceSale, $displayCheck);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -219,6 +223,31 @@ if (isset($_POST['submit'])){
       <select class="form-control" name="hospital_parent">
         <option value="0">请选择上级医院(非必须)</option>$htmlParentHospitals
     </select></div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">是否已签合同</label>
+    <div class="col-sm-4">
+      <label class="checkbox-inline">
+      <input type="radio" name="contract_flag" value="1">已签</label>
+      <label class="checkbox-inline">
+      <input type="radio" name="contract_flag" value="0" checked>未签</label>
+    </div>
+    <label class="col-sm-2 control-label">设备投放类型</label>
+    <div class="col-sm-4">
+      <label class="checkbox-inline">
+      <input type="radio" name="device_sale" value="1">出售</label>
+      <label class="checkbox-inline">
+      <input type="radio" name="device_sale" value="0" checked>免费</label>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">是否显示审阅医生</label>
+    <div class="col-sm-4">
+      <label class="checkbox-inline">
+      <input type="radio" name="display_check" value="1">是</label>
+      <label class="checkbox-inline">
+      <input type="radio" name="display_check" value="0" checked>否</label>
+    </div>
   </div>
   <div class="form-group">
     <label for="comment" class="col-sm-2 control-label">报告底部文字</label>

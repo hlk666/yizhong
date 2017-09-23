@@ -5,11 +5,11 @@ require_once PATH_LIB . 'Validate.php';
 if (false === Validate::checkRequired($_POST['hospital_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'hospital_id.']);
 }
-if (false === Validate::checkRequired($_POST['clear_target'])) {
-    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'clear_target.']);
+if (false === Validate::checkRequired($_POST['type'])) {
+    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'type.']);
 }
 $hospitalId = $_POST['hospital_id'];
-$clearTarget = $_POST['clear_target'];
+$clearTarget = $_POST['type'];
 
 $fileEcgNotice = PATH_CACHE_ECG_NOTICE . $hospitalId . '.php';
 $fileRegistNotice = PATH_CACHE_REGIST_NOTICE . $hospitalId . '.php';
@@ -26,6 +26,12 @@ if ($clearTarget == 'upload_data_fail') {
 }
 if ($clearTarget == 'move_data') {
     unlink($fileMoveData);
+}
+if ($clearTarget == 'upload_data') {
+    unlink($fileUploadData);
+}
+if ($clearTarget == 'hbi') {
+    unlink($fileHbi);
 }
 
 api_exit_success();

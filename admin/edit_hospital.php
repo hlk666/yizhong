@@ -25,6 +25,9 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $agency = isset($_POST['agency']) ? $_POST['agency'] : '';
     $salesman = isset($_POST['salesman']) ? $_POST['salesman'] : '';
     $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
+    $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
+    $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
+    $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
     
     if (empty($hospitalId)) {
         user_back_after_delay('非法访问');
@@ -68,7 +71,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         }
 
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
-                $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment);
+                $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
+                $contractFlag, $deviceSale, $displayCheck);
     }
     
     if (isset($_POST['del'])) {
@@ -135,6 +139,35 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         $htmlParentFlagYes = '<input type="radio" name="parent_flag" value="1">可</label>';
         $htmlParentFlagNo = '<input type="radio" name="parent_flag" value="0" checked>否</label>';
     }
+    
+    if ('1' == $hospitalInfo['contract_flag']) {
+        $htmlContract = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="contract_flag" value="1" checked>已签</label>
+            <label class="checkbox-inline"><input type="radio" name="contract_flag" value="0">未签</label></div>';
+    } else {
+        $htmlContract = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="contract_flag" value="1">已签</label>
+            <label class="checkbox-inline"><input type="radio" name="contract_flag" value="0" checked>未签</label></div>';
+    }
+    if ('1' == $hospitalInfo['device_sale']) {
+        $htmlDeviceSale = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="device_sale" value="1" checked>出售</label>
+            <label class="checkbox-inline"><input type="radio" name="device_sale" value="0">免费</label></div>';
+    } else {
+        $htmlDeviceSale = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">出售</label>
+            <label class="checkbox-inline"><input type="radio" name="device_sale" value="0" checked>免费</label></div>';
+    }
+    if ('1' == $hospitalInfo['display_check']) {
+        $htmlDisplayCheck = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="display_check" value="1" checked>是</label>
+            <label class="checkbox-inline"><input type="radio" name="display_check" value="0">否</label></div>';
+    } else {
+        $htmlDisplayCheck = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="display_check" value="1">是</label>
+            <label class="checkbox-inline"><input type="radio" name="display_check" value="0" checked>否</label></div>';
+    }
+    
     $button = '';
     if ('del' === $action) {
         $button = '确定删除';
@@ -192,6 +225,18 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
       <label class="checkbox-inline">$htmlParentFlagYes
       <label class="checkbox-inline">$htmlParentFlagNo
     </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">是否已签合同<font color="red">*</font></label>
+    $htmlContract
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">设备投放类型<font color="red">*</font></label>
+    $htmlDeviceSale
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">是否显示审阅医生<font color="red">*</font></label>
+    $htmlDisplayCheck
   </div>
   <div class="form-group">
     <label for="login_user" class="col-sm-2 control-label">管理员登录用户<font color="red">*</font></label>

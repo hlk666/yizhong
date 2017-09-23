@@ -81,7 +81,7 @@ class DbiAnalytics extends BaseDbi
         }
         
         $sql = 'select t.hospital_id, analysis_hospital, report_hospital, title_hospital, 
-                h.hospital_name as title_hospital_name, h.comment, double_title as `double`
+                h.hospital_name as title_hospital_name, h.comment, h.display_check, double_title as `double`
                 from hospital_tree as t inner join hospital as h on title_hospital = h.hospital_id
                 where t.hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
@@ -162,7 +162,8 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel,
                 d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor, 
-                g.guardian_id as patient_id, start_time, end_time, g.device_id, sickroom, hospitalization_id,
+                g.guardian_id as patient_id, start_time, end_time, g.device_id, sickroom, hospitalization_id, 
+                regist_doctor_name as doctor_name,
                 patient_name as name, birth_year, sex, p.tel, d.upload_time, d.report_time, d.moved_hospital
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id

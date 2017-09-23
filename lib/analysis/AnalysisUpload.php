@@ -1,6 +1,7 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_ROOT . 'lib/DbiAnalytics.php';
+//require_once PATH_LIB . 'ShortMessageService.php';
 
 class AnalysisUpload
 {
@@ -68,6 +69,11 @@ class AnalysisUpload
             if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
                 if ('hbi' == $type) {
                     setNotice($tree['report_hospital'], $type, $guardianId);
+                    /*
+                    if ($tree['report_hospital'] == 175) {
+                        ShortMessageService::send('13963896768', '有新的已分析数据，请出报告。');
+                    }
+                    */
                 }
                 if ('report' == $type && $tree['hospital_id'] != $tree['report_hospital']) {
                     setNotice($tree['hospital_id'], $type, $guardianId);

@@ -17,6 +17,7 @@ if (false === Validate::checkRequired($_POST['hospital_id'])) {
 
 $loginName = $_POST['user'];
 $realName = $_POST['name'];
+$tel = isset($_POST['tel']) ? $_POST['tel'] : '';
 $password = md5($_POST['password']);
 $hospitalId = $_POST['hospital_id'];
 
@@ -28,7 +29,7 @@ if (true === $isExisted) {
     api_exit(['code' => '13', 'message' => '该登录用户名已被他人使用。']);
 }
 
-$ret = Dbi::getDbi()->addAccount($loginName, $realName, $password, 2, $hospitalId, 0);
+$ret = Dbi::getDbi()->addAccount($loginName, $realName, $tel, $password, 2, $hospitalId, 0);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

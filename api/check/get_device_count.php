@@ -1,7 +1,8 @@
 <?php
 require_once PATH_LIB . 'DbiAdmin.php';
 
-$ret = DbiAdmin::getDbi()->getDeviceSumByHospital();
+$hospitals = isset($_GET['hospitals']) ? $_GET['hospitals'] : '';
+$ret = DbiAdmin::getDbi()->getDeviceSumByHospital($hospitals);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

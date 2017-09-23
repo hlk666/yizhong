@@ -374,7 +374,7 @@ class Dbi extends BaseDbi
     }
     public function getHospitalList()
     {
-        $sql = 'select hospital_id, hospital_name, tel from hospital';
+        $sql = 'select hospital_id, hospital_name, tel, device_sale from hospital';
         return $this->getDataAll($sql);
     }
     public function getHospitalChild($hospitalId)
@@ -461,11 +461,11 @@ class Dbi extends BaseDbi
     
     //************************* execute methods(public) *************************
     //********************************** start **********************************
-    public function addAccount($loginName, $realName, $password, $type, $hospitalId, $creator)
+    public function addAccount($loginName, $realName, $tel, $password, $type, $hospitalId, $creator)
     {
-        $sql = 'insert into account (login_name, real_name, password, type, hospital_id, creator)
-                values (:login_name, :real_name, :password, :type, :hospital_id, :creator)';
-        $param = [':login_name' => $loginName, ':real_name' => $realName, ':password' => $password,
+        $sql = 'insert into account (login_name, real_name, tel, password, type, hospital_id, creator)
+                values (:login_name, :real_name, :tel, :password, :type, :hospital_id, :creator)';
+        $param = [':login_name' => $loginName, ':real_name' => $realName, ':tel' => $tel, ':password' => $password,
                         ':type' => $type, ':hospital_id' => $hospitalId,':creator' => $creator ];
         return $this->insertData($sql, $param);
     }
