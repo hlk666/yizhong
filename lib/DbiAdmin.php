@@ -34,7 +34,7 @@ class DbiAdmin extends BaseDbi
     {
         $this->pdo->beginTransaction();
         $sql = 'insert into hospital(hospital_name, type, level, tel, province, city, address, parent_flag, 
-                sms_tel, agency_id, salesman, comment, contract_flag, device_sale, display_check)
+                sms_tel, agency, salesman, comment, contract_flag, device_sale, display_check)
                 values (:name, :type, :level, :tel, :province, :city, :address, :flag, 
                 :sms_tel, :agency, :salesman, :comment, :contract_flag, :device_sale, :display_check)';
         $param = [':name' => $name, ':type' => $type, ':level' => $level, ':tel' => $tel, ':province' => $province, ':city' => $city, 
@@ -181,7 +181,7 @@ class DbiAdmin extends BaseDbi
         }
         
         $sql = 'update hospital set hospital_name = :name, type = :type, level = :level, tel = :tel, province = :province, city = :city, 
-                address = :address, parent_flag = :flag, sms_tel = :sms_tel, agency_id = :agency, salesman = :salesman, comment = :comment,
+                address = :address, parent_flag = :flag, sms_tel = :sms_tel, agency = :agency, salesman = :salesman, comment = :comment,
                 contract_flag = :contract_flag, device_sale = :device_sale, display_check = :display_check
                 where hospital_id = :hospital';
         $param = [':hospital' => $hospitalId, ':name' => $hospitalName, ':type' => $type, ':level' => $level, ':tel' => $hospitalTel, 
@@ -235,8 +235,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getAgencyList()
     {
-        $sql = 'select distinct h1.agency_id, h2.hospital_name as `name`
-                from hospital as h1 inner join hospital as h2 on h1.agency_id = h2.hospital_id';
+        $sql = 'select distinct agency as agency_id, agency as `name` from hospital';
         return $this->getDataAll($sql);
     }
     public function getDeviceBloc()
@@ -396,16 +395,13 @@ class DbiAdmin extends BaseDbi
         if (empty($agency)) {
             return array();
         }
-        $sql = 'select distinct h1.hospital_id, h1.hospital_name
-                from hospital as h1 inner join hospital as h2 on h1.agency_id = h2.hospital_id
-                where h2.hospital_name = :agency';
+        $sql = 'select distinct hospital_id, hospital_name from hospital where agency = :agency';
         $param = [':agency' => $agency];
         return $this->getDataAll($sql, $param);
     }
     public function getHospitalAgencyList()
     {
-        $sql = 'select h1.hospital_id, h1.hospital_name, h2.hospital_name as agency_name
-                from hospital as h1 left join hospital as h2 on h1.agency_id = h2.hospital_id';
+        $sql = 'select hospital_id, hospital_name, agency as agency_name from hospital';
         return $this->getDataAll($sql);
     }
     public function getHospitalDiagnosis($level, $reportHospital, $agency, $salesman)
@@ -413,7 +409,6 @@ class DbiAdmin extends BaseDbi
         $sql = 'select h.hospital_id, h.hospital_name
                 from hospital as h 
                 left join hospital_tree as t on h.hospital_id = t.hospital_id
-                left join hospital as a on h.agency_id = a.hospital_id
                 where 1 ';
         if (!empty($level)) {
             $sql .= " and h.level in ($level) ";
@@ -422,7 +417,7 @@ class DbiAdmin extends BaseDbi
             $sql .= " and t.report_hospital = $reportHospital ";
         }
         if (!empty($agency)) {
-            $sql .= " and a.hospital_name = '$agency' ";
+            $sql .= " and h.agency = '$agency' ";
         }
         if (!empty($salesman)) {
             $sql .= " and h.salesman = '$salesman' ";
@@ -450,7 +445,7 @@ class DbiAdmin extends BaseDbi
     public function getHospitalInfo($hospitalId)
     {
         $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, address, h.tel, 
-                parent_flag, a.login_name, h.sms_tel, h.agency_id, h.salesman, h.comment, 
+                parent_flag, a.login_name, h.sms_tel, h.agency, h.salesman, h.comment, 
                 h.contract_flag, h.device_sale, h.display_check
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';

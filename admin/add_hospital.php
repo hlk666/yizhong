@@ -94,15 +94,6 @@ if (isset($_POST['submit'])){
         $htmlParentHospitals .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
     }
     
-    $ret = DbiAdmin::getDbi()->getAgencyList();
-    if (VALUE_DB_ERROR === $ret) {
-        $ret = array();
-    }
-    $htmlAgency = '';
-    foreach ($ret as $value) {
-        $htmlAgency .= '<option value="' . $value['agency_id'] . '">' . $value['name'] . '</option>';
-    }
-    
     $ret = DbiAdmin::getDbi()->getHospitalListHigh(0);
     if (VALUE_DB_ERROR === $ret) {
         $ret = array();
@@ -148,7 +139,7 @@ if (isset($_POST['submit'])){
     </div>
   </div>
   <div class="form-group">
-    <label for="type" class="col-sm-2 control-label">定位/类型</label>
+    <label for="type" class="col-sm-2 control-label">定位/类型<font color="red">*</font></label>
     <div class="col-sm-10">
       <select class="form-control" name="type">
         <option value="0">请选择类型</option>
@@ -159,7 +150,7 @@ if (isset($_POST['submit'])){
     </select></div>
   </div>
   <div class="form-group">
-    <label for="level" class="col-sm-2 control-label">医院级别</label>
+    <label for="level" class="col-sm-2 control-label">医院级别<font color="red">*</font></label>
     <div class="col-sm-10">
       <select class="form-control" name="level">
         <option value="0">请选择级别</option>
@@ -201,7 +192,7 @@ if (isset($_POST['submit'])){
   <div class="form-group">
     <label for="salesman" class="col-sm-2 control-label">代理商</label>
     <div class="col-sm-10">
-      <select class="form-control" name="agency"><option value="0">请选择代理商(如果不存在则需提前创建)</option>$htmlAgency</select>
+      <input type="text" class="form-control" name="agency" placeholder="请输入代理商">
     </div>
   </div>
   <div class="form-group">

@@ -100,17 +100,6 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
     
-    $agency = $hospitalInfo['agency_id'];
-    $ret = DbiAdmin::getDbi()->getAgencyList();
-    if (VALUE_DB_ERROR === $ret) {
-        $ret = array();
-    }
-    $htmlAgency = '';
-    foreach ($ret as $value) {
-        $htmlAgency .= '<option value="' . $value['agency_id'] . '"' 
-                . ($agency == $value['agency_id'] ? ' selected ' : '') . '>' . $value['name'] . '</option>';
-    }
-    
     $type = $hospitalInfo['type'];
     $typeSelected = '<option value="0">请选择</option> 
         <option value="1"' . ($type == '1' ? ' selected ' : '') . '>云平台</option>
@@ -129,6 +118,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $tel = $hospitalInfo['tel'];
     $loginUser = $hospitalInfo['login_name'];
     $messageTel = $hospitalInfo['sms_tel'];
+    $agency = $hospitalInfo['agency'];
     $salesman = $hospitalInfo['salesman'];
     $comment = $hospitalInfo['comment'];
     
@@ -188,14 +178,14 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     </div>
   </div>
   <div class="form-group">
-    <label for="type" class="col-sm-2 control-label">定位/类型</label>
+    <label for="type" class="col-sm-2 control-label">定位/类型<font color="red">*</font></label>
     <div class="col-sm-10">
       <select class="form-control" name="type">
         $typeSelected
     </select></div>
   </div>
   <div class="form-group">
-    <label for="level" class="col-sm-2 control-label">医院级别</label>
+    <label for="level" class="col-sm-2 control-label">医院级别<font color="red">*</font></label>
     <div class="col-sm-10">
       <select class="form-control" name="level">
         $levelSelected
@@ -251,9 +241,9 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     </div>
   </div>
   <div class="form-group">
-    <label for="salesman" class="col-sm-2 control-label">代理商</label>
+    <label class="col-sm-2 control-label">代理商<font color="red">*</font></label>
     <div class="col-sm-10">
-      <select class="form-control" name="agency"><option value="0">请选择代理商(如果不存在则需提前创建)</option>$htmlAgency</select>
+      <input type="text" class="form-control" name="agency" value="$agency">
     </div>
   </div>
   <div class="form-group">
