@@ -235,7 +235,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getAgencyList()
     {
-        $sql = 'select distinct agency as agency_id, agency as `name` from hospital';
+        $sql = 'select distinct agency as agency_id, agency as `name` from hospital where type <> 1';
         return $this->getDataAll($sql);
     }
     public function getDeviceBloc()
@@ -395,13 +395,13 @@ class DbiAdmin extends BaseDbi
         if (empty($agency)) {
             return array();
         }
-        $sql = 'select distinct hospital_id, hospital_name from hospital where agency = :agency';
+        $sql = 'select distinct hospital_id, hospital_name from hospital where type <> 1 and agency = :agency';
         $param = [':agency' => $agency];
         return $this->getDataAll($sql, $param);
     }
     public function getHospitalAgencyList()
     {
-        $sql = 'select hospital_id, hospital_name, agency as agency_name from hospital';
+        $sql = 'select hospital_id, hospital_name, agency as agency_name from hospital where type <> 1';
         return $this->getDataAll($sql);
     }
     public function getHospitalDiagnosis($level, $reportHospital, $agency, $salesman)
@@ -409,7 +409,7 @@ class DbiAdmin extends BaseDbi
         $sql = 'select h.hospital_id, h.hospital_name
                 from hospital as h 
                 left join hospital_tree as t on h.hospital_id = t.hospital_id
-                where 1 ';
+                where h.type <> 1 ';
         if (!empty($level)) {
             $sql .= " and h.level in ($level) ";
         }
@@ -457,7 +457,7 @@ class DbiAdmin extends BaseDbi
         if (empty($level)) {
             return array();
         }
-        $sql = 'select hospital_id from hospital where level = :level and type <> 1';
+        $sql = 'select hospital_id from hospital where type <> 1 and level = :level';
         $param = [':level' => $level];
         return $this->getDataAll($sql, $param);
     }
@@ -519,7 +519,7 @@ class DbiAdmin extends BaseDbi
         if (empty($hospitalTime)) {
             return array();
         }
-        $sql = 'select hospital_id from hospital where create_time > :time and type <> 1';
+        $sql = 'select hospital_id from hospital where type <> 1 and create_time > :time';
         $param = [':time' => $hospitalTime];
         return $this->getDataAll($sql, $param);
     }
@@ -535,7 +535,7 @@ class DbiAdmin extends BaseDbi
         if (empty($salesman)) {
             return array();
         }
-        $sql = 'select hospital_id from hospital where salesman = :salesman';
+        $sql = 'select hospital_id from hospital where type <> 1 and salesman = :salesman';
         $param = [':salesman' => $salesman];
         return $this->getDataAll($sql, $param);
     }
