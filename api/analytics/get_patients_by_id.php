@@ -6,6 +6,12 @@ if (empty($_GET['patient_list'])) {
 }
 
 $patientIdList = $_GET['patient_list'];
+$arrayId = explode(',', $patientIdList);
+foreach ($arrayId as $id) {
+    if (!is_numeric($id)) {
+        analytics_exit(['code' => '1', 'message' => 'ID列表必须为数字。']);
+    }
+}
 
 $patients = DbiAnalytics::getDbi()->getPatientsByIdForAnalytics($patientIdList);
 if (VALUE_DB_ERROR === $patients) {

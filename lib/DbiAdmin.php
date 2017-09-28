@@ -583,8 +583,26 @@ class DbiAdmin extends BaseDbi
     }
     public function getSalesmanList()
     {
-        $sql = 'select distinct salesman as `name` from hospital where salesman <> "";';
+        $sql = 'select distinct salesman as `name` from hospital where salesman <> ""';
         return $this->getDataAll($sql);
+    }
+    public function getTotalDiagnosis($hospital, $startTime, $endTime)
+    {
+        $sql = "select count(*) as total from guardian 
+                where regist_hospital_id in ($hospital) and regist_time >= '$startTime' and regist_time <= '$endTime'";
+        return $this->getDataString($sql);
+    }
+    public function getUser($user)
+    {
+        $sql = 'select user, password, type from user_diagnosis where user = :user limit 1';
+        $param = [':user' => $user];
+        return $this->getDataRow($sql, $param);
+    }
+    public function updatePassword($user, $newPassword)
+    {
+        $sql = 'update user_diagnosis set password = :pwd where user = :user';
+        $param = [':user' => $user, ':pwd' => $newPassword];
+        return $this->updateData($sql, $param);
     }
     /*
     public function existedLoginName($loginName)
