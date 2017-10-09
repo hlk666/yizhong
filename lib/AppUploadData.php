@@ -5,7 +5,7 @@ require_once PATH_LIB . 'Dbi.php';
 class AppUploadData
 {
     private $error = array();
-    private $logFile = 'uploadDataLog.txt';
+    private $logFile = 'upload.log';
     private $retSuccess = array('code' => 0, 'message' => '');
     
     public function run($patientId, $mode, $alert = 0, $time = '', $data = '', $size = 0)

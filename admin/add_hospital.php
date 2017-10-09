@@ -157,6 +157,7 @@ if (isset($_POST['submit'])){
         <option value="3">三级</option>
         <option value="2">二级</option>
         <option value="1">一级</option>
+        <option value="99">零级</option>
     </select></div>
   </div>
   <div class="form-group">

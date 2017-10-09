@@ -541,7 +541,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getPatientDiagnosis($hospital, $diagnosis, $startTime, $endTime)
     {
-        $sql = "select d.patient_id, d.diagnosis_id, d.create_time, h.hospital_id, h.hospital_name,
+        $sql = "select d.patient_id, d.diagnosis_id, d.create_time, h.hospital_id, h.hospital_name, h.tel as hospital_tel,
                 p.patient_name as name, p.sex, year(now()) - p.birth_year as age, p.tel
                 from patient_diagnosis as d 
                 inner join guardian as g on d.patient_id = g.guardian_id
@@ -594,7 +594,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getUser($user)
     {
-        $sql = 'select user, password, type from user_diagnosis where user = :user limit 1';
+        $sql = 'select user, password, type, hospital_id from user_diagnosis where user = :user limit 1';
         $param = [':user' => $user];
         return $this->getDataRow($sql, $param);
     }

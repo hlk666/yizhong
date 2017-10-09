@@ -28,7 +28,7 @@ if ($userInfo['password'] != $oldPassword) {
     api_exit(['code' => '12', 'message' => '密码错误。']);
 }
 
-$ret = Dbi::getDbi()->updatePassword($user, $newPassword);
+$ret = DbiAdmin::getDbi()->updatePassword($user, $newPassword);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

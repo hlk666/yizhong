@@ -66,7 +66,7 @@ if (!empty($agency)) {
         $hospitalList = substr($hospitalList, 0, -1);
     }
 } else {
-    $hospitalList = '1';
+    //$hospitalList = '1';
 }
 
 $ret = DbiAdmin::getDbi()->getGuardiansStatistics($hospitalList, $sTime, $eTime);

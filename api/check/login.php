@@ -26,6 +26,7 @@ if (empty($userInfo)) {
     $result['message'] = MESSAGE_SUCCESS;
     $result['user'] = $userInfo['user'];
     $result['type'] = $userInfo['type'];
+    $result['hospital_id'] = $userInfo['hospital_id'];
     
     api_exit($result);
 }

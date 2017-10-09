@@ -110,7 +110,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $levelSelected = '<option value="0">请选择</option>  
         <option value="3"' . ($level == '3' ? ' selected ' : '') . '>三级</option>
         <option value="2"' . ($level == '2' ? ' selected ' : '') . '>二级</option>
-        <option value="1"' . ($level == '1' ? ' selected ' : '') . '>一级</option>';
+        <option value="1"' . ($level == '1' ? ' selected ' : '') . '>一级</option>
+        <option value="99"' . ($level == '99' ? ' selected ' : '') . '>零级</option>';
     $hospitalName = $hospitalInfo['hospital_name'];
     $province = $hospitalInfo['province'];
     $city = $hospitalInfo['city'];
