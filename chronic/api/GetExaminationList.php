@@ -39,9 +39,10 @@ class GetExaminationList extends BaseApi
     protected function execute()
     {
         $departmentId = isset($this->param['department_id']) ? $this->param['department_id'] : null;
+        $level = isset($this->param['level']) ? $this->param['level'] : null;
         $startTime = isset($this->param['start_time']) ? $this->param['start_time'] : null;
         $endTime = isset($this->param['end_time']) ? $this->param['end_time'] : null;
-        $examinationList = Dbi::getDbi()->getExaminationList($this->param['patient_id'], $departmentId, $startTime, $endTime);
+        $examinationList = Dbi::getDbi()->getExaminationList($this->param['patient_id'], $departmentId, $level, $startTime, $endTime);
         if (VALUE_DB_ERROR === $examinationList) {
             return HpErrorMessage::getError(ERROR_DB);
         }
