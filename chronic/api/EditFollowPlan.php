@@ -12,7 +12,7 @@ class EditFollowPlan extends BaseApi
             return $ret;
         }
         
-        $required = ['follow_plan_id', 'name', 'plan_text', 'doctor_id'];
+        $required = ['follow_plan_id', 'name', 'plan_text', 'doctor_id', 'plan_time', 'plan_interval'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -32,6 +32,7 @@ class EditFollowPlan extends BaseApi
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'doctor_id.');
         }
         
+        /*
         $this->planList = $this->getStructalData($this->param['plan_text']);
         if (empty($this->planList)) {
             return HpErrorMessage::getError(ERROR_PARAM_FORMAT, 'plan_text.');
@@ -42,14 +43,15 @@ class EditFollowPlan extends BaseApi
                 return HpErrorMessage::getError(ERROR_TIME_ERROR, $plan[0]);
             }
         }
-        
+        */
         return true;
     }
     
     protected function execute()
     {
         $ret = Dbi::getDbi()->editFollowPlan($this->param['follow_plan_id'], 
-                $this->param['plan_text'], $this->planList, $this->param['doctor_id'], $this->param['name']);
+                $this->param['plan_text'], $this->param['doctor_id'], $this->param['name'], 
+                $this->param['plan_time'], $this->param['plan_interval']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

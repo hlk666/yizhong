@@ -125,21 +125,32 @@ class Dbi extends BaseDbi
         $this->pdo->commit();
         return $departmentId;
     }
-    public function addFollowRecord($departmentId, $patientId, $planId, $recordText, 
+    public function addFollowRecord($departmentId, $patientId, $followPlanId, $recordText, 
             $examination, $examinationList, $diagnosis, $doctorId)
     {
+        $sql = 'select plan_time, plan_text from follow_plan where id = :id limit 1';
+        $param = [':id' => $followPlanId];
+        $followPlanInfo = $this->getDataRow($sql, $param);
+        if (VALUE_DB_ERROR === $followPlanInfo) {
+            return VALUE_DB_ERROR;
+        }
+        if (empty($followPlanInfo)) {
+            return false;
+        }
+        
         $this->pdo->beginTransaction();
-    
-        $sql = 'insert into follow_record (department_id, patient_id, plan_id, record_text, examination, diagnosis, doctor_id)
-                values (:department_id, :patient_id, :plan_id, :record_text, :examination, :diagnosis, :doctor_id)';
-        $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':plan_id' => $planId, ':record_text' => $recordText, 
-                        ':examination' => $examination,  ':diagnosis' => $diagnosis, ':doctor_id' => $doctorId];
+        
+        $sql = 'insert into follow_record (department_id, patient_id, follow_plan_id, record_text, examination, diagnosis, doctor_id)
+                values (:department_id, :patient_id, :follow_plan_id, :record_text, :examination, :diagnosis, :doctor_id, :plan_time, :plan_text)';
+        $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':follow_plan_id' => $followPlanId, 
+                        ':record_text' => $recordText, ':examination' => $examination,  ':diagnosis' => $diagnosis, 
+                        ':doctor_id' => $doctorId, ':plan_time' => $followPlanInfo['plan_time'], ':plan_text' => $followPlanInfo['plan_text']];
         $followRecordId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $followRecordId) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
-        
+        /*
         $sql = 'update plan set execute_time = now() where id = :id';
         $param = [':id' => $planId];
         $ret = $this->updateData($sql, $param);
@@ -147,12 +158,13 @@ class Dbi extends BaseDbi
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
-    
+        */
         foreach ($examinationList as $exam) {
-            $sql = 'insert into examination_patient (department_id, patient_id, record_id, type, examination_id, examination_value)
-                values (:department_id, :patient_id, :record_id, :type, :examination_id, :examination_value)';
+            $sql = 'insert into examination_patient 
+                    (department_id, patient_id, record_id, type, examination_id, examination_value, examination_result)
+                    values (:department_id, :patient_id, :record_id, :type, :examination_id, :value, :result)';
             $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':record_id' => $followRecordId, 
-                            ':type' => 'follow', ':examination_id' => $exam[0], ':examination_value' => $exam[1]];
+                            ':type' => 'follow', ':examination_id' => $exam[0], ':value' => $exam[1], ':result' => $exam[2]];
             $ret = $this->insertData($sql, $param);
             if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
@@ -208,10 +220,11 @@ class Dbi extends BaseDbi
         }
         
         foreach ($examinationList as $exam) {
-            $sql = 'insert into examination_patient (department_id, patient_id, record_id, type, examination_id, examination_value)
-                values (:department_id, :patient_id, :record_id, :type, :examination_id, :examination_value)';
+            $sql = 'insert into examination_patient 
+                    (department_id, patient_id, record_id, type, examination_id, examination_value, , examination_result)
+                    values (:department_id, :patient_id, :record_id, :type, :examination_id, :value, :result)';
             $param = [':department_id' => $departmentId, ':patient_id' => $patientId,  ':record_id' => $outpatientId,
-                            ':type' => 'outpatient', ':examination_id' => $exam[0], ':examination_value' => $exam[1]];
+                            ':type' => 'outpatient', ':examination_id' => $exam[0], ':value' => $exam[1], ':result' => $exam[2]];
             $ret = $this->insertData($sql, $param);
             if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
@@ -222,20 +235,20 @@ class Dbi extends BaseDbi
         $this->pdo->commit();
         return $outpatientId;
     }
-    public function addFollowPlan($departmentId, $patientId, $planText, $planList, $doctorId, $name)
+    public function addFollowPlan($departmentId, $patientId, $planText, $doctorId, $name, $planTime, $planInterval)
     {
         $this->pdo->beginTransaction();
     
-        $sql = 'insert into follow_plan (department_id, patient_id, plan_text, doctor_id, name)
-                values (:department_id, :patient_id, :plan_text, :doctor_id, :name)';
+        $sql = 'insert into follow_plan (department_id, patient_id, plan_text, doctor_id, name, plan_time, plan_interval)
+                values (:department_id, :patient_id, :plan_text, :doctor_id, :name, :time, :interval)';
         $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':plan_text' => $planText, 
-                        ':doctor_id' => $doctorId, ':name' => $name];
+                        ':doctor_id' => $doctorId, ':name' => $name, ':time' => $planTime, ':interval' => $planInterval];
         $followPlanId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $followPlanId) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
-    
+        /*
         foreach ($planList as $plan) {
             $sql = 'insert into plan (department_id, patient_id, follow_plan_id, plan_time, plan_value)
                 values (:department_id, :patient_id, :follow_plan_id, :plan_time, :plan_value)';
@@ -247,7 +260,7 @@ class Dbi extends BaseDbi
                 return VALUE_DB_ERROR;
             }
         }
-    
+        */
         $this->pdo->commit();
         return $followPlanId;
     }
@@ -285,21 +298,21 @@ class Dbi extends BaseDbi
         $param = [':id' => $referralId, ':doctor' => $doctorId];
         return $this->updateData($sql, $param);
     }
-    public function addReferralDischarge($departmentId, $patientId, $planText, $planList, $doctorId, $name, 
+    public function addReferralDischarge($departmentId, $patientId, $planText, $doctorId, $name, $planTime, $planInterval, 
             $referralId, $doctorId, $diagnosis, $info)
     {
         $this->pdo->beginTransaction();
         
-        $sql = 'insert into follow_plan (department_id, patient_id, plan_text, doctor_id, name)
-                values (:department_id, :patient_id, :plan_text, :doctor_id, :name)';
+        $sql = 'insert into follow_plan (department_id, patient_id, plan_text, doctor_id, name, plan_time, plan_interval)
+                values (:department_id, :patient_id, :plan_text, :doctor_id, :name, :time, :interval)';
         $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':plan_text' => $planText,
-                        ':doctor_id' => $doctorId, ':name' => $name];
+                        ':doctor_id' => $doctorId, ':name' => $name, ':time' => $planTime, ':interval' => $planInterval];
         $followPlanId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $followPlanId) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
-        
+        /*
         foreach ($planList as $plan) {
             $sql = 'insert into plan (department_id, patient_id, follow_plan_id, plan_time, plan_value)
                 values (:department_id, :patient_id, :follow_plan_id, :plan_time, :plan_value)';
@@ -311,7 +324,7 @@ class Dbi extends BaseDbi
                 return VALUE_DB_ERROR;
             }
         }
-        
+        */
         $sql = 'update referral set discharge_doctor_id = :doctor, discharge_time = now(), status = 5, 
                 diagnosis = :diagnosis, info = :info, follow_plan_id = :follow_plan_id where id = :id';
         $param = [':id' => $referralId, ':doctor' => $doctorId,
@@ -371,7 +384,7 @@ class Dbi extends BaseDbi
     public function deleteFollowPlan($followPlanId)
     {
         $this->pdo->beginTransaction();
-        
+        /*
         $sql = 'delete from plan where follow_plan_id = :id';
         $param = [':id' => $followPlanId];
         $ret = $this->deleteData($sql, $param);
@@ -379,7 +392,7 @@ class Dbi extends BaseDbi
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
-        
+        */
         $sql = 'delete from follow_plan where id = :id';
         $param = [':id' => $followPlanId];
         $ret = $this->deleteData($sql, $param);
@@ -394,7 +407,7 @@ class Dbi extends BaseDbi
     public function deleteFollowRecord($followRecordId)
     {
         $this->pdo->beginTransaction();
-        
+        /*
         $sql = 'select plan_id from follow_record where id = :id';
         $param = [':id' => $followRecordId];
         $planId = $this->getDataString($sql, $param);
@@ -412,7 +425,7 @@ class Dbi extends BaseDbi
                 return VALUE_DB_ERROR;
             }
         }
-        
+        */
         $sql = 'delete from examination_patient where record_id = :id and type = "follow"';
         $param = [':id' => $followRecordId];
         $ret = $this->deleteData($sql, $param);
@@ -493,8 +506,9 @@ class Dbi extends BaseDbi
     {
         return $this->updateTableByKey('doctor', 'id', $doctorId, $data);
     }
-    public function editFollowPlan($followPlanId, $planText, $planList, $doctorId, $name)
+    public function editFollowPlan($followPlanId, $planText, $doctorId, $name, $planTime, $planInterval)
     {
+        /*
         $sql = 'select department_id, patient_id from follow_plan where id = :id limit 1';
         $param = [':id' => $followPlanId];
         $followPlan = $this->getDataRow($sql, $param);
@@ -503,17 +517,19 @@ class Dbi extends BaseDbi
         }
         $departmentId = $followPlan['department_id'];
         $patientId = $followPlan['patient_id'];
-        
+        */
         $this->pdo->beginTransaction();
         
-        $sql = 'update follow_plan set plan_text = :plan_text, doctor_id = :doctor, name = :name where id = :id';
-        $param = [':id' => $followPlanId, ':plan_text' => $planText, ':doctor' => $doctorId, ':name' => $name];
+        $sql = 'update follow_plan set plan_text = :plan_text, doctor_id = :doctor, name = :name, 
+                plan_time = :time, plan_interval = :interval where id = :id';
+        $param = [':id' => $followPlanId, ':plan_text' => $planText, ':doctor' => $doctorId, ':name' => $name, 
+                        ':time' => $planTime, ':interval' => $planInterval];
         $ret = $this->updateData($sql, $param);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
-        
+        /*
         $sql = 'delete from plan where follow_plan_id = :id and notice_time is null';
         $param = [':id' => $followPlanId];
         $ret = $this->deleteData($sql, $param);
@@ -533,7 +549,7 @@ class Dbi extends BaseDbi
                 return VALUE_DB_ERROR;
             }
         }
-        
+        */
         $this->pdo->commit();
         return $followPlanId;
     }
@@ -603,10 +619,6 @@ class Dbi extends BaseDbi
     public function existedFollowRecord($followRecordId)
     {
         return $this->existData('follow_record', ['id' => $followRecordId]);
-    }
-    public function existedFollowRecordByPlan($planId)
-    {
-        return $this->existData('follow_record', ['plan_id' => $planId]);
     }
     public function existedHospital($hospitalId)
     {
@@ -725,17 +737,22 @@ class Dbi extends BaseDbi
         $param = [':department_id' => $departmentId];
         return $this->getDataAll($sql, $param);
     }
-    public function getExaminationList($patientId, $departmentId = null, $startTime = null, $endTime = null)
+    public function getExaminationList($patientId, $departmentId = null, $level = null, $startTime = null, $endTime = null)
     {
         $sql = 'select d.id as department_id, d.`name` as department_name, p.id as patient_id, p.name as patient_name, 
-                ep.create_time as examination_time, ep.type, e.id as examination_id, e.`name` as examination_name, ep.examination_value
+                ep.create_time as examination_time, ep.type, e.id as examination_id, e.`name` as examination_name, 
+                ep.examination_value, ep.examination_result
                 from examination_patient as ep 
                 inner join examination as e on ep.examination_id = e.id
                 inner join department as d on ep.department_id = d.id
+                inner join hospital as h on d.hospital_id = h.id
                 inner join patient as p on ep.patient_id = p.id
                 where ep.patient_id = :patient_id ';
         if ($departmentId != null) {
             $sql .= " and ep.department_id = $departmentId ";
+        }
+        if ($level != null) {
+            $sql .= " and h.level = $level ";
         }
         if ($startTime != null) {
             $sql .= " and ep.create_time >= '$startTime' ";
@@ -754,14 +771,17 @@ class Dbi extends BaseDbi
     }
     public function getFollowPlanDetail($followPlanId)
     {
+        /*
         $sql = 'select id as plan_id, plan_time, plan_value, notice_time, execute_time from plan where follow_plan_id = :id';
         $param = [':id' => $followPlanId];
         return $this->getDataAll($sql, $param);
+        */
+        return array();
     }
     public function getFollowPlanList($departmentId = null, $patientId = null, $startTime = null, $endTime = null)
     {
         $sql = 'select f.id, f.department_id, d.`name` as department_name, f.patient_id, p.`name` as patient_name, 
-                f.doctor_id, dc.real_name as doctor_name, f.name as plan_name, f.create_time, f.plan_text
+                f.doctor_id, dc.real_name as doctor_name, f.name as plan_name, f.plan_time, f.plan_text, f.plan_interval
                 from follow_plan as f 
                 inner join department as d on f.department_id = d.id
                 inner join patient as p on f.patient_id = p.id
@@ -774,10 +794,10 @@ class Dbi extends BaseDbi
             $sql .= " and f.patient_id = $patientId ";
         }
         if ($startTime != null) {
-            $sql .= " and f.create_time >= '$startTime' ";
+            $sql .= " and f.plan_time >= '$startTime' ";
         }
         if ($endTime != null) {
-            $sql .= " and f.create_time <= '$endTime' ";
+            $sql .= " and f.plan_time <= '$endTime' ";
         }
         $sql .= ' order by f.id desc';
         return $this->getDataAll($sql);
@@ -797,8 +817,9 @@ class Dbi extends BaseDbi
     }
     public function getFollowRecordList($departmentId = null, $patientId = null, $startTime = null, $endTime = null)
     {
-        $sql = 'select f.id, f.plan_id, f.department_id, d.`name` as department_name, f.patient_id, p.`name` as patient_name, 
-                f.doctor_id, dc.real_name as doctor_name, f.create_time, f.record_text, f.examination, f.diagnosis
+        $sql = 'select f.id, f.follow_plan_id, f.department_id, d.`name` as department_name, 
+                f.patient_id, p.`name` as patient_name, f.doctor_id, dc.real_name as doctor_name, 
+                f.create_time, f.record_text, f.examination, f.diagnosis, f.plan_time, f.plan_text
                 from follow_record as f 
                 inner join department as d on f.department_id = d.id
                 inner join patient as p on f.patient_id = p.id
@@ -865,9 +886,8 @@ class Dbi extends BaseDbi
     {
         $sql = 'select de.id as department_id, de.name as department_name,
                 f.patient_id, p.name as patient_name, doctor_id, d.real_name as doctor_name, 
-                pl.plan_time, pl.plan_value, f.create_time as follow_time, record_text, examination, diagnosis
+                f.plan_time, f.plan_text, f.create_time as follow_time, record_text, examination, diagnosis
                 from follow_record as f
-                left join plan as pl on f.plan_id = pl.id
                 inner join department as de on f.department_id = de.id
                 inner join patient as p on f.patient_id = p.id
                 inner join doctor as d on f.doctor_id = d.id
@@ -941,7 +961,7 @@ class Dbi extends BaseDbi
             $sql .= " and f.department_id = $departmentId ";
         }
         if ($startTime != null) {
-            $sql .= " and o.create_time >= '$startTime' ";
+            $sql .= " and f.create_time >= '$startTime' ";
         }
         if ($endTime != null) {
             $sql .= " and f.create_time <= '$endTime' ";
@@ -1083,7 +1103,8 @@ class Dbi extends BaseDbi
             $sql .= " and sex = '$sex'";
         }
         if ($tel != null) {
-            $sql .= " and p.tel like '%$tel%' ";
+            //$sql .= " and p.tel like '%$tel%' ";
+            $sql .= " and p.tel = '$tel' ";
         }
         if ($address != null) {
             $sql .= " and address like '%$address%' ";

@@ -2,7 +2,7 @@
 require 'common.php';
 
 $logFile = 'sms_plan.log';
-$day = date('Y-m-d', strtotime('+1 day'));
+$day = date('Y-m-d', strtotime('+2 day'));
 $startTime = $day . ' 00:00:00';
 $endTime = $day . ' 23:59:59';
 
@@ -21,7 +21,7 @@ foreach ($plans as $plan) {
     $sendCase = sendSMS($plan['tel'], $plan['name'], $message, $logFile);
     
     if (true == $sendCase) {
-        $ret = DbiBatch::getDbi()->setMessageSend($plan['plan_id']);
+        $ret = DbiBatch::getDbi()->setMessageSend($plan['follow_plan_id']);
         if (VALUE_DB_ERROR === $ret) {
             HpLogger::write('db error-failed to update message_time.', $logFile, LOG_TIME_DAY);
         }

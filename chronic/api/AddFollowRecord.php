@@ -12,20 +12,16 @@ class AddFollowRecord extends BaseApi
             return $ret;
         }
         
-        $required = ['department_id', 'patient_id', 'plan_id', 'record_text', 'diagnosis', 'doctor_id'];
+        $required = ['department_id', 'patient_id', 'follow_plan_id', 'record_text', 'diagnosis', 'doctor_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
             return $checkRequired;
         }
         
-        $checkNumeric = HpValidate::checkNumeric(['department_id', 'patient_id', 'plan_id', 'doctor_id'], $this->param);
+        $checkNumeric = HpValidate::checkNumeric(['department_id', 'patient_id', 'follow_plan_id', 'doctor_id'], $this->param);
         if (true !== $checkNumeric) {
             return $checkNumeric;
-        }
-        
-        if (false === Dbi::getDbi()->existedPlan($this->param['plan_id'])) {
-            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'plan_id.');
         }
         
         if (false === Dbi::getDbi()->existedDepartment($this->param['department_id'])) {
@@ -39,9 +35,8 @@ class AddFollowRecord extends BaseApi
         if (false === Dbi::getDbi()->existedDoctorById($this->param['doctor_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'doctor_id.');
         }
-        
-        if (true === Dbi::getDbi()->existedFollowRecordByPlan($this->param['plan_id'])) {
-            return HpErrorMessage::getError(ERROR_DATA_EXISTED, 'plan_id.');
+        if (true === Dbi::getDbi()->existedFollowRecord($this->param['follow_plan_id'])) {
+            return HpErrorMessage::getError(ERROR_DATA_EXISTED, 'follow_plan_id.');
         }
         
         if (false === Dbi::getDbi()->isPatientInDepartment($this->param['patient_id'], $this->param['department_id'])) {
@@ -63,7 +58,7 @@ class AddFollowRecord extends BaseApi
     protected function execute()
     {
         $followRecordId = Dbi::getDbi()->addFollowRecord($this->param['department_id'], $this->param['patient_id'], 
-                $this->param['plan_id'], $this->param['record_text'], $this->param['examination'], $this->examinationList, 
+                $this->param['follow_plan_id'], $this->param['record_text'], $this->param['examination'], $this->examinationList, 
                 $this->param['diagnosis'], $this->param['doctor_id']);
         if (VALUE_DB_ERROR === $followRecordId) {
             return HpErrorMessage::getError(ERROR_DB);

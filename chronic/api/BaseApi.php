@@ -102,9 +102,6 @@ class BaseApi
         foreach ($rows as $row) {
             $rowData = array();
             $columns = array_filter(explode(',', $row));
-            if (count($columns) != 2) {
-                return array();
-            }
             $data[] = $columns;
         }
         return $data;
