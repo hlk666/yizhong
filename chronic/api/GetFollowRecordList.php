@@ -11,8 +11,10 @@ class GetFollowRecordList extends BaseApi
             return $ret;
         }
         
-        if (!isset($this->param['department_id']) && !isset($this->param['patient_id'])) {
-            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'department_id | patient_id.');
+        if (!isset($this->param['department_id']) 
+                && !isset($this->param['patient_id'])
+                && !isset($this->param['follow_plan_id'])) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'department_id | patient_id | follow_plan_id.');
         }
         
         if (isset($this->param['department_id'])) {
@@ -35,6 +37,16 @@ class GetFollowRecordList extends BaseApi
             }
         }
         
+        if (isset($this->param['follow_plan_id'])) {
+            if (false === HpValidate::checkRequired($this->param['follow_plan_id'])) {
+                return HpErrorMessage::getError(ERROR_PARAM_REQUIRED, 'follow_plan_id.');
+            }
+            $checkNumeric = HpValidate::checkNumeric(['follow_plan_id'], $this->param);
+            if (true !== $checkNumeric) {
+                return $checkNumeric;
+            }
+        }
+        
         return true;
     }
     
@@ -42,10 +54,11 @@ class GetFollowRecordList extends BaseApi
     {
         $departmentId = isset($this->param['department_id']) ? $this->param['department_id'] : null;
         $patientId = isset($this->param['patient_id']) ? $this->param['patient_id'] : null;
+        $followPlanId = isset($this->param['follow_plan_id']) ? $this->param['follow_plan_id'] : null;
         //$startTime = isset($this->param['start_time']) ? $this->param['start_time'] : null;
         //$endTime = isset($this->param['end_time']) ? $this->param['end_time'] : null;
         
-        $followRecordList = Dbi::getDbi()->getFollowRecordList($departmentId, $patientId);
+        $followRecordList = Dbi::getDbi()->getFollowRecordList($departmentId, $patientId, $followPlanId);
         if (VALUE_DB_ERROR === $followRecordList) {
             return HpErrorMessage::getError(ERROR_DB);
         }

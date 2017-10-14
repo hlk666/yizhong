@@ -235,14 +235,14 @@ class Dbi extends BaseDbi
         $this->pdo->commit();
         return $outpatientId;
     }
-    public function addFollowPlan($departmentId, $patientId, $planText, $doctorId, $name, $planTime, $planInterval)
+    public function addFollowPlan($departmentId, $patientId, $planText, $doctorId, $name, $planTime, $planInterval, $type)
     {
         $this->pdo->beginTransaction();
     
-        $sql = 'insert into follow_plan (department_id, patient_id, plan_text, doctor_id, name, plan_time, plan_interval)
-                values (:department_id, :patient_id, :plan_text, :doctor_id, :name, :time, :interval)';
+        $sql = 'insert into follow_plan (department_id, patient_id, plan_text, doctor_id, name, plan_time, plan_interval, type)
+                values (:department_id, :patient_id, :plan_text, :doctor_id, :name, :time, :interval, :type)';
         $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':plan_text' => $planText, 
-                        ':doctor_id' => $doctorId, ':name' => $name, ':time' => $planTime, ':interval' => $planInterval];
+                        ':doctor_id' => $doctorId, ':name' => $name, ':time' => $planTime, ':interval' => $planInterval, ':type' => $type];
         $followPlanId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $followPlanId) {
             $this->pdo->rollBack();
@@ -506,7 +506,7 @@ class Dbi extends BaseDbi
     {
         return $this->updateTableByKey('doctor', 'id', $doctorId, $data);
     }
-    public function editFollowPlan($followPlanId, $planText, $doctorId, $name, $planTime, $planInterval)
+    public function editFollowPlan($followPlanId, $planText, $doctorId, $name, $planTime, $planInterval, $type)
     {
         /*
         $sql = 'select department_id, patient_id from follow_plan where id = :id limit 1';
@@ -521,9 +521,9 @@ class Dbi extends BaseDbi
         $this->pdo->beginTransaction();
         
         $sql = 'update follow_plan set plan_text = :plan_text, doctor_id = :doctor, name = :name, 
-                plan_time = :time, plan_interval = :interval where id = :id';
+                plan_time = :time, plan_interval = :interval, type = :type where id = :id';
         $param = [':id' => $followPlanId, ':plan_text' => $planText, ':doctor' => $doctorId, ':name' => $name, 
-                        ':time' => $planTime, ':interval' => $planInterval];
+                        ':time' => $planTime, ':interval' => $planInterval, ':type' => $type];
         $ret = $this->updateData($sql, $param);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
@@ -780,7 +780,7 @@ class Dbi extends BaseDbi
     }
     public function getFollowPlanList($departmentId = null, $patientId = null, $startTime = null, $endTime = null)
     {
-        $sql = 'select f.id, f.department_id, d.`name` as department_name, f.patient_id, p.`name` as patient_name, 
+        $sql = 'select f.id, f.type, f.department_id, d.`name` as department_name, f.patient_id, p.`name` as patient_name, 
                 f.doctor_id, dc.real_name as doctor_name, f.name as plan_name, f.plan_time, f.plan_text, f.plan_interval
                 from follow_plan as f 
                 inner join department as d on f.department_id = d.id
@@ -815,7 +815,8 @@ class Dbi extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
-    public function getFollowRecordList($departmentId = null, $patientId = null, $startTime = null, $endTime = null)
+    public function getFollowRecordList($departmentId = null, $patientId = null, $followPlanId = null, 
+            $startTime = null, $endTime = null)
     {
         $sql = 'select f.id, f.follow_plan_id, f.department_id, d.`name` as department_name, 
                 f.patient_id, p.`name` as patient_name, f.doctor_id, dc.real_name as doctor_name, 
@@ -831,13 +832,16 @@ class Dbi extends BaseDbi
         if ($patientId != null) {
             $sql .= " and f.patient_id = $patientId ";
         }
+        if ($followPlanId != null) {
+            $sql .= " and f.follow_plan_id = $followPlanId ";
+        }
         if ($startTime != null) {
             $sql .= " and f.create_time >= '$startTime' ";
         }
         if ($endTime != null) {
             $sql .= " and f.create_time <= '$endTime' ";
         }
-        $sql .= ' order by f.id desc';
+        $sql .= ' order by f.create_time desc';
         return $this->getDataAll($sql);
     }
     public function getHospitalList()

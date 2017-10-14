@@ -11,7 +11,7 @@ class AddReferralConfirm extends BaseApi
             return $ret;
         }
         
-        $required = ['referral_id', 'apply_department_id', 'doctor_id'];
+        $required = ['referral_id', 'apply_department_id', 'doctor_id', 'patient_id', 'confirm_department'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -41,6 +41,29 @@ class AddReferralConfirm extends BaseApi
     protected function execute()
     {
         $ret = Dbi::getDbi()->addReferralConfirm($this->param['referral_id'], $this->param['doctor_id']);
+        if (VALUE_DB_ERROR === $ret) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $patientInfo = Dbi::getDbi()->getPatientDepartment($this->param['patient_id']);
+        if (VALUE_DB_ERROR === $patientInfo) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        if (empty($patientInfo)) {
+            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY);
+        }
+        
+        if ($patientInfo['department1'] != $this->param['apply_department_id'] && $patientInfo['department1'] != $this->param['confirm_department']) {
+            $oldDpt = $patientInfo['department1'];
+        } elseif ($patientInfo['department2'] != $this->param['apply_department_id'] && $patientInfo['department2'] != $this->param['confirm_department']) {
+            $oldDpt = $patientInfo['department2'];
+        } elseif ($patientInfo['department3'] != $this->param['apply_department_id'] && $patientInfo['department3'] != $this->param['confirm_department']) {
+            $oldDpt = $patientInfo['department3'];
+        } else {
+            //can not happen.
+        }
+    
+        $ret = Dbi::getDbi()->deletePatient($this->param['patient_id'], $oldDpt, $this->param['confirm_department']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

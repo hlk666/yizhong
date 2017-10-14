@@ -12,7 +12,7 @@ class AddFollowPlan extends BaseApi
             return $ret;
         }
         
-        $required = ['department_id', 'patient_id', 'name', 'plan_time', 'plan_interval', 'plan_text', 'doctor_id'];
+        $required = ['department_id', 'patient_id', 'name', 'plan_time', 'plan_interval', 'plan_text', 'doctor_id', 'type'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -52,7 +52,7 @@ class AddFollowPlan extends BaseApi
     {
         $followPlanId = Dbi::getDbi()->addFollowPlan($this->param['department_id'], $this->param['patient_id'], 
                 $this->param['plan_text'], $this->param['doctor_id'], $this->param['name'], $this->param['plan_time'], 
-                $this->param['plan_interval']);
+                $this->param['plan_interval'], $this->param['type']);
         if (VALUE_DB_ERROR === $followPlanId) {
             return HpErrorMessage::getError(ERROR_DB);
         }
