@@ -18,6 +18,11 @@ $keys = explode(',', $result);
 //$diagnosis = array_intersect($masterDiagnosis, $tempArray);
 //$keys = array_keys($diagnosis);
 
+$ret = DbiAnalytics::getDbi()->setHeavy($patientId);
+if (VALUE_DB_ERROR === $ret) {
+    api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+}
+
 foreach ($keys as $key) {
     $ret = DbiAnalytics::getDbi()->addPatientDiagnosis($patientId, $key);
     if (VALUE_DB_ERROR === $ret) {
