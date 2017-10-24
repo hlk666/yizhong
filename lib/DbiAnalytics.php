@@ -81,7 +81,8 @@ class DbiAnalytics extends BaseDbi
         }
         
         $sql = 'select t.hospital_id, analysis_hospital, report_hospital, title_hospital, 
-                h.hospital_name as title_hospital_name, h.comment, h.display_check, double_title as `double`
+                h.hospital_name as title_hospital_name, h.comment, h.display_check, h.report_must_check,
+                double_title as `double`
                 from hospital_tree as t inner join hospital as h on title_hospital = h.hospital_id
                 where t.hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
@@ -196,7 +197,7 @@ class DbiAnalytics extends BaseDbi
     public function getPatientsByIdForAnalytics($patientIdList)
     {
         $sql = "select h.hospital_name, h.tel as hospital_tel, device_id, guardian_id as patient_id, 
-                start_time, end_time, blood_pressure, tentative_diagnose, medical_history,
+                start_time, end_time, blood_pressure, tentative_diagnose, medical_history, guardian_result, 
                 patient_name as name, birth_year, sex, p.tel, reported
                  from guardian as g left join patient as p on g.patient_id = p.patient_id
                  left join hospital as h on g.regist_hospital_id = h.hospital_id
@@ -260,6 +261,21 @@ class DbiAnalytics extends BaseDbi
                 where g.guardian_id in ($guardianList) ";
         return $this->getDataAll($sql);
     }
+    public function getTelContent($hospitalId, $guardianId, $startTime, $endTime)
+    {
+        $sql = "select guardian_id, doctor_name, content, create_time from guardian_tel_content where hospital_id = $hospitalId ";
+        if (null !== $guardianId) {
+            $sql .= " and guardian_id = $guardianId ";
+        }
+        if (null !== $startTime) {
+            $sql .= " and create_time >= '$startTime' ";
+        }
+        if (null !== $endTime) {
+            $sql .= " and create_time <= '$endTime' ";
+        }
+        $sql .= ' order by guardian_id desc';
+        return $this->getDataAll($sql);
+    }
     public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
         $status = $this->getDataStatus($guardianId);
@@ -300,6 +316,13 @@ class DbiAnalytics extends BaseDbi
         $sql = "update guardian_data set is_heavy = 1 where guardian_id = :guardian_id";
         $param = [':guardian_id' => $guardianId];
         return $this->updateData($sql, $param);
+    }
+    public function setTelContent($guardianId, $hospitalId, $doctorName, $content)
+    {
+        $sql = 'insert into guardian_tel_content (guardian_id, hospital_id, doctor_name, content)
+                values (:guardian, :hospital, :doctor, :content)';
+        $param = [':guardian' => $guardianId, ':hospital' => $hospitalId, ':doctor' => $doctorName, ':content' => $content];
+        return $this->insertData($sql, $param);
     }
     public function uploadReport($guardianId, $file)
     {

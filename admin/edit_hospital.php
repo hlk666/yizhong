@@ -28,6 +28,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
     $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
+    $reportMustCheck = isset($_POST['report_must_check']) ? $_POST['report_must_check'] : '0';
     
     if (empty($hospitalId)) {
         user_back_after_delay('非法访问');
@@ -72,7 +73,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
 
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
-                $contractFlag, $deviceSale, $displayCheck);
+                $contractFlag, $deviceSale, $displayCheck, $reportMustCheck);
     }
     
     if (isset($_POST['del'])) {
@@ -158,6 +159,15 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
             <label class="checkbox-inline"><input type="radio" name="display_check" value="1">是</label>
             <label class="checkbox-inline"><input type="radio" name="display_check" value="0" checked>否</label></div>';
     }
+    if ('1' == $hospitalInfo['report_must_check']) {
+        $htmlReportMustCheck = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="report_must_check" value="1" checked>是</label>
+            <label class="checkbox-inline"><input type="radio" name="report_must_check" value="0">否</label></div>';
+    } else {
+        $htmlReportMustCheck = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="report_must_check" value="1">是</label>
+            <label class="checkbox-inline"><input type="radio" name="report_must_check" value="0" checked>否</label></div>';
+    }
     
     $button = '';
     if ('del' === $action) {
@@ -228,6 +238,10 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
   <div class="form-group">
     <label class="col-sm-2 control-label">是否显示审阅医生<font color="red">*</font></label>
     $htmlDisplayCheck
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">是否报告必须审阅<font color="red">*</font></label>
+    $htmlReportMustCheck
   </div>
   <div class="form-group">
     <label for="login_user" class="col-sm-2 control-label">管理员登录用户<font color="red">*</font></label>

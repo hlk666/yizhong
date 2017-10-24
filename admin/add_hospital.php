@@ -31,6 +31,7 @@ if (isset($_POST['submit'])){
     $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
     $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
+    $reportMustCheck = isset($_POST['report_must_check']) ? $_POST['report_must_check'] : '0';
     
     if (empty($hospitalName)) {
         user_back_after_delay('请正确输入医院名。');
@@ -75,7 +76,7 @@ if (isset($_POST['submit'])){
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $type, $level, $hospitalTel, 
             $province, $city, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser, 
             $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital, 
-            $agency, $contractFlag, $deviceSale, $displayCheck);
+            $agency, $contractFlag, $deviceSale, $displayCheck, $reportMustCheck);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -239,6 +240,13 @@ if (isset($_POST['submit'])){
       <input type="radio" name="display_check" value="1">是</label>
       <label class="checkbox-inline">
       <input type="radio" name="display_check" value="0" checked>否</label>
+    </div>
+    <label class="col-sm-2 control-label">是否报告必须审阅</label>
+    <div class="col-sm-4">
+      <label class="checkbox-inline">
+      <input type="radio" name="report_must_check" value="1">是</label>
+      <label class="checkbox-inline">
+      <input type="radio" name="report_must_check" value="0" checked>否</label>
     </div>
   </div>
   <div class="form-group">
