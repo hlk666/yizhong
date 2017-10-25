@@ -7,7 +7,7 @@ if (false === Validate::checkRequired($_POST['patient_id'])) {
 }
 
 $guardianId = $_POST['patient_id'];
-$status = isset($_POST['patient_id']) ? $_POST['patient_id'] : '1';
+$status = isset($_POST['status']) ? $_POST['status'] : '1';
 
 $ret = DbiAdmin::getDbi()->updateAnaticsStatus($guardianId, $status);
 if (VALUE_DB_ERROR === $ret) {

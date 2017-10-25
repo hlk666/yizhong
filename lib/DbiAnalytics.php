@@ -263,17 +263,20 @@ class DbiAnalytics extends BaseDbi
     }
     public function getTelContent($hospitalId, $guardianId, $startTime, $endTime)
     {
-        $sql = "select guardian_id, doctor_name, content, create_time from guardian_tel_content where hospital_id = $hospitalId ";
+        $sql = "select t.guardian_id, t.hospital_name, p.patient_name, t.doctor_name, t.content, t.create_time 
+                from guardian_tel_content as t inner join guardian as g on t.guardian_id = g.guardian_id
+                inner join patient as p on g.patient_id = p.patient_id
+                where hospital_id = $hospitalId ";
         if (null !== $guardianId) {
-            $sql .= " and guardian_id = $guardianId ";
+            $sql .= " and t.guardian_id = $guardianId ";
         }
         if (null !== $startTime) {
-            $sql .= " and create_time >= '$startTime' ";
+            $sql .= " and t.create_time >= '$startTime' ";
         }
         if (null !== $endTime) {
-            $sql .= " and create_time <= '$endTime' ";
+            $sql .= " and t.create_time <= '$endTime' ";
         }
-        $sql .= ' order by guardian_id desc';
+        $sql .= ' order by t.guardian_id desc';
         return $this->getDataAll($sql);
     }
     public function addGuardianData($guardianId, $url, $deviceType = 0)
@@ -317,11 +320,12 @@ class DbiAnalytics extends BaseDbi
         $param = [':guardian_id' => $guardianId];
         return $this->updateData($sql, $param);
     }
-    public function setTelContent($guardianId, $hospitalId, $doctorName, $content)
+    public function setTelContent($guardianId, $hospitalId, $hospitalName, $doctorName, $content)
     {
-        $sql = 'insert into guardian_tel_content (guardian_id, hospital_id, doctor_name, content)
-                values (:guardian, :hospital, :doctor, :content)';
-        $param = [':guardian' => $guardianId, ':hospital' => $hospitalId, ':doctor' => $doctorName, ':content' => $content];
+        $sql = 'insert into guardian_tel_content (guardian_id, hospital_id, hospital_name, doctor_name, content)
+                values (:guardian, :hospital_id, :hospital_name, :doctor, :content)';
+        $param = [':guardian' => $guardianId, ':hospital_id' => $hospitalId, ':hospital_name' => $hospitalName, 
+                        ':doctor' => $doctorName, ':content' => $content];
         return $this->insertData($sql, $param);
     }
     public function uploadReport($guardianId, $file)
