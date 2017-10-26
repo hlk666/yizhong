@@ -102,6 +102,19 @@ class DbiAnalytics extends BaseDbi
         
         return $hospitalConfig;
     }
+    public function getHospitalConfigList($hospitals)
+    {
+        $sql = "select t.hospital_id, analysis_hospital, report_hospital, title_hospital,
+                h.hospital_name as title_hospital_name, h.comment, h.display_check, h.report_must_check,
+                double_title as `double`
+                from hospital_tree as t inner join hospital as h on title_hospital = h.hospital_id
+                where t.hospital_id in ($hospitals)";
+        $hospitalConfig = $this->getDataAll($sql);
+        if (VALUE_DB_ERROR === $hospitalConfig) {
+            return VALUE_DB_ERROR;
+        }
+        return $hospitalConfig;
+    }
     public function getHospitalConfigAll()
     {
         $sql = 'select * from hospital_tree';
@@ -317,7 +330,7 @@ class DbiAnalytics extends BaseDbi
     public function setHeavy($patientId)
     {
         $sql = "update guardian_data set is_heavy = 1 where guardian_id = :guardian_id";
-        $param = [':guardian_id' => $guardianId];
+        $param = [':guardian_id' => $patientId];
         return $this->updateData($sql, $param);
     }
     public function setTelContent($guardianId, $hospitalId, $hospitalName, $doctorName, $content)
