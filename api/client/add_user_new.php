@@ -183,7 +183,9 @@ if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
 }
 
-ShortMessageService::send('15684158646', '有新的注册信息，病人姓名：' . $name);
+if ($registHospital != '1') {
+    ShortMessageService::send('15684158646', '有新的注册信息，病人姓名：' . $name);
+}
 
 api_exit_success();
 
