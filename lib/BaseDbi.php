@@ -183,12 +183,12 @@ class BaseDbi
     }
     protected function updateTableByKey($table, $keyName, $keyValue, array $data)
     {
-        $sql = "update $table set ";
+        $sql = 'update ' . $table . ' set ';
         foreach ($data as $key => $value) {
             if ($value == 'null') {
                 $sql .= $key . ' = ' . $value . ',';
             } else {
-                $sql .= $key . ' = "' . $value . '",';
+                $sql .= $key . ' = \'' . $value . '\',';
             }
         }
         $sql = substr($sql, 0, -1);
