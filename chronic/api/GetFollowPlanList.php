@@ -42,10 +42,13 @@ class GetFollowPlanList extends BaseApi
     {
         $departmentId = isset($this->param['department_id']) ? $this->param['department_id'] : null;
         $patientId = isset($this->param['patient_id']) ? $this->param['patient_id'] : null;
-        //$startTime = isset($this->param['start_time']) ? $this->param['start_time'] : null;
-        //$endTime = isset($this->param['end_time']) ? $this->param['end_time'] : null;
         
-        $followPlanList = Dbi::getDbi()->getFollowPlanList($departmentId, $patientId);
+        $patientName = isset($this->param['patient_name']) ? $this->param['patient_name'] : null;
+        $planName = isset($this->param['plan_name']) ? $this->param['plan_name'] : null;
+        $startTime = isset($this->param['start_time']) ? $this->param['start_time'] : null;
+        $endTime = isset($this->param['end_time']) ? $this->param['end_time'] : null;
+        
+        $followPlanList = Dbi::getDbi()->getFollowPlanList($departmentId, $patientId, $patientName, $planName, $startTime, $endTime);
         if (VALUE_DB_ERROR === $followPlanList) {
             return HpErrorMessage::getError(ERROR_DB);
         }

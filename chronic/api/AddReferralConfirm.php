@@ -1,6 +1,7 @@
 <?php
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
+require_once PATH_ROOT . 'lib/tool/HpShortMessageService.php';
 
 class AddReferralConfirm extends BaseApi
 {
@@ -62,12 +63,19 @@ class AddReferralConfirm extends BaseApi
         } else {
             //can not happen.
         }
-    
+        
         $ret = Dbi::getDbi()->deletePatient($this->param['patient_id'], $oldDpt, $this->param['confirm_department']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
         
+        $tel = Dbi::getDbi()->getTelDepartment($this->param['apply_department_id']);
+        if (VALUE_DB_ERROR === $tel) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        if (!empty($tel)) {
+            HpShortMessageService::send($tel, '转诊病人确认到院，转诊ID：' . $this->param['referral_id']);
+        }
         send_notice($this->param['apply_department_id'], '转诊病人确认到院，转诊ID：' . $this->param['referral_id']);
         
         return $this->retSuccess;

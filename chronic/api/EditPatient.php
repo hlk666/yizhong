@@ -72,6 +72,18 @@ class EditPatient extends BaseApi
         if (isset($this->param['family_tel'])) {
             $data['family_tel'] = $this->param['family_tel'];
         }
+        if (isset($this->param['height'])) {
+            $data['height'] = $this->param['height'];
+        }
+        if (isset($this->param['weight'])) {
+            $data['weight'] = $this->param['weight'];
+        }
+        if (isset($this->param['job'])) {
+            $data['job'] = $this->param['job'];
+        }
+        if (isset($this->param['education'])) {
+            $data['education'] = $this->param['education'];
+        }
         if (empty($data)) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
         }

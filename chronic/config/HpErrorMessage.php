@@ -36,6 +36,7 @@ define('ERROR_NOT_IN_DEPARTMENT', 41);
 define('ERROR_DATA_EXISTED', 42);
 define('ERROR_TIME_ERROR', 43);
 define('ERROR_DATA_DELETE_DENY', 44);
+define('ERROR_FOLLOW_RECORD_NOTICE', 45);
 
 define('ERROR_OTHER', 99);
 
@@ -79,7 +80,7 @@ class HpErrorMessage
                     ERROR_DATA_EXISTED => ['code' => ERROR_DATA_EXISTED, 'message' => '该数据已存在，请勿重复操作。'],
                     ERROR_TIME_ERROR => ['code' => ERROR_TIME_ERROR, 'message' => '时间错误。'],
                     ERROR_DATA_DELETE_DENY => ['code' => ERROR_DATA_DELETE_DENY, 'message' => '该数据无法删除。'],
-                    
+                    ERROR_FOLLOW_RECORD_NOTICE => ['code' => ERROR_FOLLOW_RECORD_NOTICE, 'message' => '随访记录不存在或者不是术后随访。'],
                     
                     ERROR_OTHER => ['code' => ERROR_OTHER, 'message' => '未知错误，请联系管理员。'],
     ];

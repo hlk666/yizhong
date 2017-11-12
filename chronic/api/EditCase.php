@@ -63,6 +63,18 @@ class EditCase extends BaseApi
         if (isset($this->param['body_examination'])) {
             $data['body_examination'] = $this->param['body_examination'];
         }
+        if (isset($this->param['familyIllness'])) {
+            $data['familyIllness'] = $this->param['familyIllness'];
+        }
+        if (isset($this->param['personalIllness'])) {
+            $data['personalIllness'] = $this->param['personalIllness'];
+        }
+        if (isset($this->param['operateIllness'])) {
+            $data['operateIllness'] = $this->param['operateIllness'];
+        }
+        if (isset($this->param['injuryIllness'])) {
+            $data['injuryIllness'] = $this->param['injuryIllness'];
+        }
         if (empty($data)) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
         }

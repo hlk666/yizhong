@@ -28,7 +28,15 @@ class GetPatientList extends BaseApi
     
     protected function execute()
     {
-        $patientList = Dbi::getDbi()->getPatientList($this->param['department_id']);
+        $name = isset($this->param['name']) ? $this->param['name'] : null;
+        $identityCard = isset($this->param['identity_card']) ? $this->param['identity_card'] : null;
+        $tel = isset($this->param['tel']) ? $this->param['tel'] : null;
+        $chronic = isset($this->param['chronic']) ? $this->param['chronic'] : null;
+        $page = isset($this->param['page']) ? $this->param['page'] : 0;
+        $rows = isset($this->param['rows']) ? $this->param['rows'] : VALUE_DEFAUTL_ROWS;
+        
+        $patientList = Dbi::getDbi()->getPatientList($this->param['department_id'], $name, $identityCard, $tel,
+                $chronic, $page * $rows, $rows);
         if (VALUE_DB_ERROR === $patientList) {
             return HpErrorMessage::getError(ERROR_DB);
         }

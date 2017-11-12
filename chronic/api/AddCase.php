@@ -12,7 +12,7 @@ class AddCase extends BaseApi
             return $ret;
         }
         
-        $required = ['department_id', 'patient_id', 'diagnosis', 'chief_complaint'];
+        $required = ['department_id', 'patient_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -50,15 +50,22 @@ class AddCase extends BaseApi
     
     protected function execute()
     {
+        $diagnosis = isset($this->param['diagnosis']) ? $this->param['diagnosis'] : '';
+        $chiefComplaint = isset($this->param['chief_complaint']) ? $this->param['chief_complaint'] : '';
         $presentIllness = isset($this->param['present_illness']) ? $this->param['present_illness'] : '';
         $pastIllness = isset($this->param['past_illness']) ? $this->param['past_illness'] : '';
         $allergies = isset($this->param['allergies']) ? $this->param['allergies'] : '';
         $smoking = isset($this->param['smoking']) ? $this->param['smoking'] : '';
         $drinking = isset($this->param['drinking']) ? $this->param['drinking'] : '';
         $bodyExamination = isset($this->param['body_examination']) ? $this->param['body_examination'] : '';
+        $familyIllness = isset($this->param['familyIllness']) ? $this->param['familyIllness'] : '';
+        $personalIllness = isset($this->param['personalIllness']) ? $this->param['personalIllness'] : '';
+        $operateIllness = isset($this->param['operateIllness']) ? $this->param['operateIllness'] : '';
+        $injuryIllness = isset($this->param['injuryIllness']) ? $this->param['injuryIllness'] : '';
         
-        $caseId = Dbi::getDbi()->addCase($this->param['department_id'], $this->param['patient_id'], $this->param['diagnosis'], 
-                $this->param['chief_complaint'], $presentIllness, $pastIllness, $allergies, $smoking, $drinking, $bodyExamination, $this->chronic);
+        $caseId = Dbi::getDbi()->addCase($this->param['department_id'], $this->param['patient_id'], $diagnosis, 
+                $chiefComplaint, $presentIllness, $pastIllness, $allergies, $smoking, $drinking, $bodyExamination, 
+                $this->chronic, $familyIllness, $personalIllness, $operateIllness, $injuryIllness);
         if (VALUE_DB_ERROR === $caseId) {
             return HpErrorMessage::getError(ERROR_DB);
         }

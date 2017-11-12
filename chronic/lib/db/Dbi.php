@@ -18,19 +18,25 @@ class Dbi extends BaseDbi
         return self::$instance;
     }
     
-    public function addCase($departmentId, $patientId, $diagnosis, $chiefComplaint, 
-            $presentIllness, $pastIllness, $allergies, $smoking, $drinking, $bodyExamination, array $chronicLable)
+    public function addCase($departmentId, $patientId, $diagnosis, $chiefComplaint, $presentIllness, 
+            $pastIllness, $allergies, $smoking, $drinking, $bodyExamination, array $chronicLable,
+            $familyIllness, $personalIllness, $operateIllness, $injuryIllness)
     {
         $this->pdo->beginTransaction();
         
         $sql = 'insert into `case` (department_id, patient_id, diagnosis, chief_complaint, 
-                present_illness, past_illness, allergies, smoking, drinking, body_examination)
+                present_illness, past_illness, allergies, smoking, drinking, body_examination, 
+                familyIllness, personalIllness, operateIllness, injuryIllness)
                 values (:department_id, :patient_id, :diagnosis, :chief_complaint, :present_illness, 
-                :past_illness, :allergies, :smoking, :drinking, :body_examination)';
+                :past_illness, :allergies, :smoking, :drinking, :body_examination, 
+                :familyIllness, :personalIllness, :operateIllness, :injuryIllness)';
         $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':diagnosis' => $diagnosis,
                         ':chief_complaint' => $chiefComplaint, ':present_illness' => $presentIllness, 
                         ':past_illness' => $pastIllness, ':allergies' => $allergies, ':smoking' => $smoking, 
-                        ':drinking' => $drinking, ':body_examination' => $bodyExamination];
+                        ':drinking' => $drinking, ':body_examination' => $bodyExamination, 
+                        ':familyIllness' => $familyIllness, ':personalIllness' => $personalIllness, 
+                        ':operateIllness' => $operateIllness, ':injuryIllness' => $injuryIllness
+        ];
         $caseId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $caseId) {
             $this->pdo->rollBack();
@@ -53,10 +59,10 @@ class Dbi extends BaseDbi
         $this->pdo->commit();
         return $caseId;
     }
-    public function addChronic($name)
+    public function addChronic($name, $level, $parentId)
     {
-        $sql = 'insert into chronic (name) values (:name)';
-        $param = [':name' => $name];
+        $sql = 'insert into chronic (name, level, parent_id) values (:name, :level, :parent)';
+        $param = [':name' => $name, ':level' => $level, ':parent' => $parentId];
         return $this->insertData($sql, $param);
     }
     public function addChronicPatient($chronicId, $patientId)
@@ -140,7 +146,7 @@ class Dbi extends BaseDbi
         
         $this->pdo->beginTransaction();
         
-        $sql = 'insert into follow_record (department_id, patient_id, follow_plan_id, record_text, examination, diagnosis, doctor_id)
+        $sql = 'insert into follow_record (department_id, patient_id, follow_plan_id, record_text, examination, diagnosis, doctor_id, plan_time, plan_text)
                 values (:department_id, :patient_id, :follow_plan_id, :record_text, :examination, :diagnosis, :doctor_id, :plan_time, :plan_text)';
         $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':follow_plan_id' => $followPlanId, 
                         ':record_text' => $recordText, ':examination' => $examination,  ':diagnosis' => $diagnosis, 
@@ -160,11 +166,16 @@ class Dbi extends BaseDbi
         }
         */
         foreach ($examinationList as $exam) {
+            if (!isset($exam[2]) || empty($exam[2])) {
+                $result = '';
+            } else {
+                $result = $exam[2];
+            }
             $sql = 'insert into examination_patient 
                     (department_id, patient_id, record_id, type, examination_id, examination_value, examination_result)
                     values (:department_id, :patient_id, :record_id, :type, :examination_id, :value, :result)';
             $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':record_id' => $followRecordId, 
-                            ':type' => 'follow', ':examination_id' => $exam[0], ':value' => $exam[1], ':result' => $exam[2]];
+                            ':type' => 'follow', ':examination_id' => $exam[0], ':value' => $exam[1], ':result' => $result];
             $ret = $this->insertData($sql, $param);
             if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
@@ -174,6 +185,88 @@ class Dbi extends BaseDbi
     
         $this->pdo->commit();
         return $followRecordId;
+    }
+    public function addRecordExamination($patientId, $examinationId, $value, $result, $type, $recordId)
+    {
+        if ('app' == $type) {
+            $sql = 'insert into examination_patient
+                    (department_id, patient_id, record_id, type, examination_id, examination_value, examination_result)
+                    values (:department_id, :patient_id, :record_id, :type, :examination_id, :value, :result)';
+            $param = [':department_id' => 0, ':patient_id' => $patientId, ':record_id' => 0,
+                            ':type' => $type, ':examination_id' => $examinationId, ':value' => $value, ':result' => $result];
+            $id = $this->insertData($sql, $param);
+            if (VALUE_DB_ERROR === $id) {
+                return VALUE_DB_ERROR;
+            }
+        } else {
+            if ($this->existData('examination_patient', 
+                    "patient_id = $patientId and record_id = $recordId and type = '$type' and examination_id = $examinationId")) {
+                $sql = "update examination_patient
+                set examination_value = '$value', examination_result = '$result', create_time = now()
+                where patient_id = $patientId and record_id = $recordId and type = '$type' and examination_id = $examinationId";
+                $ret = $this->updateData($sql);
+                if (VALUE_DB_ERROR === $ret) {
+                    return VALUE_DB_ERROR;
+                }
+            } else {
+                $sql = "select department_id from examination_patient
+                        where patient_id = $patientId and record_id = $recordId and type = '$type' limit 1";
+                $departmentId = $this->getDataString($sql);
+                if (VALUE_DB_ERROR === $departmentId) {
+                    return VALUE_DB_ERROR;
+                }
+                
+                $sql = 'insert into examination_patient
+                    (department_id, patient_id, record_id, type, examination_id, examination_value, examination_result)
+                    values (:department_id, :patient_id, :record_id, :type, :examination_id, :value, :result)';
+                $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':record_id' => $recordId,
+                                ':type' => $type, ':examination_id' => $examinationId, ':value' => $value, ':result' => $result];
+                $id = $this->insertData($sql, $param);
+                if (VALUE_DB_ERROR === $id) {
+                    return VALUE_DB_ERROR;
+                }
+            }
+            $sql = "update examination_patient 
+                    set examination_value = '$value', examination_result = '$result', create_time = now() 
+                    where patient_id = $patientId and record_id = $recordId and type = '$type' and examination_id = $examinationId";
+            $ret = $this->updateData($sql);
+            if (VALUE_DB_ERROR === $ret) {
+                return VALUE_DB_ERROR;
+            }
+            
+            $sql = "select examination_id, examination_value, examination_result
+                    from examination_patient
+                    where patient_id = $patientId and record_id = $recordId and type = '$type'";
+            $ret = $this->getDataAll($sql);
+            if (VALUE_DB_ERROR === $ret) {
+                return VALUE_DB_ERROR;
+            }
+            
+            $newExamination = '';
+            foreach ($ret as $row) {
+                $newExamination .= $row['examination_id'] . ',' . $row['examination_value'] . ',' . $row['examination_result'] . ';';
+            }
+            if ($newExamination != '') {
+                $newExamination = substr($newExamination, 0, -1);
+            }
+            
+            if ('follow' == $type) {
+                $sql = "update follow_record set examination = '$newExamination', create_time = now() where id = $recordId";
+                $ret = $this->updateData($sql);
+                if (VALUE_DB_ERROR === $ret) {
+                    return VALUE_DB_ERROR;
+                }
+            }
+            if ('outpatient' == $type) {
+                $sql = "update outpatient set examination = '$newExamination', create_time = now() where id = $recordId";
+                $ret = $this->updateData($sql);
+                if (VALUE_DB_ERROR === $ret) {
+                    return VALUE_DB_ERROR;
+                }
+            }
+            
+        }
+        return true;
     }
     public function addHospital($name, $level, $tel, $area, $province, $city, $address, $loginName, $realName, $password)
     {
@@ -264,17 +357,19 @@ class Dbi extends BaseDbi
         $this->pdo->commit();
         return $followPlanId;
     }
-    public function addPatient($identityCard, $name, $birthYear, $sex, $tel, $address, 
-            $ethnic, $nativePlace, $hospitalization, $familyName, $familyTel, $departmentId)
+    public function addPatient($identityCard, $name, $birthYear, $sex, $tel, $address, $ethnic, $nativePlace, 
+            $hospitalization, $familyName, $familyTel, $departmentId, $height, $weight, $job, $education)
     {
+        
         $sql = 'insert into patient (identity_card, name, birth_year, sex, tel, address, ethnic, native_place, 
-                hospitalization, family_name, family_tel, department1)
+                hospitalization, family_name, family_tel, department1, height, weight, job, education)
                 values (:identity_card, :name, :birth_year, :sex, :tel, :address, :ethnic, 
-                :native_place, :hospitalization, :family_name, :family_tel, :deparment1)';
+                :native_place, :hospitalization, :family_name, :family_tel, :deparment1, :height, :weight, :job, :education)';
         $param = [':identity_card' => $identityCard, ':name' => $name, ':birth_year' => $birthYear,
-                        ':sex' => $sex, ':tel' => $tel, ':address' => $address, ':ethnic' => $ethnic, 
-                        ':native_place' => $nativePlace, ':hospitalization' => $hospitalization, 
-                        ':family_name' => $familyName, ':family_tel' => $familyTel, ':deparment1' => $departmentId];
+                        ':sex' => $sex, ':tel' => $tel, ':address' => $address, ':ethnic' => $ethnic,
+                        ':native_place' => $nativePlace, ':hospitalization' => $hospitalization,
+                        ':family_name' => $familyName, ':family_tel' => $familyTel, ':deparment1' => $departmentId,
+                        ':height' => $height, ':weight' => $weight, ':job' => $job, ':education' => $education];
         return $this->insertData($sql, $param);
     }
     public function addReferralApply($applyDepartmentId, $patientId, $doctorId, $message, $replyDepartmentId)
@@ -484,7 +579,8 @@ class Dbi extends BaseDbi
     }
     public function deleteReferralReply($referralId)
     {
-        $sql = 'update referral set reply_doctor_id = null, message = nullreply_time = null where id = :id';
+        $sql = 'update referral set reply_doctor_id = null, reply_message = null, reply_time = null, status = 1 
+                where id = :id';
         $param = [':id' => $referralId];
         return $this->updateData($sql, $param);
     }
@@ -492,10 +588,10 @@ class Dbi extends BaseDbi
     {
         return $this->updateTableByKey('`case`', 'id', $caseId, $data);
     }
-    public function editChronic($id, $name)
+    public function editChronic($id, $name, $level, $parentId)
     {
-        $sql = 'update chronic set name = :name where id = :id';
-        $param = [':id' => $id, ':name' => $name];
+        $sql = 'update chronic set name = :name, level = :level, parent_id = :parent where id = :id';
+        $param = [':id' => $id, ':name' => $name, ':level' => $level, ':parent' => $parentId];
         return $this->updateData($sql, $param);
     }
     public function editDepartment($departmentId, array $data)
@@ -506,9 +602,17 @@ class Dbi extends BaseDbi
     {
         return $this->updateTableByKey('doctor', 'id', $doctorId, $data);
     }
+    public function editFollowPlan($followPlanId, array $data)
+    {
+        return $this->updateTableByKey('follow_plan', 'id', $followPlanId, $data);
+    }
+    public function editFollowRecord($followRecordId, array $data)
+    {
+        return $this->updateTableByKey('follow_record', 'id', $followRecordId, $data);
+    }
+    /*
     public function editFollowPlan($followPlanId, $planText, $doctorId, $name, $planTime, $planInterval, $type)
     {
-        /*
         $sql = 'select department_id, patient_id from follow_plan where id = :id limit 1';
         $param = [':id' => $followPlanId];
         $followPlan = $this->getDataRow($sql, $param);
@@ -517,7 +621,7 @@ class Dbi extends BaseDbi
         }
         $departmentId = $followPlan['department_id'];
         $patientId = $followPlan['patient_id'];
-        */
+        
         $this->pdo->beginTransaction();
         
         $sql = 'update follow_plan set plan_text = :plan_text, doctor_id = :doctor, name = :name, 
@@ -529,7 +633,7 @@ class Dbi extends BaseDbi
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
-        /*
+        
         $sql = 'delete from plan where follow_plan_id = :id and notice_time is null';
         $param = [':id' => $followPlanId];
         $ret = $this->deleteData($sql, $param);
@@ -549,10 +653,11 @@ class Dbi extends BaseDbi
                 return VALUE_DB_ERROR;
             }
         }
-        */
+        
         $this->pdo->commit();
         return $followPlanId;
     }
+    */
     public function editHospital($hospitalId, array $data)
     {
         return $this->updateTableByKey('hospital', 'id', $hospitalId, $data);
@@ -620,13 +725,33 @@ class Dbi extends BaseDbi
     {
         return $this->existData('follow_record', ['id' => $followRecordId]);
     }
+    public function existedFollowRecordPlanTime($patientId, $planId, $planTime)
+    {
+        return $this->existData('follow_record', "patient_id = $patientId and follow_plan_id = $planId and plan_time = '$planTime'");
+    }
+    public function existedFollowRecordNeedNotice($followRecordId)
+    {
+        return $this->existData('follow_record', "id = $followRecordId and type = 1");
+    }
     public function existedHospital($hospitalId)
     {
         return $this->existData('hospital', ['id' => $hospitalId]);
     }
+    public function existedOutPatient($outpatientId)
+    {
+        return $this->existData('outpatient', ['id' => $outpatientId]);
+    }
     public function existedPatient($patientId)
     {
         return $this->existData('patient', ['id' => $patientId]);
+    }
+    public function existedPatientIdentityCard($identityCard)
+    {
+        return $this->existData('patient', ['identity_card' => $identityCard]);
+    }
+    public function existedPatientTel($tel)
+    {
+        return $this->existData('patient', ['tel' => $tel]);
     }
     public function existedPlan($planId)
     {
@@ -638,13 +763,14 @@ class Dbi extends BaseDbi
     }
     public function existedReferralReplied($referralId)
     {
-        return $this->existData('referral', "id = $referralId and reply_time is not null");
+        return $this->existData('referral', "id = $referralId and status > 1");
     }
     public function getCaseList($patientId, $departmentId = null)
     {
         $sql = 'select c.id as case_id, d.id as department_id, d.`name` as department_name, 
                 c.diagnosis, c.chief_complaint, c.present_illness, c.past_illness, c.allergies, 
-                c.smoking, c.drinking, c.body_examination, c.create_time
+                c.smoking, c.drinking, c.body_examination, c.create_time, 
+                familyIllness, personalIllness, operateIllness, injuryIllness
                 from `case` as c inner join department as d on c.department_id = d.id
                 where c.patient_id = :patient_id ';
         if ($departmentId != null) {
@@ -656,12 +782,12 @@ class Dbi extends BaseDbi
     }
     public function getChronicList()
     {
-        $sql = 'select id as chronic_id, name as chronic_name from chronic';
+        $sql = 'select id as chronic_id, name as chronic_name, level, parent_id from chronic';
         return $this->getDataAll($sql);
     }
     public function getChronicPatient($departmentId)
     {
-        $sql = 'select c.id as chronic_id, c.name as chronic_name, p.patient_id, p.patient_name
+        $sql = 'select c.id as chronic_id, c.name as chronic_name, c.level, c.parent_id, p.patient_id, p.patient_name
                 from chronic as c 
                 left join (select cp.chronic_id, cp.patient_id, p.name as patient_name
                 from chronic_patient as cp
@@ -674,7 +800,7 @@ class Dbi extends BaseDbi
     }
     public function getChronicByPatient($patientId)
     {
-        $sql = 'select cp.chronic_id, c.name as chronic_name
+        $sql = 'select cp.chronic_id, c.name as chronic_name, level, c.parent_id
                 from chronic_patient as cp inner join chronic as c on cp.chronic_id = c.id
                 where cp.patient_id = :id';
         $param = [':id' => $patientId];
@@ -739,14 +865,13 @@ class Dbi extends BaseDbi
     }
     public function getExaminationList($patientId, $departmentId = null, $level = null, $startTime = null, $endTime = null)
     {
-        $sql = 'select d.id as department_id, d.`name` as department_name, p.id as patient_id, p.name as patient_name, 
-                ep.create_time as examination_time, ep.type, e.id as examination_id, e.`name` as examination_name, 
-                ep.examination_value, ep.examination_result
+        $sql = 'select d.id as department_id, d.`name` as department_name, 
+                ep.create_time as examination_time, ep.type, ep.examination_value, ep.examination_result,
+                e.id as examination_id, e.`name` as examination_name
                 from examination_patient as ep 
                 inner join examination as e on ep.examination_id = e.id
                 inner join department as d on ep.department_id = d.id
                 inner join hospital as h on d.hospital_id = h.id
-                inner join patient as p on ep.patient_id = p.id
                 where ep.patient_id = :patient_id ';
         if ($departmentId != null) {
             $sql .= " and ep.department_id = $departmentId ";
@@ -771,17 +896,19 @@ class Dbi extends BaseDbi
     }
     public function getFollowPlanDetail($followPlanId)
     {
-        /*
-        $sql = 'select id as plan_id, plan_time, plan_value, notice_time, execute_time from plan where follow_plan_id = :id';
+        $sql = 'select * from follow_plan where id = :id limit 1';
         $param = [':id' => $followPlanId];
-        return $this->getDataAll($sql, $param);
-        */
-        return array();
+        return $this->getDataRow($sql, $param);
     }
-    public function getFollowPlanList($departmentId = null, $patientId = null, $startTime = null, $endTime = null)
+    public function getFollowPlanList($departmentId, $patientId, $patientName, $planName, $startTime, $endTime)
     {
-        $sql = 'select f.id, f.type, f.department_id, d.`name` as department_name, f.patient_id, p.`name` as patient_name, 
-                f.doctor_id, dc.real_name as doctor_name, f.name as plan_name, f.plan_time, f.plan_text, f.plan_interval
+        $sql = 'select * from (
+                select f.id, f.type, f.department_id, d.`name` as department_name, f.patient_id, p.`name` as patient_name, p.tel,
+                f.doctor_id, dc.real_name as doctor_name, f.name as plan_name, f.plan_time, f.plan_text, f.plan_interval, f.tel_message,
+                case when status = 1 then "已完成" when status = 2 then "已放弃" 
+                    when plan_time < date_add(now(),INTERVAL -7 DAY) then "逾期"
+                    when plan_time < date_add(now(),INTERVAL 2 DAY) then "待执行"  
+                    else "正常" end as status
                 from follow_plan as f 
                 inner join department as d on f.department_id = d.id
                 inner join patient as p on f.patient_id = p.id
@@ -793,13 +920,19 @@ class Dbi extends BaseDbi
         if ($patientId != null) {
             $sql .= " and f.patient_id = $patientId ";
         }
+        if ($patientName != null) {
+            $sql .= " and p.name like '%$patientName%' ";
+        }
+        if ($planName != null) {
+            $sql .= " and f.name like '%$planName%' ";
+        }
         if ($startTime != null) {
             $sql .= " and f.plan_time >= '$startTime' ";
         }
         if ($endTime != null) {
             $sql .= " and f.plan_time <= '$endTime' ";
         }
-        $sql .= ' order by f.id desc';
+        $sql .= ') as A order by A.status desc, A.plan_time desc';
         return $this->getDataAll($sql);
     }
     public function getFollowPlanPatient($departmentId, $patientId)
@@ -844,6 +977,12 @@ class Dbi extends BaseDbi
         $sql .= ' order by f.create_time desc';
         return $this->getDataAll($sql);
     }
+    public function getFollowType($follorRecordId)
+    {
+        $sql = "select p.type from follow_plan as p inner join follow_record as r on p.id = r.follow_plan_id 
+                where r.id = $follorRecordId limit 1" ;
+        return $this->getDataRow($sql);
+    }
     public function getHospitalList()
     {
         $sql = 'select id as hospital_id, name as hospital_name, level, tel, area, province, city, address from hospital';
@@ -858,14 +997,36 @@ class Dbi extends BaseDbi
     public function getPatientInfo($patientId)
     {
         $sql = 'select id as patient_id, name as patient_name, birth_year, identity_card, sex, tel, address, 
-                ethnic, native_place, hospitalization, family_name, family_tel from patient where id = :id';
+                ethnic, native_place, hospitalization, family_name, family_tel, height, weight, job, education
+                from patient where id = :id';
         $param = [':id' => $patientId];
         return $this->getDataRow($sql, $param);
     }
-    public function getPatientList($departmentId)
+    public function getPatientList($departmentId, $name, $identityCard, $tel,
+            $chronic, $offset = VALUE_DEFAULT_OFFSET, $rows = VALUE_DEFAUTL_ROWS)
     {
-        $sql = 'select id as patient_id, name as patient_name from patient
-                where department1 = :dpt or department2 = :dpt or department3 = :dpt or department_once = :dpt';
+        $sql = 'select distinct p.id as patient_id, p.name as patient_name, birth_year, sex, tel, create_time,
+                case when f.id is null then 0 else 1 end as is_have_plan,
+                case when cp.id is null then 0 else 1 end as is_have_chronic
+                from patient as p
+                left join chronic_patient as cp on p.id = cp.patient_id
+                left join follow_plan as f on p.id = f.patient_id
+                where (department1 = :dpt or department2 = :dpt or department3 = :dpt or department_once = :dpt) ';
+        if ($name != null) {
+            $sql .= " and p.name like '%$name%' ";
+        }
+        if ($identityCard != null) {
+            $sql .= " and identity_card like '%$identityCard%' ";
+        }
+        if ($tel != null) {
+            $sql .= " and p.tel = '$tel' ";
+        }
+        if ($chronic != null) {
+            $sql .= ' and cp.chronic_id = ' . $chronic;
+        }
+        if (VALUE_DEFAULT_OFFSET !== $offset) {
+            $sql .= " order by p.id limit $offset, $rows";
+        }
         $param = [':dpt' => $departmentId];
         return $this->getDataAll($sql, $param);
     }
@@ -1045,6 +1206,12 @@ class Dbi extends BaseDbi
         
         $sql .= ' order by r.id desc';
         return $this->getDataAll($sql);
+    }
+    public function getTelDepartment($departmentId)
+    {
+        $sql = 'select phone from doctor where department_id = :id and type = 2 ';
+        $param = [':id' => $departmentId];
+        return $this->getDataString($sql, $param);
     }
     public function searchDepartment($name = null, $tel = null)
     {

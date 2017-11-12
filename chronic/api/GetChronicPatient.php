@@ -90,9 +90,11 @@ class GetChronicPatient extends BaseApi
         for ($i = 0; $i < $length; $i++) {
             if (!empty($chronicPatient[$i]['patient_id'])) {
                 $patientList[] = array(
-                                'chronic_id' => $chronicPatient[$i]['chronic_id'],
                                 'patient_id' => $chronicPatient[$i]['patient_id'],
-                                'patient_name' => $chronicPatient[$i]['patient_name']
+                                'patient_name' => $chronicPatient[$i]['patient_name'],
+                                'chronic_id' => $chronicPatient[$i]['chronic_id'],
+                                'level' => $chronicPatient[$i]['level'],
+                                'parent_id' => $chronicPatient[$i]['parent_id'],
                 );
             }
         }

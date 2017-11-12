@@ -35,7 +35,7 @@ class AddFollowRecord extends BaseApi
         if (false === Dbi::getDbi()->existedDoctorById($this->param['doctor_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'doctor_id.');
         }
-        if (true === Dbi::getDbi()->existedFollowRecord($this->param['follow_plan_id'])) {
+        if (false === Dbi::getDbi()->existedFollowPlan($this->param['follow_plan_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_EXISTED, 'follow_plan_id.');
         }
         

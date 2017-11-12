@@ -11,7 +11,7 @@ class AddChronic extends BaseApi
             return $ret;
         }
         
-        $required = ['name'];
+        $required = ['name', 'level', 'parent_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -22,13 +22,22 @@ class AddChronic extends BaseApi
             return HpErrorMessage::getError(ERROR_DATA_EXISTED);
         }
         
+        if (Dbi::getDbi()->existedChronic($this->param['parent_id'])) {
+            return HpErrorMessage::getError(ERROR_DATA_EXISTED);
+        }
+        
+        $checkRange = HpValidate::checkRange(['level'], $this->param, ['1', '2']);
+        if (true !== $checkRange) {
+            return $checkRange;
+        }
+        
         return true;
     }
     
     protected function execute()
     {
         
-        $chronicId = Dbi::getDbi()->addChronic($this->param['name']);
+        $chronicId = Dbi::getDbi()->addChronic($this->param['name'], $this->param['level'], $this->param['parent_id']);
         if (VALUE_DB_ERROR === $chronicId) {
             return HpErrorMessage::getError(ERROR_DB);
         }

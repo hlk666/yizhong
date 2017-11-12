@@ -1,6 +1,7 @@
 <?php
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
+require_once PATH_ROOT . 'lib/tool/HpShortMessageService.php';
 
 class AddConsultationReply extends BaseApi
 {
@@ -44,6 +45,14 @@ class AddConsultationReply extends BaseApi
                 $this->param['doctor_id'], $this->param['diagnosis'], $this->param['advice']);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
+        }
+        
+        $tel = Dbi::getDbi()->getTelDepartment($this->param['apply_department_id']);
+        if (VALUE_DB_ERROR === $tel) {
+            return HpErrorMessage::getError(ERROR_DB);
+        }
+        if (!empty($tel)) {
+            HpShortMessageService::send($tel, "有新的会诊回复，请确认。");
         }
         
         send_notice($this->param['apply_department_id'], '有新的会诊回复，请确认。');

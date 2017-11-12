@@ -12,7 +12,7 @@ class EditFollowPlan extends BaseApi
             return $ret;
         }
         
-        $required = ['follow_plan_id', 'name', 'plan_text', 'doctor_id', 'plan_time', 'plan_interval', 'type'];
+        $required = ['follow_plan_id', 'doctor_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -49,9 +49,33 @@ class EditFollowPlan extends BaseApi
     
     protected function execute()
     {
-        $ret = Dbi::getDbi()->editFollowPlan($this->param['follow_plan_id'], 
-                $this->param['plan_text'], $this->param['doctor_id'], $this->param['name'], 
-                $this->param['plan_time'], $this->param['plan_interval'], $this->param['type']);
+        $data = array();
+        if (isset($this->param['name'])) {
+            $data['name'] = $this->param['name'];
+        }
+        if (isset($this->param['plan_text'])) {
+            $data['plan_text'] = $this->param['plan_text'];
+        }
+        if (isset($this->param['doctor_id'])) {
+            $data['doctor_id'] = $this->param['doctor_id'];
+        }
+        if (isset($this->param['plan_time'])) {
+            $data['plan_time'] = $this->param['plan_time'];
+        }
+        if (isset($this->param['plan_interval'])) {
+            $data['plan_interval'] = $this->param['plan_interval'];
+        }
+        if (isset($this->param['type'])) {
+            $data['type'] = $this->param['type'];
+        }
+        //0:common, 1:finished, 2:deleted
+        if (isset($this->param['status'])) {
+            $data['status'] = $this->param['status'];
+        }
+        if (empty($data)) {
+            return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
+        }
+        $ret = Dbi::getDbi()->editFollowPlan($this->param['follow_plan_id'], $data);
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }

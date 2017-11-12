@@ -11,14 +11,14 @@ class AddPatient extends BaseApi
             return $ret;
         }
         
-        $required = ['name', 'birth_year', 'sex', 'tel', 'address', 'family_name', 'family_tel', 'department_id'];
+        $required = ['name', 'identity_card', 'birth_year', 'sex', 'tel', 'department_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
             return $checkRequired;
         }
         
-        $checkNumeric = HpValidate::checkNumeric(['identity_card', 'birth_year', 'department_id'], $this->param);
+        $checkNumeric = HpValidate::checkNumeric(['birth_year', 'department_id'], $this->param);
         if (true !== $checkNumeric) {
             return $checkNumeric;
         }
@@ -32,18 +32,35 @@ class AddPatient extends BaseApi
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'department_id.');
         }
         
+        if (isset($this->param['identity_card']) 
+                && true === Dbi::getDbi()->existedPatientIdentityCard($this->param['identity_card'])) {
+            return HpErrorMessage::getError(ERROR_DATA_EXISTED, 'identity_card.');
+        }
+        
+        if (isset($this->param['tel'])
+                && true === Dbi::getDbi()->existedPatientTel($this->param['tel'])) {
+            return HpErrorMessage::getError(ERROR_DATA_EXISTED, 'tel.');
+        }
+        
         return true;
     }
     
     protected function execute()
     {
+        $address = isset($this->param['address']) ? $this->param['address'] : '';
+        $familyName = isset($this->param['family_name']) ? $this->param['family_name'] : '';
+        $familyTel = isset($this->param['family_tel']) ? $this->param['family_tel'] : '';
         $identityCard = isset($this->param['identity_card']) ? $this->param['identity_card'] : '0';
         $ethnic = isset($this->param['ethnic']) ? $this->param['ethnic'] : '0';
         $nativePlace = isset($this->param['native_place']) ? $this->param['native_place'] : '0';
         $hospitalization = isset($this->param['hospitalization']) ? $this->param['hospitalization'] : '0';
+        $height = isset($this->param['height']) ? $this->param['height'] : '';
+        $weight = isset($this->param['weight']) ? $this->param['weight'] : '';
+        $job = isset($this->param['job']) ? $this->param['job'] : '';
+        $education = isset($this->param['education']) ? $this->param['education'] : '';
         $patientId = Dbi::getDbi()->addPatient($identityCard, $this->param['name'], $this->param['birth_year'], $this->param['sex'], 
-                $this->param['tel'], $this->param['address'], $ethnic, $nativePlace, $hospitalization, 
-                $this->param['family_name'], $this->param['family_tel'], $this->param['department_id']);
+                $this->param['tel'], $address, $ethnic, $nativePlace, $hospitalization, 
+                $familyName, $familyTel, $this->param['department_id'], $height, $weight, $job, $education);
         if (VALUE_DB_ERROR === $patientId) {
             return HpErrorMessage::getError(ERROR_DB);
         }

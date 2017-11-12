@@ -11,7 +11,7 @@ class DeleteReferralReply extends BaseApi
             return $ret;
         }
         
-        $required = ['referral_id', 'reply_department_id'];
+        $required = ['referral_id', 'apply_department_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
@@ -24,7 +24,7 @@ class DeleteReferralReply extends BaseApi
         }
         
         if (false === Dbi::getDbi()->existedReferral($this->param['referral_id'])) {
-            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'consultation_id.');
+            return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'referral_id.');
         }
         
         if (false === Dbi::getDbi()->existedReferralReplied($this->param['referral_id'])) {
@@ -41,7 +41,7 @@ class DeleteReferralReply extends BaseApi
             return HpErrorMessage::getError(ERROR_DB);
         }
         
-        send_notice($this->param['reply_department_id'], '有新的转诊回复被删除，转诊ID：' . $this->param['referral_id']);
+        send_notice($this->param['apply_department_id'], '有新的转诊回复被删除，转诊ID：' . $this->param['referral_id']);
         
         return $this->retSuccess;
     }
