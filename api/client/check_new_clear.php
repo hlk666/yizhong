@@ -1,5 +1,4 @@
 <?php
-require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 
 if (false === Validate::checkRequired($_POST['hospital_id'])) {
