@@ -30,4 +30,11 @@ foreach ($keys as $key) {
     }
 }
 
+$hospital = DbiAnalytics::getDbi()->getHospitalByPatient($patientId);
+if (VALUE_DB_ERROR === $hospital || empty($hospital)) {
+    //not notice
+} else {
+    setNotice($hospital, 'diagnosis', $patientId);
+}
+
 api_exit_success();
