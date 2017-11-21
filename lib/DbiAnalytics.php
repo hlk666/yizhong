@@ -210,7 +210,7 @@ class DbiAnalytics extends BaseDbi
     }
     public function getPatientsByIdForAnalytics($patientIdList)
     {
-        $sql = "select h.hospital_name, h.tel as hospital_tel, device_id, guardian_id as patient_id, 
+        $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel, device_id, guardian_id as patient_id, 
                 start_time, end_time, blood_pressure, tentative_diagnose, medical_history, guardian_result, 
                 patient_name as name, birth_year, sex, p.tel, reported
                  from guardian as g left join patient as p on g.patient_id = p.patient_id
@@ -330,6 +330,13 @@ class DbiAnalytics extends BaseDbi
     }
     public function setHeavy($patientId)
     {
+        $sql = "update guardian set reported = 1 where guardian_id = :guardian_id";
+        $param = [':guardian_id' => $patientId];
+        $ret = $this->updateData($sql, $param);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        
         $sql = "update guardian_data set is_heavy = 1 where guardian_id = :guardian_id";
         $param = [':guardian_id' => $patientId];
         return $this->updateData($sql, $param);
