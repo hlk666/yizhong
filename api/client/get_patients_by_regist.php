@@ -18,6 +18,17 @@ $eTime = isset($_GET['end_time']) ? $_GET['end_time'] : null;
 $device = isset($_GET['device_id']) ? $_GET['device_id'] : null;
 $doctorName = isset($_GET['doctor_name']) ? $_GET['doctor_name'] : null;
 $offset = $page * $rows;
+$needRead = isset($_GET['read']) ? $_GET['read'] : '';
+
+if (!empty($needRead)) {
+    $count = Dbi::getDbi()->getGuardiansByRegistCount($hospitalId, $offset, $rows, $mode, $status, 
+        $patientName, $tel, $sTime, $eTime, $device, $doctorName);
+    if (VALUE_DB_ERROR === $count) {
+        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+    }
+} else {
+    $count = '0';
+}
 
 $ret = Dbi::getDbi()->getGuardiansByRegist($hospitalId, $offset, $rows, $mode, $status, 
         $patientName, $tel, $sTime, $eTime, $device, $doctorName);
@@ -37,5 +48,6 @@ if (empty($ret)) {
         unset($ret[$key]['birth_year']);
     }
     $result['patients'] = $ret;
+    $result['count'] = $count;
     api_exit($result);
 }

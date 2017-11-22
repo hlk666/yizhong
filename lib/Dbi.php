@@ -344,6 +344,38 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
+    public function getGuardiansByRegistCount($hospitalId, $offset, $rows, $mode = null, $status = null,
+            $name = null, $tel = null, $sTime = null, $eTime = null, $device = null, $doctorName = null)
+    {
+        $sql = 'select count(1) from guardian as g left join patient as p on g.patient_id = p.patient_id
+                where regist_hospital_id in (' . $hospitalId . ')';
+        if ($mode != null) {
+            $sql .= " and g.mode = $mode ";
+        }
+        if ($status != null) {
+            $sql .= " and g.status in ($status) ";
+        }
+        if ($device != null) {
+            $sql .= " and g.device_id = $device ";
+        }
+        if ($name != null) {
+            $sql .= " and p.patient_name = '$name' ";
+        }
+        if ($tel != null) {
+            $sql .= " and p.tel = '$tel' ";
+        }
+        if ($sTime != null) {
+            $sql .= " and g.start_time >= '$sTime' ";
+        }
+        if ($eTime != null) {
+            $sql .= " and g.start_time <= '$eTime' ";
+        }
+        if ($doctorName != null) {
+            $sql .= " and g.regist_doctor_name = $doctorName ";
+        }
+        $param = [':hospital_id' => $hospitalId];
+        return $this->getDataString($sql, $param);
+    }
     public function getGuardianError()
     {
         $sql = 'select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content 
