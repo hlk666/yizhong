@@ -313,7 +313,7 @@ class Dbi extends BaseDbi
         $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, g.regist_hospital_id, 
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, g.reported,
                 g.blood_pressure, g.tentative_diagnose, g.medical_history, g.hospitalization_id, 
-                g.lead, g.regist_doctor_name as doctor_name, g.sickroom
+                g.lead, g.regist_doctor_name as doctor_name, g.sickroom, g.height, g.weight, g.family_tel
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 where regist_hospital_id in (' . $hospitalId . ')';
         if ($mode != null) {
@@ -481,7 +481,7 @@ class Dbi extends BaseDbi
     }
     public function getRepeatPatient($hospital, $name)
     {
-        $sql = 'select g.device_id, g.start_time, g.regist_doctor_name as doctor_name
+        $sql = 'select g.guardian_id, g.device_id, g.start_time, g.regist_doctor_name as doctor_name
                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
                 where g.regist_hospital_id = :hospital and p.patient_name = :name and g.status = 1 
                 and g.regist_time > date_add(now(), interval "-12" hour)';

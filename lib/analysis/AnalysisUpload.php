@@ -1,7 +1,8 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_ROOT . 'lib/DbiAnalytics.php';
-//require_once PATH_LIB . 'ShortMessageService.php';
+require_once PATH_ROOT . 'lib/DbiChronic.php';
+require_once PATH_LIB . 'ShortMessageService.php';
 
 class AnalysisUpload
 {
@@ -52,6 +53,14 @@ class AnalysisUpload
             return json_encode($this->error);
         }
         
+        $url = URL_ROOT . 'report/' . $guardianId . '.pdf';
+        $guardianForChronic = DbiAnalytics::getDbi()->getGuardianForChronic($guardianId);
+        if (VALUE_DB_ERROR === $guardianForChronic || empty($guardianForChronic) || empty($guardianForChronic['patient_id'])) {
+            //do nothing because it is not importment for analytics.
+        } else {
+            DbiChronic::getDbi()->addEcgExamination($guardianForChronic['patient_id'], $guardianId, $url, $guardianForChronic['result']);
+        }
+        
         $message = isset($param['message']) ? $param['message'] : '0';
         $hbiDoctor = isset($param['hbi_doctor']) ? $param['hbi_doctor'] : '0';
         $reportDoctor = isset($param['report_doctor']) ? $param['report_doctor'] : '0';
@@ -69,11 +78,9 @@ class AnalysisUpload
             if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
                 if ('hbi' == $type) {
                     setNotice($tree['report_hospital'], $type, $guardianId);
-                    /*
                     if ($tree['report_hospital'] == 175) {
-                        ShortMessageService::send('13963896768', '有新的已分析数据，请出报告。');
+                        ShortMessageService::send('13963896768', '有新的已分析数据，请审阅报告。');
                     }
-                    */
                 }
                 if ('report' == $type && $tree['hospital_id'] != $tree['report_hospital']) {
                     setNotice($tree['hospital_id'], $type, $guardianId);

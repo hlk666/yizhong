@@ -43,7 +43,11 @@ class DbiAnalytics extends BaseDbi
         $param = [':id' => $patientId];
         return $this->getDataAll($sql, $param);
     }
-    
+    public function getGuardianForChronic($id)
+    {
+        $sql = "select doctor_id as patient_id, ifnull(guardian_result, '') as result from guardian where guardian_id = $id limit 1";
+        return $this->getDataRow($sql);
+    }
     public function getHospitalInfo($hospitalId)
     {
         $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel

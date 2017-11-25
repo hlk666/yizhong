@@ -16,7 +16,8 @@ $tentativeDiagnose = isset($_POST['tentative_diagnose']) ? $_POST['tentative_dia
 $medicalHistory = isset($_POST['medical_history']) ? $_POST['medical_history'] : '';
 $registHospital = $_POST['regist_hospital'];
 $guardHospital = $_POST['guard_hospital'];
-$doctorId = 0;//will be used in future.
+//$doctorId = 0;//will be used in future.
+$doctorId = isset($_POST['patient_id']) ? $_POST['patient_id'] : 0;
 $doctorName = $_POST['doctor_name'];
 
 check_device($device, $registHospital);
