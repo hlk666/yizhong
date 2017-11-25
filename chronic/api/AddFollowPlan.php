@@ -50,9 +50,10 @@ class AddFollowPlan extends BaseApi
     
     protected function execute()
     {
+        $content = isset($this->param['content']) ? $this->param['content'] : '';
         $followPlanId = Dbi::getDbi()->addFollowPlan($this->param['department_id'], $this->param['patient_id'], 
                 $this->param['plan_text'], $this->param['doctor_id'], $this->param['name'], $this->param['plan_time'], 
-                $this->param['plan_interval'], $this->param['type']);
+                $this->param['plan_interval'], $this->param['type'], $content);
         if (VALUE_DB_ERROR === $followPlanId) {
             return HpErrorMessage::getError(ERROR_DB);
         }

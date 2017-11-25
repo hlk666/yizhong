@@ -48,6 +48,12 @@ class ApplyAuthority extends BaseApi
         if (empty($patientInfo)) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY);
         }
+        
+        if ($patientInfo['department1'] == $this->param['new_department'] 
+                || $patientInfo['department2'] == $this->param['new_department']
+                || $patientInfo['department3'] == $this->param['new_department']) {
+            return $this->retSuccess;
+        }
         $data = array();
         if ($patientInfo['department1'] == '0') {
             $data['department1'] = $this->param['new_department'];

@@ -24,6 +24,7 @@ define('ERROR_LOGIN_NO', 23);
 define('ERROR_NO_PERMISSON', 24);
 define('ERROR_LOGIN_TIMEOUT', 25);
 define('ERROR_CREATE_SESSION', 26);
+define('ERROR_USER_COUNT', 27);
 
 define('ERROR_UPLOAD_NO_DATA', 30);
 define('ERROR_UPLOAD_NAME', 31);
@@ -68,6 +69,7 @@ class HpErrorMessage
                     ERROR_NO_PERMISSON => ['code' => ERROR_NO_PERMISSON, 'message' => '权限不足，请用更高权限用户登录。'],
                     ERROR_LOGIN_TIMEOUT => ['code' => ERROR_LOGIN_TIMEOUT, 'message' => '登录已经过期，请重新登录。'],
                     ERROR_CREATE_SESSION => ['code' => ERROR_CREATE_SESSION, 'message' => '登录成功，但是获取session失败。请重试或者联系管理员。'],
+                    ERROR_USER_COUNT => ['code' => ERROR_USER_COUNT, 'message' => '符合条件的数据不唯一。'],
                     
                     ERROR_UPLOAD_NO_DATA => ['code' => ERROR_UPLOAD_NO_DATA, 'message' => '没有上传任何文件。'],
                     ERROR_UPLOAD_NAME => ['code' => ERROR_UPLOAD_NAME, 'message' => '实验室检查结果的类型错误。'],

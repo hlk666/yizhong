@@ -72,6 +72,9 @@ class EditFollowPlan extends BaseApi
         if (isset($this->param['status'])) {
             $data['status'] = $this->param['status'];
         }
+        if (isset($this->param['content'])) {
+            $data['status'] = $this->param['content'];
+        }
         if (empty($data)) {
             return HpErrorMessage::getError(ERROR_PARAM_REQUIRED);
         }

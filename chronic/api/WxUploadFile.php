@@ -25,12 +25,12 @@ class WxUploadFile extends BaseApi
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'examination_id.');
         }
         
-        if (isset($this->param['follow_record_id']) 
+        if (isset($this->param['follow_record_id']) && !empty($this->param['follow_record_id']) 
                 && false === Dbi::getDbi()->existedFollowRecord($this->param['follow_record_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'follow_record_id.');
         }
         
-        if (isset($this->param['outpatient_id'])
+        if (isset($this->param['outpatient_id']) && !empty($this->param['outpatient_id'])
                 && false === Dbi::getDbi()->existedOutPatient($this->param['outpatient_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'outpatient_id.');
         }
@@ -59,10 +59,10 @@ class WxUploadFile extends BaseApi
         if (move_uploaded_file($_FILES['file']['tmp_name'], $dir . $fileName)) {
             $url = 'upload/' . date('Ymd') . '/' . $fileName;
             
-            if (isset($this->param['follow_record_id'])) {
+            if (isset($this->param['follow_record_id']) && !empty($this->param['follow_record_id'])) {
                 $type = 'follow';
                 $recordId = $this->param['follow_record_id'];
-            } elseif (isset($this->param['outpatient_id'])) {
+            } elseif (isset($this->param['outpatient_id']) && !empty($this->param['outpatient_id'])) {
                 $type = 'outpatient';
                 $recordId = $this->param['outpatient_id'];
             } else {

@@ -209,8 +209,8 @@ class Dbi extends BaseDbi
                     return VALUE_DB_ERROR;
                 }
             } else {
-                $sql = "select department_id from examination_patient
-                        where patient_id = $patientId and record_id = $recordId and type = '$type' limit 1";
+                $table = $type == 'follow' ? 'follow_record' : 'outpatient';
+                $sql = "select department_id from $table where id = $recordId limit 1";
                 $departmentId = $this->getDataString($sql);
                 if (VALUE_DB_ERROR === $departmentId) {
                     return VALUE_DB_ERROR;
@@ -264,7 +264,6 @@ class Dbi extends BaseDbi
                     return VALUE_DB_ERROR;
                 }
             }
-            
         }
         return true;
     }
@@ -328,14 +327,15 @@ class Dbi extends BaseDbi
         $this->pdo->commit();
         return $outpatientId;
     }
-    public function addFollowPlan($departmentId, $patientId, $planText, $doctorId, $name, $planTime, $planInterval, $type)
+    public function addFollowPlan($departmentId, $patientId, $planText, $doctorId, $name, $planTime, $planInterval, $type, $content)
     {
         $this->pdo->beginTransaction();
     
-        $sql = 'insert into follow_plan (department_id, patient_id, plan_text, doctor_id, name, plan_time, plan_interval, type)
-                values (:department_id, :patient_id, :plan_text, :doctor_id, :name, :time, :interval, :type)';
+        $sql = 'insert into follow_plan (department_id, patient_id, plan_text, doctor_id, name, plan_time, plan_interval, type, content)
+                values (:department_id, :patient_id, :plan_text, :doctor_id, :name, :time, :interval, :type, :content)';
         $param = [':department_id' => $departmentId, ':patient_id' => $patientId, ':plan_text' => $planText, 
-                        ':doctor_id' => $doctorId, ':name' => $name, ':time' => $planTime, ':interval' => $planInterval, ':type' => $type];
+                        ':doctor_id' => $doctorId, ':name' => $name, ':time' => $planTime, ':interval' => $planInterval, 
+                        ':type' => $type, ':content' => $content];
         $followPlanId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $followPlanId) {
             $this->pdo->rollBack();
@@ -432,6 +432,39 @@ class Dbi extends BaseDbi
         
         $this->pdo->commit();
         return $ret;
+    }
+    public function bindExamination($patientId, $examinationPatientId, $followRecordId, $departmentId)
+    {
+        $sql = "update examination_patient
+                set department_id = $departmentId, record_id = $followRecordId, type = 'follow'
+                where id = $examinationPatientId";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = "select examination_id, examination_value, examination_result
+                from examination_patient
+                where patient_id = $patientId and record_id = $followRecordId and type = 'follow'";
+        $ret = $this->getDataAll($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        
+        $newExamination = '';
+        foreach ($ret as $row) {
+            $newExamination .= $row['examination_id'] . ',' . $row['examination_value'] . ',' . $row['examination_result'] . ';';
+        }
+        if ($newExamination != '') {
+            $newExamination = substr($newExamination, 0, -1);
+        }
+        
+        $sql = "update follow_record set examination = '$newExamination', create_time = now() where id = $followRecordId";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
     }
     public function deleteCase($caseId)
     {
@@ -842,13 +875,30 @@ class Dbi extends BaseDbi
     }
     public function getDoctorInfo($loginName)
     {
-        $sql = 'select d.id as doctor_id, d.real_name as doctor_name, d.type, d.password,
+        $sql = "select `type` from doctor where login_name = '$loginName' limit 1";
+        $type = $this->getDataString($sql);
+        if (VALUE_DB_ERROR === $type) {
+            return VALUE_DB_ERROR;
+        } elseif ($type == '1') {
+            $isHospitalAdmin = true;
+        } else {
+            $isHospitalAdmin = false;
+        }
+        
+        if ($isHospitalAdmin) {
+            $sql = "select d.id as doctor_id, d.real_name as doctor_name, d.type, d.password,
+                0 as department_id, '' as department_name, d.department_id as hospital_id, h.name as hospital_name
+                from doctor as d left join hospital as h on d.department_id = h.id
+                where login_name = '$loginName' limit 1";
+        } else {
+            $sql = 'select d.id as doctor_id, d.real_name as doctor_name, d.type, d.password,
                 d.department_id, dm.name as department_name, dm.hospital_id, h.name as hospital_name
                 from doctor as d left join department as dm on d.department_id = dm.id
                 left join hospital as h on dm.hospital_id = h.id
-                where login_name = :user limit 1';
-        $param = [':user' => $loginName];
-        return $this->getDataRow($sql, $param);
+                where login_name = "' . $loginName . '" limit 1';
+        }
+        
+        return $this->getDataRow($sql);
     }
     public function getDoctorPassword($doctorId)
     {
@@ -863,15 +913,30 @@ class Dbi extends BaseDbi
         $param = [':department_id' => $departmentId];
         return $this->getDataAll($sql, $param);
     }
+    public function getExaminationApp($patientId, $startTime, $endTime)
+    {
+        $sql = "select ep.id, ep.create_time as examination_time, ep.examination_value, ep.examination_result,
+                e.id as examination_id, e.`name` as examination_name
+                from examination_patient as ep inner join examination as e on ep.examination_id = e.id
+                where ep.patient_id = $patientId ";
+        if ($startTime != null) {
+            $sql .= " and ep.create_time >= '$startTime' ";
+        }
+        if ($endTime != null) {
+            $sql .= " and ep.create_time <= '$endTime' ";
+        }
+        $sql .= ' order by ep.id desc';
+        return $this->getDataAll($sql);
+    }
     public function getExaminationList($patientId, $departmentId = null, $level = null, $startTime = null, $endTime = null)
     {
-        $sql = 'select d.id as department_id, d.`name` as department_name, 
+        $sql = 'select d.id as department_id, d.`name` as department_name, h.level,
                 ep.create_time as examination_time, ep.type, ep.examination_value, ep.examination_result,
                 e.id as examination_id, e.`name` as examination_name
                 from examination_patient as ep 
                 inner join examination as e on ep.examination_id = e.id
-                inner join department as d on ep.department_id = d.id
-                inner join hospital as h on d.hospital_id = h.id
+                left join department as d on ep.department_id = d.id
+                left join hospital as h on d.hospital_id = h.id
                 where ep.patient_id = :patient_id ';
         if ($departmentId != null) {
             $sql .= " and ep.department_id = $departmentId ";
@@ -979,13 +1044,28 @@ class Dbi extends BaseDbi
     }
     public function getFollowType($follorRecordId)
     {
-        $sql = "select p.type from follow_plan as p inner join follow_record as r on p.id = r.follow_plan_id 
+        $sql = "select p.department_id as plan_department, p.type, r.department_id as record_deparment, name
+                from follow_plan as p inner join follow_record as r on p.id = r.follow_plan_id 
                 where r.id = $follorRecordId limit 1" ;
         return $this->getDataRow($sql);
     }
     public function getHospitalList()
     {
         $sql = 'select id as hospital_id, name as hospital_name, level, tel, area, province, city, address from hospital';
+        return $this->getDataAll($sql);
+    }
+    public function getPatientForEcgonline($name, $tel, $identityCard)
+    {
+        $sql = 'select id as patient_id, name, birth_year, sex from patient where 1 ';
+        if (!empty($name)) {
+            $sql .= " and name = '$name' ";
+        }
+        if (!empty($tel)) {
+            $sql .= " and tel = '$tel' ";
+        }
+        if (!empty($identityCard)) {
+            $sql .= " and identity_card = '$identityCard' ";
+        }
         return $this->getDataAll($sql);
     }
     public function getPatientDepartment($patientId)

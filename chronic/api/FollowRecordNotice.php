@@ -1,6 +1,7 @@
 <?php
 require_once 'BaseApi.php';
 require_once PATH_ROOT . 'lib/db/Dbi.php';
+require_once PATH_ROOT . 'lib/tool/HpShortMessageService.php';
 
 class FollowRecordNotice extends BaseApi
 {
@@ -38,11 +39,11 @@ class FollowRecordNotice extends BaseApi
     
     protected function execute()
     {
-        $followType = Dbi::getDbi()->getFollowType($this->param['follow_record_id']);
-        if (VALUE_DB_ERROR === $followType) {
+        $followRecordInfo = Dbi::getDbi()->getFollowType($this->param['follow_record_id']);
+        if (VALUE_DB_ERROR === $followRecordInfo) {
             return HpErrorMessage::getError(ERROR_DB);
         }
-        if ('1' != $followType) {
+        if ('1' != $followRecordInfo['type']) {
             return HpErrorMessage::getError(ERROR_FOLLOW_RECORD_NOTICE);
         }
         
@@ -50,6 +51,15 @@ class FollowRecordNotice extends BaseApi
         if (VALUE_DB_ERROR === $ret) {
             return HpErrorMessage::getError(ERROR_DB);
         }
+        
+        $name = $followRecordInfo['name'];
+        if ('1' == $this->param['status']) {
+            send_notice($followRecordInfo['plan_department'], "随访【 $name 】已完成，请确认。");
+        }
+        if ('2' == $this->param['status']) {
+            send_notice($followRecordInfo['record_department'], "随访【 $name 】需要补充检查，请确认。");
+        }
+        
         return $this->retSuccess;
     }
 }
