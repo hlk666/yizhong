@@ -162,24 +162,32 @@ class DbiAnalytics extends BaseDbi
         return $this->getDataAll($sql, $param);
     }
     
+    public function getPatientLast($deviceId)
+    {
+        $sql = "select g.guardian_id, g.start_time, p.patient_name 
+                from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                where device_id = $deviceId order by guardian_id desc limit 1";
+        return $this->getDataRow($sql);
+    }
+    
     public function getPatientsNeedFollow()
     {
         $sql = 'select d.guardian_id as patient_id, p.patient_name, h.hospital_id, h.hospital_name, 
                 upload_time, download_end_time as download_time, d.moved_hospital,
-                case d.status when 2 then "已上传" when 3 then "已下载" else "" end as status
+                case d.status when 2 then "已上传" when 3 then "已下载" when 4 then "已分析" else "" end as status
                 from guardian_data as d inner join guardian as g on d.guardian_id = g.guardian_id
                 inner join patient as p on g.patient_id = p.patient_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
-                where d.status in (2, 3) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
+                where d.status in (2, 3, 4) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
                 order by upload_time';
         return $this->getDataAll($sql);
     }
     
     public function getPatients($hospitalIdList, $currentHospital, $offset, $rows, $patientName = null, 
-            $startTime = null, $endTime = null, $status = null, $hbiDoctor = null, $reportDoctor = null)
+            $startTime = null, $endTime = null, $status = null, $hbiDoctor = null, $reportDoctor = null, $text = null)
     {
         $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel,
-                d.status, d.upload_time,
+                d.status, d.upload_time, d.type, 
                 a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor, 
                 g.guardian_id as patient_id, start_time, end_time, g.device_id, sickroom, hospitalization_id, 
                 regist_doctor_name as doctor_name, a1.account_id as hbi_doctor_id, a2.account_id as report_doctor_id,
@@ -191,6 +199,9 @@ class DbiAnalytics extends BaseDbi
                 left join account as a2 on d.report_doctor = a2.account_id
                 left join account as a3 on d.download_doctor = a3.account_id
                 where (regist_hospital_id in ($hospitalIdList) or d.moved_hospital = $currentHospital) ";
+        if (!empty($text)) {
+            $sql .= " and g.guardian_id not in ($text) ";
+        }
         if (null !== $patientName) {
             $sql .= " and patient_name = '$patientName' ";
         }
@@ -309,21 +320,19 @@ class DbiAnalytics extends BaseDbi
         $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
         return $this->updateData($sql, $param);
     }
-    public function moveData($guardianId, $hospitalFrom, $hospitalTo, $operator)
+    public function moveData($guardianId, $hospitalFrom, $hospitalTo, $operator, $type = '0')
     {
         $this->pdo->beginTransaction();
-        $sql = 'insert into history_move_data(guardian_id, hospital_from, hospital_to, move_operator)
-                values (:guardian, :from, :to, :operator)';
-        $param = [':guardian' => $guardianId, ':from' => $hospitalFrom, ':to' => $hospitalTo, ':operator' => $operator];
-        $hospitalId = $this->insertData($sql, $param);
+        $sql = "insert into history_move_data(guardian_id, hospital_from, hospital_to, move_operator, type)
+                values ('$guardianId', '$hospitalFrom', '$hospitalTo', '$operator', '$type')";
+        $hospitalId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $hospitalId) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
         
-        $sql = 'update guardian_data set moved_hospital = :to where guardian_id = :guardian';
-        $param = [':guardian' => $guardianId, ':to' => $hospitalTo];
-        $ret = $this->updateData($sql, $param);
+        $sql = "update guardian_data set moved_hospital = '$hospitalTo', type = '$type' where guardian_id = '$guardianId'";
+        $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;

@@ -33,8 +33,15 @@ $page = isset($_GET['page']) ? $_GET['page'] : 0;
 $rows = isset($_GET['rows']) ? $_GET['rows'] : VALUE_DEFAULT_ROWS;
 $offset = $page * $rows;
 
+$file = PATH_ROOT . 'data' . DIRECTORY_SEPARATOR . 'move_data' . DIRECTORY_SEPARATOR . $hospitalId . '.txt';
+if (file_exists($file)) {
+    $text = file_get_contents($file);
+} else {
+    $text = '';
+}
+
 $patients = DbiAnalytics::getDbi()->getPatients($hospitalIdList, $hospitalId, $offset, $rows, 
-        $patientName, $startTime, $endTime, $status, $hbiDoctor, $reportDoctor);
+        $patientName, $startTime, $endTime, $status, $hbiDoctor, $reportDoctor, $text);
 if (VALUE_DB_ERROR === $patients) {
     analytics_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
 }

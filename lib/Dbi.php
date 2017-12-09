@@ -89,7 +89,7 @@ class Dbi extends BaseDbi
     public function getConsultationRequest($hospitalId, $allFlag, $requestHospital, $startTime, $endTime)
     {
         $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, 
-                request_message, request_time, response_message, response_time
+                request_message, request_time, response_message, response_time, status
                 from consultation as c left join hospital as h on c.request_hospital_id = h.hospital_id
                 where response_hospital_id = :hospital_id ';
         if (0 == $allFlag) {
@@ -112,7 +112,7 @@ class Dbi extends BaseDbi
     public function getConsultationResponse($hospitalId, $allFlag, $responseHospital, $startTime, $endTime)
     {
         $sql = 'select consultation_id, h.hospital_name, guardian_id as patient_id, ecg_id, 
-                response_message, response_time, request_message, request_time
+                response_message, response_time, request_message, request_time, status
                 from consultation as c left join hospital as h on c.response_hospital_id = h.hospital_id
                 where request_hospital_id = :hospital_id ';
         if (1 == $allFlag) {
