@@ -35,5 +35,6 @@ if (empty($ret)) {
     }
     $result['hospital_name'] = $ret['hospital_name'];
     $result['upload_flag'] = $ret['upload_flag'];
+    $result['hospital_type'] = $ret['type'];
     api_exit($result);
 }

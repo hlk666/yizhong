@@ -227,6 +227,23 @@ class DbiAdmin extends BaseDbi
         return $this->existData('account', "login_name = '$loginName' and hospital_id <> $hospital");
     }
     
+    public function getAccountList($hospital)
+    {
+        $sql = "select account_id as doctor_id, real_name as doctor_name from account where hospital_id = '$hospital'";
+        return $this->getDataAll($sql);
+    }
+    public function getAccountForAnalytics($doctorList, $startTime, $endTime)
+    {
+        $sql = "select d.guardian_id as patient_id, p.patient_name, regist_hospital_id as hospital_id,
+        g.start_time, g.end_time, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor
+        from guardian_data as d left join guardian as g on d.guardian_id = g.guardian_id
+        left join patient as p on g.patient_id = p.patient_id
+        left join account as a1 on d.hbi_doctor = a1.account_id
+        left join account as a2 on d.report_doctor = a2.account_id
+        where (hbi_doctor in ($doctorList) or report_doctor in ($doctorList))
+        and g.regist_time >= '$startTime' and g.regist_time <= '$endTime'";
+        return $this->getDataAll($sql);
+    }
     public function getAdminAcount($loginName)
     {
         $sql = 'select account_id, real_name as name, type, password, hospital_id
