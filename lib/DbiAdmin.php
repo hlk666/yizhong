@@ -90,6 +90,11 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital_id' => $hospitalId, ':parent_hospital_id' => $parentHospital];
         return $this->insertData($sql, $param);
     }
+    public function delAccount($doctorId)
+    {
+        $sql = "update account set hospital_id = 9999 where account_id = $doctorId";
+        return $this->updateData($sql);
+    }
     public function delDevice($deviceId)
     {
         $sql = 'delete from device where device_id = :device';

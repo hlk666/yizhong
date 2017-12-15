@@ -21,8 +21,7 @@ if (isset($_GET['doctor_id'])) {
     if (false === Validate::checkRequired($_GET['hospital_id'])) {
         api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'doctor_id | hospital_id.']);
     }
-    $hospital = $_GET['hospial_id'];
-    
+    $hospital = $_GET['hospital_id'];
     $accountList = DbiAdmin::getDbi()->getAccountList($hospital);
     if (VALUE_DB_ERROR === $accountList) {
         api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
