@@ -11,14 +11,17 @@ class EditPatient extends BaseApi
             return $ret;
         }
         
-        $required = ['patient_id', 'department_id'];
+        //for wx
+        //$required = ['patient_id', 'department_id'];
+        $required = ['patient_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
             return $checkRequired;
         }
         
-        $checkNumeric = HpValidate::checkNumeric(['patient_id', 'department_id'], $this->param);
+        //$checkNumeric = HpValidate::checkNumeric(['patient_id', 'department_id'], $this->param);
+        $checkNumeric = HpValidate::checkNumeric(['patient_id'], $this->param);
         if (true !== $checkNumeric) {
             return $checkNumeric;
         }
@@ -26,13 +29,14 @@ class EditPatient extends BaseApi
         if (false === Dbi::getDbi()->existedPatient($this->param['patient_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'patient_id.');
         }
+        /*
         if (false === Dbi::getDbi()->existedDepartment($this->param['department_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'department_id.');
         }
         if (false === Dbi::getDbi()->isPatientInDepartment($this->param['patient_id'], $this->param['department_id'])) {
             return HpErrorMessage::getError(ERROR_NOT_IN_DEPARTMENT);
         }
-        
+        */
         return true;
     }
     

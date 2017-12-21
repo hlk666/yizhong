@@ -35,6 +35,10 @@ class DbiChronic extends BaseDbi
                     values (0, $patientId, $guardianId, 'app', 21, '$url', '$result')";
             return $this->insertData($sql);
         }
-        
+    }
+    public function getPatientByTel($tel)
+    {
+        $sql = "select id as patient_id from patient where tel = '$tel' limit 1";
+        return $this->getDataString($sql);
     }
 }
