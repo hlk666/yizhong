@@ -179,8 +179,7 @@ class BaseDbi
             }
         }
         $sql = substr($sql, 0, -1);
-        $sql .= " where $keyName = :key";
-        $param = [':key' => $keyValue];
-        return $this->updateData($sql, $param);
+        $sql .= " where $keyName = '$keyValue'";
+        return $this->updateData($sql);
     }
 }

@@ -84,10 +84,11 @@ class DbiAnalytics extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = 'select t.hospital_id, analysis_hospital, report_hospital, title_hospital, 
-                h.hospital_name as title_hospital_name, h.comment, h.display_check, h.report_must_check,
-                double_title as `double`
-                from hospital_tree as t inner join hospital as h on title_hospital = h.hospital_id
+        $sql = 'select t.hospital_id, analysis_hospital, report_hospital, title1 as title_hospital, 
+                h1.hospital_name as title_hospital_name, h1.comment, h1.display_check, 
+                h1.report_must_check, 0 as `double`, title2, h2.hospital_name as title2_name
+                from hospital_tree as t left join hospital as h1 on t.title1 = h1.hospital_id
+                left join hospital as h2 on t.title2 = h2.hospital_id
                 where t.hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
         $hospitalConfig = $this->getDataRow($sql, $param);
@@ -101,17 +102,20 @@ class DbiAnalytics extends BaseDbi
                 return VALUE_DB_ERROR;
             }
             $hospitalConfig = ['hospital_id' => $hospitalId, 'analysis_hospital' => $hospitalId,  'report_hospital' => $hospitalId, 
-                            'title_hospital' => $hospitalId, 'title_hospital_name' => $hospitalInfo['hospital_name'], 'double' => '0'];
+                            'title_hospital' => $hospitalId, 'title_hospital_name' => $hospitalInfo['hospital_name'], 'double' => '0',
+                            'title2' => '0', 'title2_name' => ''
+            ];
         }
         
         return $hospitalConfig;
     }
     public function getHospitalConfigList($hospitals)
     {
-        $sql = "select t.hospital_id, analysis_hospital, report_hospital, title_hospital,
-                h.hospital_name as title_hospital_name, h.comment, h.display_check, h.report_must_check,
-                double_title as `double`
-                from hospital_tree as t inner join hospital as h on title_hospital = h.hospital_id
+        $sql = "select t.hospital_id, analysis_hospital, report_hospital, title1 as title_hospital,
+                h1.hospital_name as title_hospital_name, h1.comment, h1.display_check, h1.report_must_check,
+                0 as `double`, title2, h2.hospital_name as title2_name
+                from hospital_tree as t left join hospital as h1 on t.title1 = h1.hospital_id
+                left join hospital as h2 on t.title2 = h2.hospital_id
                 where t.hospital_id in ($hospitals)";
         $hospitalConfig = $this->getDataAll($sql);
         if (VALUE_DB_ERROR === $hospitalConfig) {
