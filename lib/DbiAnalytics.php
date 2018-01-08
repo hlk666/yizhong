@@ -405,4 +405,14 @@ class DbiAnalytics extends BaseDbi
         $param = [':guardian' => $guardianId];
         return $this->updateData($sql, $param);
     }
+    public function setPool($guardianId, $status)
+    {
+        $oldStatus = $this->getDataStatus($guardianId);
+        if ($oldStatus > 3) {
+            return false;
+        } else {
+            $sql = "update guardian_data set status = $status where guardian_id = $guardianId";
+            return $this->updateData($sql);
+        }
+    }
 }
