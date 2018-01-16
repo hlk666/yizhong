@@ -17,6 +17,8 @@ $guardHospital = $_POST['guard_hospital'];
 $tentativeDiagnose = isset($_POST['tentative_diagnose']) ? $_POST['tentative_diagnose'] : '';
 $medicalHistory = isset($_POST['medical_history']) ? $_POST['medical_history'] : '';
 
+check_mode($mode, $guardHospital);
+
 $hospitalInfo = Dbi::getDbi()->getHospitalByDevice($device);
 if (VALUE_DB_ERROR === $hospitalInfo) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
@@ -25,6 +27,9 @@ if (empty($hospitalInfo)) {
     api_exit(['code' => '1', 'message' => MESSAGE_PARAM]);
 }
 $registHospital = $hospitalInfo['hospital_id'];
+if (empty($registHospital)) {
+    api_exit(['code' => '1', '设备未绑定。']);
+}
 
 check_device($device, $registHospital);
 //$registHospital = $_POST['regist_hospital'];
@@ -247,6 +252,22 @@ function check_device($device, $hospital)
         }
         if ('0' == $guardian['status'] || '1' == $guardian['status']) {
             api_exit(['code' => '17', 'message' => $otherPatient . '正在使用该设备。']);
+        }
+    }
+}
+
+function check_mode($mode, $hospital)
+{
+    if ($mode == 2) {
+        return;
+    }
+    if (file_exists(PATH_CONFIG . 'mode.php')) {
+        include_once PATH_CONFIG . 'mode.php';
+        if ($mode == 1 && !in_array($hospital, $mode1)) {
+            api_exit(['code' => '17', 'message' => '请选择异常模式(当前选择的是实时模式)。']);
+        }
+        if ($mode == 3 && !in_array($hospital, $mode3)) {
+            api_exit(['code' => '17', 'message' => '请选择异常模式(当前选择的是单次模式)。']);
         }
     }
 }
