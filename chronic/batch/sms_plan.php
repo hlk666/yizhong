@@ -16,7 +16,7 @@ if (VALUE_DB_ERROR === $plans) {
 
 foreach ($plans as $plan) {
     $date = substr($plan['plan_time'], 0, 4) . '年' . substr($plan['plan_time'], 5, 2) . '月' . substr($plan['plan_time'], 8, 2) . '日';
-    $value = $plan['plan_value'];
+    $value = $plan['plan_text'];
     $message = "您的复查时间({$date})到了，请您按时复查(项目:$value)。";
     $sendCase = sendSMS($plan['tel'], $plan['name'], $message, $logFile);
     
