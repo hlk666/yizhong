@@ -1044,7 +1044,7 @@ class Dbi extends BaseDbi
     }
     public function getFollowType($follorRecordId)
     {
-        $sql = "select p.department_id as plan_department, p.type, r.department_id as record_deparment, name
+        $sql = "select p.department_id as plan_department, p.type, r.department_id as record_department, name
                 from follow_plan as p inner join follow_record as r on p.id = r.follow_plan_id 
                 where r.id = $follorRecordId limit 1" ;
         return $this->getDataRow($sql);
