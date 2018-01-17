@@ -2,15 +2,17 @@
 require '../config/config.php';
 require '../lib/function.php';
 require '../lib/DbiAdmin.php';
+require '../lib/ShortMessageService.php';
 
 $title = '添加新的设备';
+$isHideSider = true;
 require 'header.php';
 
 $repeatedAddHospital = !isset($_GET['hospital']) ? null : $_GET['hospital'];
 
 if (isset($_POST['submit'])){
     if (true === $_SESSION['post']) {
-        user_back_after_delay('请不要刷新页面。');
+        user_back_after_delay('请不要刷新页面。', 2000, 'add.php');
     }
     
     $hospitalId = !isset($_POST['hospital']) ? null : $_POST['hospital'];
@@ -23,33 +25,17 @@ if (isset($_POST['submit'])){
         user_back_after_delay('请正确输入设备ID。');
     }
     
-    $isExisted = DbiAdmin::getDbi()->existedDevice($deviceId);
-    if (VALUE_DB_ERROR === $isExisted) {
-        user_back_after_delay(MESSAGE_DB_ERROR);
-    }
-    if (true === $isExisted) {
-        user_back_after_delay('该设备ID已经和其他医院绑定，请解绑后再操作。');
-    }
-    /*
-    if (strlen($deviceId) >= 2) {
-        $city = substr($deviceId, 0, 2);
-    } else {
-        $city = '00';
-    }
-    */
     $ret = DbiAdmin::getDbi()->addDevice($hospitalId, $deviceId);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
     $_SESSION['post'] = true;
     echo MESSAGE_SUCCESS 
-        . '<br /><button type="submit" class="btn btn-lg btn-info" style="margin-top:50px;" ' 
-        . ' onclick="javascript:location.href=\'device.php?hospital=' . $hospitalId . '\';">查看该医院设备列表</button>'
         . '<button type="button" class="btn btn-lg btn-info" style="margin-top:50px;margin-left:50px;" ' 
-        . ' onclick="javascript:location.href=\'add_device.php?hospital=' . $hospitalId . '\';">继续给该医院添加设备</button>';
+        . ' onclick="javascript:location.href=\'add1.php?hospital=' . $hospitalId . '\';">继续给该医院添加设备</button>';
 } else {
     $_SESSION['post'] = false;
-    $ret = DbiAdmin::getDbi()->getHospitalList();
+    $ret = DbiAdmin::getDbi()->getHospitalAgencySalesman($_SESSION['user']);
     if (VALUE_DB_ERROR === $ret) {
         $ret = array();
     }
@@ -77,11 +63,10 @@ if (isset($_POST['submit'])){
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
       <button type="submit" class="btn btn-lg btn-success" name="submit">保存</button>
-      <button type="button" class="btn btn-lg btn-primary" style="margin-left:50px" 
-        onclick="javascript:history.back();">返回</button>
     </div>
   </div>
 </form>
+
 EOF;
 }
 require 'tpl/footer.tpl';

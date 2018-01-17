@@ -29,14 +29,29 @@ if (isset($_POST['login'])) {
         header('location:index.php?error=密码错误。');
     } else {
         $_SESSION['login'] = true;
-        header('location:summary.php');
+        $_SESSION['user'] = $_POST['user'];
+        if ($_SESSION['user'] == 'admin') {
+            header('location:summary.php');
+        } else {
+            if (isset($_POST['bind'])) {
+                header('location:add1.php');
+            } else {
+                header('location:add.php');
+            }
+        }
     }
     exit;
 } else {
+    /*
     if (isset($_SESSION['login']) && true === $_SESSION['login']) {
-        header('location:summary.php');
+        if ($_SESSION['user'] == 'admin') {
+            header('location:summary.php');
+        } else {
+            header('location:add.php');
+        }
+        
         exit;
-    }
+    }*/
     $message = isset($_GET['error']) ? $_GET['error'] :null;
     if (null !== $message) {
         $message = '<lable><font color="red">' . $message . '</font></lable>';
@@ -45,6 +60,7 @@ if (isset($_POST['login'])) {
   <form class="form-signin" method="post">$message
     <input type="text" name="user" class="form-control" style="margin-bottom:10px;" placeholder="请输入用户名" required autofocus>
     <input type="password" name="password" class="form-control" style="margin-bottom:10px;" placeholder="请输入密码" required>
+    <div class="checkbox"><label><input type="checkbox" name="bind">绑定设备(不选则是添加医院)</label></div>
     <button class="btn btn-lg btn-primary btn-block" name="login" type="submit">登录</button>
   </form>
 EOF;

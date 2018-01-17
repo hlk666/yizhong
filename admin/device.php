@@ -9,6 +9,7 @@ require 'header.php';
 $id = isset($_GET['id']) ? $_GET['id'] : '';
 $name = isset($_GET['name']) ? $_GET['name'] : '';
 $hospital = isset($_GET['hospital']) ? $_GET['hospital'] : '';
+$agency = isset($_GET['agency']) ? $_GET['agency'] : '';
 
 $hospitalList = array();
 $deviceList = array();
@@ -32,6 +33,13 @@ if (!empty($hospital)) {
     }
 }
 
+if (!empty($agency)) {
+    $deviceList = DbiAdmin::getDbi()->getDeviceListAgency($agency);
+    if (VALUE_DB_ERROR === $deviceList) {
+        user_back_after_delay(MESSAGE_DB_ERROR);
+    }
+}
+
 $htmlHospitals = '';
 foreach ($hospitalList as $value) {
     if ($hospital == $value['hospital_id']) {
@@ -43,12 +51,13 @@ foreach ($hospitalList as $value) {
 
 $htmlDevices = '';
 foreach ($deviceList as $value) {
+    $buttonTxt = empty($value['hospital_name']) ? '' 
+            : '<button type="button" class="btn btn-xs btn-info" onclick="javascript:unbindDevice('. $value['device_id'] . ')">点击解除</button>';
     $htmlDevices .= '<tr><td>'
         . $value['hospital_name'] . '</td><td>'
         . $value['device_id'] . '</td><td>'
-        . $value['city'] . '</td><td>'
-        . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:unbindDevice('
-            . $value['device_id'] . ')">点击解除</button></td></tr>';
+        . $value['agency'] . '</td><td>'
+        . $buttonTxt . '</td></tr>';
 }
 
 
@@ -94,12 +103,26 @@ echo <<<EOF
 </div>
 </form>
 <hr style="border-top:1px ridge red;" />
+<form class="form-horizontal" role="form" method="get">
+<div class="row">
+  <div class="col-xs-12 col-sm-3" style="margin-bottom:3px;">
+    <label class="control-label">输入代理商/业务员姓名：</label>
+  </div>
+  <div class="col-xs-12 col-sm-3" style="margin-bottom:3px;">
+    <input type="text" class="form-control" name="agency" value="$agency" required>
+  </div>
+  <div class="col-xs-12 col-sm-3">
+    <button type="submit" class="btn btn-sm btn-info">搜索</button>
+  </div>
+</div>
+</form>
+<hr style="border-top:1px ridge red;" />
   <table class="table table-striped">
     <thead>
       <tr>
         <th>医院名</th>
         <th>设备ID</th>
-        <th>省份代码</th>
+        <th>代理商/业务员</th>
         <th>解除绑定</th>
       </tr>
     </thead>

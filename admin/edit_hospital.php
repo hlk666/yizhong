@@ -24,6 +24,10 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $messageTel = isset($_POST['message_tel']) ? $_POST['message_tel'] : '0';
     $agency = isset($_POST['agency']) ? $_POST['agency'] : '';
     $salesman = isset($_POST['salesman']) ? $_POST['salesman'] : '';
+    $invoiceName = (isset($_POST['invoice_name']) && !empty($_POST['invoice_name'])) ? $_POST['invoice_name'] : '';
+    $invoiceId = (isset($_POST['invoice_id']) && !empty($_POST['invoice_id'])) ? $_POST['invoice_id'] : '';
+    $invoiceAddressTel = (isset($_POST['invoice_addr_tel']) && !empty($_POST['invoice_addr_tel'])) ? $_POST['invoice_addr_tel'] : '';
+    $invoiceBank = (isset($_POST['invoice_bank']) && !empty($_POST['invoice_bank'])) ? $_POST['invoice_bank'] : '';
     $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
     $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
     $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
@@ -73,7 +77,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
 
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
-                $contractFlag, $deviceSale, $displayCheck, $reportMustCheck);
+                $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank);
     }
     
     if (isset($_POST['del'])) {
@@ -123,6 +127,10 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $agency = $hospitalInfo['agency'];
     $salesman = $hospitalInfo['salesman'];
     $comment = $hospitalInfo['comment'];
+    $invoiceName = $hospitalInfo['invoice_name'];
+    $invoiceId = $hospitalInfo['invoice_id'];
+    $invoiceAddressTel = $hospitalInfo['invoice_addr_tel'];
+    $invoiceBank = $hospitalInfo['invoice_bank'];
     
     if ('1' == $hospitalInfo['parent_flag']) {
         $htmlParentFlagYes = '<input type="radio" name="parent_flag" value="1" checked>可</label>';
@@ -265,6 +273,30 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <label for="salesman" class="col-sm-2 control-label">业务员<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="salesman" name="salesman" value="$salesman">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">发票名称<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="invoice_name" value="$invoiceName">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">纳税人识别号<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="invoice_id" value="$invoiceId">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">(发票)地址电话<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="invoice_addr_tel" value="$invoiceAddressTel">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">开户行及账号<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="invoice_bank" value="$invoiceBank">
     </div>
   </div>
   <div class="form-group">

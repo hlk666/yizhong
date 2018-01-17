@@ -90,3 +90,11 @@ function loadCity(currentCity){
         cityS.appendChild(tempFragment);
     }
 }
+function getHosName(id) {
+    htmlobj = $.ajax({url : "hosName.php?id=" + id, async : false});
+    $("#title").html(htmlobj.responseText);
+}
+function checkUser(user) {
+    htmlobj = $.ajax({url : "checkUser.php?user=" + user, async : false});
+    $("#check_user").html(htmlobj.responseText);
+}

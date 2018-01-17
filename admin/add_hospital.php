@@ -23,6 +23,12 @@ if (isset($_POST['submit'])){
     $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
     $messageTel = (isset($_POST['message_tel']) && !empty($_POST['message_tel'])) ? $_POST['message_tel'] : '0';
     $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '';
+    
+    $invoiceName = (isset($_POST['invoice_name']) && !empty($_POST['invoice_name'])) ? $_POST['invoice_name'] : '';
+    $invoiceId = (isset($_POST['invoice_id']) && !empty($_POST['invoice_id'])) ? $_POST['invoice_id'] : '';
+    $invoiceAddressTel = (isset($_POST['invoice_addr_tel']) && !empty($_POST['invoice_addr_tel'])) ? $_POST['invoice_addr_tel'] : '';
+    $invoiceBank = (isset($_POST['invoice_bank']) && !empty($_POST['invoice_bank'])) ? $_POST['invoice_bank'] : '';
+    
     $comment = (isset($_POST['comment']) && !empty($_POST['comment'])) ? $_POST['comment'] : '';
     $analysisHospital = (isset($_POST['hospital_analysis']) && !empty($_POST['hospital_analysis'])) ? $_POST['hospital_analysis'] : '';
     $reportHospital = (isset($_POST['hospital_report']) && !empty($_POST['hospital_report'])) ? $_POST['hospital_report'] : '';
@@ -76,7 +82,8 @@ if (isset($_POST['submit'])){
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $type, $level, $hospitalTel, 
             $province, $city, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser, 
             $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital, 
-            $agency, $contractFlag, $deviceSale, $displayCheck, $reportMustCheck);
+            $agency, $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, 
+            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $_SESSION['user']);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -201,6 +208,30 @@ if (isset($_POST['submit'])){
     <label for="salesman" class="col-sm-2 control-label">业务员</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="salesman" name="salesman" placeholder="请输入业务员姓名">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">发票名称</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="invoice_name" placeholder="请输入发票名称">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">纳税人识别号</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="invoice_id" placeholder="请输入纳税人识别号">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">(发票)地址电话</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="invoice_addr_tel" placeholder="请输入(发票)地址电话">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">开户行及账号</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="invoice_bank" placeholder="请输入开户行及账号">
     </div>
   </div>
   <div class="form-group">
