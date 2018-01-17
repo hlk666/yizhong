@@ -312,6 +312,11 @@ class DbiAnalytics extends BaseDbi
         $sql .= ' order by t.guardian_id desc';
         return $this->getDataAll($sql);
     }
+    public function getRecentpatient()
+    {
+        $sql = 'select guardian_id from guardian_data where is_heavy = 1 and report_time >= DATE_ADD(now(),INTERVAL -2 DAY)';
+        return $this->getDataAll($sql);
+    }
     public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
         $status = $this->getDataStatus($guardianId);
@@ -393,7 +398,7 @@ class DbiAnalytics extends BaseDbi
             if ($status == 5) {
                 $set = 'set hbi_doctor = ' . $hbiDoctor;
             } else {
-                $set = 'set status = 4, hbi_doctor = ' . $hbiDoctor;
+                $set = 'set status = 4, report_time = now(), hbi_doctor = ' . $hbiDoctor;
             }
         } elseif ($statusName == 'report') {
             $set = 'set status = 5, report_time = now(), report_doctor = ' . $reportDoctor;
@@ -408,11 +413,12 @@ class DbiAnalytics extends BaseDbi
     public function setPool($guardianId, $status)
     {
         $oldStatus = $this->getDataStatus($guardianId);
-        if ($oldStatus > 3) {
-            return false;
-        } else {
-            $sql = "update guardian_data set status = $status where guardian_id = $guardianId";
-            return $this->updateData($sql);
+        $set = "status = $status";
+        if ($oldStatus == 5) {
+            $set .= ', report_doctor = 0';
         }
+        
+        $sql = "update guardian_data set $set where guardian_id = $guardianId";
+        return $this->updateData($sql);
     }
 }

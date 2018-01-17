@@ -1,4 +1,5 @@
 <?php
+require PATH_LIB . 'DbiAnalytics.php';
 require_once PATH_LIB . 'Validate.php';
 
 if (false === Validate::checkRequired($_GET['hospitals'])) {
@@ -11,6 +12,17 @@ $result = array();
 $result['code'] = '0';
 $result['message'] = MESSAGE_SUCCESS;
 
+if ($type == 'diagnosis') {
+    $patientRecent = array();
+    $ret = DbiAnalytics::getDbi()->getRecentpatient();
+    if (VALUE_DB_ERROR === $ret) {
+        //do nothing.
+    } else {
+        foreach ($ret as $row) {
+            $patientRecent[] = $row['guardian_id'];
+        }
+    }
+}
 if ($hospitals == '0') {
     $path = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . $type;
     foreach(scandir($path) as $file) {
@@ -20,7 +32,17 @@ if ($hospitals == '0') {
         if (!is_dir($path . DIRECTORY_SEPARATOR . $file)) {
             include $path . DIRECTORY_SEPARATOR . $file;
             $hospital = str_replace('.php', '', $file);
-            $result[$hospital] = $patients;
+            if ($type == 'diagnosis') {
+                $newPatients = array_intersect($patientRecent, $patients);
+            } else {
+                $newPatients = $patients;
+            }
+            //fix bug.
+            $tmp = array();
+            foreach ($newPatients as $value) {
+                $tmp[] = $value;
+            }
+            $result[$hospital] = $tmp;
         }
     }
 } else {
