@@ -106,7 +106,11 @@ class DbiAdmin extends BaseDbi
     }
     public function delDevice($deviceId, $hospital, $agency)
     {
-        $sql = "update device set hospital_id = $hospital, agency = '$agency' where device_id = '$deviceId'";
+        if ($this->existData('device', "device_id = $deviceId")) {
+            $sql = "update device set hospital_id = $hospital, agency = '$agency' where device_id = '$deviceId'";
+        } else {
+            $sql = "insert into device (device_id, hospital_id, agency) values ('$deviceId', $hospital, '$agency')";
+        }
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;

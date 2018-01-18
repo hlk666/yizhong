@@ -15,13 +15,17 @@ if (isset($_POST['submit'])){
     
     $hospitalId = !isset($_POST['hospital']) ? 0 : $_POST['hospital'];
     $deviceList = !isset($_POST['device']) ? null : $_POST['device'];
+    $deviceIdList = !isset($_POST['device_id']) ? null : $_POST['device_id'];
     $agency = !isset($_POST['agency']) ? '' : $_POST['agency'];
     
     if ((empty($hospitalId) || '0' == $hospitalId) && (empty($agency))) {
         user_back_after_delay('请选择医院或代理商/业务员。');
     }
-    if (empty($deviceList)) {
-        user_back_after_delay('请选择设备。');
+    if (empty($deviceList) && empty($deviceIdList)) {
+        user_back_after_delay('请选择(或输入)设备ID。');
+    }
+    if (empty($deviceList) && !empty($deviceIdList)) {
+        $deviceList = explode(',', $deviceIdList);
     }
     foreach ($deviceList as $deviceId) {
         $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency);
@@ -44,13 +48,13 @@ if (isset($_POST['submit'])){
     <label class="control-label">医院名(模糊匹配)</label>
   </div>
   <div class="col-xs-12 col-sm-3" style="margin-bottom:3px;">
-    <input type="text" class="form-control" name="name" value="$name" required>
+    <input type="text" class="form-control" name="name" value="$name" >
   </div>
   <div class="col-xs-12 col-sm-2" style="margin-bottom:3px;">
     <label class="control-label">设备列表数量</label>
   </div>
   <div class="col-xs-12 col-sm-3" style="margin-bottom:3px;">
-    <input type="text" class="form-control" name="count" value="$count" required>
+    <input type="text" class="form-control" name="count" value="$count">
   </div>
   <div class="col-xs-12 col-sm-2">
     <button type="submit" class="btn btn-info">显示</button>
@@ -58,7 +62,9 @@ if (isset($_POST['submit'])){
 </div>
 </form>
 EOF;
-    if (!empty($name) && !empty($count)) {
+    if (empty($name)) {
+        $htmlHospitals = '<option value="0">无医院</option>';
+    } else {
         $ret = DbiAdmin::getDbi()->getHospitalList(null, null, null, $name);
         if (VALUE_DB_ERROR === $ret) {
             $ret = array();
@@ -67,16 +73,22 @@ EOF;
         foreach ($ret as $value) {
             $htmlHospitals .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
         }
+    }
         
+    if (empty($count)) {
+        $htmlDevices = '<input type="text" class="form-control" name="device_id" >';
+    } else {
         $ret = DbiAdmin::getDbi()->getDeviceNotUsed($count);
         if (VALUE_DB_ERROR === $ret) {
             $ret = array();
         }
         $htmlDevices = '';
         foreach ($ret as $value) {
-            $htmlDevices .= '<label class="checkbox-inline"><input type="checkbox" name="device[]" value="' 
+            $htmlDevices .= '<label class="checkbox-inline"><input type="checkbox" name="device[]" value="'
                     . $value['device_id'] . '">' . $value['device_id'] . '</label>';
         }
+    }
+        
         echo <<<EOF
 <hr style="border-top:1px ridge red;" />
 <form class="form-horizontal" role="form" method="post">
@@ -89,7 +101,7 @@ EOF;
     <div class="col-sm-10"><select class="form-control" name="hospital">$htmlHospitals</select></div>
   </div>
   <div class="form-group">
-    <label for="device_id" class="col-sm-2 control-label">设备ID<font color="red">*</font></label>
+    <label for="device_id" class="col-sm-2 control-label">设备ID(输入时用英文逗号分隔)<font color="red">*</font></label>
     <div class="col-sm-10">$htmlDevices</div>
   </div>
   <div class="form-group">
@@ -105,6 +117,5 @@ EOF;
   </div>
 </form>
 EOF;
-    }
 }
 require 'tpl/footer.tpl';
