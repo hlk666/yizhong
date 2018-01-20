@@ -36,7 +36,11 @@ class DbiAnalytics extends BaseDbi
         $sql = 'insert into patient_diagnosis (patient_id, diagnosis_id) values (:patient, :diagnosis)';
         return $this->insertData($sql, $param);
     }
-    
+    public function getCheckText($guardianId)
+    {
+        $sql = "select check_text from guardian_data where guardian_id = $guardianId limit 1";
+        return $this->getDataString($sql);
+    }
     public function getDiagnosisByPatient($patientId)
     {
         $sql = 'select distinct diagnosis_id, create_time from patient_diagnosis where patient_id = :id';
@@ -349,6 +353,11 @@ class DbiAnalytics extends BaseDbi
         
         $this->pdo->commit();
         return true;
+    }
+    public function setCheckText($guardianId, $text)
+    {
+        $sql = "update guardian_data set check_text = '$text' where guardian_id = $guardianId";
+        return $this->updateData($sql);
     }
     public function setHeavy($patientId)
     {
