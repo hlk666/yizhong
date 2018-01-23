@@ -18,7 +18,16 @@ class DbiBatch extends BaseDbi
         }
         return self::$instance;
     }
-    
+    public function getDeviceCount()
+    {
+        $sql = 'select t.id, t.name, count(t.device_id) as quantity from (
+                select device_id, d.hospital_id as `id`, h.hospital_name as `name` 
+                from device as d inner join hospital as h on d.hospital_id = h.hospital_id where d.hospital_id <> 0
+                union all
+                select device_id, 0 as `id`, case agency when "" then "直属" else agency end as `name` from device where hospital_id = 0
+                ) as t group by t.id, t.name';
+        return $this->getDataAll($sql);
+    }
     public function getDiffEcgIdFrom()
     {
         $sql = 'select ecg_id from difference';
