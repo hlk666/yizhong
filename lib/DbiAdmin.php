@@ -49,10 +49,10 @@ class DbiAdmin extends BaseDbi
         $this->pdo->beginTransaction();
         $sql = "insert into hospital(hospital_name, type, level, tel, province, city, address, parent_flag, 
                 sms_tel, agency, salesman, comment, contract_flag, device_sale, display_check, report_must_check, 
-                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator)
+                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker)
                 values ('$name', '$type', '$level', '$tel', '$province', '$city', '$address', '$parentFlag', 
                 '$messageTel', '$agency', '$salesman', '$comment', '$contractFlag', '$deviceSale', '$displayCheck', 
-                '$reportMustCheck', '$invoiceName', '$invoiceId', '$invoiceAddressTel', '$invoiceBank', '$creator')";
+                '$reportMustCheck', '$invoiceName', '$invoiceId', '$invoiceAddressTel', '$invoiceBank', '$creator', '$creator')";
         $hospitalId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $hospitalId) {
             $this->pdo->rollBack();
@@ -196,7 +196,7 @@ class DbiAdmin extends BaseDbi
     public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
             $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, 
-            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank)
+            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker)
     {
         $this->pdo->beginTransaction();
     
@@ -214,7 +214,7 @@ class DbiAdmin extends BaseDbi
                 sms_tel = '$messageTel', agency = '$agency', salesman = '$salesman', comment = '$comment', contract_flag = '$contractFlag', 
                 device_sale = '$deviceSale', display_check = '$displayCheck', report_must_check = '$reportMustCheck',
                 invoice_name = '$invoiceName', invoice_id = '$invoiceId', invoice_addr_tel = '$invoiceAddressTel', 
-                invoice_bank = '$invoiceBank' where hospital_id = '$hospitalId'";
+                invoice_bank = '$invoiceBank', worker = '$worker' where hospital_id = '$hospitalId'";
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
@@ -506,7 +506,7 @@ class DbiAdmin extends BaseDbi
         $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, address, h.tel, 
                 parent_flag, a.login_name, h.sms_tel, h.agency, h.salesman, h.comment, 
                 h.contract_flag, h.device_sale, h.display_check, h.report_must_check,
-                invoice_name, invoice_id, invoice_addr_tel, invoice_bank
+                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];
@@ -603,17 +603,12 @@ class DbiAdmin extends BaseDbi
         $param = [':salesman' => $salesman];
         return $this->getDataAll($sql, $param);
     }
-    public function getHospitalAgencySalesman($user)
+    public function getHospitalWorder($user)
     {
         if (empty($user)) {
             return array();
         }
-        $sql = "select real_name from account where login_name = '$user' limit 1";
-        $name = $this->getDataString($sql);
-        if (empty($name)) {
-            return array();
-        }
-        $sql = "select hospital_id, hospital_name from hospital where agency = '$name' or salesman = '$name'";
+        $sql = "select hospital_id, hospital_name from hospital where worker = '$user'";
         return $this->getDataAll($sql);
     }
     public function getPatientDiagnosis($hospital, $diagnosis, $startTime, $endTime)

@@ -107,7 +107,7 @@ EOF;
   <div class="form-group">
     <label for="device_id" class="col-sm-2 control-label">代理商/业务员</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="agency" placeholder="请输入发货对象" required>
+      <input type="text" class="form-control" name="agency" placeholder="请输入发货对象" >
     </div>
   </div>
   <div class="form-group">

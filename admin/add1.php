@@ -25,6 +25,14 @@ if (isset($_POST['submit'])){
         user_back_after_delay('请正确输入设备ID。');
     }
     
+    $isExisted = DbiAdmin::getDbi()->existedDevice($deviceId);
+    if (VALUE_DB_ERROR === $isExisted) {
+        user_back_after_delay(MESSAGE_DB_ERROR);
+    }
+    if (true === $isExisted) {
+        user_back_after_delay('该设备ID已经和其他医院绑定，请解绑后再操作。');
+    }
+    
     $ret = DbiAdmin::getDbi()->addDevice($hospitalId, $deviceId);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
@@ -35,7 +43,7 @@ if (isset($_POST['submit'])){
         . ' onclick="javascript:location.href=\'add1.php?hospital=' . $hospitalId . '\';">继续给该医院添加设备</button>';
 } else {
     $_SESSION['post'] = false;
-    $ret = DbiAdmin::getDbi()->getHospitalAgencySalesman($_SESSION['user']);
+    $ret = DbiAdmin::getDbi()->getHospitalWorder($_SESSION['user']);
     if (VALUE_DB_ERROR === $ret) {
         $ret = array();
     }

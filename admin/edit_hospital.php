@@ -24,6 +24,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $messageTel = isset($_POST['message_tel']) ? $_POST['message_tel'] : '0';
     $agency = isset($_POST['agency']) ? $_POST['agency'] : '';
     $salesman = isset($_POST['salesman']) ? $_POST['salesman'] : '';
+    $worker = isset($_POST['worker']) ? $_POST['worker'] : '';
     $invoiceName = (isset($_POST['invoice_name']) && !empty($_POST['invoice_name'])) ? $_POST['invoice_name'] : '';
     $invoiceId = (isset($_POST['invoice_id']) && !empty($_POST['invoice_id'])) ? $_POST['invoice_id'] : '';
     $invoiceAddressTel = (isset($_POST['invoice_addr_tel']) && !empty($_POST['invoice_addr_tel'])) ? $_POST['invoice_addr_tel'] : '';
@@ -77,7 +78,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
 
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
-                $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank);
+                $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
+                $invoiceBank, $worker);
     }
     
     if (isset($_POST['del'])) {
@@ -126,6 +128,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $messageTel = $hospitalInfo['sms_tel'];
     $agency = $hospitalInfo['agency'];
     $salesman = $hospitalInfo['salesman'];
+    $worker = $hospitalInfo['worker'];
     $comment = $hospitalInfo['comment'];
     $invoiceName = $hospitalInfo['invoice_name'];
     $invoiceId = $hospitalInfo['invoice_id'];
@@ -273,6 +276,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <label for="salesman" class="col-sm-2 control-label">业务员<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="salesman" name="salesman" value="$salesman">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">安装人员登录名<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="worker" value="$worker">
     </div>
   </div>
   <div class="form-group">
