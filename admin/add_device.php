@@ -37,7 +37,7 @@ if (isset($_POST['submit'])){
         $city = '00';
     }
     */
-    $ret = DbiAdmin::getDbi()->addDevice($hospitalId, $deviceId);
+    $ret = DbiAdmin::getDbi()->addDevice($hospitalId, $deviceId, 'admin');
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }

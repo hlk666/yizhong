@@ -22,7 +22,7 @@ class DbiAdmin extends BaseDbi
     {
         return $this->getDataAll($sql);
     }
-    public function addDevice($hospital, $device)
+    public function addDevice($hospital, $device, $user = '')
     {
         if ($this->existData('device', "device_id = '$device'")) {
             $sql = "update device set hospital_id = '$hospital', agency = '' where device_id = '$device'";
@@ -34,7 +34,7 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = "insert into history_device (device_id, hospital_id) values ('$device', '$hospital')";
+        $sql = "insert into history_device (device_id, hospital_id, user) values ('$device', '$hospital', '$user')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -116,7 +116,8 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = "insert into history_device (device_id, hospital_id, agency) values ('$deviceId', $hospital, '$agency')";
+        $sql = "insert into history_device (device_id, hospital_id, agency, user) 
+                values ('$deviceId', $hospital, '$agency', 'delete')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;

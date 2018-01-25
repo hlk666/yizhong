@@ -33,7 +33,7 @@ if (isset($_POST['submit'])){
         user_back_after_delay('该设备ID已经和其他医院绑定，请解绑后再操作。');
     }
     
-    $ret = DbiAdmin::getDbi()->addDevice($hospitalId, $deviceId);
+    $ret = DbiAdmin::getDbi()->addDevice($hospitalId, $deviceId, $_SESSION['user']);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
