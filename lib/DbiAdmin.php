@@ -464,11 +464,18 @@ class DbiAdmin extends BaseDbi
         $sql = 'select hospital_id, hospital_name, agency as agency_name from hospital where type <> 1';
         return $this->getDataAll($sql);
     }
-    public function getHospitalDevice()
+    public function getHospitalDevice($startTime, $endTime)
     {
-        $sql = 'select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, count(d.device_id) as device_count
+        $time = '';
+        if (!empty($startTime)) {
+            $time .= "and h.create_time >= '$startTime' ";
+        }
+        if (!empty($endTime)) {
+            $time .= "and h.create_time <= '$endTime' ";
+        }
+        $sql = "select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, count(d.device_id) as device_count
                 from hospital as h left join device as d on h.hospital_id = d.hospital_id
-                group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time';
+                where 1 $time group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time";
         return $this->getDataAll($sql);
     }
     public function getHospitalDiagnosis($level, $reportHospital, $agency, $salesman)
