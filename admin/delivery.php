@@ -21,6 +21,9 @@ if (isset($_POST['submit'])){
     if ((empty($hospitalId) || '0' == $hospitalId) && (empty($agency))) {
         user_back_after_delay('请选择医院或代理商/业务员。');
     }
+    if (!empty($hospitalId) && !empty($agency)) {
+        user_back_after_delay('不能同时输入医院和代理商/业务员。');
+    }
     if (empty($deviceList) && empty($deviceIdList)) {
         user_back_after_delay('请选择(或输入)设备ID。');
     }

@@ -117,7 +117,7 @@ class DbiAdmin extends BaseDbi
         }
         
         $sql = "insert into history_device (device_id, hospital_id, agency, user) 
-                values ('$deviceId', $hospital, '$agency', 'delete')";
+                values ('$deviceId', $hospital, '$agency', 'admin')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -449,6 +449,11 @@ class DbiAdmin extends BaseDbi
                 where regist_hospital_id = :hospital and regist_time >= :start and regist_time < :end';
         $param = [':hospital' => $hospital, ':start' => $startTime, ':end' => $endTime];
         return $this->getDataString($sql, $param);
+    }
+    public function getHistoryDevice($deviceId)
+    {
+        $sql = "select * from history_device where device_id = $deviceId";
+        return $this->getDataAll($sql);
     }
     public function getHospitalAgency($agency)
     {
