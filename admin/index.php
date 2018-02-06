@@ -30,14 +30,15 @@ if (isset($_POST['login'])) {
     } else {
         $_SESSION['login'] = true;
         $_SESSION['user'] = $_POST['user'];
-        if ($_SESSION['user'] == 'admin') {
+        if ($ret['type'] == '0') {
             header('location:summary.php');
-        } else {
+        } else {/*
             if (isset($_POST['bind'])) {
                 header('location:add1.php');
             } else {
                 header('location:add.php');
-            }
+            }*/
+            header('location:add.php');
         }
     }
     exit;
@@ -60,7 +61,7 @@ if (isset($_POST['login'])) {
   <form class="form-signin" method="post">$message
     <input type="text" name="user" class="form-control" style="margin-bottom:10px;" placeholder="请输入用户名" required autofocus>
     <input type="password" name="password" class="form-control" style="margin-bottom:10px;" placeholder="请输入密码" required>
-    <div class="checkbox"><label><input type="checkbox" name="bind">绑定设备(不选则是添加医院)</label></div>
+    <!--<div class="checkbox"><label><input type="checkbox" name="bind">绑定设备(不选则是添加医院)</label></div>-->
     <button class="btn btn-lg btn-primary btn-block" name="login" type="submit">登录</button>
   </form>
 EOF;

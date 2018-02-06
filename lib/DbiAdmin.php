@@ -44,15 +44,16 @@ class DbiAdmin extends BaseDbi
     public function addHospital($name, $type, $level, $tel, $province, $city, $address, $parentFlag, $parentHospital, 
             $adminUser, $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $title1, $agency, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-            $invoiceBank, $creator)
+            $invoiceBank, $creator, $double = '0', $agencyTel = '', $deviceList = array())
     {
         $this->pdo->beginTransaction();
         $sql = "insert into hospital(hospital_name, type, level, tel, province, city, address, parent_flag, 
                 sms_tel, agency, salesman, comment, contract_flag, device_sale, display_check, report_must_check, 
-                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker)
+                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker, agency_tel)
                 values ('$name', '$type', '$level', '$tel', '$province', '$city', '$address', '$parentFlag', 
                 '$messageTel', '$agency', '$salesman', '$comment', '$contractFlag', '$deviceSale', '$displayCheck', 
-                '$reportMustCheck', '$invoiceName', '$invoiceId', '$invoiceAddressTel', '$invoiceBank', '$creator', '$creator')";
+                '$reportMustCheck', '$invoiceName', '$invoiceId', '$invoiceAddressTel', '$invoiceBank', '$creator', 
+                '$creator', '$agencyTel')";
         $hospitalId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $hospitalId) {
             $this->pdo->rollBack();
@@ -79,9 +80,42 @@ class DbiAdmin extends BaseDbi
             }
         }
         
+        if (!empty($deviceList)) {
+            foreach ($deviceList as $deviceId) {
+                if ($this->existData('device', "device_id = $deviceId")) {
+                    $sql = "update device set hospital_id = $hospitalId, agency = '' where device_id = '$deviceId'";
+                } else {
+                    $sql = "insert into device (device_id, hospital_id, agency) values ('$deviceId', $hospitalId, '')";
+                }
+                $ret = $this->updateData($sql);
+                if (VALUE_DB_ERROR === $ret) {
+                    $this->pdo->rollBack();
+                    return VALUE_DB_ERROR;
+                }
+                
+                $sql = "insert into history_device (device_id, hospital_id, agency, user) values ('$deviceId', $hospitalId, '', 'hos-creator')";
+                $ret = $this->insertData($sql);
+                if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+                }
+            }
+        }
+        
         if (!empty($analysisHospital) && !empty($reportHospital) && !empty($title1)) {
-            $sql = "insert into hospital_tree(hospital_id, analysis_hospital, report_hospital, title1)
-                values ($hospitalId, $analysisHospital, $reportHospital, $title1)";
+            $ret = $this->getHospitalName($title1);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->pdo->rollBack();
+                return VALUE_DB_ERROR;
+            }
+            $title = $ret['hospital_id'];
+            if ($double == '1') {
+                $sql = "insert into hospital_tree(hospital_id, analysis_hospital, report_hospital, title1, title2)
+                values ($hospitalId, $analysisHospital, $reportHospital, $title, $hospitalId)";
+            } else {
+                $sql = "insert into hospital_tree(hospital_id, analysis_hospital, report_hospital, title1)
+                values ($hospitalId, $analysisHospital, $reportHospital, $title)";
+            }
             $ret = $this->insertData($sql);
             if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
@@ -279,6 +313,16 @@ class DbiAdmin extends BaseDbi
         $sql = 'select distinct agency as agency_id, agency as `name` from hospital where type <> 1';
         return $this->getDataAll($sql);
     }
+    public function getDeviceAgency($name)
+    {
+        if (empty($name)) {
+            $and = '';
+        } else {
+            $and = " and agency = '$name'";
+        }
+        $sql = "select device_id, agency from device where hospital_id = 0 $and";
+        return $this->getDataAll($sql);
+    }
     public function getDeviceBloc()
     {
         $sql = 'select distinct hospital_id, city from device order by city, hospital_id';
@@ -445,10 +489,17 @@ class DbiAdmin extends BaseDbi
     }
     public function getGuardiansTime($hospital, $startTime, $endTime)
     {
-        $sql = 'select count(guardian_id) as `count` from guardian 
-                where regist_hospital_id = :hospital and regist_time >= :start and regist_time < :end';
-        $param = [':hospital' => $hospital, ':start' => $startTime, ':end' => $endTime];
-        return $this->getDataString($sql, $param);
+        if ($hospital == '0') {
+            $sql = "select regist_hospital_id as hospital_id, count(guardian_id) as `count` from guardian
+            where regist_time >= '$startTime' and regist_time < '$endTime'
+            group by regist_hospital_id";
+        } else {
+            $sql = "select regist_hospital_id as hospital_id, count(guardian_id) as `count` from guardian
+            where regist_hospital_id = $hospital and regist_time >= '$startTime' and regist_time < '$endTime'
+            group by regist_hospital_id";
+        }
+        
+        return $this->getDataAll($sql);
     }
     public function getHistoryDevice($deviceId)
     {
@@ -534,7 +585,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalName($code)
     {
-        $sql = "select hospital_name from hospital where `code` = '$code' limit 1";
+        $sql = "select hospital_id, hospital_name from hospital where `code` = '$code' limit 1";
         return $this->getDataRow($sql);
     }
     public function getHospitalLevel($level)

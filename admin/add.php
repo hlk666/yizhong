@@ -36,6 +36,11 @@ if (isset($_POST['submit'])){
     $titleHospital = (isset($_POST['hospital_title']) && !empty($_POST['hospital_title'])) ? $_POST['hospital_title'] : '';
     $agency = (isset($_POST['agency']) && !empty($_POST['agency'])) ? $_POST['agency'] : '';
     
+    $double = (isset($_POST['double']) && !empty($_POST['double'])) ? $_POST['double'] : '';
+    $agencyTel = (isset($_POST['agency_tel']) && !empty($_POST['agency_tel'])) ? $_POST['agency_tel'] : '';
+    $strDevice = (isset($_POST['device_list']) && !empty($_POST['device_list'])) ? str_replace('，', ',', $_POST['device_list']) : '';
+    $deviceList = explode(',', $strDevice);
+    
     if (empty($hospitalName)) {
         user_back_after_delay('请正确输入医院名。');
     }
@@ -76,13 +81,14 @@ if (isset($_POST['submit'])){
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, '0', $level, $hospitalTel, 
             $province, $city, $hospitalAddress, '0', '0', $adminUser, '', 
             $salesman, '', $analysisHospital, $reportHospital, $titleHospital, $agency, 
-            '0', '0', '0', '0', $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $creator);
+            '0', '0', '0', '0', $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, 
+            $creator, $double, $agencyTel, $deviceList);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
     $_SESSION['post'] = true;
     ShortMessageService::send('13465596133', '有新的医院。');
-    echo '<h1>添加成功。<a href="add1.php">绑定设备</a></h1><a href="add.php">继续新建医院</a></h1>';
+    echo '<h1>添加成功。</h1><a href="add.php">继续新建医院</a>';
 } else {
     $_SESSION['post'] = false;
     echo <<<EOF
@@ -129,16 +135,29 @@ if (isset($_POST['submit'])){
     <label class="col-sm-6 control-label" id="check_user" style="text-align:left;color:red;"></label>
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">出报告医院</label>
+    <label class="col-sm-2 control-label">审核医院(本院请填0)<font color="red">*</font></label>
     <div class="col-sm-4">
-      <input type="text" class="form-control" name="hospital_title" placeholder="出报告抬头医院(本院填0)" onchange="getHosName(this.value)" required>
+      <input type="text" class="form-control" name="hospital_title" placeholder="无需审核(本院直接出报告)请填0" onchange="getHosName(this.value)" required>
     </div>
     <label class="col-sm-6 control-label" id="title" style="text-align:left;color:red;"></label>
   </div>
   <div class="form-group">
+    <label class="col-sm-2 control-label">是否双抬头</label>
+    <div class="col-sm-4">
+      <label class="checkbox-inline">
+      <input type="radio" name="double" value="1">是</label>
+      <label class="checkbox-inline">
+      <input type="radio" name="double" value="0" checked>否</label>
+    </div>
+  </div>
+  <div class="form-group">
     <label for="salesman" class="col-sm-2 control-label">代理商<font color="red">*</font></label>
-    <div class="col-sm-10">
+    <div class="col-sm-4">
       <input type="text" class="form-control" name="agency" placeholder="请输入代理商" required>
+    </div>
+    <label for="salesman" class="col-sm-2 control-label">代理商电话</label>
+    <div class="col-sm-4">
+      <input type="text" class="form-control" name="agency_tel" placeholder="请输入代理商电话">
     </div>
   </div>
   <div class="form-group">
@@ -146,6 +165,13 @@ if (isset($_POST['submit'])){
     <div class="col-sm-10">
       <input type="text" class="form-control" id="salesman" name="salesman" placeholder="请输入业务员姓名" required>
     </div>
+  </div>
+  <div class="form-group">
+    <label for="salesman" class="col-sm-2 control-label">设备ID(多个设备用英文逗号分隔)</label>
+    <div class="col-sm-4">
+      <input type="text" class="form-control" name="device_list" placeholder="请输入设备ID(多个设备用英文逗号分隔)" onchange="checkDevice(this.value)">
+    </div>
+    <label class="col-sm-6 control-label" id="device" style="text-align:left;color:red;"></label>
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">发票名称</label>

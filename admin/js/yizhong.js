@@ -98,3 +98,7 @@ function checkUser(user) {
     htmlobj = $.ajax({url : "checkUser.php?user=" + user, async : false});
     $("#check_user").html(htmlobj.responseText);
 }
+function checkDevice(device) {
+    htmlobj = $.ajax({url : "checkDevice.php?device=" + device, async : false});
+    $("#device").html(htmlobj.responseText);
+}

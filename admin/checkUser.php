@@ -24,4 +24,4 @@ echo '
 <meta charset="utf-8">
 <title>羿中医疗科技有限公司管理系统</title>
 </head>
-<body>' . $html . '</html';
+<body>' . $html . '</html>';
