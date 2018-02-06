@@ -62,6 +62,8 @@ foreach ($patients as $key => $value) {
         $patients[$key]['status'] = '已出报告';
     } elseif ($value['status'] == 6) {
         $patients[$key]['status'] = '已分配';
+    } elseif ($value['status'] == 7) {
+        $patients[$key]['status'] = '问题已反馈';
     } else {
         $patients[$key]['status'] = '未上传';
     }

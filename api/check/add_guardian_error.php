@@ -20,7 +20,7 @@ if (VALUE_DB_ERROR === $ret) {
 $data = array();
 $data['download_start_time'] = 'null';
 $data['download_end_time'] = 'null';
-$data['status'] = 1;
+$data['status'] = 7;
 $data['download_doctor'] = 0;
 $ret = Dbi::getDbi()->noticeDownloadData($guardianId, $data);
 if (VALUE_DB_ERROR === $ret) {
