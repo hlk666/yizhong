@@ -10,8 +10,13 @@ if (false === Validate::checkRequired($_GET['end_time'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'end_time.']);
 }
 */
+if ($_GET['end_time'] >= date('Y-m-d')) {
+    $endTime =  date('Y-m-d', strtotime('-1 day'));
+} else {
+    $endTime = $_GET['end_time'];
+}
 $startTime = str_replace('-', '', substr($_GET['start_time'], 0, 10));
-$endTime = str_replace('-', '', substr($_GET['end_time'], 0, 10));
+$endTime = str_replace('-', '', substr($endTime, 0, 10));
 
 
 $startFile = PATH_DATA . 'device_count' . DIRECTORY_SEPARATOR . $startTime . '.php';
@@ -30,12 +35,14 @@ else {
 }
 $endDeviceInfo = $deviceInfo;
 
-$hospitals = array_merge(array_keys($startDeviceInfo), array_keys($endDeviceInfo));
+$hospitals = array_unique(array_merge(array_keys($startDeviceInfo), array_keys($endDeviceInfo)));
 $data = array();
 foreach ($hospitals as $hospital) {
     $startCount = isset($startDeviceInfo[$hospital]) ? $startDeviceInfo[$hospital] : 0;
     $endCount = isset($endDeviceInfo[$hospital]) ? $endDeviceInfo[$hospital] : 0;
-    $data[$hospital] = $endCount - $startCount;
+    //$data[$hospital] = $endCount - $startCount;
+    $tmp = ['name' => $hospital, 'count' => $endCount - $startCount];
+    $data[] = $tmp;
 }
 
 $result = array();
