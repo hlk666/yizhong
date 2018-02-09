@@ -63,7 +63,7 @@ foreach ($patients as $key => $value) {
     } elseif ($value['status'] == 6) {
         $patients[$key]['status'] = '已分配';
     } elseif ($value['status'] == 7) {
-        $patients[$key]['status'] = '问题已反馈';
+        $patients[$key]['status'] = '问题数据';
     } else {
         $patients[$key]['status'] = '未上传';
     }

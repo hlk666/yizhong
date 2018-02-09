@@ -93,7 +93,7 @@ class DbiAdmin extends BaseDbi
                     return VALUE_DB_ERROR;
                 }
                 
-                $sql = "insert into history_device (device_id, hospital_id, agency, user) values ('$deviceId', $hospitalId, '', 'hos-creator')";
+                $sql = "insert into history_device (device_id, hospital_id, agency, user) values ('$deviceId', $hospitalId, '', '$creator')";
                 $ret = $this->insertData($sql);
                 if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
@@ -140,9 +140,15 @@ class DbiAdmin extends BaseDbi
     }
     public function delDevice($deviceId, $hospital, $agency)
     {
-        if ($this->existData('device', "device_id = $deviceId")) {
+        $oldHospitalId = $this->getDataString("select hospital_id from device where device_id = $deviceId limit 1");
+        if (VALUE_DB_ERROR === $oldHospitalId) {
+            return VALUE_DB_ERROR;
+        }
+        
+        if ($oldHospitalId !== '') {
             $sql = "update device set hospital_id = $hospital, agency = '$agency' where device_id = '$deviceId'";
         } else {
+            $oldHospitalId = '0';
             $sql = "insert into device (device_id, hospital_id, agency) values ('$deviceId', $hospital, '$agency')";
         }
         $ret = $this->updateData($sql);
@@ -150,8 +156,8 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = "insert into history_device (device_id, hospital_id, agency, user) 
-                values ('$deviceId', $hospital, '$agency', 'admin')";
+        $sql = "insert into history_device (device_id, hospital_id, agency, user, unbind_hospital_id) 
+                values ('$deviceId', $hospital, '$agency', 'admin', $oldHospitalId)";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -279,6 +285,10 @@ class DbiAdmin extends BaseDbi
     {
         return $this->existData('device', "device_id = '$deviceId' and hospital_id <> 0");
     }
+    public function existedDevice1($deviceId)
+    {
+        return $this->existData('device', "device_id = '$deviceId' and hospital_id > 1");
+    }
     public function existedLoginName($loginName, $hospital)
     {
         return $this->existData('account', "login_name = '$loginName' and hospital_id <> $hospital");
@@ -311,6 +321,13 @@ class DbiAdmin extends BaseDbi
     public function getAgencyList()
     {
         $sql = 'select distinct agency as agency_id, agency as `name` from hospital where type <> 1';
+        return $this->getDataAll($sql);
+    }
+    public function getDepartment()
+    {
+        $sql = 'select d.department_id, d.hospital_id, h1.hospital_name as department_name, h2.hospital_name as hospital_name
+                from department as d left join hospital as h1 on d.department_id = h1.hospital_id
+                left join hospital as h2 on d.hospital_id = h2.hospital_id';
         return $this->getDataAll($sql);
     }
     public function getDeviceAgency($name)
@@ -487,15 +504,16 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
-    public function getGuardiansTime($hospital, $startTime, $endTime)
+    public function getGuardiansTime($hospital, $startTime, $endTime, $isAddResult = false)
     {
+        $sqlIsAddResult = $isAddResult ? ' and guardian_result is not null' : '';
         if ($hospital == '0') {
             $sql = "select regist_hospital_id as hospital_id, count(guardian_id) as `count` from guardian
-            where regist_time >= '$startTime' and regist_time < '$endTime'
+            where regist_time >= '$startTime' and regist_time < '$endTime' $sqlIsAddResult
             group by regist_hospital_id";
         } else {
             $sql = "select regist_hospital_id as hospital_id, count(guardian_id) as `count` from guardian
-            where regist_hospital_id = $hospital and regist_time >= '$startTime' and regist_time < '$endTime'
+            where regist_hospital_id = $hospital and regist_time >= '$startTime' and regist_time < '$endTime' $sqlIsAddResult
             group by regist_hospital_id";
         }
         
@@ -529,9 +547,9 @@ class DbiAdmin extends BaseDbi
         if (!empty($endTime)) {
             $time .= "and h.create_time <= '$endTime' ";
         }
-        $sql = "select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, count(d.device_id) as device_count
+        $sql = "select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type, count(d.device_id) as device_count
                 from hospital as h left join device as d on h.hospital_id = d.hospital_id
-                where 1 $time group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time";
+                where 1 $time group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type";
         return $this->getDataAll($sql);
     }
     public function getHospitalDiagnosis($level, $reportHospital, $agency, $salesman)

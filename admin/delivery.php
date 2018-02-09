@@ -30,6 +30,18 @@ if (isset($_POST['submit'])){
     if (empty($deviceList) && !empty($deviceIdList)) {
         $deviceList = explode(',', $deviceIdList);
     }
+    
+    foreach ($deviceList as $deviceId) {
+        $isExisted = DbiAdmin::getDbi()->existedDevice1($deviceId);
+        if (VALUE_DB_ERROR === $isExisted) {
+            user_back_after_delay(MESSAGE_DB_ERROR);
+        } elseif (true === $isExisted) {
+            user_back_after_delay("设备【 $deviceId 】已绑定其他医院。");
+        }  else {
+            continue;
+        }
+    }
+    
     foreach ($deviceList as $deviceId) {
         $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency);
         if (VALUE_DB_ERROR === $ret) {
