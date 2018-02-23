@@ -202,7 +202,7 @@ class Dbi extends BaseDbi
             if ($this->existData('examination_patient', 
                     "patient_id = $patientId and record_id = $recordId and type = '$type' and examination_id = $examinationId")) {
                 $sql = "update examination_patient
-                set examination_value = '$value', examination_result = '$result', create_time = now()
+                set examination_value = concat(examination_value, '-$value'), examination_result = '$result', create_time = now()
                 where patient_id = $patientId and record_id = $recordId and type = '$type' and examination_id = $examinationId";
                 $ret = $this->updateData($sql);
                 if (VALUE_DB_ERROR === $ret) {
@@ -226,14 +226,8 @@ class Dbi extends BaseDbi
                     return VALUE_DB_ERROR;
                 }
             }
-            $sql = "update examination_patient 
-                    set examination_value = '$value', examination_result = '$result', create_time = now() 
-                    where patient_id = $patientId and record_id = $recordId and type = '$type' and examination_id = $examinationId";
-            $ret = $this->updateData($sql);
-            if (VALUE_DB_ERROR === $ret) {
-                return VALUE_DB_ERROR;
-            }
-            
+
+            //update follow_record from examinaion_patient.
             $sql = "select examination_id, examination_value, examination_result
                     from examination_patient
                     where patient_id = $patientId and record_id = $recordId and type = '$type'";

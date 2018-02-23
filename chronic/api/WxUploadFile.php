@@ -10,13 +10,13 @@ class WxUploadFile extends BaseApi
         if (true !== $ret) {
             return $ret;
         }
-        $required = ['patient_id', 'examination_id', 'result'];
+        $required = ['patient_id', 'examination_id'];
         
         $checkRequired = HpValidate::checkRequiredParam($required, $this->param);
         if (true !== $checkRequired) {
             return $checkRequired;
         }
-        
+        /*
         if (false === Dbi::getDbi()->existedPatient($this->param['patient_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'patient_id.');
         }
@@ -34,7 +34,7 @@ class WxUploadFile extends BaseApi
                 && false === Dbi::getDbi()->existedOutPatient($this->param['outpatient_id'])) {
             return HpErrorMessage::getError(ERROR_DATA_CONSISTENCY, 'outpatient_id.');
         }
-        
+        */
         if (!isset($_FILES['file']['name']) || !isset($_FILES['file']['tmp_name'])) {
             return HpErrorMessage::getError(ERROR_UPLOAD_NO_DATA);
         }
@@ -53,8 +53,9 @@ class WxUploadFile extends BaseApi
             mkdir($dir);
         }
         $clientFileName = $_FILES['file']['name'];
+        $rowNo = '_' . (isset($this->param['row_no']) ? $this->param['row_no'] : '1');
         $fileName = $this->param['patient_id'] . '_' . $this->param['examination_id']
-            . '_' . date('His') . substr($clientFileName, strrpos($clientFileName, '.'));
+            . '_' . date('His') . $rowNo . substr($clientFileName, strrpos($clientFileName, '.'));
         
         if (move_uploaded_file($_FILES['file']['tmp_name'], $dir . $fileName)) {
             $url = 'upload/' . date('Ymd') . '/' . $fileName;
@@ -70,7 +71,7 @@ class WxUploadFile extends BaseApi
                 $recordId = null;
             }
             $ret = Dbi::getDbi()->addRecordExamination($this->param['patient_id'], 
-                    $this->param['examination_id'], $url, $this->param['result'], $type, $recordId);
+                    $this->param['examination_id'], $url, '', $type, $recordId);
             if (VALUE_DB_ERROR === $ret) {
                 return HpErrorMessage::getError(ERROR_DB);
             }
