@@ -3,9 +3,6 @@ require 'common.php';
 require_once PATH_LIB . 'db/DbiBatch.php';
 
 $logFile = 'batch_device_count.log';
-Logger::writeBatch($logFile, 'start.');
-
-$tableFrom = 'ecg';
 
 $deviceCount = DbiBatch::getDbi()->getDeviceCount();
 if (VALUE_DB_ERROR === $deviceCount) {
@@ -26,5 +23,4 @@ foreach ($deviceCount as $row) {
 }
 file_put_contents($file, $data);
 
-Logger::writeBatch($logFile, 'succeed.');
 exit;
