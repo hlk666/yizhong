@@ -152,14 +152,42 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
             <label class="checkbox-inline"><input type="radio" name="contract_flag" value="1">已签</label>
             <label class="checkbox-inline"><input type="radio" name="contract_flag" value="0" checked>未签</label></div>';
     }
-    if ('1' == $hospitalInfo['device_sale']) {
-        $htmlDeviceSale = '<div class="col-sm-10">
-            <label class="checkbox-inline"><input type="radio" name="device_sale" value="1" checked>出售</label>
-            <label class="checkbox-inline"><input type="radio" name="device_sale" value="0">免费</label></div>';
-    } else {
-        $htmlDeviceSale = '<div class="col-sm-10">
-            <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">出售</label>
-            <label class="checkbox-inline"><input type="radio" name="device_sale" value="0" checked>免费</label></div>';
+    switch ($hospitalInfo['device_sale']) {
+        case 1:
+            $htmlDeviceSale = '<div class="col-sm-10">
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="1" checked>投放</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">其他</label></div>';
+            break;
+        case 2:
+            $htmlDeviceSale = '<div class="col-sm-10">
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2" checked>销售+服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">其他</label></div>';
+            break;
+        case 3:
+            $htmlDeviceSale = '<div class="col-sm-10">
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3" checked>销售+无服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">其他</label></div>';
+            break;
+        case 4:
+            $htmlDeviceSale = '<div class="col-sm-10">
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4" checked>其他</label></div>';
+            break;
+        default:
+            $htmlDeviceSale = '<div class="col-sm-10">
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="1" checked>投放</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">其他</label></div>';
+            break;
     }
     if ('1' == $hospitalInfo['display_check']) {
         $htmlDisplayCheck = '<div class="col-sm-10">

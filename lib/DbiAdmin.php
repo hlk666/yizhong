@@ -370,6 +370,13 @@ class DbiAdmin extends BaseDbi
         $sql = "select device_id, fault, create_time from device_fault where 1 $whereDevice $whereFault";
         return $this->getDataAll($sql);
     }
+    public function getDeviceHospital($device)
+    {
+        $sql = "select d.device_id, h.hospital_id, hospital_name, h.agency, h.salesman, tel, agency_tel
+                from hospital as h inner join device as d on h.hospital_id = d.hospital_id
+                where d.device_id = '$device' limit 1";
+        return $this->getDataRow($sql);
+    }
     public function getDeviceGuardianCount($hospital, $startTime = null, $endTime = null)
     {
         if (empty($hospital)) {
@@ -563,9 +570,11 @@ class DbiAdmin extends BaseDbi
         if (!empty($endTime)) {
             $time .= "and h.create_time <= '$endTime' ";
         }
-        $sql = "select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type, count(d.device_id) as device_count
+        $sql = "select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, 
+                h.type, h.province, h.city, h.county, count(d.device_id) as device_count
                 from hospital as h left join device as d on h.hospital_id = d.hospital_id
-                where 1 $time group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type";
+                where 1 $time 
+                group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type, h.province, h.city, h.county";
         return $this->getDataAll($sql);
     }
     public function getHospitalDiagnosis($level, $reportHospital, $agency, $salesman)
@@ -774,6 +783,11 @@ class DbiAdmin extends BaseDbi
         $sql = 'select user, password, type, hospital_id from user_diagnosis where user = :user limit 1';
         $param = [':user' => $user];
         return $this->getDataRow($sql, $param);
+    }
+    public function notFollow($hospitalId)
+    {
+        $sql = "update hospital set need_follow = 0 where hospital_id = $hospitalId";
+        return $this->updateData($sql);
     }
     public function updatePassword($user, $newPassword)
     {

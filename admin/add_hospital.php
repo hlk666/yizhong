@@ -17,6 +17,7 @@ if (isset($_POST['submit'])){
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
     $province = isset($_POST['province']) ? $_POST['province'] : '';
     $city = isset($_POST['city']) ? $_POST['city'] : '';
+    $county = isset($_POST['county']) ? $_POST['county'] : '';
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
     $hospitalParent = !isset($_POST['hospital_parent']) ? null : $_POST['hospital_parent'];
@@ -35,7 +36,7 @@ if (isset($_POST['submit'])){
     $titleHospital = (isset($_POST['hospital_title']) && !empty($_POST['hospital_title'])) ? $_POST['hospital_title'] : '';
     $agency = (isset($_POST['agency']) && !empty($_POST['agency'])) ? $_POST['agency'] : '';
     $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
-    $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
+    $deviceSale = '0';//isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
     $reportMustCheck = isset($_POST['report_must_check']) ? $_POST['report_must_check'] : '0';
     
@@ -80,7 +81,7 @@ if (isset($_POST['submit'])){
     }
     
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, $type, $level, $hospitalTel, 
-            $province, $city, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser, 
+            $province, $city, $county, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser, 
             $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital, 
             $agency, $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, 
             $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $_SESSION['user']);
@@ -180,9 +181,12 @@ if (isset($_POST['submit'])){
       <select class="form-control" name="province" id="proS" onchange="loadCity()"><option value="0">请选择</option></select>
     </div>
     <div class="col-sm-2">
-      <select class="form-control" name="city" id="cityS"><option value="0">请选择</option></select>
+      <select class="form-control" name="city" id="cityS" onchange="loadCounty()"><option value="0">请选择</option></select>
     </div>
-    <div class="col-sm-6">
+    <div class="col-sm-2">
+      <select class="form-control" name="county" id="countyS"><option value="0">请选择</option></select>
+    </div>
+    <div class="col-sm-4">
       <input type="text" class="form-control" id="hospital_address" name="hospital_address" placeholder="请输入医院的地址" required>
     </div>
   </div>
@@ -256,13 +260,6 @@ if (isset($_POST['submit'])){
       <label class="checkbox-inline">
       <input type="radio" name="contract_flag" value="0" checked>未签</label>
     </div>
-    <label class="col-sm-2 control-label">设备投放类型</label>
-    <div class="col-sm-4">
-      <label class="checkbox-inline">
-      <input type="radio" name="device_sale" value="1">出售</label>
-      <label class="checkbox-inline">
-      <input type="radio" name="device_sale" value="0" checked>免费</label>
-    </div>
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">是否显示审阅医生</label>
@@ -317,12 +314,13 @@ if (isset($_POST['submit'])){
     </div>
   </div>
 </form>
-<script src="js/proCity.js"></script>
+<script src="js/proCityCountry.js"></script>
 <script src="js/yizhong.js"></script>
 <script>
-    var proS=document.getElementById("proS"),cityS=document.getElementById("cityS");
+    var proS=document.getElementById("proS"),cityS=document.getElementById("cityS"),countyS=document.getElementById("countyS");
     loadProvince();
     loadCity();
+    loadCounty();
 </script>
 EOF;
 }

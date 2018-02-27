@@ -24,6 +24,7 @@ if (isset($_POST['submit'])){
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
     $province = isset($_POST['province']) ? $_POST['province'] : '';
     $city = isset($_POST['city']) ? $_POST['city'] : '';
+    $county = isset($_POST['county']) ? $_POST['county'] : '';
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
     $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '';
@@ -56,6 +57,9 @@ if (isset($_POST['submit'])){
     if (empty($city)) {
         user_back_after_delay('请选择城市。');
     }
+    if (empty($county)) {
+        user_back_after_delay('请选择区县。');
+    }
     if (empty($hospitalAddress)) {
         user_back_after_delay('请正确输入医院地址。');
     }
@@ -79,7 +83,7 @@ if (isset($_POST['submit'])){
     }
     
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, '0', $level, $hospitalTel, 
-            $province, $city, $hospitalAddress, '0', '0', $adminUser, '', 
+            $province, $city, $county, $hospitalAddress, '0', '0', $adminUser, '', 
             $salesman, '', $analysisHospital, $reportHospital, $titleHospital, $agency, 
             '0', '0', '0', '0', $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, 
             $creator, $double, $agencyTel, $deviceList);
@@ -121,9 +125,12 @@ if (isset($_POST['submit'])){
       <select class="form-control" name="province" id="proS" onchange="loadCity()"><option value="0">请选择</option></select>
     </div>
     <div class="col-sm-2">
-      <select class="form-control" name="city" id="cityS"><option value="0">请选择</option></select>
+      <select class="form-control" name="city" id="cityS" onchange="loadCounty()"><option value="0">请选择</option></select>
     </div>
-    <div class="col-sm-6">
+    <div class="col-sm-2">
+      <select class="form-control" name="county" id="countyS"><option value="0">请选择</option></select>
+    </div>
+    <div class="col-sm-4">
       <input type="text" class="form-control" id="hospital_address" name="hospital_address" placeholder="请输入医院的地址" required>
     </div>
   </div>
@@ -155,9 +162,9 @@ if (isset($_POST['submit'])){
     <div class="col-sm-4">
       <input type="text" class="form-control" name="agency" placeholder="请输入代理商" required>
     </div>
-    <label for="salesman" class="col-sm-2 control-label">代理商电话</label>
+    <label for="salesman" class="col-sm-2 control-label">代理商电话<font color="red">*</font></label>
     <div class="col-sm-4">
-      <input type="text" class="form-control" name="agency_tel" placeholder="请输入代理商电话">
+      <input type="text" class="form-control" name="agency_tel" placeholder="请输入代理商电话" required>
     </div>
   </div>
   <div class="form-group">
@@ -204,12 +211,13 @@ if (isset($_POST['submit'])){
     </div>
   </div>
 </form>
-<script src="js/proCity.js"></script>
+<script src="js/proCityCountry.js"></script>
 <script src="js/yizhong.js"></script>
 <script>
-    var proS=document.getElementById("proS"),cityS=document.getElementById("cityS");
+    var proS=document.getElementById("proS"),cityS=document.getElementById("cityS"),countyS=document.getElementById("countyS");
     loadProvince();
     loadCity();
+    loadCounty();
 </script>
 EOF;
 }

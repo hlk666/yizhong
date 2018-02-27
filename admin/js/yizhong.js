@@ -90,6 +90,30 @@ function loadCity(currentCity){
         cityS.appendChild(tempFragment);
     }
 }
+function loadCounty(){
+    if(cityS.value==0){
+        return;
+    }else{
+        countyS.innerHTML="<option value='0'>请选择</option>";
+        var hasFound=false;
+        var tempFragment = document.createDocumentFragment();
+        for(var i=0;i<countryData_.length;i++){
+            if(cityS.value==countryData_[i].ck){
+                hasFound=true;
+                var option=document.createElement("option");
+                option.setAttribute("value",countryData_[i].cyk);
+                option.innerHTML=countryData_[i].cyv;
+                tempFragment.appendChild(option);
+            }else{
+                if(hasFound){
+                    break;
+                }
+            }
+        }
+        countyS.appendChild(tempFragment);
+    }
+}
+
 function getHosName(id) {
     htmlobj = $.ajax({url : "hosName.php?id=" + id, async : false});
     $("#title").html(htmlobj.responseText);
