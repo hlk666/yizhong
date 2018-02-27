@@ -41,16 +41,25 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function addHospital($name, $type, $level, $tel, $province, $city, $address, $parentFlag, $parentHospital, 
+    public function addDeviceFault($device, $fault)
+    {
+        $sql = "insert into device_fault (device_id, fault) values ('$device', '$fault')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
+    public function addHospital($name, $type, $level, $tel, $province, $city, $county, $address, $parentFlag, $parentHospital, 
             $adminUser, $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $title1, $agency, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
             $invoiceBank, $creator, $double = '0', $agencyTel = '', $deviceList = array())
     {
         $this->pdo->beginTransaction();
-        $sql = "insert into hospital(hospital_name, type, level, tel, province, city, address, parent_flag, 
+        $sql = "insert into hospital(hospital_name, type, level, tel, province, city, county, address, parent_flag, 
                 sms_tel, agency, salesman, comment, contract_flag, device_sale, display_check, report_must_check, 
                 invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker, agency_tel)
-                values ('$name', '$type', '$level', '$tel', '$province', '$city', '$address', '$parentFlag', 
+                values ('$name', '$type', '$level', '$tel', '$province', '$city', '$county', '$address', '$parentFlag', 
                 '$messageTel', '$agency', '$salesman', '$comment', '$contractFlag', '$deviceSale', '$displayCheck', 
                 '$reportMustCheck', '$invoiceName', '$invoiceId', '$invoiceAddressTel', '$invoiceBank', '$creator', 
                 '$creator', '$agencyTel')";
@@ -352,6 +361,13 @@ class DbiAdmin extends BaseDbi
         }
         $sql = "select ifnull(hospital_name, '') as hospital_name, device_id, d.agency from device as d
                 left join hospital as h on d.hospital_id = h.hospital_id  where d.device_id like '%$id'";
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceFault($device, $fault)
+    {
+        $whereDevice = empty($device) ? '' : " and device_id = '$device' ";
+        $whereFault = empty($fault) ? '' : " and fault = '$fault' ";
+        $sql = "select device_id, fault, create_time from device_fault where 1 $whereDevice $whereFault";
         return $this->getDataAll($sql);
     }
     public function getDeviceGuardianCount($hospital, $startTime = null, $endTime = null)

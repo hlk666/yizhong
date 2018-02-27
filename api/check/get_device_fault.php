@@ -1,7 +1,10 @@
 <?php
 require_once PATH_LIB . 'DbiAdmin.php';
 
-$ret = DbiAdmin::getDbi()->getDeviceFault();
+$device = isset($_GET['device_id']) ? $_GET['device_id'] : '';
+$fault = isset($_GET['fault']) ? $_GET['fault'] : '';
+
+$ret = DbiAdmin::getDbi()->getDeviceFault($device, $fault);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
