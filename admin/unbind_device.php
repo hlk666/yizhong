@@ -13,7 +13,7 @@ if (empty($deviceId)) {
     user_back_after_delay('非法访问。');
 }
 
-$ret = DbiAdmin::getDbi()->delDevice($deviceId, 0, $agency);
+$ret = DbiAdmin::getDbi()->delDevice($deviceId, 0, $agency, $_SESSION['user']);
 if (VALUE_DB_ERROR === $ret) {
     user_back_after_delay(MESSAGE_DB_ERROR);
 }

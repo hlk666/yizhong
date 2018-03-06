@@ -90,7 +90,7 @@ function loadCity(currentCity){
         cityS.appendChild(tempFragment);
     }
 }
-function loadCounty(){
+function loadCounty(currentCounty){
     if(cityS.value==0){
         return;
     }else{
@@ -103,6 +103,9 @@ function loadCounty(){
                 var option=document.createElement("option");
                 option.setAttribute("value",countryData_[i].cyk);
                 option.innerHTML=countryData_[i].cyv;
+                if (countryData_[i].cyk == currentCounty) {
+                    option.setAttribute('selected', 'selected');
+                }
                 tempFragment.appendChild(option);
             }else{
                 if(hasFound){

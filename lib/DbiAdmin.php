@@ -50,6 +50,24 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
+    public function addDeviceFeedback($hospitalId, $feedback)
+    {
+        $sql = "insert into device_feedback (hospital_id, feedback) values ('$hospitalId', '$feedback')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
+    public function addDevicePD($device)
+    {
+        $sql = "insert into device (device_id, hospital_id) values ('$device', 40)";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
     public function addHospital($name, $type, $level, $tel, $province, $city, $county, $address, $parentFlag, $parentHospital, 
             $adminUser, $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $title1, $agency, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
@@ -147,13 +165,12 @@ class DbiAdmin extends BaseDbi
         $sql = "update account set hospital_id = 9999 where account_id = $doctorId";
         return $this->updateData($sql);
     }
-    public function delDevice($deviceId, $hospital, $agency)
+    public function delDevice($deviceId, $hospital, $agency, $user)
     {
         $oldHospitalId = $this->getDataString("select hospital_id from device where device_id = $deviceId limit 1");
         if (VALUE_DB_ERROR === $oldHospitalId) {
             return VALUE_DB_ERROR;
         }
-        
         if ($oldHospitalId !== '') {
             $sql = "update device set hospital_id = $hospital, agency = '$agency' where device_id = '$deviceId'";
         } else {
@@ -166,7 +183,7 @@ class DbiAdmin extends BaseDbi
         }
         
         $sql = "insert into history_device (device_id, hospital_id, agency, user, unbind_hospital_id) 
-                values ('$deviceId', $hospital, '$agency', 'admin', $oldHospitalId)";
+                values ('$deviceId', $hospital, '$agency', '$user', $oldHospitalId)";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -243,10 +260,10 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital' => $hospitalId];
         return $this->deleteData($sql, $param);
     }
-    public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
+    public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
             $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, 
-            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker)
+            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter)
     {
         $this->pdo->beginTransaction();
     
@@ -260,11 +277,11 @@ class DbiAdmin extends BaseDbi
         }
         
         $sql = "update hospital set hospital_name = '$hospitalName', type = '$type', level = '$level', tel = '$hospitalTel', 
-                province = '$province', city = '$city', address = '$hospitalAddress', parent_flag = '$parentFlag', 
+                province = '$province', city = '$city', county = '$county', address = '$hospitalAddress', parent_flag = '$parentFlag', 
                 sms_tel = '$messageTel', agency = '$agency', salesman = '$salesman', comment = '$comment', contract_flag = '$contractFlag', 
                 device_sale = '$deviceSale', display_check = '$displayCheck', report_must_check = '$reportMustCheck',
                 invoice_name = '$invoiceName', invoice_id = '$invoiceId', invoice_addr_tel = '$invoiceAddressTel', 
-                invoice_bank = '$invoiceBank', worker = '$worker' where hospital_id = '$hospitalId'";
+                invoice_bank = '$invoiceBank', worker = '$worker', filter = '$filter' where hospital_id = '$hospitalId'";
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
@@ -370,6 +387,12 @@ class DbiAdmin extends BaseDbi
         $sql = "select device_id, fault, create_time from device_fault where 1 $whereDevice $whereFault";
         return $this->getDataAll($sql);
     }
+    public function getDeviceFeedback($hospitalId, $createTime)
+    {
+        $whereTime = empty($createTime) ? '' : " and create_time >= '$createTime' ";
+        $sql = "select device_id, fault, create_time from device_fault where hospital_id = $hospitalId $whereTime";
+        return $this->getDataAll($sql);
+    }
     public function getDeviceHospital($device)
     {
         $sql = "select d.device_id, h.hospital_id, hospital_name, h.agency, h.salesman, tel, agency_tel
@@ -436,6 +459,11 @@ class DbiAdmin extends BaseDbi
         if (null !== $rows) {
             $sql .= " limit $offset, $rows";
         }
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceListPD()
+    {
+        $sql = "select device_id from device where hospital_id = 40";
         return $this->getDataAll($sql);
     }
     public function getDeviceNotUsed($count)
@@ -507,15 +535,19 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
-    public function getGuardiansStatistics($hospitalList, $sTime = null, $eTime = null)
+    public function getGuardiansStatistics($hospitalList, $sTime = null, $eTime = null, $hospitalId = null)
     {
         $sql = 'select g.guardian_id, g.device_id, g.regist_hospital_id, g.start_time, g.end_time, d.status,
                 p.patient_name, p.sex, p.birth_year, p.tel, g.regist_doctor_name as doctor_name
                 from guardian as g left join patient as p on g.patient_id = p.patient_id 
                 left join guardian_data as d on g.guardian_id = d.guardian_id
                 where 1 ';
-        if (!empty($hospitalList)) {
-            $sql .= " and regist_hospital_id in ($hospitalList) ";
+        if (!empty($hospitalId)) {
+            $sql .= " and regist_hospital_id in ($hospitalId) ";
+        } else {
+            if (!empty($hospitalList)) {
+                $sql .= " and regist_hospital_id in ($hospitalList) ";
+            }
         }
         if ($sTime != null) {
             $sql .= " and g.regist_time >= '$sTime' ";
@@ -571,10 +603,11 @@ class DbiAdmin extends BaseDbi
             $time .= "and h.create_time <= '$endTime' ";
         }
         $sql = "select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, 
-                h.type, h.province, h.city, h.county, count(d.device_id) as device_count
+                h.type, h.province, h.city, h.county, h.device_sale, count(d.device_id) as device_count, h.filter
                 from hospital as h left join device as d on h.hospital_id = d.hospital_id
                 where 1 $time 
-                group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type, h.province, h.city, h.county";
+                group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type, 
+                h.province, h.city, h.county, h.filter";
         return $this->getDataAll($sql);
     }
     public function getHospitalDiagnosis($level, $reportHospital, $agency, $salesman)
@@ -617,10 +650,10 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, address, h.tel, 
+        $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, county, address, h.tel, 
                 parent_flag, a.login_name, h.sms_tel, h.agency, h.salesman, h.comment, 
                 h.contract_flag, h.device_sale, h.display_check, h.report_must_check,
-                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker
+                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker, filter
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];
@@ -784,10 +817,60 @@ class DbiAdmin extends BaseDbi
         $param = [':user' => $user];
         return $this->getDataRow($sql, $param);
     }
+    public function notDisplayFirst($guardianId)
+    {
+        $sql = "update guardian set display_first = 0 where guardian_id = $guardianId";
+        return $this->updateData($sql);
+    }
     public function notFollow($hospitalId)
     {
         $sql = "update hospital set need_follow = 0 where hospital_id = $hospitalId";
         return $this->updateData($sql);
+    }
+    public function pdDelete($deviceId, $user)
+    {
+        $sql = "insert into history_device (device_id, user, unbind_hospital_id) values ('$deviceId', '$user', 40)";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        
+        $sql = "delete from device where device_id = '$deviceId'";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
+    public function pdAbandon($deviceId, $user)
+    {
+        $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id) values ('$deviceId', 9999, '$user', 40)";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+    
+        $sql = "update device set hospital_id = 9999 where device_id = '$deviceId'";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
+    public function pdWarehouse($deviceId, $user)
+    {
+        $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id) values ('$deviceId', 1, '$user', 40)";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+    
+        $sql = "update device set hospital_id = 1 where device_id = '$deviceId'";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
     }
     public function updatePassword($user, $newPassword)
     {

@@ -7,6 +7,7 @@ $level = isset($_GET['level']) && !empty($_GET['level']) ? $_GET['level'] : null
 $hospitalTime = isset($_GET['hospital_time']) && !empty($_GET['hospital_time']) ? $_GET['hospital_time'] : null;
 $sTime = isset($_GET['start_time']) && !empty($_GET['start_time']) ? $_GET['start_time'] : null;
 $eTime = isset($_GET['end_time']) && !empty($_GET['end_time']) ? $_GET['end_time'] . ' 23:59:59' : null;
+$hospitalId = isset($_GET['hospital_id']) && !empty($_GET['hospital_id']) ? $_GET['hospital_id'] : null;
 
 $hospitalList = '';
 if (!empty($agency)) {
@@ -69,7 +70,7 @@ if (!empty($agency)) {
     //$hospitalList = '1';
 }
 
-$ret = DbiAdmin::getDbi()->getGuardiansStatistics($hospitalList, $sTime, $eTime);
+$ret = DbiAdmin::getDbi()->getGuardiansStatistics($hospitalList, $sTime, $eTime, $hospitalId);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

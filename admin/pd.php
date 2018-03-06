@@ -1,0 +1,64 @@
+<?php
+require '../config/config.php';
+require '../lib/function.php';
+require '../lib/DbiAdmin.php';
+
+$title = '生产部管理';
+$isHideSider = true;
+require 'header.php';
+
+if (isset($_POST['submit'])){
+    $ret = DbiAdmin::getDbi()->addDevicePD($_POST['device']);
+    if (VALUE_DB_ERROR === $ret) {
+        user_back_after_delay(MESSAGE_DB_ERROR);
+    }
+}
+
+$deviceList = DbiAdmin::getDbi()->getDeviceListPD();
+if (VALUE_DB_ERROR === $deviceList) {
+    user_back_after_delay(MESSAGE_DB_ERROR);
+}
+
+$htmlDevices = '';
+foreach ($deviceList as $value) {
+    $btnDel = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:pdFunc('. $value['device_id'] . ', \'delete\')">注销</button>';
+    $btnAbandon = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:pdFunc('. $value['device_id'] . ', \'abandon\')">移入废品库</button>';
+    $btnWarehouse = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:pdFunc('. $value['device_id'] . ', \'warehouse\')">移入成品库</button>';
+    $htmlDevices .= '<tr><td>' . $value['device_id'] . '</td><td>' . $btnDel . '</td><td>' . $btnAbandon . '</td><td>' . $btnWarehouse . '</td></tr>';
+}
+
+echo <<<EOF
+<h4>将设备添加到生产部(新品、退货等)。</h4>
+<form class="form-horizontal" role="form" method="post">
+<div class="row">
+  <div class="col-xs-12 col-sm-3" style="margin-bottom:3px;">
+    <label class="control-label">输入设备ID：</label>
+  </div>
+  <div class="col-xs-12 col-sm-3" style="margin-bottom:3px;">
+    <input type="text" class="form-control" name="device" required>
+  </div>
+  <div class="col-xs-12 col-sm-3">
+    <button type="submit" class="btn btn-sm btn-info" name="submit">添加到生产部</button>
+  </div>
+</div>
+</form>
+<hr style="border-top:1px ridge red;" />
+<table class="table table-striped">
+<thead>
+  <tr>
+    <th>设备ID</th>
+    <th>注销/删除设备ID(不移入废品库)</th>
+    <th>移入废品库</th>
+    <th>移入成品库</th>
+  </tr>
+</thead>
+<tbody>$htmlDevices</tbody>
+</table>
+<script>
+    function pdFunc(id, type)
+    {
+        window.location = 'pd_js.php?id=' + id + '&type=' + type;
+    }
+</script>
+EOF;
+require 'tpl/footer.tpl';
