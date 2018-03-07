@@ -147,7 +147,7 @@ class BaseDbi
             $stmt->execute($param);
             Logger::write($this->sqlLog, $stmt->queryString);
             $ret = $stmt->fetchColumn();
-            if (null === $ret) {
+            if (null === $ret || false === $ret) {
                 return '';
             } else {
                 return $ret;

@@ -82,6 +82,9 @@ class AnalysisUpload
                         ShortMessageService::send('13963896768', '有新的已分析数据，请审阅报告。');
                     }
                 }
+                if ('report' == $type && in_array($param['report_doctor'], [233, 446])) {
+                    setNotice('1', 'report', $guardianId);
+                }
                 if ('report' == $type && $tree['hospital_id'] != $tree['report_hospital']) {
                     setNotice($tree['hospital_id'], $type, $guardianId);
                 }

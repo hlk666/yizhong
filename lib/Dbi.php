@@ -269,7 +269,7 @@ class Dbi extends BaseDbi
         $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, g.regist_hospital_id, 
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, 
                 g.blood_pressure, g.tentative_diagnose, g.medical_history, g.hospitalization_id, 
-                g.lead, g.regist_doctor_name as doctor_name, g.sickroom
+                g.lead, g.regist_doctor_name as doctor_name, g.sickroom, g.display_first
                 from guardian as g left join patient as p on g.patient_id = p.patient_id ';
         if ($hospitalId === 0) {
             $sql .= ' where 1 ';
@@ -406,7 +406,9 @@ class Dbi extends BaseDbi
     }
     public function getHospitalList()
     {
-        $sql = 'select hospital_id, hospital_name, tel, level, device_sale, type, create_time, agency, salesman from hospital';
+        $sql = 'select hospital_id, hospital_name, tel, level, device_sale, type, create_time, 
+                agency, salesman, need_follow, province, city, county, filter, need_follow_report
+                from hospital';
         return $this->getDataAll($sql);
     }
     public function getHospitalChild($hospitalId)
