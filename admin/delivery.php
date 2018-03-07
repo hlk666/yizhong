@@ -43,7 +43,7 @@ if (isset($_POST['submit'])){
     }
     
     foreach ($deviceList as $deviceId) {
-        $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency);
+        $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency, $_SESSION['user']);
         if (VALUE_DB_ERROR === $ret) {
             user_back_after_delay(MESSAGE_DB_ERROR);
         }

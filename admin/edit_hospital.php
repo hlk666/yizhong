@@ -18,6 +18,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
     $province = isset($_POST['province']) ? $_POST['province'] : '';
     $city = isset($_POST['city']) ? $_POST['city'] : '';
+    $county = isset($_POST['county']) ? $_POST['county'] : '';
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
     $loginUser = !isset($_POST['login_user']) ? null : $_POST['login_user'];
@@ -34,6 +35,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
     $reportMustCheck = isset($_POST['report_must_check']) ? $_POST['report_must_check'] : '0';
+    $filter = isset($_POST['filter']) ? $_POST['filter'] : '0';
     
     if (empty($hospitalId)) {
         user_back_after_delay('非法访问');
@@ -76,10 +78,10 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
             user_back_after_delay("登录用户名<font color='red'>$loginUser</font>已被他人使用。");
         }
 
-        $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, 
+        $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
                 $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-                $invoiceBank, $worker);
+                $invoiceBank, $worker, $filter);
     }
     
     if (isset($_POST['del'])) {
@@ -122,6 +124,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $hospitalName = $hospitalInfo['hospital_name'];
     $province = $hospitalInfo['province'];
     $city = $hospitalInfo['city'];
+    $county = $hospitalInfo['county'];
     $address = $hospitalInfo['address'];
     $tel = $hospitalInfo['tel'];
     $loginUser = $hospitalInfo['login_name'];
@@ -158,35 +161,35 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="1" checked>投放</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">其他</label></div>';
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">押金</label></div>';
             break;
         case 2:
             $htmlDeviceSale = '<div class="col-sm-10">
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="2" checked>销售+服务费</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">其他</label></div>';
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">押金</label></div>';
             break;
         case 3:
             $htmlDeviceSale = '<div class="col-sm-10">
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="3" checked>销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">其他</label></div>';
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">押金</label></div>';
             break;
         case 4:
             $htmlDeviceSale = '<div class="col-sm-10">
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4" checked>其他</label></div>';
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4" checked>押金</label></div>';
             break;
         default:
             $htmlDeviceSale = '<div class="col-sm-10">
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="1" checked>投放</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">其他</label></div>';
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">押金</label></div>';
             break;
     }
     if ('1' == $hospitalInfo['display_check']) {
@@ -206,6 +209,15 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         $htmlReportMustCheck = '<div class="col-sm-10">
             <label class="checkbox-inline"><input type="radio" name="report_must_check" value="1">是</label>
             <label class="checkbox-inline"><input type="radio" name="report_must_check" value="0" checked>否</label></div>';
+    }
+    if ('1' == $hospitalInfo['filter']) {
+        $htmlFilter = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="filter" value="1" checked>不再关注</label>
+            <label class="checkbox-inline"><input type="radio" name="filter" value="0">继续关注</label></div>';
+    } else {
+        $htmlFilter = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="filter" value="1">不再关注</label>
+            <label class="checkbox-inline"><input type="radio" name="filter" value="0" checked>继续关注</label></div>';
     }
     
     $button = '';
@@ -253,9 +265,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
       <select class="form-control" name="province" id="proS" onchange="loadCity()"><option value="0">请选择</option></select>
     </div>
     <div class="col-sm-2">
-      <select class="form-control" name="city" id="cityS"><option value="0">请选择</option></select>
+      <select class="form-control" name="city" id="cityS" onchange="loadCounty()"><option value="0">请选择</option></select>
     </div>
-    <div class="col-sm-6">
+    <div class="col-sm-2">
+      <select class="form-control" name="county" id="countyS"><option value="0">请选择</option></select>
+    </div>
+    <div class="col-sm-4">
       <input type="text" class="form-control" id="hospital_address1" name="hospital_address" value="$address">
     </div>
   </div>
@@ -281,6 +296,10 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
   <div class="form-group">
     <label class="col-sm-2 control-label">是否报告必须审阅<font color="red">*</font></label>
     $htmlReportMustCheck
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">是否关注该医院<font color="red">*</font></label>
+    $htmlFilter
   </div>
   <div class="form-group">
     <label for="login_user" class="col-sm-2 control-label">管理员登录用户<font color="red">*</font></label>
@@ -350,12 +369,13 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     </div>
   </div>
 </form>
-<script src="js/proCity.js"></script>
+<script src="js/proCityCountry.js"></script>
 <script src="js/yizhong.js"></script>
 <script>
-    var proS=document.getElementById("proS"),cityS=document.getElementById("cityS");
+    var proS=document.getElementById("proS"),cityS=document.getElementById("cityS"),countyS=document.getElementById("countyS");
     loadProvince($province);
     loadCity($city);
+    loadCounty($county);
 </script>
 EOF;
 }
