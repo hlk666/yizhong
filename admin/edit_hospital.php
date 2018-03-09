@@ -36,6 +36,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
     $reportMustCheck = isset($_POST['report_must_check']) ? $_POST['report_must_check'] : '0';
     $filter = isset($_POST['filter']) ? $_POST['filter'] : '0';
+    $contact = !isset($_POST['contact']) ? null : $_POST['contact'];
     
     if (empty($hospitalId)) {
         user_back_after_delay('非法访问');
@@ -81,7 +82,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
                 $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-                $invoiceBank, $worker, $filter);
+                $invoiceBank, $worker, $filter, $contact);
     }
     
     if (isset($_POST['del'])) {
@@ -137,6 +138,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $invoiceId = $hospitalInfo['invoice_id'];
     $invoiceAddressTel = $hospitalInfo['invoice_addr_tel'];
     $invoiceBank = $hospitalInfo['invoice_bank'];
+    $contact = $hospitalInfo['contact'];
     
     if ('1' == $hospitalInfo['parent_flag']) {
         $htmlParentFlagYes = '<input type="radio" name="parent_flag" value="1" checked>可</label>';
@@ -305,6 +307,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <label for="login_user" class="col-sm-2 control-label">管理员登录用户<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="login_user" name="login_user" value="$loginUser">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">联系人<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control"  name="contact" value="$contact">
     </div>
   </div>
   <div class="form-group">

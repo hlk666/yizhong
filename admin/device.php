@@ -52,7 +52,7 @@ foreach ($hospitalList as $value) {
 $htmlDevices = '';
 foreach ($deviceList as $value) {
     $buttonTxt = empty($value['hospital_name']) ? '' 
-            : '<button type="button" class="btn btn-xs btn-info" onclick="javascript:unbindDevice('. $value['device_id'] . ')">点击解除</button>';
+            : '<button type="button" class="btn btn-xs btn-info" onclick="javascript:unbindDevice('. $value['device_id'] . ')">点击退回设备</button>';
     $htmlDevices .= '<tr><td>'
         . $value['hospital_name'] . '</td><td>'
         . $value['device_id'] . '</td><td>'
@@ -123,7 +123,7 @@ echo <<<EOF
         <th>医院名</th>
         <th>设备ID</th>
         <th>代理商/业务员</th>
-        <th>解除绑定</th>
+        <th>退货(进入生产部)</th>
       </tr>
     </thead>
     <tbody>$htmlDevices</tbody>

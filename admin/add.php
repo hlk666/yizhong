@@ -27,6 +27,7 @@ if (isset($_POST['submit'])){
     $county = isset($_POST['county']) ? $_POST['county'] : '';
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
+    $contact = !isset($_POST['contact']) ? null : $_POST['contact'];
     $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '';
     
     $invoiceName = (isset($_POST['invoice_name']) && !empty($_POST['invoice_name'])) ? $_POST['invoice_name'] : '';
@@ -66,6 +67,17 @@ if (isset($_POST['submit'])){
     if (empty($adminUser)) {
         user_back_after_delay('请正确输入初始管理员登录用户。');
     }
+    foreach ($deviceList as $deviceId) {
+        $isExisted = DbiAdmin::getDbi()->existedDevice1($deviceId);
+        if (VALUE_DB_ERROR === $isExisted) {
+            user_back_after_delay(MESSAGE_DB_ERROR);
+        } elseif (true === $isExisted) {
+            user_back_after_delay("设备【 $deviceId 】已绑定其他医院。");
+        }  else {
+            continue;
+        }
+    }
+    
     if (empty($titleHospital)) {
         $analysisHospital = 0;
         $reportHospital = 0;
@@ -86,7 +98,7 @@ if (isset($_POST['submit'])){
             $province, $city, $county, $hospitalAddress, '0', '0', $adminUser, '', 
             $salesman, '', $analysisHospital, $reportHospital, $titleHospital, $agency, 
             '0', '0', '0', '0', $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, 
-            $creator, $double, $agencyTel, $deviceList);
+            $creator, $double, $agencyTel, $deviceList, $contact);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -140,6 +152,13 @@ if (isset($_POST['submit'])){
       <input type="text" class="form-control" id="admin" name="admin" placeholder="请输入管理员登录用户名" required onchange="checkUser(this.value)">
     </div>
     <label class="col-sm-6 control-label" id="check_user" style="text-align:left;color:red;"></label>
+  </div>
+  <div class="form-group">
+    <label for="admin" class="col-sm-2 control-label">联系人<font color="red">*</font></label>
+    <div class="col-sm-4">
+      <input type="text" class="form-control" name="contact" required">
+    </div>
+    <label class="col-sm-6 control-label" id="check_user" style="text-align:left;">例：王主任，张医生</label>
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">审核医院(本院请填0)<font color="red">*</font></label>

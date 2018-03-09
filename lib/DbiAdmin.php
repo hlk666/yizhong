@@ -22,6 +22,18 @@ class DbiAdmin extends BaseDbi
     {
         return $this->getDataAll($sql);
     }
+    public function addCountyHospital($county, $count)
+    {
+        if ($this->existData('county_hospital', " county = '$county'")) {
+            $sql = "update county_hospital set quantity = $count where county = '$county'";
+        }
+        $sql = "insert into county_hospital (county, quantity) values ('$county', '$count')";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
     public function addDevice($hospital, $device, $user = '')
     {
         if ($this->existData('device', "device_id = '$device'")) {
@@ -61,8 +73,13 @@ class DbiAdmin extends BaseDbi
     }
     public function addDevicePD($device)
     {
-        $sql = "insert into device (device_id, hospital_id) values ('$device', 40)";
-        $ret = $this->insertData($sql);
+        if($this->existData('device', "device_id = '$device'")) {
+            $sql = "update device set hospital_id = 40 where device_id = '$device'";
+        } else {
+            $sql = "insert into device (device_id, hospital_id) values ('$device', 40)";
+        }
+        
+        $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
         }
@@ -71,16 +88,16 @@ class DbiAdmin extends BaseDbi
     public function addHospital($name, $type, $level, $tel, $province, $city, $county, $address, $parentFlag, $parentHospital, 
             $adminUser, $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $title1, $agency, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-            $invoiceBank, $creator, $double = '0', $agencyTel = '', $deviceList = array())
+            $invoiceBank, $creator, $double = '0', $agencyTel = '', $deviceList = array(), $contact = '')
     {
         $this->pdo->beginTransaction();
         $sql = "insert into hospital(hospital_name, type, level, tel, province, city, county, address, parent_flag, 
                 sms_tel, agency, salesman, comment, contract_flag, device_sale, display_check, report_must_check, 
-                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker, agency_tel)
+                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker, agency_tel, contact)
                 values ('$name', '$type', '$level', '$tel', '$province', '$city', '$county', '$address', '$parentFlag', 
                 '$messageTel', '$agency', '$salesman', '$comment', '$contractFlag', '$deviceSale', '$displayCheck', 
                 '$reportMustCheck', '$invoiceName', '$invoiceId', '$invoiceAddressTel', '$invoiceBank', '$creator', 
-                '$creator', '$agencyTel')";
+                '$creator', '$agencyTel', '$contact')";
         $hospitalId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $hospitalId) {
             $this->pdo->rollBack();
@@ -263,7 +280,7 @@ class DbiAdmin extends BaseDbi
     public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
             $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, 
-            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter)
+            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter, $contact)
     {
         $this->pdo->beginTransaction();
     
@@ -281,7 +298,8 @@ class DbiAdmin extends BaseDbi
                 sms_tel = '$messageTel', agency = '$agency', salesman = '$salesman', comment = '$comment', contract_flag = '$contractFlag', 
                 device_sale = '$deviceSale', display_check = '$displayCheck', report_must_check = '$reportMustCheck',
                 invoice_name = '$invoiceName', invoice_id = '$invoiceId', invoice_addr_tel = '$invoiceAddressTel', 
-                invoice_bank = '$invoiceBank', worker = '$worker', filter = '$filter' where hospital_id = '$hospitalId'";
+                invoice_bank = '$invoiceBank', worker = '$worker', filter = '$filter', contact = '$contact'
+                where hospital_id = '$hospitalId'";
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
@@ -349,6 +367,16 @@ class DbiAdmin extends BaseDbi
         $sql = 'select distinct agency as agency_id, agency as `name` from hospital where type <> 1';
         return $this->getDataAll($sql);
     }
+    public function getCountyCount($county = '')
+    {
+        if (empty($county)) {
+            $where = '';
+        } else {
+            $where = " and county in ($county) ";
+        }
+        $sql = "select county, quantity from county_hospital where 1 $where";
+        return $this->getDataAll($sql);
+    }
     public function getDepartment()
     {
         $sql = 'select d.department_id, d.hospital_id, h1.hospital_name as department_name, h2.hospital_name as hospital_name
@@ -389,8 +417,9 @@ class DbiAdmin extends BaseDbi
     }
     public function getDeviceFeedback($hospitalId, $createTime)
     {
+        $whereHospital = empty($hospitalId) ? '' : " and hospital_id = '$hospitalId' ";
         $whereTime = empty($createTime) ? '' : " and create_time >= '$createTime' ";
-        $sql = "select device_id, fault, create_time from device_fault where hospital_id = $hospitalId $whereTime";
+        $sql = "select hospital_id, feedback, create_time from device_feedback where 1 $whereHospital $whereTime";
         return $this->getDataAll($sql);
     }
     public function getDeviceHospital($device)
@@ -487,9 +516,9 @@ class DbiAdmin extends BaseDbi
         if (empty($hospitals)) {
             $where = '';
         } else {
-            $where = " where hospital_id in ($hospitals) ";
+            $where = " and hospital_id in ($hospitals) ";
         }
-        $sql = "select hospital_id, count(device_id) as quantity from device $where group by hospital_id";
+        $sql = "select hospital_id, count(device_id) as quantity from device where hospital_id > 0 $where group by hospital_id";
         return $this->getDataAll($sql);
     }
     public function getEcgs($startTime, $endTime, $exceptHospitalList)
@@ -653,7 +682,7 @@ class DbiAdmin extends BaseDbi
         $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, county, address, h.tel, 
                 parent_flag, a.login_name, h.sms_tel, h.agency, h.salesman, h.comment, 
                 h.contract_flag, h.device_sale, h.display_check, h.report_must_check,
-                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker, filter
+                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker, filter, contact
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];
@@ -871,6 +900,11 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         return true;
+    }
+    public function setHospitalFilter($hospitalId, $filter)
+    {
+        $sql = "update hospital set filter = '$filter' where hospital_id = $hospitalId";
+        return $this->updateData($sql);
     }
     public function updatePassword($user, $newPassword)
     {

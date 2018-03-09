@@ -407,7 +407,7 @@ class Dbi extends BaseDbi
     public function getHospitalList()
     {
         $sql = 'select hospital_id, hospital_name, tel, level, device_sale, type, create_time, 
-                agency, salesman, need_follow, province, city, county, filter, need_follow_report
+                agency, salesman, need_follow, province, city, county, filter, need_follow_report, contact
                 from hospital';
         return $this->getDataAll($sql);
     }

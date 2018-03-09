@@ -16,6 +16,6 @@ if (VALUE_DB_ERROR === $ret) {
     user_back_after_delay(MESSAGE_DB_ERROR);
 }
 
-user_back_after_delay('操作成功。');
+user_back_after_delay('操作成功。', 2000, 'pd.php');
 
 require 'tpl/footer.tpl';
