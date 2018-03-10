@@ -3,8 +3,9 @@ require_once PATH_LIB . 'DbiAdmin.php';
 
 $device = isset($_GET['device_id']) ? $_GET['device_id'] : '';
 $fault = isset($_GET['fault']) ? $_GET['fault'] : '';
+$time = isset($_GET['time']) ? $_GET['time'] : '';
 
-$ret = DbiAdmin::getDbi()->getDeviceFault($device, $fault);
+$ret = DbiAdmin::getDbi()->getDeviceFault($device, $fault, $time);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

@@ -53,9 +53,9 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function addDeviceFault($device, $fault)
+    public function addDeviceFault($device, $fault, $content)
     {
-        $sql = "insert into device_fault (device_id, fault) values ('$device', '$fault')";
+        $sql = "insert into device_fault (device_id, fault, content) values ('$device', '$fault', '$content')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -408,11 +408,12 @@ class DbiAdmin extends BaseDbi
                 left join hospital as h on d.hospital_id = h.hospital_id  where d.device_id like '%$id'";
         return $this->getDataAll($sql);
     }
-    public function getDeviceFault($device, $fault)
+    public function getDeviceFault($device, $fault, $time)
     {
         $whereDevice = empty($device) ? '' : " and device_id = '$device' ";
         $whereFault = empty($fault) ? '' : " and fault = '$fault' ";
-        $sql = "select device_id, fault, create_time from device_fault where 1 $whereDevice $whereFault";
+        $whereTime = empty($time) ? '' : " and create_time >= '$time' ";
+        $sql = "select device_id, fault, content, create_time from device_fault where 1 $whereDevice $whereFault $whereTime ";
         return $this->getDataAll($sql);
     }
     public function getDeviceFeedback($hospitalId, $createTime)
