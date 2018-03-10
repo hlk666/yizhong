@@ -33,6 +33,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
     $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
     $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
+    $serviceCharge = isset($_POST['service_charge']) ? $_POST['service_charge'] : '0';
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
     $reportMustCheck = isset($_POST['report_must_check']) ? $_POST['report_must_check'] : '0';
     $filter = isset($_POST['filter']) ? $_POST['filter'] : '0';
@@ -80,8 +81,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         }
 
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
-                $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
-                $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
+                $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, $contractFlag, 
+                $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
                 $invoiceBank, $worker, $filter, $contact);
     }
     
@@ -161,38 +162,36 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         case 1:
             $htmlDeviceSale = '<div class="col-sm-10">
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="1" checked>投放</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">押金</label></div>';
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">押金</label></div>';
             break;
         case 2:
             $htmlDeviceSale = '<div class="col-sm-10">
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2" checked>销售+服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">押金</label></div>';
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2" checked>销售</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">押金</label></div>';
             break;
         case 3:
             $htmlDeviceSale = '<div class="col-sm-10">
                 <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3" checked>销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">押金</label></div>';
-            break;
-        case 4:
-            $htmlDeviceSale = '<div class="col-sm-10">
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4" checked>押金</label></div>';
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3" checked>押金</label></div>';
             break;
         default:
             $htmlDeviceSale = '<div class="col-sm-10">
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="1" checked>投放</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2">销售+服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="3">销售+无服务费</label>
-                <label class="checkbox-inline"><input type="radio" name="device_sale" value="4">押金</label></div>';
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="1">投放</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="2" checked>销售</label>
+                <label class="checkbox-inline"><input type="radio" name="device_sale" value="">押金</label></div>';
             break;
+    }
+    if ('1' == $hospitalInfo['service_charge']) {
+        $htmlServiceCharge = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="service_charge" value="1" checked>有</label>
+            <label class="checkbox-inline"><input type="radio" name="service_charge" value="0">无</label></div>';
+    } else {
+        $htmlServiceCharge = '<div class="col-sm-10">
+            <label class="checkbox-inline"><input type="radio" name="service_charge" value="1">有</label>
+            <label class="checkbox-inline"><input type="radio" name="service_charge" value="0" checked>无</label></div>';
     }
     if ('1' == $hospitalInfo['display_check']) {
         $htmlDisplayCheck = '<div class="col-sm-10">
@@ -290,6 +289,10 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
   <div class="form-group">
     <label class="col-sm-2 control-label">设备投放类型<font color="red">*</font></label>
     $htmlDeviceSale
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">有无服务费<font color="red">*</font></label>
+    $htmlServiceCharge
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">是否显示审阅医生<font color="red">*</font></label>

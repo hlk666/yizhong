@@ -279,7 +279,7 @@ class DbiAdmin extends BaseDbi
     }
     public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
             $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
-            $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, 
+            $contractFlag, $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, 
             $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter, $contact)
     {
         $this->pdo->beginTransaction();
@@ -294,9 +294,10 @@ class DbiAdmin extends BaseDbi
         }
         
         $sql = "update hospital set hospital_name = '$hospitalName', type = '$type', level = '$level', tel = '$hospitalTel', 
-                province = '$province', city = '$city', county = '$county', address = '$hospitalAddress', parent_flag = '$parentFlag', 
-                sms_tel = '$messageTel', agency = '$agency', salesman = '$salesman', comment = '$comment', contract_flag = '$contractFlag', 
-                device_sale = '$deviceSale', display_check = '$displayCheck', report_must_check = '$reportMustCheck',
+                province = '$province', city = '$city', county = '$county', address = '$hospitalAddress', 
+                parent_flag = '$parentFlag', sms_tel = '$messageTel', agency = '$agency', salesman = '$salesman', 
+                comment = '$comment', contract_flag = '$contractFlag', device_sale = '$deviceSale', 
+                display_check = '$displayCheck', service_charge = '$serviceCharge', report_must_check = '$reportMustCheck',
                 invoice_name = '$invoiceName', invoice_id = '$invoiceId', invoice_addr_tel = '$invoiceAddressTel', 
                 invoice_bank = '$invoiceBank', worker = '$worker', filter = '$filter', contact = '$contact'
                 where hospital_id = '$hospitalId'";
@@ -633,11 +634,12 @@ class DbiAdmin extends BaseDbi
             $time .= "and h.create_time <= '$endTime' ";
         }
         $sql = "select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, 
-                h.type, h.province, h.city, h.county, h.device_sale, count(d.device_id) as device_count, h.filter
+                h.type, h.province, h.city, h.county, h.device_sale, h.service_charge, 
+                count(d.device_id) as device_count, h.filter
                 from hospital as h left join device as d on h.hospital_id = d.hospital_id
                 where 1 $time 
                 group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type, 
-                h.province, h.city, h.county, h.filter";
+                h.province, h.city, h.county, h.filter, h.device_sale, h.service_charge";
         return $this->getDataAll($sql);
     }
     public function getHospitalDiagnosis($level, $reportHospital, $agency, $salesman)
@@ -682,7 +684,7 @@ class DbiAdmin extends BaseDbi
     {
         $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, county, address, h.tel, 
                 parent_flag, a.login_name, h.sms_tel, h.agency, h.salesman, h.comment, 
-                h.contract_flag, h.device_sale, h.display_check, h.report_must_check,
+                h.contract_flag, h.device_sale, h.service_charge, h.display_check, h.report_must_check,
                 invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker, filter, contact
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
