@@ -1,6 +1,6 @@
 function unbindDevice(id)
 {
-    if (confirm('确定要解除该设备ID和医院的绑定么？')) {
+    if (confirm('确定要将设备退回到生产部么(进入生产部后只有杨志磊能操作该设备)？')) {
         window.location = 'unbind_device.php?id=' + id;
     } else {
         //do nothing.

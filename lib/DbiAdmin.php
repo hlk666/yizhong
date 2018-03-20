@@ -280,7 +280,7 @@ class DbiAdmin extends BaseDbi
     public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
             $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
             $contractFlag, $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, 
-            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter, $contact)
+            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter, $contact, $agencyTel)
     {
         $this->pdo->beginTransaction();
     
@@ -295,8 +295,8 @@ class DbiAdmin extends BaseDbi
         
         $sql = "update hospital set hospital_name = '$hospitalName', type = '$type', level = '$level', tel = '$hospitalTel', 
                 province = '$province', city = '$city', county = '$county', address = '$hospitalAddress', 
-                parent_flag = '$parentFlag', sms_tel = '$messageTel', agency = '$agency', salesman = '$salesman', 
-                comment = '$comment', contract_flag = '$contractFlag', device_sale = '$deviceSale', 
+                parent_flag = '$parentFlag', sms_tel = '$messageTel', agency = '$agency', agency_tel = '$agencyTel', 
+                salesman = '$salesman', comment = '$comment', contract_flag = '$contractFlag', device_sale = '$deviceSale', 
                 display_check = '$displayCheck', service_charge = '$serviceCharge', report_must_check = '$reportMustCheck',
                 invoice_name = '$invoiceName', invoice_id = '$invoiceId', invoice_addr_tel = '$invoiceAddressTel', 
                 invoice_bank = '$invoiceBank', worker = '$worker', filter = '$filter', contact = '$contact'
@@ -683,7 +683,7 @@ class DbiAdmin extends BaseDbi
     public function getHospitalInfo($hospitalId)
     {
         $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, county, address, h.tel, 
-                parent_flag, a.login_name, h.sms_tel, h.agency, h.salesman, h.comment, 
+                parent_flag, a.login_name, h.sms_tel, h.agency, h.agency_tel, h.salesman, h.comment, 
                 h.contract_flag, h.device_sale, h.service_charge, h.display_check, h.report_must_check,
                 invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker, filter, contact
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
@@ -805,6 +805,15 @@ class DbiAdmin extends BaseDbi
         if (null !== $endTime) {
             $sql .= " and d.create_time <= '$endTime' ";
         }
+        return $this->getDataAll($sql);
+    }
+    public function getPatientNotUpload($time)
+    {
+        $sql = "select g.guardian_id as patient_id, h.hospital_id, h.hospital_name, h.contact, h.tel, p.patient_name, g.start_time
+                from guardian_data as d inner join guardian as g on d.guardian_id = g.guardian_id
+                inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                inner join patient as p on g.patient_id = p.patient_id
+                where d.status < 2 and g.status = 2 and g.start_time >= '$time' and g.regist_hospital_id not in (1, 40)";
         return $this->getDataAll($sql);
     }
     public function getSalesmanData($salesman, $startTime = null, $endTime = null, $offset = 0, $rows = null)

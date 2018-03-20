@@ -30,6 +30,7 @@ $weight = isset($_POST['weight']) ? $_POST['weight'] : null;
 $bloodPressure = isset($_POST['blood_pressure']) ? $_POST['blood_pressure'] : null;
 $sickRoom = isset($_POST['sickroom']) ? $_POST['sickroom'] : null;
 $familyTel = isset($_POST['family_tel']) ? $_POST['family_tel'] : null;
+$hospitalizationId = isset($_POST['hospitalization_id']) ? $_POST['hospitalization_id'] : null;
 
 $dataPatient = array();
 if (null != $name) {
@@ -88,6 +89,9 @@ if (null != $sickRoom) {
 }
 if (null != $familyTel) {
     $dataGuardian['family_tel'] = $familyTel;
+}
+if (null != $hospitalizationId) {
+    $dataGuardian['hospitalization_id'] = $hospitalizationId;
 }
 if (!empty($dataGuardian)) {
     $ret = Dbi::getDbi()->editGuardian($guardianId, $dataGuardian);

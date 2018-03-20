@@ -24,6 +24,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $loginUser = !isset($_POST['login_user']) ? null : $_POST['login_user'];
     $messageTel = isset($_POST['message_tel']) ? $_POST['message_tel'] : '0';
     $agency = isset($_POST['agency']) ? $_POST['agency'] : '';
+    $agencyTel = isset($_POST['agency_tel']) ? $_POST['agency_tel'] : '';
     $salesman = isset($_POST['salesman']) ? $_POST['salesman'] : '';
     $worker = isset($_POST['worker']) ? $_POST['worker'] : '';
     $invoiceName = (isset($_POST['invoice_name']) && !empty($_POST['invoice_name'])) ? $_POST['invoice_name'] : '';
@@ -83,7 +84,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, $contractFlag, 
                 $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-                $invoiceBank, $worker, $filter, $contact);
+                $invoiceBank, $worker, $filter, $contact, $agencyTel);
     }
     
     if (isset($_POST['del'])) {
@@ -132,6 +133,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $loginUser = $hospitalInfo['login_name'];
     $messageTel = $hospitalInfo['sms_tel'];
     $agency = $hospitalInfo['agency'];
+    $agencyTel = $hospitalInfo['agency_tel'];
     $salesman = $hospitalInfo['salesman'];
     $worker = $hospitalInfo['worker'];
     $comment = $hospitalInfo['comment'];
@@ -261,6 +263,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     </div>
   </div>
   <div class="form-group">
+    <label class="col-sm-2 control-label">联系人<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control"  name="contact" value="$contact">
+    </div>
+  </div>
+  <div class="form-group">
     <label for="hospital_address" class="col-sm-2 control-label">地址<font color="red">*</font></label>
     <div class="col-sm-2">
       <select class="form-control" name="province" id="proS" onchange="loadCity()"><option value="0">请选择</option></select>
@@ -313,12 +321,6 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">联系人<font color="red">*</font></label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control"  name="contact" value="$contact">
-    </div>
-  </div>
-  <div class="form-group">
     <label for="message_tel" class="col-sm-2 control-label">接收短信手机号<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="message_tel" name="message_tel" value="$messageTel">
@@ -328,6 +330,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <label class="col-sm-2 control-label">代理商<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" name="agency" value="$agency">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">代理商电话<font color="red">*</font></label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="agency_tel" value="$agencyTel">
     </div>
   </div>
   <div class="form-group">
