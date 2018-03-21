@@ -41,7 +41,7 @@ if (isset($_POST['submit'])){
     $double = (isset($_POST['double']) && !empty($_POST['double'])) ? $_POST['double'] : '';
     $agencyTel = (isset($_POST['agency_tel']) && !empty($_POST['agency_tel'])) ? $_POST['agency_tel'] : '';
     $strDevice = (isset($_POST['device_list']) && !empty($_POST['device_list'])) ? str_replace('，', ',', $_POST['device_list']) : '';
-    $deviceList = explode(',', $strDevice);
+    $deviceList = empty($strDevice) ? array() : explode(',', $strDevice);
     
     if (empty($hospitalName)) {
         user_back_after_delay('请正确输入医院名。');
