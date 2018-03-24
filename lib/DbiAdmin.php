@@ -103,6 +103,20 @@ class DbiAdmin extends BaseDbi
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
+        
+        //it is simple to edit code here for erp.2018-03-22 start.
+        $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'erp' . DIRECTORY_SEPARATOR . 'changed_hospital.txt';
+        
+        if (!file_exists($file)) {
+            file_put_contents($file, $hospitalId);
+        } else {
+            $oldArray = explode(',', file_get_contents($file));
+            $oldArray[] = $hospitalId;
+            $newArray = array_unique($oldArray);
+            file_put_contents($file, implode(',', $newArray));
+        }
+        //2018-03-22 end.
+        
         //default password:123456, defalt type:1->administrator
         $sql = 'insert into account(login_name, real_name, password, type, hospital_id)
                 values (:login_name, :real_name, "e10adc3949ba59abbe56e057f20f883e", 1, :hospital_id)';
