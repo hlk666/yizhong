@@ -613,7 +613,7 @@ class DbiAdmin extends BaseDbi
             group by regist_hospital_id";
         } else {
             $sql = "select regist_hospital_id as hospital_id, count(guardian_id) as `count` from guardian
-            where regist_hospital_id = $hospital and regist_time >= '$startTime' and regist_time < '$endTime' $sqlIsAddResult
+            where regist_hospital_id in ($hospital) and regist_time >= '$startTime' and regist_time < '$endTime' $sqlIsAddResult
             group by regist_hospital_id";
         }
         
