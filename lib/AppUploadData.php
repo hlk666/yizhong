@@ -67,7 +67,7 @@ class AppUploadData
     
     private function validate($patientId, $mode, $time, $data, $size)
     {
-        if (!isset($patientId) || trim($patientId) == '') {
+        if (!isset($patientId) || trim($patientId) == '' || empty($patientId)) {
             $this->setError(1, 'Patient id is required.');
             return false;
         }
