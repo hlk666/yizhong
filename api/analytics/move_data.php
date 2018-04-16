@@ -36,6 +36,9 @@ if (false == DbiAnalytics::getDbi()->existedHospital($hospitalFrom)) {
 if (false == DbiAnalytics::getDbi()->existedHospital($hospitalTo)) {
     api_exit(['code' => '1', 'message' => MESSAGE_PARAM . 'hospital_to.']);
 }
+if ($hospitalFrom == $hospitalTo) {
+    api_exit(['code' => '1', 'message' => MESSAGE_PARAM . '不能从某医院转移到自己。']);
+}
 
 $ret = DbiAnalytics::getDbi()->moveData($guardianId, $hospitalFrom, $hospitalTo, $operator, $type);
 if (VALUE_DB_ERROR === $ret) {
