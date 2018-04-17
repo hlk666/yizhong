@@ -67,7 +67,7 @@ if (1 == $deviceType) {
             ShortMessageService::send('13793616212', '有新的上传数据，请分析。');
         }
         if ($tree['analysis_hospital'] == 211) {
-            ShortMessageService::send('13191866787', '有新的上传数据，请分析。');
+            ShortMessageService::send('18531687224', '有新的上传数据，请分析。');
         }
         
         setNotice($tree['analysis_hospital'], 'upload_data', $guardianId);
