@@ -830,6 +830,16 @@ class DbiAdmin extends BaseDbi
                 where d.status < 2 and g.status = 2 and g.start_time >= '$time' and g.regist_hospital_id not in (1, 40)";
         return $this->getDataAll($sql);
     }
+    public function getReportPatients($hospitalId)
+    {
+        $sql = "select g.guardian_id as patient_id, p.patient_name, start_time 
+                from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                inner join guardian_data as d on g.guardian_id = d.guardian_id
+                where d.status = 5 and g.regist_hospital_id = '$hospitalId' 
+                and g.start_time > date_add(now(), interval -7 day) order by g.guardian_id desc";
+    
+        return $this->getDataAll($sql);
+    }
     public function getSalesmanData($salesman, $startTime = null, $endTime = null, $offset = 0, $rows = null)
     {
         if (empty($salesman)) {
