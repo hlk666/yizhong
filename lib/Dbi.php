@@ -438,6 +438,11 @@ class Dbi extends BaseDbi
         $param = [':device_id' => $deviceId];
         return $this->getDataRow($sql, $param);
     }
+    public function getOrderList($hospital)
+    {
+        $sql = "select * from `order` where hospital_id = $hospital and status = 1";
+        return $this->getDataAll($sql);
+    }
     public function getPatient($patientId)
     {
         $sql = 'select patient_id, patient_name, sex, birth_year, tel, address
@@ -510,6 +515,29 @@ class Dbi extends BaseDbi
         $param = [':device_id' => $deviceId, ':phone_power' => $phonePower, ':collection_power' => $collectionPower,
                         ':bluetooth' => $bluetooth, ':line' => $line];
         return $this->insertData($sql, $param);
+    }
+    public function addOrder($hospital, $name, $sex, $age, $tel, $sickRoom, $bloodPressure, $height, $weight, 
+            $familyName, $familyTel, $tentativeDiagnosis, $medicalHistory, $hospitalization, $doctor)
+    {
+        $birthYear = date('Y') - $age;
+        $sql = "insert into `order` (hospital_id, name, sex, birth_year, tel, sickroom, blood_pressure, height, weight, 
+                family_name, family_tel, tentative_diagnosis, medical_history, hospitalization, doctor)
+                values ($hospital, '$name', $sex, $birthYear, '$tel', '$sickRoom', '$bloodPressure', $height, $weight, 
+                '$familyName', '$familyTel', '$tentativeDiagnosis', '$medicalHistory', '$hospitalization', '$doctor')";
+        $orderId = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $orderId) {
+            return VALUE_DB_ERROR;
+        }
+        return $orderId;
+    }
+    public function changeOrderStatus($hospital, $name)
+    {
+        $sql = "update `order` set status = 2 where hospital_id = $hospital and status = 1 and name = '$name'";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
     }
     public function changeMode($guardianId, $oldMode, $newMode)
     {

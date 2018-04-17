@@ -32,6 +32,12 @@ if (empty($registHospital)) {
 }
 
 check_device($device, $registHospital);
+
+$ret = Dbi::getDbi()->changeOrderStatus($registHospital, $name);
+if (VALUE_DB_ERROR === $ret) {
+    api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+}
+
 //$registHospital = $_POST['regist_hospital'];
 //$guardHospital = $_POST['guard_hospital'];
 $doctorId = 0;//will be used in future.
@@ -194,7 +200,7 @@ if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
 }
 
-if ($registHospital != '1') {
+if ($registHospital != '1' && $registHospital != '40') {
     ShortMessageService::send('15684158646', '有新的注册信息，病人姓名：' . $name);
 }
 

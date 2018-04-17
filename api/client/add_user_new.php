@@ -25,9 +25,14 @@ if (!isset($_POST['ignore_repeat'])) {
     check_patient_repeat($registHospital, $name);
 }
 
+$ret = Dbi::getDbi()->changeOrderStatus($registHospital, $name);
+if (VALUE_DB_ERROR === $ret) {
+    api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+}
+
 $height = isset($_POST['height']) ? $_POST['height'] : '0';
 $weight = isset($_POST['weight']) ? $_POST['weight'] : '0';
-$bloodPressure = isset($_POST['blood_pressure']) ? $_POST['blood_pressure'] : '';
+$bloodPressure = isset($_POST['bloodpress']) ? $_POST['bloodpress'] : '';
 $sickRoom = isset($_POST['sickroom']) ? $_POST['sickroom'] : '';
 $familyTel = isset($_POST['family_tel']) ? $_POST['family_tel'] : '0';
 $hours = isset($_POST['guard_hours']) ? $_POST['guard_hours'] : 24;
@@ -184,7 +189,7 @@ if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
 }
 
-if ($registHospital != '1') {
+if ($registHospital != '1' && $registHospital != '40') {
     ShortMessageService::send('15684158646', '有新的注册信息，病人姓名：' . $name);
 }
 
