@@ -19,7 +19,8 @@ class Invigilator
             'sthigh_hour', 'sthigh_times', 'stlow_hour', 'stlow_times', 's_early_beat_hour', 's_early_beat_times', 
             'v_early_beat_hour', 'v_early_beat_times', 'stopbeat_hour', 'stopbeat_times', 'v_double_hour', 'v_double_times', 
             'v_two_hour', 'v_two_times', 'v_three_hour', 'v_three_times', 's_double_hour', 's_double_times', 's_two_hour', 
-            's_two_times', 's_three_hour', 's_three_times', 's_speed_hour', 's_speed_times', 'v_speed_hour', 'v_speed_times');
+            's_two_times', 's_three_hour', 's_three_times', 's_speed_hour', 's_speed_times', 'v_speed_hour', 'v_speed_times',
+            'restart_bluetooth', 'upload_status');
     
     private $commands = array();
     private $file = '';
