@@ -2,6 +2,7 @@
 require '../config/config.php';
 require '../lib/function.php';
 require '../lib/DbiAdmin.php';
+require_once '../lib/Logger.php';
 
 $title = '修改/删除医院信息';
 require 'header.php';
@@ -81,6 +82,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
             user_back_after_delay("登录用户名<font color='red'>$loginUser</font>已被他人使用。");
         }
 
+        Logger::write('edit_hospital.log', $_SESSION['user'] . '。' . var_export($_POST, true));
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, $contractFlag, 
                 $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
