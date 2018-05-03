@@ -129,7 +129,7 @@ class DbiAnalytics extends BaseDbi
     }
     public function getHospitalConfigAll()
     {
-        $sql = 'select * from hospital_tree';
+        $sql = 'select t.*, h.report_must_check from hospital_tree as t inner join hospital as h on t.hospital_id = h.hospital_id';
         return $this->getDataAll($sql);
     }
     public function getPatient($guardianId)
