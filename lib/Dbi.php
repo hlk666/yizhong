@@ -313,8 +313,10 @@ class Dbi extends BaseDbi
         $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, g.regist_hospital_id, 
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, g.reported,
                 g.blood_pressure, g.tentative_diagnose, g.medical_history, g.hospitalization_id, 
-                g.lead, g.regist_doctor_name as doctor_name, g.sickroom, g.height, g.weight, g.family_tel
+                g.lead, g.regist_doctor_name as doctor_name, g.sickroom, g.height, g.weight, g.family_tel,
+                d.status as report_status
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
+                left join guardian_data as d on g.guardian_id = d.guardian_id
                 where regist_hospital_id in (' . $hospitalId . ')';
         if ($mode != null) {
             $sql .= " and g.mode = $mode ";
