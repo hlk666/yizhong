@@ -30,7 +30,7 @@ if (isset($_POST['submit'])){
     if (empty($deviceList) && !empty($deviceIdList)) {
         $deviceList = explode(',', $deviceIdList);
     }
-    
+    /*
     foreach ($deviceList as $deviceId) {
         $isExisted = DbiAdmin::getDbi()->existedDevice1($deviceId);
         if (VALUE_DB_ERROR === $isExisted) {
@@ -41,7 +41,7 @@ if (isset($_POST['submit'])){
             continue;
         }
     }
-    
+    */
     foreach ($deviceList as $deviceId) {
         $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency, $_SESSION['user']);
         if (VALUE_DB_ERROR === $ret) {
