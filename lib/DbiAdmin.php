@@ -892,7 +892,7 @@ class DbiAdmin extends BaseDbi
         $sql = "update hospital set need_follow = 0 where hospital_id = $hospitalId";
         return $this->updateData($sql);
     }
-    public function pdDelete($deviceId, $user)
+    public function pdDelete($deviceId, $user, $version)
     {
         $sql = "insert into history_device (device_id, user, unbind_hospital_id) values ('$deviceId', '$user', 40)";
         $ret = $this->insertData($sql);
@@ -907,7 +907,7 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function pdAbandon($deviceId, $user)
+    public function pdAbandon($deviceId, $user, $version)
     {
         $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id) values ('$deviceId', 9999, '$user', 40)";
         $ret = $this->insertData($sql);
@@ -922,7 +922,7 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function pdWarehouse($deviceId, $user)
+    public function pdWarehouse($deviceId, $user, $version)
     {
         $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id) values ('$deviceId', 1, '$user', 40)";
         $ret = $this->insertData($sql);
@@ -930,7 +930,7 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
     
-        $sql = "update device set hospital_id = 1 where device_id = '$deviceId'";
+        $sql = "update device set hospital_id = 1, version = '$version' where device_id = '$deviceId'";
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;

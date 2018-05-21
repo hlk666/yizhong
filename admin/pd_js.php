@@ -10,8 +10,9 @@ require 'header.php';
 if (empty($_GET['id']) || empty($_GET['type'])) {
     user_back_after_delay('非法访问。');
 }
+$version = isset($_GET['version']) ? $_GET['version'] : '';
 $func = 'pd' . ucwords($_GET['type']);
-$ret = DbiAdmin::getDbi()->$func($_GET['id'], $_SESSION['user']);
+$ret = DbiAdmin::getDbi()->$func($_GET['id'], $_SESSION['user'], $version);
 if (VALUE_DB_ERROR === $ret) {
     user_back_after_delay(MESSAGE_DB_ERROR);
 }
