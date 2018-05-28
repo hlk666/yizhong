@@ -54,7 +54,7 @@ define('PARAM_BRADYCARDIA', 50);
 define('PARAM_LEAD', '5');
 define('PARAM_MODE3_RECORD_TIME', '30');
 define('PARAM_MODE2_RECORD_TIME', '30');
-define('PARAM_REGULAR_TIME', '4');
+define('PARAM_REGULAR_TIME', '1');
 define('PARAM_PREMATURE_BEAT', '8');
 define('PARAM_COMBEATRHY', 'on');
 define('PARAM_EXMINRATE', '30');
