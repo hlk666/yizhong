@@ -36,9 +36,13 @@ class DbiAnalytics extends BaseDbi
         $sql = 'insert into patient_diagnosis (patient_id, diagnosis_id) values (:patient, :diagnosis)';
         return $this->insertData($sql, $param);
     }
-    public function addAdvice($patientId, $advice)
+    public function addAdvice($patientId, $advice, $doctorId)
     {
-        $sql = "update guardian_data set advice = '$advice' where guardian_id = $patientId";
+        $set = "advice = '$advice'";
+        if (!empty($doctorId)) {
+            $set .= ", status = 5, report_doctor = $doctorId, report_time = now()";
+        }
+        $sql = "update guardian_data set $set where guardian_id = $patientId";
         return $this->updateData($sql);
     }
     public function getCheckText($guardianId)
