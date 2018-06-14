@@ -314,7 +314,7 @@ class Dbi extends BaseDbi
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, g.reported,
                 g.blood_pressure, g.tentative_diagnose, g.medical_history, g.hospitalization_id, 
                 g.lead, g.regist_doctor_name as doctor_name, g.sickroom, g.height, g.weight, g.family_tel,
-                d.status as report_status
+                d.status as report_status, d.advice
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join guardian_data as d on g.guardian_id = d.guardian_id
                 where regist_hospital_id in (' . $hospitalId . ')';
@@ -386,6 +386,11 @@ class Dbi extends BaseDbi
                 inner join patient as p on g.patient_id = p.patient_id
                 where notice_flag = 0';
         return $this->getDataAll($sql);
+    }
+    public function getGuardianHospital($guardianId)
+    {
+        $sql = "select guard_hospital_id from guardian where guardian_id = $guardianId limit 1;";
+        return $this->getDataString($sql);
     }
     public function getHospitalByDevice($diviceId)
     {

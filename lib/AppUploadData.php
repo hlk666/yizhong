@@ -49,6 +49,12 @@ class AppUploadData
                 return json_encode($this->error);
             }
             
+            $hospital = Dbi::getDbi()->getGuardianHospital($patientId);
+            if (VALUE_DB_ERROR === $hospital) {
+                $this->setError(5, 'Server DB error.');
+                return json_encode($this->error);
+            }
+            
             $urlFile = 'ECG/' . $patientId . '/' . $time . '.bin';
             $retDB = Dbi::getDbi()->flowGuardianAddEcg($patientId, $alert, $time, $urlFile);
             if (VALUE_DB_ERROR === $retDB) {
@@ -57,10 +63,18 @@ class AppUploadData
                 return json_encode($this->error);
             }
             
+            if (!empty($hospital)) {
+                $cacheEcgDataFile = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'ecg_data' . DIRECTORY_SEPARATOR . $hospital . '.txt';
+                $cacheEcgData = file_get_contents($cacheEcgDataFile) . $patientId . ',' . $retDB . ',' . $alert . ',' . $time . ',' . $urlFile . ';';
+                file_put_contents($cacheEcgDataFile, $cacheEcgData);
+            }
+            
             $hospitalInfo = Dbi::getDbi()->getHospitalByGuardian($patientId);
             if (VALUE_DB_ERROR !== $hospitalInfo) {
                 setNotice($hospitalInfo['guard_hospital_id'], 'ecg_notice', $patientId);
             }
+            
+            
         }
         return json_encode($this->retSuccess);
     }
