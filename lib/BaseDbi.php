@@ -102,7 +102,7 @@ class BaseDbi
             Logger::write($this->sqlLog, $stmt->queryString);
             return $stmt->rowCount() > 0;
         } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
+            Logger::write($this->logFile, $e->getMessage() . ".\r\nTrace : " . $e->getTraceAsString());
             return false;
         }
     }
@@ -119,7 +119,7 @@ class BaseDbi
                 return $ret;
             }
         } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
+            Logger::write($this->logFile, $e->getMessage() . ".\r\nTrace : " . $e->getTraceAsString());
             return VALUE_DB_ERROR;
         }
     }
@@ -136,7 +136,7 @@ class BaseDbi
                 return $ret;
             }
         } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
+            Logger::write($this->logFile, $e->getMessage() . ".\r\nTrace : " . $e->getTraceAsString());
             return VALUE_DB_ERROR;
         }
     }
@@ -153,7 +153,7 @@ class BaseDbi
                 return $ret;
             }
         } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
+            Logger::write($this->logFile, $e->getMessage() . ".\r\nTrace : " . $e->getTraceAsString());
             return VALUE_DB_ERROR;
         }
     }
@@ -165,7 +165,7 @@ class BaseDbi
             Logger::write($this->sqlLog, $stmt->queryString);
             return $this->pdo->lastInsertId();
         } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
+            Logger::write($this->logFile, $e->getMessage() . ".\r\nTrace : " . $e->getTraceAsString());
             return VALUE_DB_ERROR;
         }
     }
@@ -177,7 +177,7 @@ class BaseDbi
             Logger::write($this->sqlLog, $stmt->queryString);
             return true;
         } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
+            Logger::write($this->logFile, $e->getMessage() . ".\r\nTrace : " . $e->getTraceAsString());
             return VALUE_DB_ERROR;
         }
     }
