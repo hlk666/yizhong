@@ -2,6 +2,7 @@
 require '../config/config.php';
 require '../lib/function.php';
 require '../lib/DbiAdmin.php';
+require '../lib/ShortMessageService.php';
 
 $title = '添加新的医院';
 require 'header.php';
@@ -89,6 +90,7 @@ if (isset($_POST['submit'])){
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
     $_SESSION['post'] = true;
+    ShortMessageService::send('13465596133', '有新的医院。');
     echo MESSAGE_SUCCESS 
         . '<br /><button type="button" class="btn btn-lg btn-info" style="margin-top:50px;" ' 
         . ' onclick="javascript:location.href=\'hospital.php\';">查看医院列表</button>';
