@@ -804,6 +804,10 @@ class DbiAdmin extends BaseDbi
         $sql = "select hospital_id, hospital_name from hospital where worker = '$user'";
         return $this->getDataAll($sql);
     }
+    public function getICCID($deviceId) {
+        $sql = "select iccid from device where device_id = '$deviceId' limit 1";
+        return $this->getDataString($sql);
+    }
     public function getPatientDiagnosis($hospital, $diagnosis, $startTime, $endTime)
     {
         $sql = "select d.patient_id, d.diagnosis_id, d.create_time, h.hospital_id, h.hospital_name, h.tel as hospital_tel,
