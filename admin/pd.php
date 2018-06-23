@@ -24,7 +24,9 @@ foreach ($deviceList as $value) {
     $btnDel = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:pdFunc('. $value['device_id'] . ', \'delete\')">注销</button>';
     $btnAbandon = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:pdFunc('. $value['device_id'] . ', \'abandon\')">移入废品库</button>';
     $btnWarehouse = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:pdFunc('. $value['device_id'] . ', \'warehouse\')">移入成品库</button>';
-    $htmlDevices .= '<tr><td>' . $value['device_id'] . '</td><td>' . $btnDel . '</td><td>' . $btnAbandon . '</td><td>' . $btnWarehouse . '</td></tr>';
+    $inputIccid = '<input type="text" class="form-control" id="iccid' . $value['device_id'] . '">'; 
+    $htmlDevices .= '<tr><td>' . $value['device_id'] . '</td><td>' . $btnDel . '</td><td>' . 
+        $btnAbandon . '</td><td>' . $inputIccid . '</td><td>' . $btnWarehouse . '</td></tr>';
 }
 
 echo <<<EOF
@@ -49,6 +51,7 @@ echo <<<EOF
     <th>设备ID</th>
     <th>注销/删除设备ID(不移入废品库)</th>
     <th>移入废品库</th>
+    <th>联通平台iccid</th>
     <th>移入成品库</th>
   </tr>
 </thead>
@@ -57,7 +60,8 @@ echo <<<EOF
 <script>
     function pdFunc(id, type)
     {
-        window.location = 'pd_js.php?id=' + id + '&type=' + type;
+        var iccid = document.getElementById("iccid" + id).value;
+        window.location = 'pd_js.php?id=' + id + '&type=' + type + '&iccid=' + iccid;
     }
 </script>
 EOF;

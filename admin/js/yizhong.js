@@ -116,7 +116,10 @@ function loadCounty(currentCounty){
         countyS.appendChild(tempFragment);
     }
 }
-
+function getHosInvoice(id) {
+    htmlobj = $.ajax({url : "hosInvoice.php?id=" + id, async : false});
+    $("#current_invoice").html(htmlobj.responseText);
+}
 function getHosName(id) {
     htmlobj = $.ajax({url : "hosName.php?id=" + id, async : false});
     $("#title").html(htmlobj.responseText);

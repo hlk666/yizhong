@@ -323,6 +323,16 @@ class DbiAdmin extends BaseDbi
         $this->pdo->commit();
         return true;
     }
+    public function editInvoiceEndDate($hospitalId, $date)
+    {
+
+        $sql = "update hospital set invoice_end_date = '$date' where hospital_id = $hospitalId";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
     public function editTree($hospitalId, $analysisHospital, $reportHospital, $title1, $title2)
     {
         if ($this->existData('hospital_tree', 'hospital_id = ' . $hospitalId)) {
@@ -705,6 +715,11 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
     }
+    public function getHospitalInvoice($hospitalId)
+    {
+        $sql = "select invoice_end_date from hospital where hospital_id = $hospitalId limit 1";
+        return $this->getDataString($sql);
+    }
     public function getHospitalName($code)
     {
         $sql = "select hospital_id, hospital_name from hospital where `code` = '$code' limit 1";
@@ -896,7 +911,7 @@ class DbiAdmin extends BaseDbi
         $sql = "update hospital set need_follow = 0 where hospital_id = $hospitalId";
         return $this->updateData($sql);
     }
-    public function pdDelete($deviceId, $user, $version)
+    public function pdDelete($deviceId, $user, $version, $iccid)
     {
         $sql = "insert into history_device (device_id, user, unbind_hospital_id) values ('$deviceId', '$user', 40)";
         $ret = $this->insertData($sql);
@@ -911,7 +926,7 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function pdAbandon($deviceId, $user, $version)
+    public function pdAbandon($deviceId, $user, $version, $iccid)
     {
         $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id) values ('$deviceId', 9999, '$user', 40)";
         $ret = $this->insertData($sql);
@@ -926,7 +941,7 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function pdWarehouse($deviceId, $user, $version)
+    public function pdWarehouse($deviceId, $user, $version, $iccid)
     {
         $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id) values ('$deviceId', 1, '$user', 40)";
         $ret = $this->insertData($sql);
@@ -934,7 +949,7 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
     
-        $sql = "update device set hospital_id = 1, version = '$version' where device_id = '$deviceId'";
+        $sql = "update device set hospital_id = 1, version = '$version', iccid = '$iccid' where device_id = '$deviceId'";
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
