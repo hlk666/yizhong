@@ -518,7 +518,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getDeviceListPD()
     {
-        $sql = "select device_id from device where hospital_id = 40";
+        $sql = "select device_id, iccid from device where hospital_id = 40";
         return $this->getDataAll($sql);
     }
     public function getDeviceNotUsed($count)

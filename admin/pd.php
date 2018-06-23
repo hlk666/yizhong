@@ -24,7 +24,7 @@ foreach ($deviceList as $value) {
     $btnDel = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:pdFunc('. $value['device_id'] . ', \'delete\')">注销</button>';
     $btnAbandon = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:pdFunc('. $value['device_id'] . ', \'abandon\')">移入废品库</button>';
     $btnWarehouse = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:pdFunc('. $value['device_id'] . ', \'warehouse\')">移入成品库</button>';
-    $inputIccid = '<input type="text" class="form-control" id="iccid' . $value['device_id'] . '">'; 
+    $inputIccid = '<input type="text" class="form-control" id="iccid' . $value['device_id'] . '" value="'. $value['iccid'] .'">'; 
     $htmlDevices .= '<tr><td>' . $value['device_id'] . '</td><td>' . $btnDel . '</td><td>' . 
         $btnAbandon . '</td><td>' . $inputIccid . '</td><td>' . $btnWarehouse . '</td></tr>';
 }
