@@ -659,7 +659,7 @@ class DbiAdmin extends BaseDbi
         }
         $sql = "select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, 
                 h.type, h.province, h.city, h.county, h.device_sale, h.service_charge, 
-                count(d.device_id) as device_count, h.filter
+                count(d.device_id) as device_count, h.filter, h.device_sale, h.worker
                 from hospital as h left join device as d on h.hospital_id = d.hospital_id
                 where 1 $time 
                 group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type, 
