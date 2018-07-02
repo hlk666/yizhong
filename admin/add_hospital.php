@@ -37,7 +37,7 @@ if (isset($_POST['submit'])){
     $titleHospital = (isset($_POST['hospital_title']) && !empty($_POST['hospital_title'])) ? $_POST['hospital_title'] : '';
     $agency = (isset($_POST['agency']) && !empty($_POST['agency'])) ? $_POST['agency'] : '';
     $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
-    $deviceSale = '0';//isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
+    $deviceSale = '2';//isset($_POST['device_sale']) ? $_POST['device_sale'] : '2';
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
     $reportMustCheck = isset($_POST['report_must_check']) ? $_POST['report_must_check'] : '0';
     

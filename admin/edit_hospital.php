@@ -34,7 +34,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $invoiceBank = (isset($_POST['invoice_bank']) && !empty($_POST['invoice_bank'])) ? $_POST['invoice_bank'] : '';
     $comment = isset($_POST['comment']) ? $_POST['comment'] : '';
     $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
-    $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '0';
+    $deviceSale = isset($_POST['device_sale']) ? $_POST['device_sale'] : '2';
     $serviceCharge = isset($_POST['service_charge']) ? $_POST['service_charge'] : '0';
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
     $reportMustCheck = isset($_POST['report_must_check']) ? $_POST['report_must_check'] : '0';
