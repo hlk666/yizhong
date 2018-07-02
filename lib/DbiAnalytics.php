@@ -420,7 +420,11 @@ class DbiAnalytics extends BaseDbi
                 $set = 'set status = 4, report_time = now(), hbi_doctor = ' . $hbiDoctor;
             }
         } elseif ($statusName == 'report') {
-            $set = 'set status = 5, report_time = now(), report_doctor = ' . $reportDoctor;
+            if ($reportDoctor == '247' || $reportDoctor == '446') {
+                $set = 'set status = 5, report_time = now(), hbi_doctor = ' . $reportDoctor;
+            } else {
+                $set = 'set status = 5, report_time = now(), report_doctor = ' . $reportDoctor;
+            }
         } else {
             return VALUE_DB_ERROR;
         }
