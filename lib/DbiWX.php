@@ -18,20 +18,26 @@ class DbiWX extends BaseDbi
         }
         return self::$instance;
     }
-    
+    public function checkHospitalType($hospitalId)
+    {
+        return $this->existData(hospital_tree, "report_hospital = $hospitalId");
+    }
+    public function clearLogin($doctorId)
+    {
+        $sql = "update account set open_id = '' where account_id = $doctorId";
+        return $this->updateData($sql);
+    }
     public function getDoctorByOpenId($openId)
     {
-        $sql = 'select account_id as doctor_id, real_name as doctor_name, type, password, hospital_id
-                from account where open_id = :open_id limit 1';
-        $param = [':open_id' => $openId];
-        return $this->getDataRow($sql, $param);
+        $sql = "select account_id as doctor_id, real_name as doctor_name, type, password, hospital_id
+                from account where open_id = '$openId' limit 1";
+        return $this->getDataRow($sql);
     }
     public function getDoctorByUser($user)
     {
-        $sql = 'select account_id as doctor_id, real_name as doctor_name, type, password, hospital_id
-                from account where login_name = :user limit 1';
-        $param = [':user' => $user];
-        return $this->getDataRow($sql, $param);
+        $sql = "select account_id as doctor_id, real_name as doctor_name, type, password, hospital_id
+                from account where login_name = '$user' limit 1";
+        return $this->getDataRow($sql);
     }
     public function getEcgs($guardianId, $readStatus)
     {
@@ -56,10 +62,18 @@ class DbiWX extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel, upload_flag
-                from hospital where hospital_id = :hospital_id limit 1';
-        $param = [':hospital_id' => $hospitalId];
-        return $this->getDataRow($sql, $param);
+        $sql = "select hospital_id, hospital_name, address, tel, parent_flag, sms_tel, upload_flag
+                from hospital where hospital_id = $hospitalId limit 1";
+        return $this->getDataRow($sql);
+    }
+    public function getPatientReport($hospitalId)
+    {
+        $sql = "select g.guardian_id, p.patient_name, g.start_time from guardian as g 
+                inner join patient as p on g.patient_id = p.patient_id
+                inner join guardian_data as d on g.guardian_id = d.guardian_id
+                inner join hospital_tree as t on g.regist_hospital_id = t.hospital_id
+                where t.report_hospital = $hospitalId and d.status = 4 and g.start_time > date_add(now(), interval -7 day)";
+        return $this->getDataAll($sql);
     }
     public function getPatientEcg($hospitalId)
     {
@@ -77,9 +91,8 @@ class DbiWX extends BaseDbi
     }
     public function updateOpenId($user, $openId)
     {
-        $sql = 'update account set open_id = :open_id where login_name = :user';
-        $param = [':user' => $user, ':open_id' => $openId];
-        return $this->updateData($sql, $param);
+        $sql = "update account set open_id = '$openId' where login_name = '$user'";
+        return $this->updateData($sql);
     }
 
 }
