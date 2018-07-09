@@ -6,13 +6,18 @@ if (false === Validate::checkRequired($_GET['hospital_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'hospital_id.']);
 }
 
-$ret = DbiWX::getDbi()->getPatientReport($_GET['hospital_id']);
-if (VALUE_DB_ERROR === $ret) {
+$isReportHospital = DbiWX::getDbi()->checkHospitalType($_GET['hospital_id']);
+if ($isReportHospital === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+}
+if (true == $isReportHospital) {
+    $reportFlag = '1';
+} else {
+    $reportFlag = '0';
 }
 
 $result = array();
 $result['code'] = '0';
 $result['message'] = MESSAGE_SUCCESS;
-$result['patients'] = $ret;
+$result['report_flag'] = $reportFlag;
 api_exit($result);
