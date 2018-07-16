@@ -634,6 +634,13 @@ class DbiAdmin extends BaseDbi
         $sql = "select * from history_device where device_id = $deviceId";
         return $this->getDataAll($sql);
     }
+    public function getHistoryDeviceByHospital($hospitals, $startTime, $endTime)
+    {
+        $sql = "select * from history_device 
+                where (hospital_id in ($hospitals) or unbind_hospital_id in ($hospitals))
+                and bk_time between '$startTime' and '$endTime'";
+        return $this->getDataAll($sql);
+    }
     public function getHospitalAgency($agency)
     {
         if (empty($agency)) {
