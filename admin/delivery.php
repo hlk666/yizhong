@@ -3,7 +3,7 @@ require '../config/config.php';
 require '../lib/function.php';
 require '../lib/DbiAdmin.php';
 
-$title = '发货';
+$title = '发货(调配设备)';
 require 'header.php';
 
 $repeatedAddHospital = !isset($_GET['hospital']) ? null : $_GET['hospital'];
@@ -17,6 +17,8 @@ if (isset($_POST['submit'])){
     $deviceList = !isset($_POST['device']) ? null : $_POST['device'];
     $deviceIdList = !isset($_POST['device_id']) ? null : $_POST['device_id'];
     $agency = !isset($_POST['agency']) ? '' : $_POST['agency'];
+    $content = !isset($_POST['content']) ? '' : $_POST['content'];
+    $action = !isset($_POST['action']) ? '' : $_POST['action'];
     
     if ((empty($hospitalId) || '0' == $hospitalId) && (empty($agency))) {
         user_back_after_delay('请选择医院或代理商/业务员。');
@@ -26,6 +28,9 @@ if (isset($_POST['submit'])){
     }
     if (empty($deviceList) && empty($deviceIdList)) {
         user_back_after_delay('请选择(或输入)设备ID。');
+    }
+    if (empty($action)) {
+        user_back_after_delay('请选择备注信息。');
     }
     if (empty($deviceList) && !empty($deviceIdList)) {
         $deviceList = explode(',', $deviceIdList);
@@ -43,7 +48,7 @@ if (isset($_POST['submit'])){
     }
     */
     foreach ($deviceList as $deviceId) {
-        $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency, $_SESSION['user']);
+        $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency, $_SESSION['user'], $content, $action);
         if (VALUE_DB_ERROR === $ret) {
             user_back_after_delay(MESSAGE_DB_ERROR);
         }
@@ -123,6 +128,24 @@ EOF;
     <label for="device_id" class="col-sm-2 control-label">代理商/业务员</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" name="agency" placeholder="请输入发货对象" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="content" class="col-sm-2 control-label">操作<font color="red">*</font></label>
+    <div class="col-sm-3">
+      <select class="form-control" name="action">
+        <option value="">请选择</option>
+        <option value="新注册">新注册</option>
+        <option value="追加设备">追加设备</option>
+        <option value="更换设备">退换设备</option>
+        <option value="撤回设备">收回设备</option>
+        <option value="调拨">调拨</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+    <label for="content" class="col-sm-2 control-label">备注</label>
+    <div class="col-sm-5">
+      <input type="text" class="form-control" name="content" >
     </div>
   </div>
   <div class="form-group">

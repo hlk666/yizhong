@@ -46,7 +46,8 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = "insert into history_device (device_id, hospital_id, user) values ('$device', '$hospital', '$user')";
+        $sql = "insert into history_device (device_id, hospital_id, user, action) 
+                values ('$device', '$hospital', '$user', '新注册')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -151,7 +152,8 @@ class DbiAdmin extends BaseDbi
                     return VALUE_DB_ERROR;
                 }
                 
-                $sql = "insert into history_device (device_id, hospital_id, agency, user) values ('$deviceId', $hospitalId, '', '$creator')";
+                $sql = "insert into history_device (device_id, hospital_id, agency, user, action) 
+                        values ('$deviceId', $hospitalId, '', '$creator', '新注册')";
                 $ret = $this->insertData($sql);
                 if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
@@ -196,7 +198,7 @@ class DbiAdmin extends BaseDbi
         $sql = "update account set hospital_id = 9999 where account_id = $doctorId";
         return $this->updateData($sql);
     }
-    public function delDevice($deviceId, $hospital, $agency, $user)
+    public function delDevice($deviceId, $hospital, $agency, $user, $content = '', $action = '')
     {
         $oldHospitalId = $this->getDataString("select hospital_id from device where device_id = $deviceId limit 1");
         if (VALUE_DB_ERROR === $oldHospitalId) {
@@ -213,8 +215,8 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = "insert into history_device (device_id, hospital_id, agency, user, unbind_hospital_id) 
-                values ('$deviceId', $hospital, '$agency', '$user', $oldHospitalId)";
+        $sql = "insert into history_device (device_id, hospital_id, agency, user, unbind_hospital_id, content, action) 
+                values ('$deviceId', $hospital, '$agency', '$user', $oldHospitalId, '$content', '$action')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -636,7 +638,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getHistoryDeviceByHospital($hospitals, $startTime, $endTime)
     {
-        $sql = "select * from history_device 
+        $sql = "select distinct * from history_device 
                 where (hospital_id in ($hospitals) or unbind_hospital_id in ($hospitals))
                 and bk_time between '$startTime' and '$endTime'";
         return $this->getDataAll($sql);
@@ -920,7 +922,7 @@ class DbiAdmin extends BaseDbi
     }
     public function pdDelete($deviceId, $user, $version, $iccid)
     {
-        $sql = "insert into history_device (device_id, user, unbind_hospital_id) values ('$deviceId', '$user', 40)";
+        $sql = "insert into history_device (device_id, user, unbind_hospital_id, content) values ('$deviceId', '$user', 40, '注销设备号')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -935,7 +937,8 @@ class DbiAdmin extends BaseDbi
     }
     public function pdAbandon($deviceId, $user, $version, $iccid)
     {
-        $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id) values ('$deviceId', 9999, '$user', 40)";
+        $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id, content) 
+                values ('$deviceId', 9999, '$user', 40, '移入废品库')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -950,7 +953,8 @@ class DbiAdmin extends BaseDbi
     }
     public function pdWarehouse($deviceId, $user, $version, $iccid)
     {
-        $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id) values ('$deviceId', 1, '$user', 40)";
+        $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id, content) 
+                values ('$deviceId', 1, '$user', 40, '移入成品库')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
