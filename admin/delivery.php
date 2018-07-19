@@ -17,14 +17,15 @@ if (isset($_POST['submit'])){
     $deviceList = !isset($_POST['device']) ? null : $_POST['device'];
     $deviceIdList = !isset($_POST['device_id']) ? null : $_POST['device_id'];
     $agency = !isset($_POST['agency']) ? '' : $_POST['agency'];
+    $salesman = !isset($_POST['salesman']) ? '' : $_POST['salesman'];
     $content = !isset($_POST['content']) ? '' : $_POST['content'];
     $action = !isset($_POST['action']) ? '' : $_POST['action'];
     
-    if ((empty($hospitalId) || '0' == $hospitalId) && (empty($agency))) {
+    if ((empty($hospitalId) || '0' == $hospitalId) && (empty($agency)) && (empty($salesman))) {
         user_back_after_delay('请选择医院或代理商/业务员。');
     }
-    if (!empty($hospitalId) && !empty($agency)) {
-        user_back_after_delay('不能同时输入医院和代理商/业务员。');
+    if (!empty($agency) && !empty($salesman)) {
+        user_back_after_delay('不能同时输入代理商和业务员。');
     }
     if (empty($deviceList) && empty($deviceIdList)) {
         user_back_after_delay('请选择(或输入)设备ID。');
@@ -47,8 +48,12 @@ if (isset($_POST['submit'])){
         }
     }
     */
+    if (!empty($hospitalId)) {
+        $agency = '';
+        $salesman = '';
+    }
     foreach ($deviceList as $deviceId) {
-        $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency, $_SESSION['user'], $content, $action);
+        $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency, $salesman, $_SESSION['user'], $content, $action);
         if (VALUE_DB_ERROR === $ret) {
             user_back_after_delay(MESSAGE_DB_ERROR);
         }
@@ -125,9 +130,15 @@ EOF;
     <div class="col-sm-10">$htmlDevices</div>
   </div>
   <div class="form-group">
-    <label for="device_id" class="col-sm-2 control-label">代理商/业务员</label>
+    <label for="agency" class="col-sm-2 control-label">代理商</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="agency" placeholder="请输入发货对象" >
+      <input type="text" class="form-control" name="agency" placeholder="医院、代理商、业务员，只能输入一项" >
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="salesman" class="col-sm-2 control-label">业务员</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" name="salesman" placeholder="医院、代理商、业务员，只能输入一项" >
     </div>
   </div>
   <div class="form-group">

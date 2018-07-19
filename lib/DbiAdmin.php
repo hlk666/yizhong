@@ -37,7 +37,7 @@ class DbiAdmin extends BaseDbi
     public function addDevice($hospital, $device, $user = '')
     {
         if ($this->existData('device', "device_id = '$device'")) {
-            $sql = "update device set hospital_id = '$hospital', agency = '' where device_id = '$device'";
+            $sql = "update device set hospital_id = '$hospital', agency = '', salesman = '' where device_id = '$device'";
         } else {
             $sql = "insert into device (device_id, hospital_id) values ('$device', '$hospital')";
         }
@@ -152,8 +152,8 @@ class DbiAdmin extends BaseDbi
                     return VALUE_DB_ERROR;
                 }
                 
-                $sql = "insert into history_device (device_id, hospital_id, agency, user, action) 
-                        values ('$deviceId', $hospitalId, '', '$creator', '新注册')";
+                $sql = "insert into history_device (device_id, hospital_id, user, action) 
+                        values ('$deviceId', $hospitalId, '$creator', '新注册')";
                 $ret = $this->insertData($sql);
                 if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
@@ -198,25 +198,25 @@ class DbiAdmin extends BaseDbi
         $sql = "update account set hospital_id = 9999 where account_id = $doctorId";
         return $this->updateData($sql);
     }
-    public function delDevice($deviceId, $hospital, $agency, $user, $content = '', $action = '')
+    public function delDevice($deviceId, $hospital, $agency, $salesman, $user, $content = '', $action = '')
     {
         $oldHospitalId = $this->getDataString("select hospital_id from device where device_id = $deviceId limit 1");
         if (VALUE_DB_ERROR === $oldHospitalId) {
             return VALUE_DB_ERROR;
         }
         if ($oldHospitalId !== '') {
-            $sql = "update device set hospital_id = $hospital, agency = '$agency' where device_id = '$deviceId'";
+            $sql = "update device set hospital_id = $hospital, agency = '$agency', salesman = '$salesman' where device_id = '$deviceId'";
         } else {
             $oldHospitalId = '0';
-            $sql = "insert into device (device_id, hospital_id, agency) values ('$deviceId', $hospital, '$agency')";
+            $sql = "insert into device (device_id, hospital_id, agency, salesman) values ('$deviceId', $hospital, '$agency', '$salesman')";
         }
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
         }
         
-        $sql = "insert into history_device (device_id, hospital_id, agency, user, unbind_hospital_id, content, action) 
-                values ('$deviceId', $hospital, '$agency', '$user', $oldHospitalId, '$content', '$action')";
+        $sql = "insert into history_device (device_id, hospital_id, agency, salesman, user, unbind_hospital_id, content, action) 
+                values ('$deviceId', $hospital, '$agency', '$salesman', '$user', $oldHospitalId, '$content', '$action')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
