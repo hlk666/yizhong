@@ -68,7 +68,7 @@ class DbiWX extends BaseDbi
     }
     public function getPatientReport($hospitalId)
     {
-        $sql = "select g.guardian_id, p.patient_name, g.start_time from guardian as g 
+        $sql = "select g.guardian_id, p.patient_name, p.sex, g.start_time from guardian as g 
                 inner join patient as p on g.patient_id = p.patient_id
                 inner join guardian_data as d on g.guardian_id = d.guardian_id
                 inner join hospital_tree as t on g.regist_hospital_id = t.hospital_id
@@ -77,9 +77,12 @@ class DbiWX extends BaseDbi
     }
     public function getPatientEcg($hospitalId)
     {
-        $sql = "select guardian_id, patient_name, regist_time
+        $sql = "select guardian_id, patient_name, sex, birth_year, regist_time
                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
-                where regist_hospital_id = '$hospitalId' and g.status = 1";
+                where g.status = 1 and (regist_hospital_id in (
+                   select h.hospital_id from hospital as h
+                   inner join hospital_relation as r on h.hospital_id = r.hospital_id
+                   where r.parent_hospital_id = $hospitalId) or regist_hospital_id = $hospitalId)";
         return $this->getDataAll($sql);
     }
     public function getPatientInfoByGuardian($guardianId)
