@@ -156,21 +156,6 @@ class DbiAnalytics extends BaseDbi
                 where pd.diagnosis_id in $diagnosisList order by pd.patient_id desc";
         return $this->getDataAll($sql);
     }
-    public function getPatientLastHospital($patientId, $startTime, $endTime)
-    {
-        $sql = 'select h.hospital_name, g.regist_time
-                from guardian as g inner join hospital as h on g.regist_hospital_id = h.hospital_id
-                where patient_id = :id ';
-        if (!empty($startTime)) {
-            $sql .= " and g.regist_time >= '$startTime' ";
-        }
-        if (!empty($endTime)) {
-            $sql .= " and g.regist_time <= '$endTime' ";
-        }
-        $sql .= ' order by guardian_id desc limit 1;';
-        $param = array(':id' => $patientId);
-        return $this->getDataRow($sql, $param);
-    }
     
     public function getHospitals($hospitalId)
     {
