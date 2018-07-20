@@ -411,14 +411,16 @@ class DbiAdmin extends BaseDbi
                 left join hospital as h2 on d.hospital_id = h2.hospital_id';
         return $this->getDataAll($sql);
     }
-    public function getDeviceAgency($name)
+    public function getDeviceAgency($agency, $salesman)
     {
-        if (empty($name)) {
-            $and = '';
+        if (!empty($agency)) {
+            $and = " and agency = '$agency'";
+        } elseif (!empty($salesman)) {
+            $and = " and salesman = '$salesman'";
         } else {
-            $and = " and agency = '$name'";
+            $and = '';
         }
-        $sql = "select device_id, agency from device where hospital_id = 0 $and";
+        $sql = "select device_id, agency, salesman from device where hospital_id = 0 $and";
         return $this->getDataAll($sql);
     }
     public function getDeviceBloc()

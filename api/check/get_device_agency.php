@@ -1,8 +1,9 @@
 <?php
 require_once PATH_LIB . 'DbiAdmin.php';
 
-$name = isset($_GET['name']) ? $_GET['name'] : '';
-$ret = DbiAdmin::getDbi()->getDeviceAgency($name);
+$agency = isset($_GET['agency']) ? $_GET['agency'] : '';
+$salesman = isset($_GET['salesman']) ? $_GET['salesman'] : '';
+$ret = DbiAdmin::getDbi()->getDeviceAgency($agency, $salesman);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
