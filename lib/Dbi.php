@@ -82,9 +82,8 @@ class Dbi extends BaseDbi
     }
     public function getAgencyHospitals($agency)
     {
-        $sql = 'select hospital_id, hospital_name from hospital where agency = :agency';
-        $param = [':agency' => $agency];
-        return $this->getDataAll($sql, $param);
+        $sql = "select hospital_id, hospital_name from hospital where agency = :agency";
+        return $this->getDataAll($sql);
     }
     public function getConsultationRequest($hospitalId, $allFlag, $requestHospital, $startTime, $endTime)
     {

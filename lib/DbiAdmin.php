@@ -452,7 +452,7 @@ class DbiAdmin extends BaseDbi
         } else {
             $and = '';
         }
-        $sql = "select device_id, a.agency_name as agency, s.salesman_name as salesman from device as d
+        $sql = "select device_id, d.agency_id, a.agency_name, d.salesman_id, s.salesman_name from device as d
                 left join agency as a on d.agency_id = a.agency_id
                 left join salesman as s on d.salesman_id = s.salesman_id 
                 where hospital_id = 0 $and";
@@ -468,8 +468,12 @@ class DbiAdmin extends BaseDbi
         if (empty($id)) {
             return array();
         }
-        $sql = "select ifnull(hospital_name, '') as hospital_name, device_id, d.agency from device as d
-                left join hospital as h on d.hospital_id = h.hospital_id  where d.device_id like '%$id'";
+        $sql = "select ifnull(hospital_name, '') as hospital_name, device_id, a.agency_name as agency, s.salesman_name as salesman
+                from device as d
+                left join agency as a on d.agency_id = a.agency_id
+                left join salesman as s on d.salesman_id = s.salesman_id
+                left join hospital as h on d.hospital_id = h.hospital_id  
+                where d.device_id like '%$id'";
         return $this->getDataAll($sql);
     }
     public function getDeviceFault($device, $fault, $time)
@@ -539,7 +543,7 @@ class DbiAdmin extends BaseDbi
         if (empty($hospital)) {
             return array();
         }
-        $sql = "select hospital_name, device_id, '' as agency from device as d
+        $sql = "select hospital_name, device_id, '' as agency, '' as salesman from device as d
                 inner join hospital as h on d.hospital_id = h.hospital_id  where d.hospital_id = $hospital";
         if (null !== $rows) {
             $sql .= " limit $offset, $rows";
@@ -551,7 +555,11 @@ class DbiAdmin extends BaseDbi
         if (empty($agency)) {
             return array();
         }
-        $sql = "select '-' as hospital_name, device_id, agency from device where agency = '$agency'";
+        $sql = "select '-' as hospital_name, device_id, a.agency_name as agency, s.salesman_name as salesman
+                from device as d
+                left join agency as a on d.agency_id = a.agency_id
+                left join salesman as s on d.salesman_id = s.salesman_id
+                where a.agency_name like '%$agency%' or s.salesman_name like '%$agency%'";
         if (null !== $rows) {
             $sql .= " limit $offset, $rows";
         }
