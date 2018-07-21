@@ -83,7 +83,7 @@ echo <<<EOF
 <form class="form-horizontal" role="form" method="get">
 <div class="row">
   <div class="col-xs-12 col-sm-1" style="margin-bottom:3px;">
-    <label for="salesman" class="control-label"><font color="red">*</font>医院</label>
+    <label class="control-label"><font color="red">*</font>医院</label>
   </div>
   <div class="col-xs-12 col-sm-3" style="margin-bottom:3px;">
     <select class="form-control" name="hospital">$htmlHospitals</select>

@@ -6,7 +6,7 @@ require '../lib/DbiAdmin.php';
 $title = '业务员开单统计';
 require 'header.php';
 
-$currentSalesman = isset($_GET['name']) ? $_GET['name'] : '';
+$id = isset($_GET['id']) ? $_GET['id'] : '';
 $startTime = isset($_GET['start_time']) && !empty($_GET['start_time']) ? $_GET['start_time'] : null;
 $endTime = isset($_GET['end_time']) && !empty($_GET['end_time']) ? $_GET['end_time'] . ' 23:59:59' : null;
 $startTimeDisplay = isset($_GET['start_time']) && !empty($_GET['start_time']) ? $_GET['start_time'] : '';
@@ -18,14 +18,14 @@ if (VALUE_DB_ERROR === $ret) {
 }
 $htmlSalesman = '<option value="0">请选择业务员</option>';
 foreach ($ret as $value) {
-    if ($currentSalesman == $value['name']) {
-        $htmlSalesman .= '<option value="' . $value['name'] . '" selected>' . $value['name'] . '</option>';
+    if ($id == $value['salesman_id']) {
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '" selected>' . $value['name'] . '</option>';
     } else {
-        $htmlSalesman .= '<option value="' . $value['name'] . '">' . $value['name'] . '</option>';
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '">' . $value['name'] . '</option>';
     }
 }
 
-$ret = DbiAdmin::getDbi()->getSalesmanData($currentSalesman, $startTime, $endTime);
+$ret = DbiAdmin::getDbi()->getSalesmanData($id, $startTime, $endTime);
 if (VALUE_DB_ERROR === $ret) {
     user_back_after_delay(MESSAGE_DB_ERROR);
 }
@@ -38,7 +38,7 @@ $lastPage = ceil($count / $rows);
 if (1 === $page) {
     $ret = array_slice($ret, 0, $rows);
 } else {
-    $ret = DbiAdmin::getDbi()->getSalesmanData($currentSalesman, $startTime, $endTime, $offset, $rows);
+    $ret = DbiAdmin::getDbi()->getSalesmanData($id, $startTime, $endTime, $offset, $rows);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -67,13 +67,13 @@ if (empty($ret)) {
     }
     $htmlData .= '</tbody></table>';
     $currentPage = null;
-    if (null !== $currentSalesman) {
-        $currentPage = "salesman_data.php?name=$currentSalesman&start_time=$startTimeDisplay&end_time=$endTimeDisplay";
+    if (null !== $id) {
+        $currentPage = "salesman_data.php?id=$id&start_time=$startTimeDisplay&end_time=$endTimeDisplay";
     }
     $paging = getPaging($page, $lastPage, $currentPage);
 }
 
-$ret = DbiAdmin::getDbi()->getSalesmanData($currentSalesman, $startTime, $endTime);
+$ret = DbiAdmin::getDbi()->getSalesmanData($id, $startTime, $endTime);
 if (VALUE_DB_ERROR === $ret) {
     user_back_after_delay(MESSAGE_DB_ERROR);
 }
@@ -102,10 +102,10 @@ echo <<<EOF
 <form class="form-horizontal" role="form" method="get">
 <div class="row">
   <div class="col-xs-12 col-sm-1" style="margin-bottom:3px;">
-    <label for="salesman" class="control-label"><font color="red">*</font>业务员</label>
+    <label class="control-label"><font color="red">*</font>业务员</label>
   </div>
   <div class="col-xs-12 col-sm-2" style="margin-bottom:3px;">
-    <select class="form-control" name="name">$htmlSalesman</select>
+    <select class="form-control" name="id">$htmlSalesman</select>
   </div>
   <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
     <label for="start_time" class="control-label"><font color="red">*</font>开始日：</label>

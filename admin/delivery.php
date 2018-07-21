@@ -16,8 +16,8 @@ if (isset($_POST['submit'])){
     $hospitalId = !isset($_POST['hospital']) ? 0 : $_POST['hospital'];
     $deviceList = !isset($_POST['device']) ? null : $_POST['device'];
     $deviceIdList = !isset($_POST['device_id']) ? null : $_POST['device_id'];
-    $agency = !isset($_POST['agency']) ? '' : $_POST['agency'];
-    $salesman = !isset($_POST['salesman']) ? '' : $_POST['salesman'];
+    $agency = !isset($_POST['agency']) ? '0' : $_POST['agency'];
+    $salesman = !isset($_POST['salesman']) ? '0' : $_POST['salesman'];
     $content = !isset($_POST['content']) ? '' : $_POST['content'];
     $action = !isset($_POST['action']) ? '' : $_POST['action'];
     
@@ -25,7 +25,7 @@ if (isset($_POST['submit'])){
         user_back_after_delay('请选择医院或代理商/业务员。');
     }
     if (!empty($agency) && !empty($salesman)) {
-        user_back_after_delay('不能同时输入代理商和业务员。');
+        user_back_after_delay('不能同时选择代理商和业务员。');
     }
     if (empty($deviceList) && empty($deviceIdList)) {
         user_back_after_delay('请选择(或输入)设备ID。');
@@ -49,8 +49,8 @@ if (isset($_POST['submit'])){
     }
     */
     if (!empty($hospitalId)) {
-        $agency = '';
-        $salesman = '';
+        $agency = 0;
+        $salesman = 0;
     }
     foreach ($deviceList as $deviceId) {
         $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency, $salesman, $_SESSION['user'], $content, $action);
@@ -113,6 +113,25 @@ EOF;
                     . $value['device_id'] . '">' . $value['device_id'] . '</label>';
         }
     }
+    
+    $ret = DbiAdmin::getDbi()->getAgencyList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlAgency = '<option value="0">请选择代理商</option>';
+    foreach ($ret as $value) {
+        $htmlAgency .= '<option value="' . $value['agency_id'] . '">' . $value['name'] . '</option>';
+    }
+    
+    $ret = DbiAdmin::getDbi()->getSalesmanList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlSalesman = '<option value="0">请选择业务员</option>';
+    foreach ($ret as $value) {
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '">' . $value['name'] . '</option>';
+    }
+    
         
         echo <<<EOF
 <hr style="border-top:1px ridge red;" />
@@ -132,13 +151,13 @@ EOF;
   <div class="form-group">
     <label for="agency" class="col-sm-2 control-label">代理商</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="agency" placeholder="医院、代理商、业务员，只能输入一项" >
+      <select class="form-control" name="agency">$htmlAgency</select>
     </div>
   </div>
   <div class="form-group">
     <label for="salesman" class="col-sm-2 control-label">业务员</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="salesman" placeholder="医院、代理商、业务员，只能输入一项" >
+      <select class="form-control" name="salesman">$htmlSalesman</select>
     </div>
   </div>
   <div class="form-group">

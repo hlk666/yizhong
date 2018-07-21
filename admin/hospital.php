@@ -17,10 +17,10 @@ if (VALUE_DB_ERROR === $ret) {
 }
 $htmlSalesman = '<option value="0">请选择业务员</option>';
 foreach ($ret as $value) {
-    if ($salesman == $value['name']) {
-        $htmlSalesman .= '<option value="' . $value['name'] . '" selected>' . $value['name'] . '</option>';
+    if ($salesman == $value['salesman_id']) {
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '" selected>' . $value['name'] . '</option>';
     } else {
-        $htmlSalesman .= '<option value="' . $value['name'] . '">' . $value['name'] . '</option>';
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '">' . $value['name'] . '</option>';
     }
 }
 

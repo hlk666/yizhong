@@ -24,7 +24,7 @@ if (isset($_POST['submit'])){
     $hospitalParent = !isset($_POST['hospital_parent']) ? null : $_POST['hospital_parent'];
     $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
     $messageTel = (isset($_POST['message_tel']) && !empty($_POST['message_tel'])) ? $_POST['message_tel'] : '0';
-    $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '';
+    $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '0';
     
     $invoiceName = (isset($_POST['invoice_name']) && !empty($_POST['invoice_name'])) ? $_POST['invoice_name'] : '';
     $invoiceId = (isset($_POST['invoice_id']) && !empty($_POST['invoice_id'])) ? $_POST['invoice_id'] : '';
@@ -35,7 +35,7 @@ if (isset($_POST['submit'])){
     $analysisHospital = (isset($_POST['hospital_analysis']) && !empty($_POST['hospital_analysis'])) ? $_POST['hospital_analysis'] : '';
     $reportHospital = (isset($_POST['hospital_report']) && !empty($_POST['hospital_report'])) ? $_POST['hospital_report'] : '';
     $titleHospital = (isset($_POST['hospital_title']) && !empty($_POST['hospital_title'])) ? $_POST['hospital_title'] : '';
-    $agency = (isset($_POST['agency']) && !empty($_POST['agency'])) ? $_POST['agency'] : '';
+    $agency = (isset($_POST['agency']) && !empty($_POST['agency'])) ? $_POST['agency'] : '0';
     $contractFlag = isset($_POST['contract_flag']) ? $_POST['contract_flag'] : '0';
     $deviceSale = '2';//isset($_POST['device_sale']) ? $_POST['device_sale'] : '2';
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
@@ -141,6 +141,23 @@ if (isset($_POST['submit'])){
         }
     }
     
+    $ret = DbiAdmin::getDbi()->getAgencyList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlAgency = '<option value="0">请选择代理商</option>';
+    foreach ($ret as $value) {
+        $htmlAgency .= '<option value="' . $value['agency_id'] . '">' . $value['name'] . '</option>';
+    }
+    $ret = DbiAdmin::getDbi()->getSalesmanList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlSalesman = '<option value="0">请选择业务员</option>';
+    foreach ($ret as $value) {
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '">' . $value['name'] . '</option>';
+    }
+    
     echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
   <div class="form-group">
@@ -205,15 +222,15 @@ if (isset($_POST['submit'])){
     </div>
   </div>
   <div class="form-group">
-    <label for="salesman" class="col-sm-2 control-label">代理商</label>
+    <label for="agency" class="col-sm-2 control-label">代理商</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="agency" placeholder="请输入代理商">
+      <select class="form-control" name="agency">$htmlAgency</select>
     </div>
   </div>
   <div class="form-group">
     <label for="salesman" class="col-sm-2 control-label">业务员</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="salesman" name="salesman" placeholder="请输入业务员姓名">
+      <select class="form-control" name="salesman">$htmlSalesman</select>
     </div>
   </div>
   <div class="form-group">

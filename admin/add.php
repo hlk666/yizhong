@@ -28,7 +28,7 @@ if (isset($_POST['submit'])){
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
     $contact = !isset($_POST['contact']) ? null : $_POST['contact'];
-    $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '';
+    $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '0';
     
     $invoiceName = (isset($_POST['invoice_name']) && !empty($_POST['invoice_name'])) ? $_POST['invoice_name'] : '';
     $invoiceId = (isset($_POST['invoice_id']) && !empty($_POST['invoice_id'])) ? $_POST['invoice_id'] : '';
@@ -36,10 +36,9 @@ if (isset($_POST['submit'])){
     $invoiceBank = (isset($_POST['invoice_bank']) && !empty($_POST['invoice_bank'])) ? $_POST['invoice_bank'] : '';
     
     $titleHospital = (isset($_POST['hospital_title']) && !empty($_POST['hospital_title'])) ? $_POST['hospital_title'] : '';
-    $agency = (isset($_POST['agency']) && !empty($_POST['agency'])) ? $_POST['agency'] : '';
+    $agency = (isset($_POST['agency']) && !empty($_POST['agency'])) ? $_POST['agency'] : '0';
     
     $double = (isset($_POST['double']) && !empty($_POST['double'])) ? $_POST['double'] : '';
-    $agencyTel = (isset($_POST['agency_tel']) && !empty($_POST['agency_tel'])) ? $_POST['agency_tel'] : '';
     $strDevice = (isset($_POST['device_list']) && !empty($_POST['device_list'])) ? str_replace('，', ',', $_POST['device_list']) : '';
     $deviceList = empty($strDevice) ? array() : explode(',', $strDevice);
     
@@ -98,7 +97,7 @@ if (isset($_POST['submit'])){
             $province, $city, $county, $hospitalAddress, '0', '0', $adminUser, '', 
             $salesman, '', $analysisHospital, $reportHospital, $titleHospital, $agency, 
             '0', '0', '0', '0', $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, 
-            $creator, $double, $agencyTel, $deviceList, $contact);
+            $creator, $double, $deviceList, $contact);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -107,6 +106,24 @@ if (isset($_POST['submit'])){
     echo '<h1>添加成功。</h1><a href="add.php">继续新建医院</a>';
 } else {
     $_SESSION['post'] = false;
+    
+    $ret = DbiAdmin::getDbi()->getAgencyList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlAgency = '<option value="0">请选择代理商</option>';
+    foreach ($ret as $value) {
+        $htmlAgency .= '<option value="' . $value['agency_id'] . '">' . $value['name'] . '</option>';
+    }
+    $ret = DbiAdmin::getDbi()->getSalesmanList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlSalesman = '<option value="0">请选择业务员</option>';
+    foreach ($ret as $value) {
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '">' . $value['name'] . '</option>';
+    }
+    
     echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
   <div class="form-group">
@@ -177,23 +194,19 @@ if (isset($_POST['submit'])){
     </div>
   </div>
   <div class="form-group">
-    <label for="salesman" class="col-sm-2 control-label">代理商<font color="red">*</font></label>
-    <div class="col-sm-4">
-      <input type="text" class="form-control" name="agency" placeholder="请输入代理商" required>
-    </div>
-    <label for="salesman" class="col-sm-2 control-label">代理商电话<font color="red">*</font></label>
-    <div class="col-sm-4">
-      <input type="text" class="form-control" name="agency_tel" placeholder="请输入代理商电话" required>
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="salesman" class="col-sm-2 control-label">业务员<font color="red">*</font></label>
+    <label for="agency" class="col-sm-2 control-label">代理商</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="salesman" name="salesman" placeholder="请输入业务员姓名" required>
+      <select class="form-control" name="agency">$htmlAgency</select>
     </div>
   </div>
   <div class="form-group">
-    <label for="salesman" class="col-sm-2 control-label">设备ID(多个设备用英文逗号分隔)</label>
+    <label for="salesman" class="col-sm-2 control-label">业务员</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="salesman">$htmlSalesman</select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="device_list" class="col-sm-2 control-label">设备ID(多个设备用英文逗号分隔)</label>
     <div class="col-sm-4">
       <input type="text" class="form-control" name="device_list" placeholder="请输入设备ID(多个设备用英文逗号分隔)" onchange="checkDevice(this.value)">
     </div>

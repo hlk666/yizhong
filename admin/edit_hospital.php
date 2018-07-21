@@ -24,9 +24,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $parentFlag = !isset($_POST['parent_flag']) ? null : $_POST['parent_flag'];
     $loginUser = !isset($_POST['login_user']) ? null : $_POST['login_user'];
     $messageTel = isset($_POST['message_tel']) ? $_POST['message_tel'] : '0';
-    $agency = isset($_POST['agency']) ? $_POST['agency'] : '';
-    $agencyTel = isset($_POST['agency_tel']) ? $_POST['agency_tel'] : '';
-    $salesman = isset($_POST['salesman']) ? $_POST['salesman'] : '';
+    $agency = isset($_POST['agency']) ? $_POST['agency'] : '0';
+    $salesman = isset($_POST['salesman']) ? $_POST['salesman'] : '0';
     $worker = isset($_POST['worker']) ? $_POST['worker'] : '';
     $invoiceName = (isset($_POST['invoice_name']) && !empty($_POST['invoice_name'])) ? $_POST['invoice_name'] : '';
     $invoiceId = (isset($_POST['invoice_id']) && !empty($_POST['invoice_id'])) ? $_POST['invoice_id'] : '';
@@ -86,7 +85,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, $contractFlag, 
                 $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-                $invoiceBank, $worker, $filter, $contact, $agencyTel);
+                $invoiceBank, $worker, $filter, $contact);
     }
     
     if (isset($_POST['del'])) {
@@ -147,9 +146,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $tel = $hospitalInfo['tel'];
     $loginUser = $hospitalInfo['login_name'];
     $messageTel = $hospitalInfo['sms_tel'];
-    $agency = $hospitalInfo['agency'];
-    $agencyTel = $hospitalInfo['agency_tel'];
-    $salesman = $hospitalInfo['salesman'];
+    $agency = $hospitalInfo['agency_id'];
+    $salesman = $hospitalInfo['salesman_id'];
     $worker = $hospitalInfo['worker'];
     $comment = $hospitalInfo['comment'];
     $invoiceName = $hospitalInfo['invoice_name'];
@@ -157,6 +155,23 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $invoiceAddressTel = $hospitalInfo['invoice_addr_tel'];
     $invoiceBank = $hospitalInfo['invoice_bank'];
     $contact = $hospitalInfo['contact'];
+    
+    $ret = DbiAdmin::getDbi()->getAgencyList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlAgency = '<option value="0"' . ($value == '0' ? ' selected ' : '') . '>请选择代理商</option>';
+    foreach ($ret as $value) {
+        $htmlAgency .= '<option value="' . $value['agency_id'] . '"' . ($value['agency_id'] == $agency ? ' selected ' : '') . '>' . $value['name'] . '</option>';
+    }
+    $ret = DbiAdmin::getDbi()->getSalesmanList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlSalesman = '<option value="0"' . ($value == '0' ? ' selected ' : '') . '>请选择业务员</option>';
+    foreach ($ret as $value) {
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '"' . ($value['salesman_id'] == $salesman ? ' selected ' : '') . '>' . $value['name'] . '</option>';
+    }
     
     if ('1' == $hospitalInfo['parent_flag']) {
         $htmlParentFlagYes = '<input type="radio" name="parent_flag" value="1" checked>可</label>';
@@ -342,21 +357,15 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">代理商<font color="red">*</font></label>
+    <label for="agency" class="col-sm-2 control-label">代理商</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="agency" value="$agency">
+      <select class="form-control" name="agency">$htmlAgency</select>
     </div>
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">代理商电话<font color="red">*</font></label>
+    <label for="salesman" class="col-sm-2 control-label">业务员</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" name="agency_tel" value="$agencyTel">
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="salesman" class="col-sm-2 control-label">业务员<font color="red">*</font></label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="salesman" name="salesman" value="$salesman">
+      <select class="form-control" name="salesman">$htmlSalesman</select>
     </div>
   </div>
   <div class="form-group">

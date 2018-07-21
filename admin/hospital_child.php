@@ -60,7 +60,7 @@ echo <<<EOF
 <form class="form-horizontal" role="form" method="get">
 <div class="row">
   <div class="col-xs-12 col-sm-2">
-    <label for="salesman" class="control-label"><font color="red">*</font>医院</label>
+    <label class="control-label"><font color="red">*</font>医院</label>
   </div>
   <div class="col-xs-12 col-sm-4">
     <select class="form-control" name="hospital">$htmlHospitals</select>

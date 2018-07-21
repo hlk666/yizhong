@@ -89,16 +89,25 @@ class DbiAdmin extends BaseDbi
     public function addHospital($name, $type, $level, $tel, $province, $city, $county, $address, $parentFlag, $parentHospital, 
             $adminUser, $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $title1, $agency, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-            $invoiceBank, $creator, $double = '0', $agencyTel = '', $deviceList = array(), $contact = '')
+            $invoiceBank, $creator, $double = '0', $deviceList = array(), $contact = '')
     {
+        $agencyName = $this->getDataString("select agency_name from agency where agency_id = $agency limit 1");
+        if (VALUE_DB_ERROR === $agencyName) {
+            return VALUE_DB_ERROR;
+        }
+        $salesmanName = $this->getDataString("select salesman_name from salesman where salesman_id = $salesman limit 1");
+        if (VALUE_DB_ERROR === $salesmanName) {
+            return VALUE_DB_ERROR;
+        }
+        
         $this->pdo->beginTransaction();
         $sql = "insert into hospital(hospital_name, type, level, tel, province, city, county, address, parent_flag, 
                 sms_tel, agency, salesman, comment, contract_flag, device_sale, display_check, report_must_check, 
-                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker, agency_tel, contact)
+                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker, contact, agency_id, salesman_id)
                 values ('$name', '$type', '$level', '$tel', '$province', '$city', '$county', '$address', '$parentFlag', 
-                '$messageTel', '$agency', '$salesman', '$comment', '$contractFlag', '$deviceSale', '$displayCheck', 
+                '$messageTel', '$agencyName', '$salesmanName', '$comment', '$contractFlag', '$deviceSale', '$displayCheck', 
                 '$reportMustCheck', '$invoiceName', '$invoiceId', '$invoiceAddressTel', '$invoiceBank', '$creator', 
-                '$creator', '$agencyTel', '$contact')";
+                '$creator', '$contact', '$agency', '$salesman')";
         $hospitalId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $hospitalId) {
             $this->pdo->rollBack();
@@ -142,9 +151,10 @@ class DbiAdmin extends BaseDbi
         if (!empty($deviceList)) {
             foreach ($deviceList as $deviceId) {
                 if ($this->existData('device', "device_id = $deviceId")) {
-                    $sql = "update device set hospital_id = $hospitalId, agency = '' where device_id = '$deviceId'";
+                    $sql = "update device set hospital_id = $hospitalId, agency = '', salesman = '', agency_id = 0, salesman_id = 0 
+                    where device_id = '$deviceId'";
                 } else {
-                    $sql = "insert into device (device_id, hospital_id, agency) values ('$deviceId', $hospitalId, '')";
+                    $sql = "insert into device (device_id, hospital_id) values ('$deviceId', $hospitalId)";
                 }
                 $ret = $this->updateData($sql);
                 if (VALUE_DB_ERROR === $ret) {
@@ -204,19 +214,30 @@ class DbiAdmin extends BaseDbi
         if (VALUE_DB_ERROR === $oldHospitalId) {
             return VALUE_DB_ERROR;
         }
+        $agencyName = $this->getDataString("select agency_name from agency where agency_id = $agency limit 1");
+        if (VALUE_DB_ERROR === $agencyName) {
+            return VALUE_DB_ERROR;
+        }
+        $salesmanName = $this->getDataString("select salesman_name from salesman where salesman_id = $salesman limit 1");
+        if (VALUE_DB_ERROR === $salesmanName) {
+            return VALUE_DB_ERROR;
+        }
         if ($oldHospitalId !== '') {
-            $sql = "update device set hospital_id = $hospital, agency = '$agency', salesman = '$salesman' where device_id = '$deviceId'";
+            $sql = "update device set hospital_id = $hospital, 
+                    agency = '$agencyName', salesman = '$salesmanName', agency_id = $agency, salesman_id = $salesman
+                    where device_id = '$deviceId'";
         } else {
             $oldHospitalId = '0';
-            $sql = "insert into device (device_id, hospital_id, agency, salesman) values ('$deviceId', $hospital, '$agency', '$salesman')";
+            $sql = "insert into device (device_id, hospital_id, agency, salesman, agency_id, salesman_id) 
+                    values ('$deviceId', $hospital, '$agencyName', '$salesmanName', '$agency', '$salesman')";
         }
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
         }
         
-        $sql = "insert into history_device (device_id, hospital_id, agency, salesman, user, unbind_hospital_id, content, action) 
-                values ('$deviceId', $hospital, '$agency', '$salesman', '$user', $oldHospitalId, '$content', '$action')";
+        $sql = "insert into history_device (device_id, hospital_id, agency, salesman, agency_id, salesman_id, user, unbind_hospital_id, content, action) 
+                values ('$deviceId', $hospital, '$agencyName', '$salesmanName', '$agency', '$salesman', '$user', $oldHospitalId, '$content', '$action')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -296,8 +317,17 @@ class DbiAdmin extends BaseDbi
     public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
             $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
             $contractFlag, $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, 
-            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter, $contact, $agencyTel)
+            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter, $contact)
     {
+        $agencyName = $this->getDataString("select agency_name from agency where agency_id = $agency limit 1");
+        if (VALUE_DB_ERROR === $agencyName) {
+            return VALUE_DB_ERROR;
+        }
+        $salesmanName = $this->getDataString("select salesman_name from salesman where salesman_id = $salesman limit 1");
+        if (VALUE_DB_ERROR === $salesmanName) {
+            return VALUE_DB_ERROR;
+        }
+        
         $this->pdo->beginTransaction();
     
         $sql = 'update account set login_name = :login_user, real_name = :real_name 
@@ -311,8 +341,8 @@ class DbiAdmin extends BaseDbi
         
         $sql = "update hospital set hospital_name = '$hospitalName', type = '$type', level = '$level', tel = '$hospitalTel', 
                 province = '$province', city = '$city', county = '$county', address = '$hospitalAddress', 
-                parent_flag = '$parentFlag', sms_tel = '$messageTel', agency = '$agency', agency_tel = '$agencyTel', 
-                salesman = '$salesman', comment = '$comment', contract_flag = '$contractFlag', device_sale = '$deviceSale', 
+                parent_flag = '$parentFlag', sms_tel = '$messageTel', agency = '$agencyName', agency_id = '$agency', salesman_id = '$salesman',
+                salesman = '$salesmanName', comment = '$comment', contract_flag = '$contractFlag', device_sale = '$deviceSale', 
                 display_check = '$displayCheck', service_charge = '$serviceCharge', report_must_check = '$reportMustCheck',
                 invoice_name = '$invoiceName', invoice_id = '$invoiceId', invoice_addr_tel = '$invoiceAddressTel', 
                 invoice_bank = '$invoiceBank', worker = '$worker', filter = '$filter', contact = '$contact'
@@ -391,7 +421,8 @@ class DbiAdmin extends BaseDbi
     }
     public function getAgencyList()
     {
-        $sql = 'select distinct agency as agency_id, agency as `name` from hospital where type <> 1';
+        //$sql = 'select distinct agency as agency_id, agency as `name` from hospital where type <> 1';
+        $sql = "select agency_id, agency_name as `name` from agency";
         return $this->getDataAll($sql);
     }
     public function getCountyCount($county = '')
@@ -718,7 +749,7 @@ class DbiAdmin extends BaseDbi
     public function getHospitalInfo($hospitalId)
     {
         $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, county, address, h.tel, 
-                parent_flag, a.login_name, h.sms_tel, h.agency, h.agency_tel, h.salesman, h.comment, 
+                parent_flag, a.login_name, h.sms_tel, h.agency, h.salesman, h.agency_id, h.salesman_id, h.comment, 
                 h.contract_flag, h.device_sale, h.service_charge, h.display_check, h.report_must_check,
                 invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker, filter, contact
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
@@ -759,7 +790,7 @@ class DbiAdmin extends BaseDbi
             $sql .= " and h.level = '$level' ";
         }
         if (!empty($salesman)) {
-            $sql .= " and h.salesman = '$salesman' ";
+            $sql .= " and h.salesman_id = '$salesman' ";
         }
         if (!empty($name)) {
             $sql .= " and h.hospital_name like '%$name%' ";
@@ -818,9 +849,8 @@ class DbiAdmin extends BaseDbi
         if (empty($salesman)) {
             return array();
         }
-        $sql = 'select hospital_id from hospital where type <> 1 and salesman = :salesman';
-        $param = [':salesman' => $salesman];
-        return $this->getDataAll($sql, $param);
+        $sql = "select hospital_id from hospital where type <> 1 and salesman_id = $salesman";
+        return $this->getDataAll($sql);
     }
     public function getHospitalWorder($user)
     {
@@ -870,15 +900,15 @@ class DbiAdmin extends BaseDbi
     
         return $this->getDataAll($sql);
     }
-    public function getSalesmanData($salesman, $startTime = null, $endTime = null, $offset = 0, $rows = null)
+    public function getSalesmanData($id, $startTime = null, $endTime = null, $offset = 0, $rows = null)
     {
-        if (empty($salesman)) {
+        if (empty($id)) {
             return array();
         }
-        $sql = 'select h.hospital_name, p.patient_name, regist_time, g.regist_doctor_name as doctor_name
+        $sql = "select h.hospital_name, p.patient_name, regist_time, g.regist_doctor_name as doctor_name
                 from guardian as g inner join hospital as h on g.regist_hospital_id = h.hospital_id
                 inner join patient as p on g.patient_id = p.patient_id
-                where regist_hospital_id in (select hospital_id from hospital where salesman = :salesman) ';
+                where regist_hospital_id in (select hospital_id from hospital where salesman_id = $id) ";
         if (null !== $startTime) {
             $sql .= " and regist_time >= '$startTime' ";
         }
@@ -892,12 +922,12 @@ class DbiAdmin extends BaseDbi
             $sql .= " limit $offset, $rows";
         }
         
-        $param = [':salesman' => $salesman];
-        return $this->getDataAll($sql, $param);
+        return $this->getDataAll($sql);
     }
     public function getSalesmanList()
     {
-        $sql = 'select distinct salesman as `name` from hospital where salesman <> ""';
+        //$sql = 'select distinct salesman as `name` from hospital where salesman <> ""';
+        $sql = "select salesman_id, salesman_name as `name` from salesman";
         return $this->getDataAll($sql);
     }
     public function getTotalDiagnosis($hospital, $startTime, $endTime)
