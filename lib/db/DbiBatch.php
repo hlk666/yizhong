@@ -24,9 +24,11 @@ class DbiBatch extends BaseDbi
                     select device_id, d.hospital_id as `id`, h.hospital_name as `name` 
                     from device as d inner join hospital as h on d.hospital_id = h.hospital_id where d.hospital_id <> 0
                     union all
-                    select device_id, 0 as `id`, agency as `name` from device where agency <> ""
+                    select device_id, 0 as `id`, a.agency_name as `name` from device as d 
+                    left join agency as a on d.agency_id = a.agency_id where d.agency_id <> 0
                     union all
-                    select device_id, 0 as `id`, salesman as `name` from device where salesman <> ""
+                    select device_id, 0 as `id`, s.salesman_name as `name` from device as d 
+                    left join salesman as s on d.salesman_id = s.salesman_id where d.salesman_id <> 0
                 ) as t group by t.id, t.name';
         return $this->getDataAll($sql);
     }

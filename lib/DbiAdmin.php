@@ -422,7 +422,6 @@ class DbiAdmin extends BaseDbi
     }
     public function getAgencyList()
     {
-        //$sql = 'select distinct agency as agency_id, agency as `name` from hospital where type <> 1';
         $sql = "select agency_id, agency_name as `name` from agency";
         return $this->getDataAll($sql);
     }
@@ -493,7 +492,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getDeviceHospital($device)
     {
-        $sql = "select d.device_id, h.hospital_id, hospital_name, h.agency_id, h.salesman_id, a.agency_name, s.salesman_name, tel, agency_tel
+        $sql = "select d.device_id, h.hospital_id, hospital_name, h.agency_id, h.salesman_id, a.agency_name, s.salesman_name, tel, a.agency_tel
                 from hospital as h inner join device as d on h.hospital_id = d.hospital_id
                 left join agency as a on d.agency_id = a.agency_id
                 left join salesman as s on d.salesman_id = s.salesman_id
@@ -766,7 +765,7 @@ class DbiAdmin extends BaseDbi
     public function getHospitalInfo($hospitalId)
     {
         $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, county, address, h.tel, 
-                parent_flag, a.login_name, h.sms_tel, h.agency, h.salesman, h.agency_id, h.salesman_id, h.comment, 
+                parent_flag, a.login_name, h.sms_tel, h.agency_id, h.salesman_id, h.comment, 
                 h.contract_flag, h.device_sale, h.service_charge, h.display_check, h.report_must_check,
                 invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker, filter, contact
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
