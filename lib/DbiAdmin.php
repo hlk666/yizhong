@@ -37,7 +37,8 @@ class DbiAdmin extends BaseDbi
     public function addDevice($hospital, $device, $user = '')
     {
         if ($this->existData('device', "device_id = '$device'")) {
-            $sql = "update device set hospital_id = '$hospital', agency = '', salesman = '' where device_id = '$device'";
+            $sql = "update device set hospital_id = '$hospital', agency = '', salesman = '', agency_id = 0, salesman_id = 0 
+            where device_id = '$device'";
         } else {
             $sql = "insert into device (device_id, hospital_id) values ('$device', '$hospital')";
         }
@@ -445,13 +446,16 @@ class DbiAdmin extends BaseDbi
     public function getDeviceAgency($agency, $salesman)
     {
         if (!empty($agency)) {
-            $and = " and agency = '$agency'";
+            $and = " and d.agency_id = '$agency'";
         } elseif (!empty($salesman)) {
-            $and = " and salesman = '$salesman'";
+            $and = " and d.salesman_id = '$salesman'";
         } else {
             $and = '';
         }
-        $sql = "select device_id, agency, salesman from device where hospital_id = 0 $and";
+        $sql = "select device_id, a.agency_name as agency, s.salesman_name as salesman from device as d
+                left join agency as a on d.agency_id = a.agency_id
+                left join salesman as s on d.salesman_id = s.salesman_id 
+                where hospital_id = 0 $and";
         return $this->getDataAll($sql);
     }
     public function getDeviceBloc()
@@ -485,8 +489,10 @@ class DbiAdmin extends BaseDbi
     }
     public function getDeviceHospital($device)
     {
-        $sql = "select d.device_id, h.hospital_id, hospital_name, h.agency, h.salesman, tel, agency_tel
+        $sql = "select d.device_id, h.hospital_id, hospital_name, h.agency_id, h.salesman_id, a.agency_name, s.salesman_name, tel, agency_tel
                 from hospital as h inner join device as d on h.hospital_id = d.hospital_id
+                left join agency as a on d.agency_id = a.agency_id
+                left join salesman as s on d.salesman_id = s.salesman_id
                 where d.device_id = '$device' limit 1";
         return $this->getDataRow($sql);
     }
@@ -681,9 +687,8 @@ class DbiAdmin extends BaseDbi
         if (empty($agency)) {
             return array();
         }
-        $sql = 'select distinct hospital_id, hospital_name from hospital where type <> 1 and agency = :agency';
-        $param = [':agency' => $agency];
-        return $this->getDataAll($sql, $param);
+        $sql = "select distinct hospital_id, hospital_name from hospital where type <> 1 and agency_id = $agency";
+        return $this->getDataAll($sql);
     }
     public function getHospitalAgencyList()
     {
@@ -699,12 +704,16 @@ class DbiAdmin extends BaseDbi
         if (!empty($endTime)) {
             $time .= "and h.create_time <= '$endTime' ";
         }
-        $sql = "select h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, 
+        $sql = "select h.hospital_id, h.hospital_name, h.salesman_id, h.agency_id, 
+                a.agency_name, s.salesman_name, h.create_time, 
                 h.type, h.province, h.city, h.county, h.device_sale, h.service_charge, 
                 count(d.device_id) as device_count, h.filter, h.device_sale, h.worker
                 from hospital as h left join device as d on h.hospital_id = d.hospital_id
+                left join agency as a on h.agency_id = a.agency_id
+                left join salesman as s on h.salesman_id = s.salesman_id
                 where 1 $time 
-                group by h.hospital_id, h.hospital_name, h.salesman, h.agency, h.create_time, h.type, 
+                group by h.hospital_id, h.hospital_name, h.salesman_id, h.agency_id, 
+                a.agency_name, s.salesman_name, h.create_time, h.type, 
                 h.province, h.city, h.county, h.filter, h.device_sale, h.service_charge";
         return $this->getDataAll($sql);
     }
@@ -721,10 +730,10 @@ class DbiAdmin extends BaseDbi
             $sql .= " and t.report_hospital = $reportHospital ";
         }
         if (!empty($agency)) {
-            $sql .= " and h.agency = '$agency' ";
+            $sql .= " and h.agency_id = '$agency' ";
         }
         if (!empty($salesman)) {
-            $sql .= " and h.salesman = '$salesman' ";
+            $sql .= " and h.salesman_id = '$salesman' ";
         }
         return $this->getDataAll($sql);
     }
@@ -926,7 +935,6 @@ class DbiAdmin extends BaseDbi
     }
     public function getSalesmanList()
     {
-        //$sql = 'select distinct salesman as `name` from hospital where salesman <> ""';
         $sql = "select salesman_id, salesman_name as `name` from salesman";
         return $this->getDataAll($sql);
     }
