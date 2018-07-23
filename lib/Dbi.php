@@ -711,14 +711,14 @@ class Dbi extends BaseDbi
                 $this->pdo->rollBack();
                 return VALUE_DB_ERROR;
             }
-            
+            /*
             $sql = 'delete from ecg where guardian_id = :guardian_id';
             $param = [':guardian_id' => $guardianId];
             $ret = $this->deleteData($sql, $param);
             if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
                 return VALUE_DB_ERROR;
-            }
+            }*/
             $this->pdo->commit();
             return true;
         }
