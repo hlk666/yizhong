@@ -2,8 +2,8 @@
 require_once PATH_LIB . 'DbiWX.php';
 require_once PATH_LIB . 'Validate.php';
 
-$appid = 'wxcd00c31443e7f935';
-$secret = '24c9b5d12b896a1baf4b107258a9495a';
+$appid = 'wxf6b18a1e070d2ec8';
+$secret = '41d6f23901b41ae61ad8f0c5649a389f';
 
 if (false === Validate::checkRequired($_GET['code'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'code.']);
