@@ -3,7 +3,7 @@ require '../config/config.php';
 require '../lib/DbiAdmin.php';
 
 $device = isset($_GET['device']) ? str_replace('，', ',', $_GET['device']) : '';
-$device = explode(',', $device);
+$device = explode(',', str_replace('，', ',', $device));
 
 $strDevice = '';
 $html = '';

@@ -34,7 +34,7 @@ if (isset($_POST['submit'])){
         user_back_after_delay('请选择备注信息。');
     }
     if (empty($deviceList) && !empty($deviceIdList)) {
-        $deviceList = explode(',', $deviceIdList);
+        $deviceList = explode(',', str_replace('，', ',', $deviceIdList));
     }
     /*
     foreach ($deviceList as $deviceId) {
@@ -48,11 +48,26 @@ if (isset($_POST['submit'])){
         }
     }
     */
+    foreach ($deviceList as $deviceId) {
+        $ret = DbiAdmin::getDbi()->checkDeviceDelivery($deviceId);
+        if (VALUE_DB_ERROR === $ret) {
+            user_back_after_delay(MESSAGE_DB_ERROR);
+        } elseif ($ret == 1) {
+            user_back_after_delay("设备【 $deviceId 】的ID不存在，不能发货/调配。");
+        }  elseif ($ret == 2) {
+            user_back_after_delay("设备【 $deviceId 】在生产部，不能发货/调配。");
+        }  else {
+            //do nothing.
+        }
+    }
     if (!empty($hospitalId)) {
         $agency = 0;
         $salesman = 0;
     }
     foreach ($deviceList as $deviceId) {
+        if (empty($deviceId)) {
+            user_back_after_delay('设备ID有误。');
+        }
         $ret = DbiAdmin::getDbi()->delDevice($deviceId, $hospitalId, $agency, $salesman, $_SESSION['user'], $content, $action);
         if (VALUE_DB_ERROR === $ret) {
             user_back_after_delay(MESSAGE_DB_ERROR);
