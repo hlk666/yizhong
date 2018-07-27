@@ -8,9 +8,17 @@ $isHideSider = true;
 require 'header.php';
 
 if (isset($_POST['submit'])){
-    $ret = DbiAdmin::getDbi()->addDevicePD($_POST['device']);
-    if (VALUE_DB_ERROR === $ret) {
+    $deviceId = $_POST['device'];
+    $isExisted = DbiAdmin::getDbi()->existedDevice2($deviceId);
+    if (VALUE_DB_ERROR === $isExisted) {
         user_back_after_delay(MESSAGE_DB_ERROR);
+    } elseif (true === $isExisted) {
+        user_back_after_delay("设备【 $deviceId 】已绑定其他医院或代理商/业务员，请从【发货/调配】页面操作。");
+    } else {
+        $ret = DbiAdmin::getDbi()->addDevicePD($deviceId);
+        if (VALUE_DB_ERROR === $ret) {
+            user_back_after_delay(MESSAGE_DB_ERROR);
+        }
     }
 }
 

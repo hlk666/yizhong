@@ -362,6 +362,10 @@ class DbiAdmin extends BaseDbi
     {
         return $this->existData('device', "device_id = '$deviceId' and hospital_id > 1");
     }
+    public function existedDevice2($deviceId)
+    {
+        return $this->existData('device', "device_id = '$deviceId'");
+    }
     public function existedLoginName($loginName, $hospital)
     {
         return $this->existData('account', "login_name = '$loginName' and hospital_id <> $hospital");
@@ -929,6 +933,21 @@ class DbiAdmin extends BaseDbi
         $sql = 'select user, password, type, hospital_id from user_diagnosis where user = :user limit 1';
         $param = [':user' => $user];
         return $this->getDataRow($sql, $param);
+    }
+    public function checkDeviceDelivery($deviceId)
+    {
+        $sql = "select device_id, hospital_id from device where device_id = '$deviceId' limit 1";
+        $ret = $this->getDataRow($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        if (empty($ret)) {
+            return 1;
+        }
+        if ($ret['hospital_id'] == '40') {
+            return 2;
+        }
+        return 0;
     }
     public function notDisplayFirst($guardianId)
     {
