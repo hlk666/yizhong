@@ -21,7 +21,7 @@ class DbiERP extends BaseDbi
     
     public function getHospitalInfoList($IdList)
     {
-        $sql = "select hospital_id, hospital_name, h.agency_id, a.agency_name, a.agency_tel, h.salesman_id, s.salesman_name
+        $sql = "select hospital_id, hospital_name, h.create_time, h.agency_id, a.agency_name, a.agency_tel, h.salesman_id, s.salesman_name
                 from hospital as h
                 left join agency as a on h.agency_id = a.agency_id
                 left join salesman as s on h.salesman_id = s.salesman_id
