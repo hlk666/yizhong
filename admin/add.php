@@ -81,8 +81,13 @@ if (isset($_POST['submit'])){
         $analysisHospital = 0;
         $reportHospital = 0;
     } else {
-        $analysisHospital = 119;
-        $reportHospital = 119;
+        if ($titleHospital == 313) {
+            $analysisHospital = 417;
+            $reportHospital = 313;
+        } else {
+            $analysisHospital = 119;
+            $reportHospital = 119;
+        }
     }
     
     $isExisted = DbiAdmin::getDbi()->existedLoginName($adminUser, 0);
@@ -96,7 +101,7 @@ if (isset($_POST['submit'])){
     $ret = DbiAdmin::getDbi()->addHospital($hospitalName, '0', $level, $hospitalTel, 
             $province, $city, $county, $hospitalAddress, '0', '0', $adminUser, '', 
             $salesman, '', $analysisHospital, $reportHospital, $titleHospital, $agency, 
-            '0', '0', '0', '0', $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, 
+            '0', '2', '0', '0', $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, 
             $creator, $double, $deviceList, $contact);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
