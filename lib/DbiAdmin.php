@@ -22,6 +22,18 @@ class DbiAdmin extends BaseDbi
     {
         return $this->getDataAll($sql);
     }
+    public function addAgency($name, $tel)
+    {
+        if($this->existData('agency', "agency_name = '$name'")) {
+            return VALUE_DB_ERROR;
+        }
+        $sql = "insert into agency (agency_name, agency_tel) values ('$name', '$tel')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
     public function addCountyHospital($county, $count)
     {
         if ($this->existData('county_hospital', " county = '$county'")) {
@@ -194,6 +206,18 @@ class DbiAdmin extends BaseDbi
             values (:hospital_id, :parent_hospital_id)';
         $param = [':hospital_id' => $hospitalId, ':parent_hospital_id' => $parentHospital];
         return $this->insertData($sql, $param);
+    }
+    public function addSalesman($name)
+    {
+        if($this->existData('salesman', "salesman_name = '$name'")) {
+            return VALUE_DB_ERROR;
+        }
+        $sql = "insert into salesman (salesman_name) values ('$name')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
     }
     public function delAccount($doctorId)
     {
@@ -395,9 +419,15 @@ class DbiAdmin extends BaseDbi
         $param = [':user' => $loginName];
         return $this->getDataRow($sql, $param);
     }
+    public function getAgencyByName($name)
+    {
+        $sql = "select agency_tel from agency where agency_name = '$name' limit 1";
+        return $this->getDataString($sql);
+    }
     public function getAgencyList()
     {
-        $sql = "select agency_id, agency_name as `name` from agency";
+        $sql = "select agency_id, agency_name as `name` from agency 
+                order by convert(agency_name using gbk) collate gbk_chinese_ci asc";
         return $this->getDataAll($sql);
     }
     public function getCountyCount($county = '')
@@ -893,6 +923,11 @@ class DbiAdmin extends BaseDbi
     
         return $this->getDataAll($sql);
     }
+    public function getSalesmanByName($name)
+    {
+        $sql = "select 1 from salesman where salesman_name = '$name' limit 1";
+        return $this->getDataString($sql);
+    }
     public function getSalesmanData($id, $startTime = null, $endTime = null, $offset = 0, $rows = null)
     {
         if (empty($id)) {
@@ -919,7 +954,8 @@ class DbiAdmin extends BaseDbi
     }
     public function getSalesmanList()
     {
-        $sql = "select salesman_id, salesman_name as `name` from salesman";
+        $sql = "select salesman_id, salesman_name as `name` from salesman
+                order by convert(salesman_name using gbk) collate gbk_chinese_ci asc";
         return $this->getDataAll($sql);
     }
     public function getTotalDiagnosis($hospital, $startTime, $endTime)

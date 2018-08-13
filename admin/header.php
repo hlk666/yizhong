@@ -57,6 +57,10 @@ EOF;
           <!--<li><a href="app_set_update.php">更 新 设 备 版 本</a></li>-->
         </ul>
         <ul class="nav nav-sidebar">
+          <li><a href="add_agency.php">添加代理商</a></li>
+          <li><a href="add_salesman.php">添加 业务员</a></li>
+        </ul>
+        <ul class="nav nav-sidebar">
           <li><a href="hospital_device.php">医院开单数据</a></li>
           <li><a href="salesman_data.php">查询业务员开单</a></li>
         </ul>

@@ -133,6 +133,7 @@ EOF;
     if (VALUE_DB_ERROR === $ret) {
         $ret = array();
     }
+    echo '<script>var agencyData = ' . json_encode($ret, JSON_UNESCAPED_UNICODE) . ';</script>';
     $htmlAgency = '<option value="0">请选择代理商</option>';
     foreach ($ret as $value) {
         $htmlAgency .= '<option value="' . $value['agency_id'] . '">' . $value['name'] . '</option>';
@@ -142,6 +143,7 @@ EOF;
     if (VALUE_DB_ERROR === $ret) {
         $ret = array();
     }
+    echo '<script>var salesmanData = ' . json_encode($ret, JSON_UNESCAPED_UNICODE) . ';</script>';
     $htmlSalesman = '<option value="0">请选择业务员</option>';
     foreach ($ret as $value) {
         $htmlSalesman .= '<option value="' . $value['salesman_id'] . '">' . $value['name'] . '</option>';
@@ -165,14 +167,18 @@ EOF;
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">代理商</label>
-    <div class="col-sm-10">
-      <select class="form-control" name="agency">$htmlAgency</select>
+    <div class="col-sm-3">
+    <input type="text" class="form-control" id="agency_input" onBlur="agencyFilter()"></div>
+    <div class="col-sm-7">
+      <select class="form-control" id="agency" name="agency">$htmlAgency</select>
     </div>
   </div>
   <div class="form-group">
-    <label for="salesman" class="col-sm-2 control-label">业务员</label>
-    <div class="col-sm-10">
-      <select class="form-control" name="salesman">$htmlSalesman</select>
+    <label class="col-sm-2 control-label">业务员</label>
+    <div class="col-sm-3">
+    <input type="text" class="form-control" id="salesman_input" onBlur="salesmanFilter()"></div>
+    <div class="col-sm-7">
+      <select class="form-control" id="salesman" name="salesman">$htmlSalesman</select>
     </div>
   </div>
   <div class="form-group">
@@ -199,6 +205,44 @@ EOF;
     </div>
   </div>
 </form>
+<script>
+function agencyFilter()
+{
+    var agencyValue = document.getElementById('agency_input').value.trim();
+    var agencySelect = document.getElementById('agency');
+    agencySelect.options.length = 0;
+    agencySelect.options.add(new Option('请选择', ''));
+    for(let item in agencyData)
+    {
+        if (agencyValue == '') {
+            agencySelect.options.add(new Option(agencyData[item].name, agencyData[item].agency_id));
+        } else {
+            var index = agencyData[item].name.indexOf(agencyValue);
+            if (index != -1) {
+                agencySelect.options.add(new Option(agencyData[item].name, agencyData[item].agency_id));
+            }
+        }
+    }
+}
+function salesmanFilter()
+{
+    var salesmanValue = document.getElementById('salesman_input').value.trim();
+    var salesmanSelect = document.getElementById('salesman');
+    salesmanSelect.options.length = 0;
+    salesmanSelect.options.add(new Option('请选择', ''));
+    for(let item in salesmanData)
+    {
+        if (salesmanValue == '') {
+            salesmanSelect.options.add(new Option(salesmanData[item].name, salesmanData[item].salesman_id));
+        } else {
+            var index = salesmanData[item].name.indexOf(salesmanValue);
+            if (index != -1) {
+                salesmanSelect.options.add(new Option(salesmanData[item].name, salesmanData[item].salesman_id));
+            }
+        }
+    }
+}
+</script>
 EOF;
 }
 require 'tpl/footer.tpl';
