@@ -57,7 +57,7 @@ EOF;
           <!--<li><a href="app_set_update.php">更 新 设 备 版 本</a></li>-->
         </ul>
         <ul class="nav nav-sidebar">
-          <li><a href="add_agency.php">添加代理商</a></li>
+          <li><a href="agency.php">代理商列表</a></li>
           <li><a href="add_salesman.php">添加 业务员</a></li>
         </ul>
         <ul class="nav nav-sidebar">

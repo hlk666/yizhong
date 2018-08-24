@@ -320,6 +320,15 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital' => $hospitalId];
         return $this->deleteData($sql, $param);
     }
+    public function editAgency($id, $name, $tel)
+    {
+        $sql = "update agency set agency_name = '$name', agency_tel = '$tel' where agency_id = $id";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
     public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
             $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
             $contractFlag, $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, 
@@ -424,9 +433,19 @@ class DbiAdmin extends BaseDbi
         $sql = "select agency_tel from agency where agency_name = '$name' limit 1";
         return $this->getDataString($sql);
     }
+    public function getAgencyByNameId($id, $name)
+    {
+        $sql = "select 1 from agency where agency_name = '$name' and agency_id <> $id limit 1";
+        return $this->getDataString($sql);
+    }
+    public function getAgencyInfo($id)
+    {
+        $sql = "select agency_name, agency_tel from agency where agency_id = $id limit 1";
+        return $this->getDataRow($sql);
+    }
     public function getAgencyList()
     {
-        $sql = "select agency_id, agency_name as `name` from agency 
+        $sql = "select agency_id, agency_name as `name`, agency_tel from agency 
                 order by convert(agency_name using gbk) collate gbk_chinese_ci asc";
         return $this->getDataAll($sql);
     }

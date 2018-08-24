@@ -162,7 +162,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     }
     $htmlAgency = '<option value="0"' . ($value == '0' ? ' selected ' : '') . '>请选择代理商</option>';
     foreach ($ret as $value) {
-        $htmlAgency .= '<option value="' . $value['agency_id'] . '"' . ($value['agency_id'] == $agency ? ' selected ' : '') . '>' . $value['name'] . '</option>';
+        $htmlAgency .= '<option value="' . $value['agency_id'] . '"' . ($value['agency_id'] == $agency ? ' selected ' : '') . '>' 
+                . $value['name'] . '(' . $value['agency_tel'] . ')</option>';
     }
     $ret = DbiAdmin::getDbi()->getSalesmanList();
     if (VALUE_DB_ERROR === $ret) {
