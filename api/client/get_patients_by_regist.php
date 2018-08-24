@@ -22,7 +22,7 @@ $needRead = isset($_GET['read']) ? $_GET['read'] : '';
 
 if (!empty($needRead)) {
     $count = Dbi::getDbi()->getGuardiansByRegistCount($hospitalId, $offset, $rows, $mode, $status, 
-        $patientName, $tel, $sTime, $eTime, $device, $doctorName);
+        $patientName, $tel, null, null, $device, $doctorName);
     if (VALUE_DB_ERROR === $count) {
         api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
     }
@@ -36,7 +36,7 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 if (empty($ret)) {
-    api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
+    api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA, 'count' => $count]);
 } else {
     $result = array();
     $result['code'] = '0';
