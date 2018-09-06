@@ -147,7 +147,7 @@ if (isset($_POST['submit'])){
     }
     $htmlAgency = '<option value="0">请选择代理商</option>';
     foreach ($ret as $value) {
-        $htmlAgency .= '<option value="' . $value['agency_id'] . '">' . $value['name'] . '</option>';
+        $htmlAgency .= '<option value="' . $value['agency_id'] . '">' . $value['name'] . '(' . $value['agency_tel'] . ')</option>';
     }
     $ret = DbiAdmin::getDbi()->getSalesmanList();
     if (VALUE_DB_ERROR === $ret) {

@@ -9,7 +9,7 @@ require 'header.php';
 
 if (isset($_POST['submit'])){
     if (true === $_SESSION['post']) {
-        user_back_after_delay('请不要重复刷新页面。', 2000, 'edit_hospital.php');
+        user_back_after_delay('请不要重复刷新页面。', 2000, 'edit_agency.php');
     }
     
     $name = isset($_POST['name']) ?  trim($_POST['name']) : '';

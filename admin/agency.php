@@ -14,7 +14,7 @@ if (VALUE_DB_ERROR === $agencyList) {
 $html = '';
 foreach ($agencyList as $value) {
     $html .= '<tr><td>' . $value['name'] . '</td><td>' . $value['agency_tel'] 
-        . '</td><td><a href="edit_agency.php?id=' . $value['agency_id'] . '">点击编辑</a></td><td></tr>';
+        . '</td><td><a href="edit_agency.php?id=' . $value['agency_id'] . '">点击编辑</a></td></tr>';
 }
 
 
