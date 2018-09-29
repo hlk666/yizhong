@@ -387,6 +387,15 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
+    public function editSalesman($id, $name)
+    {
+        $sql = "update salesman set salesman_name = '$name' where salesman_id = $id";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
     public function existedDevice($deviceId)
     {
         return $this->existData('device', "device_id = '$deviceId' and hospital_id <> 0");
@@ -435,8 +444,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getAgencyByNameId($id, $name)
     {
-        $sql = "select 1 from agency where agency_name = '$name' and agency_id <> $id limit 1";
-        return $this->getDataString($sql);
+        return $this->existData('agency', "agency_name = '$name' and agency_id <> $id");
     }
     public function getAgencyInfo($id)
     {
@@ -947,6 +955,10 @@ class DbiAdmin extends BaseDbi
         $sql = "select 1 from salesman where salesman_name = '$name' limit 1";
         return $this->getDataString($sql);
     }
+    public function getSalesmanByNameId($id, $name)
+    {
+        return $this->existData('salesman', "salesman_name = '$name' and salesman_id <> $id");
+    }
     public function getSalesmanData($id, $startTime = null, $endTime = null, $offset = 0, $rows = null)
     {
         if (empty($id)) {
@@ -970,6 +982,11 @@ class DbiAdmin extends BaseDbi
         }
         
         return $this->getDataAll($sql);
+    }
+    public function getSalesmanInfo($id)
+    {
+        $sql = "select salesman_name from salesman where salesman_id = $id limit 1";
+        return $this->getDataRow($sql);
     }
     public function getSalesmanList()
     {
