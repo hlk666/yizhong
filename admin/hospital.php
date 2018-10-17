@@ -10,6 +10,7 @@ $type = isset($_GET['type']) ? $_GET['type'] : '';
 $level = isset($_GET['level']) ? $_GET['level'] : '';
 $salesman = isset($_GET['salesman']) ? $_GET['salesman'] : '';
 $name = isset($_GET['name']) ? $_GET['name'] : '';
+$id = isset($_GET['id']) ? $_GET['id'] : '';
 
 $ret = DbiAdmin::getDbi()->getSalesmanList();
 if (VALUE_DB_ERROR === $ret) {
@@ -35,7 +36,7 @@ $levelSelected = '<option value="0">请选择</option>
     <option value="2"' . ($level == '2' ? ' selected ' : '') . '>二级</option>
     <option value="1"' . ($level == '1' ? ' selected ' : '') . '>一级</option>';
 
-$ret = DbiAdmin::getDbi()->getHospitalList($type, $level, $salesman, $name);
+$ret = DbiAdmin::getDbi()->getHospitalList($type, $level, $salesman, $name, 0, null, $id);
 if (VALUE_DB_ERROR === $ret) {
     echo '<script language="javascript">alert("服务器访问失败，请刷新重试。");</script>';
     $ret = array();
@@ -49,7 +50,7 @@ $lastPage = ceil($count / $rows);
 if (1 === $page) {
     $ret = array_slice($ret, 0, $rows);
 } else {
-    $ret = DbiAdmin::getDbi()->getHospitalList($type, $level, $salesman, $name, $offset, $rows);
+    $ret = DbiAdmin::getDbi()->getHospitalList($type, $level, $salesman, $name, $offset, $rows, $id);
 }
 
 $htmlHospitals = '';
@@ -93,16 +94,22 @@ echo <<<EOF
     <select class="form-control" name="level">$levelSelected</select>
   </div>
   <div class="col-xs-12 col-sm-2" style="margin-bottom:3px;">
-    <label for="salesman" class="control-label">选择业务员</label>
+    <label for="salesman" class="control-label">业务员</label>
   </div>
   <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
     <select class="form-control" name="salesman">$htmlSalesman</select>
   </div>
   <div class="col-xs-12 col-sm-2" style="margin-bottom:3px;">
-    <label class="control-label">输入医院名</label>
+    <label class="control-label">医院名</label>
   </div>
   <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
     <input type="text" class="form-control" name="name" value="$name">
+  </div>
+  <div class="col-xs-12 col-sm-2" style="margin-bottom:3px;">
+    <label class="control-label">医院id</label>
+  </div>
+  <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
+    <input type="text" class="form-control" name="id" value="$id">
   </div>
   <div class="col-xs-12 col-sm-offset-5 col-sm-4" style="margin-top:10px;">
     <button type="submit" class="btn btn-lg btn-info">搜索</button>

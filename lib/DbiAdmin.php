@@ -736,14 +736,17 @@ class DbiAdmin extends BaseDbi
                 where h.type <> 1';
         return $this->getDataAll($sql);
     }
-    public function getHospitalDevice($startTime, $endTime)
+    public function getHospitalDevice($startTime, $endTime, $province)
     {
-        $time = '';
+        $where = '';
         if (!empty($startTime)) {
-            $time .= "and h.create_time >= '$startTime' ";
+            $where .= "and h.create_time >= '$startTime' ";
         }
         if (!empty($endTime)) {
-            $time .= "and h.create_time <= '$endTime' ";
+            $where .= "and h.create_time <= '$endTime' ";
+        }
+        if (!empty($province)) {
+            $where .= "and h.province = '$province' ";
         }
         $sql = "select h.hospital_id, h.hospital_name, h.salesman_id, h.agency_id, 
                 a.agency_name, s.salesman_name, h.create_time, 
@@ -752,7 +755,7 @@ class DbiAdmin extends BaseDbi
                 from hospital as h left join device as d on h.hospital_id = d.hospital_id
                 left join agency as a on h.agency_id = a.agency_id
                 left join salesman as s on h.salesman_id = s.salesman_id
-                where 1 $time 
+                where 1 $where 
                 group by h.hospital_id, h.hospital_name, h.salesman_id, h.agency_id, 
                 a.agency_name, s.salesman_name, h.create_time, h.type, 
                 h.province, h.city, h.county, h.filter, h.device_sale, h.service_charge";
@@ -826,13 +829,16 @@ class DbiAdmin extends BaseDbi
         $param = [':level' => $level];
         return $this->getDataAll($sql, $param);
     }
-    public function getHospitalList($type = '', $level = '', $salesman = '', $name = '', $offset = 0, $rows = null)
+    public function getHospitalList($type = '', $level = '', $salesman = '', $name = '', $offset = 0, $rows = null, $id = '')
     {
         $sql = 'select h.hospital_id, hospital_name, h.tel, address, parent_flag, a.login_name, ifnull(d.quantity,0) as quantity
                 from hospital as h left join account as a on h.hospital_id = a.hospital_id 
                 left join (select hospital_id, count(device_id) as quantity from device group by hospital_id) as d 
                     on h.hospital_id = d.hospital_id
                 where a.type = 1 ';
+        if (!empty($id)) {
+            $sql .= " and h.hospital_id = '$id' ";
+        }
         if (!empty($type)) {
             $sql .= " and h.type = '$type' ";
         }
