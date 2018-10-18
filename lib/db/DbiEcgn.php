@@ -20,7 +20,7 @@ class DbiEcgn extends BaseDbi
         return self::$instance;
     }
     
-    public function apply($name, $sex, $birthYear, $tel, $department, $examinationName, $doctor,
+    public function apply($name, $sex, $birthYear, $tel, $applyDepartment, $examinationName, $doctor, $examDepartmentId,
             $caseId, $hospitalizationId, $outpatientId, $medicalInsuranceId)
     {
         $sql = "select patient_id from patient where patient_name = '$name' and birth_year = '$birthYear' and tel = '$tel' limit 1";
@@ -38,9 +38,9 @@ class DbiEcgn extends BaseDbi
                 return VALUE_DB_ERROR;
             }
         }
-        $sql = "insert into examination(department_id, patient_id, exam_name, doctor_id,
+        $sql = "insert into examination(apply_department_id, patient_id, exam_name, doctor_id, exam_department_id,
         case_id, hospitalization_id, outpatient_id, medical_insurance)
-        values ('$department', '$patientId', '$examinationName', '$doctor',
+        values ('$applyDepartment', '$patientId', '$examinationName', '$doctor', '$examDepartmentId',
         '$caseId', '$hospitalizationId', '$outpatientId', '$medicalInsuranceId')";
         $examinationId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $examinationId) {
@@ -51,8 +51,46 @@ class DbiEcgn extends BaseDbi
         return $examinationId;
     }
     
+    public function deleteExamination($id)
+    {
+        $sql = "delete from examination where examination_id = '$id'";
+        return $this->deleteData($sql);
+    }
+    
+    public function diagnose($examinationId, $doctorId, $text)
+    {
+        $sql = "update examination set `status` = 5, diagnosis_doctor_id = '$doctorId', diagnosis_time = now(),  diagnosis_text = '$text'
+        where examination_id = '$examinationId'";
+        return $this->updateData($sql);
+    }
+    
+    public function editExamination($id, array $data)
+    {
+        return $this->updateTableByKey('examination', 'examination_id', $id, $data);
+    }
+    public function editPatient($id, array $data)
+    {
+        return $this->updateTableByKey('patient', 'patient_id', $id, $data);
+    }
+    
+    public function examine($examinationId, $doctorId, $path)
+    {
+        $sql = "update examination set `status` = 4, exam_doctor_id = '$doctorId', exam_time = now(),  exam_path = '$path'
+        where examination_id = '$examinationId'";
+        return $this->updateData($sql);
+    }
+    
+    public function existedExamination($id)
+    {
+        return $this->existData('examination', "examination_id = '$id'");
+    }
+    public function existedPatient($id)
+    {
+        return $this->existData('patient', "patient_id = '$id'");
+    }
+    
     //status:1=apply,2=order,3=register,4=examine,5=report,6=download
-    public function getExamination($status, $name, $caseId, $hospitalizationId, $outpatientId, $medicalInsuranceId, 
+    public function getExamination($status, $name, $caseId, $hospitalizationId, $outpatientId, $medicalInsuranceId, $roomId,
             $applyStartTime, $applyEndTime, $orderStartTime, $orderEndTime)
     {
         $sql = "select e.*, p.* from examination as e inner join patient as p on e.patient_id = p.patient_id where `status` = $status";
@@ -71,6 +109,9 @@ class DbiEcgn extends BaseDbi
         if (!empty($medicalInsuranceId)) {
             $sql .= " and medical_insurance = '$medicalInsuranceId'";
         }
+        if (!empty($roomId)) {
+            $sql .= " and room_id = '$roomId'";
+        }
         if (!empty($applyStartTime)) {
             $sql .= " and apply_time >= '$applyStartTime'";
         }
@@ -84,6 +125,14 @@ class DbiEcgn extends BaseDbi
             $sql .= " and order_time <= '$orderEndTime'";
         }
         return $this->getDataAll($sql);
+    }
+    public function getExaminationInfo($id)
+    {
+        $sql = "select e.*, p.*, d.diagnosis_department_id from examination as e 
+                inner join patient as p on e.patient_id = p.patient_id 
+                inner join department as d on e.exam_department_id = d.department_id
+                where e.examination_id = $id";
+        return $this->getDataRow($sql);
     }
     
     public function login($departmentId, $loginName, $tel)
@@ -102,13 +151,13 @@ class DbiEcgn extends BaseDbi
     
     public function order($examinationId, $orderTime)
     {
-        $sql = "update examination set `status` = 2, order_time = now() where examination_id = $examinationId";
+        $sql = "update examination set `status` = 2, order_time = '$orderTime' where examination_id = $examinationId";
         return $this->updateData($sql);
     }
     
     public function register($examinationId, $examDepartmentId, $roomId)
     {
-        $sql = "update examination set `status` = 3, exam_department_id = '$examDepartmentId', roor_id = '$roomId' 
+        $sql = "update examination set `status` = 3, exam_department_id = '$examDepartmentId', room_id = '$roomId' 
                 where examination_id = '$examinationId'";
         return $this->updateData($sql);
     }

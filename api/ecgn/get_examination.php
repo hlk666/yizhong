@@ -16,6 +16,7 @@ $caseId = isset($_GET['case_id']) ? $_GET['case_id'] : null;
 $hospitalizationId = isset($_GET['hospitalization_id']) ? $_GET['hospitalization_id'] : null;
 $outpatientId = isset($_GET['outpatient_id']) ? $_GET['outpatient_id'] : null;
 $medicalInsuranceId = isset($_GET['medical_insurance']) ? $_GET['medical_insurance'] : null;
+$roomId = isset($_GET['room_id']) ? $_GET['room_id'] : null;
 
 $applyStartTime = isset($_GET['apply_start_time']) ? $_GET['apply_start_time'] : null;
 $applyEndTime = isset($_GET['apply_end_time']) ? $_GET['apply_end_time'] : null;
@@ -23,7 +24,8 @@ $orderStartTime = isset($_GET['order_start_time']) ? $_GET['order_start_time'] :
 $orderEndTime = isset($_GET['order_end_time']) ? $_GET['order_end_time'] : null;
 
 
-$ret = DbiEcgn::getDbi()->getExamination($_GET['status'], $name, $caseId, $hospitalizationId, $outpatientId, $medicalInsuranceId, 
+$ret = DbiEcgn::getDbi()->getExamination($_GET['status'], $name, 
+        $caseId, $hospitalizationId, $outpatientId, $medicalInsuranceId, $roomId, 
         $applyStartTime, $applyEndTime, $orderStartTime, $orderEndTime);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
