@@ -30,7 +30,7 @@ if (isset($_POST['login'])) {
     } else {
         $_SESSION['login'] = true;
         $_SESSION['user'] = $_POST['user'];
-        if ($_POST['user'] == 'yzl' || $_POST['user'] == 'yzhl') {
+        if ($_POST['user'] == 'yzl' || $_POST['user'] == 'yzhl' || $_POST['user'] == 'lily') {
             header('location:pd.php');
         } else {
             if ($ret['type'] == '0') {
