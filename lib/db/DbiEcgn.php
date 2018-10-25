@@ -20,6 +20,16 @@ class DbiEcgn extends BaseDbi
         return self::$instance;
     }
     
+    public function addHospital($name, $tel)
+    {
+        $sql = "insert into hospital (hospital_name, tel) values ('$name', '$tel')";
+        $id = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $id) {
+            return VALUE_DB_ERROR;
+        }
+        return $id;
+    }
+    
     public function apply($name, $sex, $birthYear, $tel, $applyDepartment, $examinationName, $doctor, $examDepartmentId,
             $caseId, $hospitalizationId, $outpatientId, $medicalInsuranceId)
     {
@@ -51,22 +61,31 @@ class DbiEcgn extends BaseDbi
         return $examinationId;
     }
     
+    public function deleteHospital($id)
+    {
+        $sql = "delete from hospital where hospital_id = '$id'";
+        return $this->deleteData($sql);
+    }
     public function deleteExamination($id)
     {
         $sql = "delete from examination where examination_id = '$id'";
         return $this->deleteData($sql);
     }
     
-    public function diagnose($examinationId, $doctorId, $text)
+    public function diagnose($examinationId, $doctorId, $text, $value)
     {
-        $sql = "update examination set `status` = 5, diagnosis_doctor_id = '$doctorId', diagnosis_time = now(),  diagnosis_text = '$text'
-        where examination_id = '$examinationId'";
+        $sql = "update examination set `status` = 5, diagnosis_doctor_id = '$doctorId', diagnosis_time = now(),  
+                diagnosis_text = '$text', diagnosis_value = '$value' where examination_id = '$examinationId'";
         return $this->updateData($sql);
     }
     
     public function editExamination($id, array $data)
     {
         return $this->updateTableByKey('examination', 'examination_id', $id, $data);
+    }
+    public function editHospital($id, array $data)
+    {
+        return $this->updateTableByKey('hospital', 'hospital_id', $id, $data);
     }
     public function editPatient($id, array $data)
     {
@@ -83,6 +102,10 @@ class DbiEcgn extends BaseDbi
     public function existedExamination($id)
     {
         return $this->existData('examination', "examination_id = '$id'");
+    }
+    public function existedHospital($id)
+    {
+        return $this->existData('hospital', "hospital_id = '$id'");
     }
     public function existedPatient($id)
     {
@@ -133,6 +156,17 @@ class DbiEcgn extends BaseDbi
                 inner join department as d on e.exam_department_id = d.department_id
                 where e.examination_id = $id";
         return $this->getDataRow($sql);
+    }
+    public function getHospital($name, $tel)
+    {
+        $sql = "select * from hospital where 1";
+        if (!empty($name)) {
+            $sql .= " and hospital_name like '%$name%'";
+        }
+        if (!empty($tel)) {
+            $sql .= " and tel like '%$tel%'";
+        }
+        return $this->getDataAll($sql);
     }
     
     public function login($departmentId, $loginName, $tel)

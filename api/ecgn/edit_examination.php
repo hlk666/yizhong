@@ -6,7 +6,8 @@ if (false === Validate::checkRequired($_POST['examination_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'examination_id.']);
 }
 
-$ret = DbiEcgn::getDbi()->existedExamination($_POST['examination_id']);
+$id = $_POST['examination_id'];
+$ret = DbiEcgn::getDbi()->existedExamination($id);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
@@ -73,7 +74,7 @@ if (empty($data)) {
     api_exit(['code' => '1', 'message' => '没有修改任何信息。']);
 }
 
-$ret = DbiEcgn::getDbi()->editExamination($_POST['examination_id'], $data);
+$ret = DbiEcgn::getDbi()->editExamination($id, $data);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

@@ -11,13 +11,16 @@ if (false === Validate::checkRequired($_POST['doctor_id'])) {
 if (false === Validate::checkRequired($_POST['diagnosis'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'diagnosis.']);
 }
+if (false === Validate::checkRequired($_POST['value'])) {
+    api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'value.']);
+}
 
 $info = DbiEcgn::getDbi()->getExaminationInfo($_POST['examination_id']);
 if (VALUE_DB_ERROR === $info) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
-$ret = DbiEcgn::getDbi()->diagnose($_POST['examination_id'], $_POST['doctor_id'], $_POST['diagnosis']);
+$ret = DbiEcgn::getDbi()->diagnose($_POST['examination_id'], $_POST['doctor_id'], $_POST['diagnosis'], $_POST['value']);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
