@@ -114,6 +114,7 @@ class DbiAdmin extends BaseDbi
                 '$creator', '$contact', '$agency', '$salesman')";
         $hospitalId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $hospitalId) {
+            Logger::write('add_hospital_error.log', $sql);
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
