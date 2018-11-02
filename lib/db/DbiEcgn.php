@@ -20,12 +20,31 @@ class DbiEcgn extends BaseDbi
         return self::$instance;
     }
     
+    public function addDepartment($name, $diagnosisDepartment, $manager)
+    {
+        $sql = "insert into department (department_name, diagnosis_department_id, manager_id) 
+                values ('$name', '$diagnosisDepartment', '$manager')";
+        $id = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $id) {
+            return VALUE_DB_ERROR;
+        }
+        return $id;
+    }
     public function addHospital($name, $tel)
     {
         $sql = "insert into hospital (hospital_name, tel) values ('$name', '$tel')";
         $id = $this->insertData($sql);
         if (VALUE_DB_ERROR === $id) {
             return VALUE_DB_ERROR;
+        }
+        return $id;
+    }
+    public function addRoom($name)
+    {
+        $sql = "insert into room (room_name) values ('$name')";
+        $id = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $id) {
+        return VALUE_DB_ERROR;
         }
         return $id;
     }
@@ -61,14 +80,27 @@ class DbiEcgn extends BaseDbi
         return $examinationId;
     }
     
+    public function deleteDepartment($id)
+    {
+        $sql = "delete from department where department_id = '$id'";
+        return $this->deleteData($sql);
+    }
+    
+    public function deleteExamination($id)
+    {
+        $sql = "delete from examination where examination_id = '$id'";
+        return $this->deleteData($sql);
+    }
+    
     public function deleteHospital($id)
     {
         $sql = "delete from hospital where hospital_id = '$id'";
         return $this->deleteData($sql);
     }
-    public function deleteExamination($id)
+    
+    public function deleteRoom($id)
     {
-        $sql = "delete from examination where examination_id = '$id'";
+        $sql = "delete from room where room_id = '$id'";
         return $this->deleteData($sql);
     }
     
@@ -79,6 +111,10 @@ class DbiEcgn extends BaseDbi
         return $this->updateData($sql);
     }
     
+    public function editDepartment($id, array $data)
+    {
+        return $this->updateTableByKey('department', 'department_id', $id, $data);
+    }
     public function editExamination($id, array $data)
     {
         return $this->updateTableByKey('examination', 'examination_id', $id, $data);
@@ -91,6 +127,10 @@ class DbiEcgn extends BaseDbi
     {
         return $this->updateTableByKey('patient', 'patient_id', $id, $data);
     }
+    public function editRoom($id, array $data)
+    {
+        return $this->updateTableByKey('room', 'room_id', $id, $data);
+    }
     
     public function examine($examinationId, $doctorId, $path)
     {
@@ -99,6 +139,10 @@ class DbiEcgn extends BaseDbi
         return $this->updateData($sql);
     }
     
+    public function existedDepartment($id)
+    {
+        return $this->existData('department', "department_id = '$id'");
+    }
     public function existedExamination($id)
     {
         return $this->existData('examination', "examination_id = '$id'");
@@ -111,7 +155,25 @@ class DbiEcgn extends BaseDbi
     {
         return $this->existData('patient', "patient_id = '$id'");
     }
+    public function existedRoom($id)
+    {
+        return $this->existData('room', "room_id = '$id'");
+    }
     
+    public function getDepartment($name, $diagnosisDepartment, $manager)
+    {
+        $sql = "select * from department where 1";
+        if (!empty($name)) {
+            $sql .= " and department_name like '%$name%'";
+        }
+        if (!empty($diagnosisDepartment)) {
+            $sql .= " and diagnosis_department_id = '$diagnosisDepartment'";
+        }
+        if (!empty($manager)) {
+            $sql .= " and manager_id = '$manager'";
+        }
+        return $this->getDataAll($sql);
+    }
     //status:1=apply,2=order,3=register,4=examine,5=report,6=download
     public function getExamination($status, $name, $caseId, $hospitalizationId, $outpatientId, $medicalInsuranceId, $roomId,
             $applyStartTime, $applyEndTime, $orderStartTime, $orderEndTime)
@@ -165,6 +227,14 @@ class DbiEcgn extends BaseDbi
         }
         if (!empty($tel)) {
             $sql .= " and tel like '%$tel%'";
+        }
+        return $this->getDataAll($sql);
+    }
+    public function getRoom($name)
+    {
+        $sql = "select * from room where 1";
+        if (!empty($name)) {
+            $sql .= " and room_name like '%$name%'";
         }
         return $this->getDataAll($sql);
     }
