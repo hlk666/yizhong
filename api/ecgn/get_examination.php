@@ -2,11 +2,9 @@
 require_once PATH_LIB . 'db/DbiEcgn.php';
 require_once PATH_LIB . 'Validate.php';
 
-
 if (false === Validate::checkRequired($_GET['status'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'status.']);
 }
-
 
 $name = isset($_GET['name']) ? $_GET['name'] : null;
 //$departmentId = isset($_GET['department_id']) ? $_GET['department_id'] : null;

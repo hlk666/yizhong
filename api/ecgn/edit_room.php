@@ -26,7 +26,7 @@ if (empty($data)) {
     api_exit(['code' => '1', 'message' => '没有修改任何信息。']);
 }
 
-$ret = DbiEcgn::getDbi()->editDepartment($id, $data);
+$ret = DbiEcgn::getDbi()->editRoom($id, $data);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

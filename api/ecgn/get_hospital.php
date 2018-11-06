@@ -1,6 +1,5 @@
 <?php
 require_once PATH_LIB . 'db/DbiEcgn.php';
-require_once PATH_LIB . 'Validate.php';
 
 $name = isset($_GET['name']) ? $_GET['name'] : null;
 $tel = isset($_GET['tel']) ? $_GET['tel'] : null;

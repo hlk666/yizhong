@@ -30,6 +30,16 @@ class DbiEcgn extends BaseDbi
         }
         return $id;
     }
+    public function addDoctor($user, $password, $name, $tel, $type, $hospitalId, $departmentId)
+    {
+        $sql = "insert into doctor (login_name, password, real_name, tel, type, hospital_id, department_id) 
+                values ('$user', '$password', '$name', '$tel', $type, $hospitalId, $departmentId)";
+        $id = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $id) {
+            return VALUE_DB_ERROR;
+        }
+        return $id;
+    }
     public function addHospital($name, $tel)
     {
         $sql = "insert into hospital (hospital_name, tel) values ('$name', '$tel')";
@@ -85,19 +95,21 @@ class DbiEcgn extends BaseDbi
         $sql = "delete from department where department_id = '$id'";
         return $this->deleteData($sql);
     }
-    
+    public function deleteDoctor($id)
+    {
+        $sql = "delete from doctor where doctor_id = '$id'";
+        return $this->deleteData($sql);
+    }
     public function deleteExamination($id)
     {
         $sql = "delete from examination where examination_id = '$id'";
         return $this->deleteData($sql);
     }
-    
     public function deleteHospital($id)
     {
         $sql = "delete from hospital where hospital_id = '$id'";
         return $this->deleteData($sql);
     }
-    
     public function deleteRoom($id)
     {
         $sql = "delete from room where room_id = '$id'";
@@ -114,6 +126,10 @@ class DbiEcgn extends BaseDbi
     public function editDepartment($id, array $data)
     {
         return $this->updateTableByKey('department', 'department_id', $id, $data);
+    }
+    public function editDoctor($id, array $data)
+    {
+        return $this->updateTableByKey('doctor', 'doctor_id', $id, $data);
     }
     public function editExamination($id, array $data)
     {
@@ -142,6 +158,10 @@ class DbiEcgn extends BaseDbi
     public function existedDepartment($id)
     {
         return $this->existData('department', "department_id = '$id'");
+    }
+    public function existedDoctor($id)
+    {
+        return $this->existData('doctor', "doctor_id = '$id'");
     }
     public function existedExamination($id)
     {
@@ -172,6 +192,30 @@ class DbiEcgn extends BaseDbi
         if (!empty($manager)) {
             $sql .= " and manager_id = '$manager'";
         }
+        return $this->getDataAll($sql);
+    }
+    public function getDoctor($user, $name, $tel, $type, $hospitalId, $departmentId)
+    {
+        $sql = "select * from doctor where 1";
+        if (!empty($user)) {
+            $sql .= " and login_name like '%$user%'";
+        }
+        if (!empty($name)) {
+            $sql .= " and real_name like '%$name%'";
+        }
+        if (!empty($tel)) {
+            $sql .= " and tel like '%$tel%'";
+        }
+        if (!empty($type)) {
+            $sql .= " and type = '$type'";
+        }
+        if (!empty($hospitalId)) {
+            $sql .= " and hospital_id = '$hospitalId'";
+        }
+        if (!empty($departmentId)) {
+            $sql .= " and department_id = '$departmentId'";
+        }
+
         return $this->getDataAll($sql);
     }
     //status:1=apply,2=order,3=register,4=examine,5=report,6=download
