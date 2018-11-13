@@ -114,7 +114,6 @@ class DbiAdmin extends BaseDbi
                 '$creator', '$contact', '$agency', '$salesman')";
         $hospitalId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $hospitalId) {
-            Logger::write('add_hospital_error.log', $sql);
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
@@ -178,12 +177,17 @@ class DbiAdmin extends BaseDbi
         }
         
         if (!empty($analysisHospital) && !empty($reportHospital) && !empty($title1)) {
-            $ret = $this->getHospitalName($title1);
-            if (VALUE_DB_ERROR === $ret) {
-                $this->pdo->rollBack();
-                return VALUE_DB_ERROR;
+            if (is_numeric($title1)) {
+                $title = $title1;
+            } else {
+                $ret = $this->getHospitalName($title1);
+                if (VALUE_DB_ERROR === $ret) {
+                    $this->pdo->rollBack();
+                    return VALUE_DB_ERROR;
+                }
+                $title = $ret['hospital_id'];
             }
-            $title = $ret['hospital_id'];
+            
             if ($double == '1') {
                 $sql = "insert into hospital_tree(hospital_id, analysis_hospital, report_hospital, title1, title2)
                 values ($hospitalId, $analysisHospital, $reportHospital, $title, $hospitalId)";

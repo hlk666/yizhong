@@ -16,6 +16,7 @@ if (isset($_POST['submit'])){
     $type = isset($_POST['type']) ? $_POST['type'] : '';
     $level = isset($_POST['level']) ? $_POST['level'] : '';
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
+    $contact = !isset($_POST['contact']) ? null : $_POST['contact'];
     $province = isset($_POST['province']) ? $_POST['province'] : '';
     $city = isset($_POST['city']) ? $_POST['city'] : '';
     $county = isset($_POST['county']) ? $_POST['county'] : '';
@@ -85,7 +86,8 @@ if (isset($_POST['submit'])){
             $province, $city, $county, $hospitalAddress, $parentFlag, $hospitalParent, $adminUser, 
             $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital, 
             $agency, $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, 
-            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $_SESSION['user']);
+            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $_SESSION['user'],
+            '0', array(), $contact);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -187,6 +189,13 @@ if (isset($_POST['submit'])){
         <option value="1">一级</option>
         <option value="99">零级</option>
     </select></div>
+  </div>
+  <div class="form-group">
+    <label for="admin" class="col-sm-2 control-label">联系人<font color="red">*</font></label>
+    <div class="col-sm-4">
+      <input type="text" class="form-control" name="contact" required">
+    </div>
+    <label class="col-sm-6 control-label" id="check_user" style="text-align:left;">例：王主任，张医生</label>
   </div>
   <div class="form-group">
     <label for="hospital_tel" class="col-sm-2 control-label">电话<font color="red">*</font></label>
