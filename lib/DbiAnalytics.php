@@ -328,6 +328,22 @@ class DbiAnalytics extends BaseDbi
         $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
         return $this->updateData($sql, $param);
     }
+    public function isQianyi($guardianId)
+    {
+        $sql = "select 1 from guardian as g inner join hospital_tree as t on g.regist_hospital_id = t.hospital_id
+                left join qianyi_data as q on g.guardian_id = q.guardian_id
+                where t.report_hospital = 3 and g.guardian_id = $guardianId and q.guardian_id is null limit 1";
+        $ret = $this->getDataString($sql);
+        if (!empty($ret)) {
+            return true;
+        }
+        return false;
+    }
+    public function saveQianyiData($guardianId)
+    {
+        $sql = "insert into qianyi_data (guardian_id) values ($guardianId)";
+        return $this->insertData($sql);
+    }
     public function moveData($guardianId, $hospitalFrom, $hospitalTo, $operator, $type = '0')
     {
         $this->pdo->beginTransaction();

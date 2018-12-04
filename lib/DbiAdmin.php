@@ -472,6 +472,17 @@ class DbiAdmin extends BaseDbi
         $sql = "select county, quantity from county_hospital where 1 $where";
         return $this->getDataAll($sql);
     }
+    public function getDataForQianyi()
+    {
+        $sql = 'select q.guardian_id, p.patient_name, p.birth_year, p.sex, g.start_time, 
+                d.report_time, h.province, h.city, h.`level`, ifnull(g.guardian_result, "") as diagnose
+                from qianyi_data as q inner join guardian as g on q.guardian_id = g.guardian_id
+                inner join patient as p on g.patient_id = p.patient_id
+                inner join guardian_data as d on g.guardian_id = d.guardian_id
+                inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                where q.send_time is null';
+        return $this->getDataAll($sql);
+    }
     public function getDepartment()
     {
         $sql = 'select d.department_id, d.hospital_id, h1.hospital_name as department_name, h2.hospital_name as hospital_name
@@ -1105,6 +1116,11 @@ class DbiAdmin extends BaseDbi
         $sql = 'update guardian_data set status = :status where guardian_id = :id';
         $param = [':id' => $guardianId, ':status' => $status];
         return $this->updateData($sql, $param);
+    }
+    public function updateQianyiData($guardianId)
+    {
+        $sql = "update qianyi_data set send_time = now() where guardian_id = $guardianId";
+        return $this->updateData($sql);
     }
     /*
     public function existedLoginName($loginName)
