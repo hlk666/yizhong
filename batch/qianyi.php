@@ -8,7 +8,7 @@ if (VALUE_DB_ERROR === $ret) {
 }
 if (empty($ret)) {
     Logger::write('qianyi_msg.log', 'no data');
-    exit(1);
+    exit(0);
 }
 
 $cityList = [
@@ -79,9 +79,9 @@ foreach ($ret as $row) {
     $url = 'http://113.128.194.226:38901/TMSServer/api/v2/server.do';
     $json = json_encode($data, JSON_UNESCAPED_UNICODE);
     $param = '{"LOGICNAME":"saveCompleteConsultation","TOKEN":"","MESSAGEID":"202999","DATAS":' . $json . '}';
-    echo $param;
+    //echo $param;
     $ret = request($url, $param);
-    echo $ret;
+    //echo $ret;
     $retArray = json_decode($ret, true);
     if (isset($retArray['code']) && $retArray['code'] == '00') {
         $update = DbiAdmin::getDbi()->updateQianyiData($guardianId);
@@ -95,7 +95,7 @@ foreach ($ret as $row) {
     }
 }
 
-echo 'ok';
+//echo 'ok';
 exit(0);
 
 function request($url, $post)

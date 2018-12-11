@@ -332,7 +332,8 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = "select 1 from guardian as g inner join hospital_tree as t on g.regist_hospital_id = t.hospital_id
                 left join qianyi_data as q on g.guardian_id = q.guardian_id
-                where t.report_hospital = 3 and g.guardian_id = $guardianId and q.guardian_id is null limit 1";
+                where g.regist_hospital_id <> 3 and g.regist_time > '2018-01-01' and t.report_hospital = 3 
+                and g.guardian_id = $guardianId and q.guardian_id is null limit 1";
         $ret = $this->getDataString($sql);
         if (!empty($ret)) {
             return true;
