@@ -149,6 +149,11 @@ class DbiAnalytics extends BaseDbi
         $param = array(':guardian_id' => $guardianId);
         return $this->getDataRow($sql, $param);
     }
+    public function getPatientOneData($guardianId)
+    {
+        $sql = "select * from guardian_data where guardian_id = '$guardianId'";
+        return $this->getDataRow($sql);
+    }
     public function getPatientByDiagnosis($diagnosisList)
     {
         $sql = "select distinct pd.patient_id, p.patient_name, p.birth_year, p.sex, p.tel
@@ -228,12 +233,13 @@ class DbiAnalytics extends BaseDbi
     }
     public function getPatientsByIdForAnalytics($patientIdList)
     {
-        $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel, device_id, guardian_id as patient_id, 
-                start_time, end_time, blood_pressure, tentative_diagnose, medical_history, guardian_result, 
-                patient_name as name, birth_year, sex, p.tel, reported
-                 from guardian as g left join patient as p on g.patient_id = p.patient_id
-                 left join hospital as h on g.regist_hospital_id = h.hospital_id
-                 where guardian_id in ($patientIdList)";
+        $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel, g.device_id, g.guardian_id as patient_id, 
+                g.start_time, g.end_time, blood_pressure, tentative_diagnose, medical_history, guardian_result, 
+                patient_name as name, birth_year, sex, p.tel, reported, d.advice
+                from guardian as g left join patient as p on g.patient_id = p.patient_id
+                left join guardian_data as d on g.guardian_id = d.guardian_id
+                left join hospital as h on g.regist_hospital_id = h.hospital_id
+                where g.guardian_id in ($patientIdList)";
         return $this->getDataAll($sql);
     }
     public function getPatientsMoved($hospitalId, $offset, $rows, $patientName = null, $startTime = null, $endTime = null,
