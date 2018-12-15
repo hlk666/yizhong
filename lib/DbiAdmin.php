@@ -212,6 +212,15 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital_id' => $hospitalId, ':parent_hospital_id' => $parentHospital];
         return $this->insertData($sql, $param);
     }
+    public function addNotice($guardianId, $notice)
+    {
+        $sql = "insert into history_notice (guardian_id, notice_text) values ('$guardianId', '$notice')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
     public function addSalesman($name)
     {
         if($this->existData('salesman', "salesman_name = '$name'")) {
@@ -475,7 +484,8 @@ class DbiAdmin extends BaseDbi
     public function getDataForQianyi()
     {
         $sql = 'select q.guardian_id, p.patient_name, p.birth_year, p.sex, g.start_time, 
-                d.report_time, h.province, h.city, h.`level`, ifnull(g.guardian_result, "") as diagnose
+                d.report_time, h.province, h.city, h.`level`, ifnull(g.guardian_result, "") as diagnose,
+                g.regist_doctor_name, h.hospital_name
                 from qianyi_data as q inner join guardian as g on q.guardian_id = g.guardian_id
                 inner join patient as p on g.patient_id = p.patient_id
                 inner join guardian_data as d on g.guardian_id = d.guardian_id
@@ -935,6 +945,23 @@ class DbiAdmin extends BaseDbi
     public function getICCID($deviceId) {
         $sql = "select iccid from device where device_id = '$deviceId' limit 1";
         return $this->getDataString($sql);
+    }
+    public function getNotice($hospitalName, $guardianId, $patientName) {
+        $sql = "select h.hospital_name, p.patient_name, n.guardian_id, n.notice_text, n.notice_time
+                from history_notice as n inner join guardian as g on n.guardian_id = g.guardian_id
+                inner join patient as p on g.patient_id = p.patient_id
+                inner join hospital as h on regist_hospital_id = h.hospital_id
+                where 1";
+        if (!empty($hospitalName)) {
+            $sql .= " and h.hospital_name like '%$hospitalName%' ";
+        }
+        if (!empty($patientName)) {
+            $sql .= " and p.patient_name like '%$patientName%' ";
+        }
+        if (!empty($guardianId)) {
+            $sql .= " and n.guardian_id = '$guardianId' ";
+        }
+        return $this->getDataAll($sql);
     }
     public function getPatientDiagnosis($hospital, $diagnosis, $startTime, $endTime)
     {

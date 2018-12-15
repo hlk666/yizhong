@@ -41,14 +41,18 @@ foreach ($ret as $row) {
     $patientSex = $row['sex'];
     $reportTime = $row['report_time'];
     $diagnose = $row['diagnose'];
+    $hospitalName = $row['hospital_name'];
+    $doctorName = $row['regist_doctor_name'];
     
     $data = array();
     $data['prim_no'] = $guardianId;
-    $data['requserid'] = '1000020';
+    $data['requserid'] = '6452ca61f615454b87fe46f7ae0a4a33';
     $data['reqhospitalid'] = 'e818e077b769428fa7802b3a385f1915';
     $data['reqhospital'] = '千佛山心电平台';
     $data['reqdepartmentid'] = '233602b4764f483b88ae12824557057b';
     $data['reqdepartment'] = '其他备用科室';
+    $data['self_hosp'] = $hospitalName;
+    $data['self_doc'] = $doctorName;
     $data['province'] = '370000';
     $data['city'] = $city;
     $data['hos_level'] = $level;
