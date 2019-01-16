@@ -11,6 +11,7 @@ if (false === Validate::checkRequired($_GET['end_time'])) {
 
 $startTime = $_GET['start_time'];
 $endTime = $_GET['end_time'];
+$isReportTime = isset($_GET['is_report_time']) ? true : false;
 
 if (isset($_GET['doctor_id'])) {
     if (false === Validate::checkRequired($_GET['doctor_id'])) {
@@ -36,7 +37,7 @@ if (isset($_GET['doctor_id'])) {
     $doctorList = substr($doctorList, 0, -1);
 }
 
-$patients = DbiAdmin::getDbi()->getAccountForAnalytics($doctorList, $startTime, $endTime);
+$patients = DbiAdmin::getDbi()->getAccountForAnalytics($doctorList, $startTime, $endTime, $isReportTime);
 if (VALUE_DB_ERROR === $patients) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

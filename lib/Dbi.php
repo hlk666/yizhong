@@ -43,7 +43,7 @@ class Dbi extends BaseDbi
     //********************************** start **********************************
     public function existedDeviceHospital($deviceId, $hospitalId)
     {
-        return $this->existData('device', " device_id = $deviceId and hospital_id = $hospitalId ");
+        return $this->existData('device', " device_id = '$deviceId' and hospital_id = $hospitalId ");
     }
     public function existedEcg($ecgId)
     {

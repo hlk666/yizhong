@@ -432,16 +432,20 @@ class DbiAdmin extends BaseDbi
         $sql = "select account_id as doctor_id, real_name as doctor_name from account where hospital_id = '$hospital'";
         return $this->getDataAll($sql);
     }
-    public function getAccountForAnalytics($doctorList, $startTime, $endTime)
+    public function getAccountForAnalytics($doctorList, $startTime, $endTime, $isReportTime = false)
     {
+        if ($isReportTime) {
+            $and = "and d.report_time >= '$startTime' and d.report_time <= '$endTime'";
+        } else {
+            $and = "and g.regist_time >= '$startTime' and g.regist_time <= '$endTime'";
+        }
         $sql = "select d.guardian_id as patient_id, p.patient_name, regist_hospital_id as hospital_id,
-        g.start_time, g.end_time, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor
-        from guardian_data as d left join guardian as g on d.guardian_id = g.guardian_id
-        left join patient as p on g.patient_id = p.patient_id
-        left join account as a1 on d.hbi_doctor = a1.account_id
-        left join account as a2 on d.report_doctor = a2.account_id
-        where (hbi_doctor in ($doctorList) or report_doctor in ($doctorList))
-        and g.regist_time >= '$startTime' and g.regist_time <= '$endTime'";
+                g.start_time, g.end_time, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor
+                from guardian_data as d left join guardian as g on d.guardian_id = g.guardian_id
+                left join patient as p on g.patient_id = p.patient_id
+                left join account as a1 on d.hbi_doctor = a1.account_id
+                left join account as a2 on d.report_doctor = a2.account_id
+                where (hbi_doctor in ($doctorList) or report_doctor in ($doctorList)) $and ";
         return $this->getDataAll($sql);
     }
     public function getAdminAcount($loginName)
@@ -491,6 +495,18 @@ class DbiAdmin extends BaseDbi
                 inner join guardian_data as d on g.guardian_id = d.guardian_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
                 where q.send_time is null';
+        return $this->getDataAll($sql);
+    }
+    public function getDataForQianyiTest()
+    {
+        $sql = 'select g.guardian_id, p.patient_name, p.birth_year, p.sex, g.start_time,
+                d.report_time, h.province, h.city, h.`level`, ifnull(g.guardian_result, "") as diagnose,
+                g.regist_doctor_name, h.hospital_name
+                from guardian as g
+                inner join patient as p on g.patient_id = p.patient_id
+                inner join guardian_data as d on g.guardian_id = d.guardian_id
+                inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                where g.guardian_id = 20791';
         return $this->getDataAll($sql);
     }
     public function getDepartment()
@@ -988,6 +1004,29 @@ class DbiAdmin extends BaseDbi
                 inner join patient as p on g.patient_id = p.patient_id
                 where d.status < 2 and g.status = 2 and g.start_time >= '$time' and g.regist_hospital_id not in (1, 40)";
         return $this->getDataAll($sql);
+    }
+    public function getPatientFuzy($name) {
+        $sql = "select patient_id, patient_name from patient where patient_name like '%$name%'";
+        return $this->getDataAll($sql);
+    }
+    public function getPatientStatus($patient = '0', $guardian = '0') {
+        if (!empty($patient)) {
+            $where = 'where g.patient_id = ' . $patient;
+        }
+        if (!empty($guardian)) {
+            $where = 'where g.guardian_id = ' . $guardian;
+        }
+        $sql = "select g.guardian_id, p.patient_name, h1.hospital_id, h1.hospital_name, g.start_time, g.end_time, g.device_id, g.`mode`, 
+                d.`status` as upload_status, h2.hospital_name as moved_hospital_name, d.type as moved_type, d.report_time, 
+                a1.real_name as hbi_doctor, a2.real_name as report_doctor, d.download_doctor
+                from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                inner join hospital as h1 on g.regist_hospital_id = h1.hospital_id
+                inner join guardian_data as d on g.guardian_id = d.guardian_id
+                left join hospital as h2 on d.moved_hospital = h2.hospital_id
+                left join account as a1 on d.hbi_doctor = a1.account_id
+                left join account as a2 on d.report_doctor = a2.account_id
+                $where order by g.guardian_id desc limit 1";
+        return $this->getDataRow($sql);
     }
     public function getReportPatients($hospitalId)
     {
