@@ -405,12 +405,16 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
     }
-    public function getHospitalList()
+    public function getHospitalList($hospitals)
     {
         $sql = 'select hospital_id, hospital_name, tel, level, device_sale, type, create_time, h.agency_id, 
                 h.salesman_id, a.agency_name, s.salesman_name, need_follow, province, city, county, 
                 filter, need_follow_report, contact from hospital as h 
-                left join agency as a on h.agency_id = a.agency_id left join salesman as s on h.salesman_id = s.salesman_id';
+                left join agency as a on h.agency_id = a.agency_id 
+                left join salesman as s on h.salesman_id = s.salesman_id';
+        if (!empty($hospitals)) {
+            $sql .= " where hospital_id in ($hospitals)";
+        }
         return $this->getDataAll($sql);
     }
     public function getHospitalChild($hospitalId)
