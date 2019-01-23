@@ -362,7 +362,8 @@ class DbiAnalytics extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = "update guardian_data set moved_hospital = '$hospitalTo', type = '$type' where guardian_id = '$guardianId'";
+        $sql = "update guardian_data set moved_hospital = '$hospitalTo', type = '$type', status = 2, download_doctor = 0
+                where guardian_id = '$guardianId'";
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
