@@ -439,7 +439,7 @@ class DbiAdmin extends BaseDbi
         } else {
             $and = "and g.regist_time >= '$startTime' and g.regist_time <= '$endTime'";
         }
-        $sql = "select d.guardian_id as patient_id, p.patient_name, regist_hospital_id as hospital_id,
+        $sql = "select d.guardian_id as patient_id, p.patient_name, regist_hospital_id as hospital_id, d.report_time,
                 g.start_time, g.end_time, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor
                 from guardian_data as d left join guardian as g on d.guardian_id = g.guardian_id
                 left join patient as p on g.patient_id = p.patient_id
@@ -1018,13 +1018,14 @@ class DbiAdmin extends BaseDbi
         }
         $sql = "select g.guardian_id, p.patient_name, h1.hospital_id, h1.hospital_name, g.start_time, g.end_time, g.device_id, g.`mode`, 
                 d.`status` as upload_status, h2.hospital_name as moved_hospital_name, d.type as moved_type, d.report_time, 
-                a1.real_name as hbi_doctor, a2.real_name as report_doctor, d.download_doctor
+                a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor_name
                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
                 inner join hospital as h1 on g.regist_hospital_id = h1.hospital_id
                 inner join guardian_data as d on g.guardian_id = d.guardian_id
                 left join hospital as h2 on d.moved_hospital = h2.hospital_id
                 left join account as a1 on d.hbi_doctor = a1.account_id
                 left join account as a2 on d.report_doctor = a2.account_id
+                left join account as a3 on d.download_doctor = a3.account_id
                 $where order by g.guardian_id desc limit 1";
         return $this->getDataRow($sql);
     }

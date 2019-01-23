@@ -67,6 +67,7 @@ EOF;
         <ul class="nav nav-sidebar">
           <li><a href="remote_check_log.php">远程查房跟踪</a></li>
           <li><a href="invoice.php">发票开单日期</a></li>
+          <li><a href="patient.php">查询监护详细信息</a></li>
         </ul>
         <ul class="nav nav-sidebar">
           <li><a href="logout.php">注 销 本 次 登 录</a></li>
