@@ -31,6 +31,7 @@ $cityList = [
                 1099 => '371700'
 ];
 
+$pattern = '/一、(.*)二、诊断：\n\s*(.*)/s';
 foreach ($ret as $row) {
     $guardianId = $row['guardian_id'];
     $city = $cityList[$row['city']];
@@ -74,10 +75,16 @@ foreach ($ret as $row) {
     $data['tria_dep_name'] = '心血管内科';
     $data['tria_sub_dept_id'] = 'ef7b6ff59ccc43c3affcf5527b980567';
     $data['tria_sub_dept_name'] = '保健心血管内二科';
-    
-    
     $data['cons_mode'] = '1';
-    $data['diagnose'] = $diagnose;
+    
+    $isRightFormat = preg_match($pattern, $diagnose, $matches);
+    if ($isRightFormat === false || empty($matches)) {
+        $data['treatment'] = '';
+        $data['diagnose'] = $diagnose;
+    } else {
+        $data['treatment'] = $matches[1];
+        $data['diagnose'] = $matches[2];
+    }
     //$data['attechmentlist'][] = ['filename' => "$guardianId.pdf", 'attachmenttype' => '4', 'url' => "http://101.200.174.235/report/$guardianId.pdf"];
     
     $url = 'http://113.128.194.226:38901/TMSServer/api/v2/server.do';
