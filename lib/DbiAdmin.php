@@ -22,12 +22,12 @@ class DbiAdmin extends BaseDbi
     {
         return $this->getDataAll($sql);
     }
-    public function addAgency($name, $tel)
+    public function addAgency($name, $tel, $salesman = '0', $creator = '')
     {
         if($this->existData('agency', "agency_name = '$name'")) {
             return VALUE_DB_ERROR;
         }
-        $sql = "insert into agency (agency_name, agency_tel) values ('$name', '$tel')";
+        $sql = "insert into agency (agency_name, agency_tel, salesman_id, creator) values ('$name', '$tel', '$salesman', '$creator')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -334,9 +334,9 @@ class DbiAdmin extends BaseDbi
         $param = [':hospital' => $hospitalId];
         return $this->deleteData($sql, $param);
     }
-    public function editAgency($id, $name, $tel)
+    public function editAgency($id, $name, $tel, $salesman = '0')
     {
-        $sql = "update agency set agency_name = '$name', agency_tel = '$tel' where agency_id = $id";
+        $sql = "update agency set agency_name = '$name', agency_tel = '$tel', salesman_id = '$salesman' where agency_id = $id";
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -466,12 +466,13 @@ class DbiAdmin extends BaseDbi
     }
     public function getAgencyInfo($id)
     {
-        $sql = "select agency_name, agency_tel from agency where agency_id = $id limit 1";
+        $sql = "select agency_name, agency_tel, salesman_id from agency where agency_id = $id limit 1";
         return $this->getDataRow($sql);
     }
     public function getAgencyList()
     {
-        $sql = "select agency_id, agency_name as `name`, agency_tel from agency 
+        $sql = "select agency_id, agency_name as `name`, agency_tel, s.salesman_name 
+                from agency as a left join salesman as s on a.salesman_id = s.salesman_id
                 order by convert(agency_name using gbk) collate gbk_chinese_ci asc";
         return $this->getDataAll($sql);
     }
@@ -679,6 +680,11 @@ class DbiAdmin extends BaseDbi
         }
         $param = [':start' => $startTime, ':end' => $endTime];
         return $this->getDataAll($sql, $param);
+    }
+    public function getEcgActive()
+    {
+        $sql = 'select guardian_id, max(create_time) as alert_time from ecg where create_time > date_add(now(), interval -1 hour) group by guardian_id';
+        return $this->getDataAll($sql);
     }
     public function getGuardiansByRegistTime($startTime, $endTime, $exceptHospitalList)
     {
@@ -1028,6 +1034,20 @@ class DbiAdmin extends BaseDbi
                 left join account as a3 on d.download_doctor = a3.account_id
                 $where order by g.guardian_id desc limit 1";
         return $this->getDataRow($sql);
+    }
+    public function getPatientStatusByName($name) {
+        $sql = "select g.guardian_id, p.patient_name, h1.hospital_id, h1.hospital_name, g.start_time, g.end_time, g.device_id, g.`mode`,
+                d.`status` as upload_status, h2.hospital_name as moved_hospital_name, d.type as moved_type, d.report_time,
+                a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor_name
+                from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                inner join hospital as h1 on g.regist_hospital_id = h1.hospital_id
+                inner join guardian_data as d on g.guardian_id = d.guardian_id
+                left join hospital as h2 on d.moved_hospital = h2.hospital_id
+                left join account as a1 on d.hbi_doctor = a1.account_id
+                left join account as a2 on d.report_doctor = a2.account_id
+                left join account as a3 on d.download_doctor = a3.account_id
+                where p.patient_name like '%$name%' order by p.patient_name, g.guardian_id desc";
+        return $this->getDataAll($sql);
     }
     public function getReportPatients($hospitalId)
     {

@@ -15,6 +15,7 @@ if (isset($_POST['submit'])){
     $name = isset($_POST['name']) ?  trim($_POST['name']) : '';
     $tel = isset($_POST['tel']) ? trim($_POST['tel']) : '';
     $id = isset($_POST['id']) ? trim($_POST['id']) : '';
+    $salesman = isset($_POST['salesman']) ? trim($_POST['salesman']) : '0';
     
     if (empty($id)) {
         user_back_after_delay('非法访问');
@@ -26,6 +27,9 @@ if (isset($_POST['submit'])){
     if (empty($tel)) {
         user_back_after_delay('请正确输入代理商电话。');
     }
+    if (empty($salesman)) {
+        user_back_after_delay('请先选择业务员。如果不存在，请先创建业务员数据。');
+    }
     
     $isExisted = DbiAdmin::getDbi()->getAgencyByNameId($id, $name);
     if (VALUE_DB_ERROR === $isExisted) {
@@ -35,7 +39,7 @@ if (isset($_POST['submit'])){
         user_back_after_delay("代理商名<font color='red'>$name</font>和他人冲突，请修改。");
     }
     
-    $ret = DbiAdmin::getDbi()->editAgency($id, $name, $tel);
+    $ret = DbiAdmin::getDbi()->editAgency($id, $name, $tel, $salesman);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -59,6 +63,17 @@ if (isset($_POST['submit'])){
     
     $agencyName = $agencyInfo['agency_name'];
     $agencyTel = $agencyInfo['agency_tel'];
+    $salesman = $agencyInfo['salesman_id'];
+    
+    $ret = DbiAdmin::getDbi()->getSalesmanList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlSalesman = '<option value="0"' . ($value == '0' ? ' selected ' : '') . '>请选择业务员</option>';
+    foreach ($ret as $value) {
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '"' . ($value['salesman_id'] == $salesman ? ' selected ' : '') . '>' 
+                . $value['name'] . '</option>';
+    }
     
     echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
@@ -75,7 +90,12 @@ if (isset($_POST['submit'])){
       <input type="text" class="form-control" id="tel" name="tel" value="$agencyTel">
     </div>
   </div>
-  
+  <div class="form-group">
+    <label for="salesman" class="col-sm-2 control-label">业务员</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="salesman">$htmlSalesman</select>
+    </div>
+  </div>
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
       <button type="submit" class="btn btn-lg btn-success" name="submit">修改</button>

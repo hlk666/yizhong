@@ -13,6 +13,7 @@ if (isset($_POST['submit'])){
     
     $name = isset($_POST['name']) ?  trim($_POST['name']) : '';
     $tel = isset($_POST['tel']) ? trim($_POST['tel']) : '';
+    $salesman = isset($_POST['salesman']) ? trim($_POST['salesman']) : '0';
     
     if (empty($name)) {
         user_back_after_delay('请正确输入代理商名字。');
@@ -20,6 +21,10 @@ if (isset($_POST['submit'])){
     if (empty($tel)) {
         user_back_after_delay('请输入代理商电话。');
     }
+    if (empty($salesman)) {
+        user_back_after_delay('请先选择业务员。如果不存在，请先创建业务员数据。');
+    }
+    
     $telDB = DbiAdmin::getDbi()->getAgencyByName($name);
     if (VALUE_DB_ERROR === $telDB) {
         user_back_after_delay(MESSAGE_DB_ERROR);
@@ -32,14 +37,25 @@ if (isset($_POST['submit'])){
         }
     }
     
-    $ret = DbiAdmin::getDbi()->addAgency($name, $tel);
+    $ret = DbiAdmin::getDbi()->addAgency($name, $tel, $salesman, $_SESSION['user']);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
     $_SESSION['post'] = true;
-    echo MESSAGE_SUCCESS;
+    echo MESSAGE_SUCCESS
+    . '<br /><button type="button" class="btn btn-lg btn-info" style="margin-top:50px;" '
+            . ' onclick="javascript:location.href=\'agency.php\';">查看代理商列表</button>';
 } else {
     $_SESSION['post'] = false;
+    
+    $ret = DbiAdmin::getDbi()->getSalesmanList();
+    if (VALUE_DB_ERROR === $ret) {
+        $ret = array();
+    }
+    $htmlSalesman = '<option value="0"' . ($value == '0' ? ' selected ' : '') . '>请选择业务员</option>';
+    foreach ($ret as $value) {
+        $htmlSalesman .= '<option value="' . $value['salesman_id'] . '">' . $value['name'] . '</option>';
+    }
     
     echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
@@ -53,6 +69,12 @@ if (isset($_POST['submit'])){
     <label class="col-sm-2 control-label">代理商电话<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" name="tel" placeholder="请输入代理商电话" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="salesman" class="col-sm-2 control-label">业务员</label>
+    <div class="col-sm-10">
+      <select class="form-control" name="salesman">$htmlSalesman</select>
     </div>
   </div>
   <div class="form-group">
