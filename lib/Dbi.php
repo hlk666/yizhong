@@ -372,13 +372,18 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataString($sql, $param);
     }
-    public function getGuardianError()
+    public function getGuardianError($hospital = 0)
     {
-        $sql = 'select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content 
+        if (empty($hospital)) {
+            $where = "notice_flag = 0";
+        } else {
+            $where = "regist_hospital_id = '$hospital'";
+        }
+        $sql = "select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content, notice_flag
                 from guardian_error as e inner join guardian as g on e.guardian_id = g.guardian_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
                 inner join patient as p on g.patient_id = p.patient_id
-                where notice_flag = 0';
+                where $where";
         return $this->getDataAll($sql);
     }
     public function getGuardianHospital($guardianId)

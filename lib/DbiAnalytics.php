@@ -181,11 +181,11 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = 'select d.guardian_id as patient_id, p.patient_name, h.hospital_id, h.hospital_name, 
                 upload_time, download_end_time as download_time, d.moved_hospital,
-                case d.status when 2 then "已上传" when 3 then "已下载" when 4 then "已分析" else "" end as status
+                case d.status when 2 then "已上传" when 3 then "已下载" when 4 then "已分析" when 6 then "已分配" else "" end as status
                 from guardian_data as d inner join guardian as g on d.guardian_id = g.guardian_id
                 inner join patient as p on g.patient_id = p.patient_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
-                where d.status in (2, 3, 4) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
+                where d.status in (2, 3, 4, 6) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
                 order by upload_time';
         return $this->getDataAll($sql);
     }
