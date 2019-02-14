@@ -27,6 +27,8 @@ if (isset($_POST['submit'])){
     $county = isset($_POST['county']) ? $_POST['county'] : '';
     $hospitalAddress = !isset($_POST['hospital_address']) ? null : $_POST['hospital_address'];
     $adminUser = !isset($_POST['admin']) ? null : $_POST['admin'];
+    $password = !isset($_POST['password']) ? null : $_POST['password'];
+    $passwordRepeat = !isset($_POST['password_repeat']) ? null : $_POST['password_repeat'];
     $contact = !isset($_POST['contact']) ? null : $_POST['contact'];
     $salesman = (isset($_POST['salesman']) && !empty($_POST['salesman'])) ? $_POST['salesman'] : '0';
     
@@ -66,6 +68,12 @@ if (isset($_POST['submit'])){
     if (empty($adminUser)) {
         user_back_after_delay('请正确输入初始管理员登录用户。');
     }
+    if (empty($password)) {
+        user_back_after_delay('请正确输入初始管理员登录密码。');
+    }
+    if ($password != $passwordRepeat) {
+        user_back_after_delay('初始管理员用户的两次密码不一致。');
+    }
     foreach ($deviceList as $deviceId) {
         $isExisted = DbiAdmin::getDbi()->existedDevice1($deviceId);
         if (VALUE_DB_ERROR === $isExisted) {
@@ -102,7 +110,7 @@ if (isset($_POST['submit'])){
             $province, $city, $county, $hospitalAddress, '0', '0', $adminUser, '', 
             $salesman, '', $analysisHospital, $reportHospital, $titleHospital, $agency, 
             '0', '2', '0', '0', $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, 
-            $creator, $double, $deviceList, $contact);
+            $creator, $double, $deviceList, $contact, $password);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -175,6 +183,21 @@ if (isset($_POST['submit'])){
     </div>
     <label class="col-sm-6 control-label" id="check_user" style="text-align:left;color:red;"></label>
   </div>
+  
+  <div class="form-group">
+    <label class="col-sm-2 control-label">管理员登录密码<font color="red">*</font></label>
+    <div class="col-sm-4">
+      <input type="password" class="form-control" name="password" id="password" placeholder="管理员密码" onchange="checkRepeatPwd()" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">确认密码<font color="red">*</font></label>
+    <div class="col-sm-4">
+      <input type="password" class="form-control" name="password_repeat" id="password_repeat" placeholder="管理员密码" onchange="checkRepeatPwd()" required>
+    </div>
+    <label class="col-sm-6 control-label" id="check_pwd" style="text-align:left;color:red;"></label>
+  </div>
+  
   <div class="form-group">
     <label for="admin" class="col-sm-2 control-label">联系人<font color="red">*</font></label>
     <div class="col-sm-4">
@@ -255,6 +278,17 @@ if (isset($_POST['submit'])){
     loadProvince();
     loadCity();
     loadCounty();
+    function checkRepeatPwd()
+    {
+      if ($("#password").val() == "") {
+          return;
+      }
+      if ($("#password").val() != $("#password_repeat").val()) {
+          $("#check_pwd").html("两次输入的密码不一致");
+      } else {
+          $("#check_pwd").html("");
+      }
+    }
 </script>
 EOF;
 }

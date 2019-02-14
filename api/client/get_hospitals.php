@@ -2,7 +2,9 @@
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 
-$ret = Dbi::getDbi()->getHospitalList();
+$hospitals = isset($_GET['hospitals']) ? $_GET['hospitals'] : '0';
+
+$ret = Dbi::getDbi()->getHospitalList($hospitals);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

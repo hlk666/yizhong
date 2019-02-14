@@ -102,7 +102,7 @@ class DbiAdmin extends BaseDbi
     public function addHospital($name, $type, $level, $tel, $province, $city, $county, $address, $parentFlag, $parentHospital, 
             $adminUser, $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $title1, $agency, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-            $invoiceBank, $creator, $double = '0', $deviceList = array(), $contact = '')
+            $invoiceBank, $creator, $double = '0', $deviceList = array(), $contact = '', $password = '123456')
     {
         $this->pdo->beginTransaction();
         $sql = "insert into hospital(hospital_name, type, level, tel, province, city, county, address, parent_flag, 
@@ -132,10 +132,11 @@ class DbiAdmin extends BaseDbi
         //2018-03-22 end.
         
         //default password:123456, defalt type:1->administrator
-        $sql = 'insert into account(login_name, real_name, password, type, hospital_id)
-                values (:login_name, :real_name, "e10adc3949ba59abbe56e057f20f883e", 1, :hospital_id)';
-        $param = [':login_name' => $adminUser, ':real_name' => $name . '管理员', ':hospital_id' => $hospitalId];
-        $insertAccount = $this->insertData($sql, $param);
+        $realName = $name . '管理员';
+        $dbPwd = md5($password);
+        $sql = "insert into account(login_name, real_name, password, type, hospital_id)
+                values ('$adminUser', '$realName', '$dbPwd', 1, $hospitalId)";
+        $insertAccount = $this->insertData($sql);
         if (VALUE_DB_ERROR === $insertAccount) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
@@ -954,14 +955,6 @@ class DbiAdmin extends BaseDbi
             return array();
         }
         $sql = "select hospital_id from hospital where type <> 1 and salesman_id = $salesman";
-        return $this->getDataAll($sql);
-    }
-    public function getHospitalWorder($user)
-    {
-        if (empty($user)) {
-            return array();
-        }
-        $sql = "select hospital_id, hospital_name from hospital where worker = '$user'";
         return $this->getDataAll($sql);
     }
     public function getICCID($deviceId) {

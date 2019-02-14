@@ -35,12 +35,7 @@ if (isset($_POST['login'])) {
         } else {
             if ($ret['type'] == '0') {
                 header('location:summary.php');
-            } else {/*
-                if (isset($_POST['bind'])) {
-                header('location:add1.php');
-                } else {
-                header('location:add.php');
-                }*/
+            } else {
                 header('location:add.php');
             }
         }
