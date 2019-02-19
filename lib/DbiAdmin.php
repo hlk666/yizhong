@@ -477,6 +477,20 @@ class DbiAdmin extends BaseDbi
                 order by convert(agency_name using gbk) collate gbk_chinese_ci asc";
         return $this->getDataAll($sql);
     }
+    public function getCommunication($hospitalId, $deviceId, $user)
+    {
+        $sql = 'select * from communication where 1';
+        if (!empty($hospitalId)) {
+            $sql .= " and hospital_id = '$hospitalId'";
+        }
+        if (!empty($deviceId)) {
+            $sql .= " and device_id = '$deviceId'";
+        }
+        if (!empty($user)) {
+            $sql .= " and creator = '$user'";
+        }
+        return $this->getDataAll($sql);
+    }
     public function getCountyCount($county = '')
     {
         if (empty($county)) {
@@ -1107,6 +1121,12 @@ class DbiAdmin extends BaseDbi
         $sql = 'select user, password, type, hospital_id from user_diagnosis where user = :user limit 1';
         $param = [':user' => $user];
         return $this->getDataRow($sql, $param);
+    }
+    public function addCommunication($hospitalId, $type, $content, $creator, $deviceId)
+    {
+        $sql = "insert into communication (hospital_id, type, content, creator, device_id)
+                values ('$hospitalId', '$type', '$content', '$creator', '$deviceId')";
+        return $this->insertData($sql);
     }
     public function checkDeviceDelivery($deviceId)
     {
