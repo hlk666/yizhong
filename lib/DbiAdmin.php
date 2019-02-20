@@ -102,16 +102,17 @@ class DbiAdmin extends BaseDbi
     public function addHospital($name, $type, $level, $tel, $province, $city, $county, $address, $parentFlag, $parentHospital, 
             $adminUser, $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $title1, $agency, 
             $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-            $invoiceBank, $creator, $double = '0', $deviceList = array(), $contact = '', $password = '123456')
+            $invoiceBank, $creator, $double = '0', $deviceList = array(), $contact = '', $password = '123456', $emergencyTel = '')
     {
         $this->pdo->beginTransaction();
         $sql = "insert into hospital(hospital_name, type, level, tel, province, city, county, address, parent_flag, 
                 sms_tel, comment, contract_flag, device_sale, display_check, report_must_check, 
-                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker, contact, agency_id, salesman_id)
+                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, creator, worker, contact, 
+                agency_id, salesman_id, emergency_tel)
                 values ('$name', '$type', '$level', '$tel', '$province', '$city', '$county', '$address', '$parentFlag', 
                 '$messageTel', '$comment', '$contractFlag', '$deviceSale', '$displayCheck', 
                 '$reportMustCheck', '$invoiceName', '$invoiceId', '$invoiceAddressTel', '$invoiceBank', '$creator', 
-                '$creator', '$contact', '$agency', '$salesman')";
+                '$creator', '$contact', '$agency', '$salesman', '$emergencyTel')";
         $hospitalId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $hospitalId) {
             $this->pdo->rollBack();
@@ -347,7 +348,7 @@ class DbiAdmin extends BaseDbi
     public function editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
             $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, 
             $contractFlag, $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, 
-            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter, $contact)
+            $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $worker, $filter, $contact, $emergencyTel = '')
     {
         $this->pdo->beginTransaction();
         $sql = 'update account set login_name = :login_user, real_name = :real_name 
@@ -365,7 +366,8 @@ class DbiAdmin extends BaseDbi
                 comment = '$comment', contract_flag = '$contractFlag', device_sale = '$deviceSale', 
                 display_check = '$displayCheck', service_charge = '$serviceCharge', report_must_check = '$reportMustCheck',
                 invoice_name = '$invoiceName', invoice_id = '$invoiceId', invoice_addr_tel = '$invoiceAddressTel', 
-                invoice_bank = '$invoiceBank', worker = '$worker', filter = '$filter', contact = '$contact'
+                invoice_bank = '$invoiceBank', worker = '$worker', filter = '$filter', contact = '$contact', 
+                emergency_tel = '$emergencyTel'
                 where hospital_id = '$hospitalId'";
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
@@ -867,7 +869,7 @@ class DbiAdmin extends BaseDbi
         $sql = 'select h.hospital_id, hospital_name, h.type, level, province, city, county, address, h.tel, 
                 parent_flag, a.login_name, h.sms_tel, h.agency_id, h.salesman_id, h.comment, 
                 h.contract_flag, h.device_sale, h.service_charge, h.display_check, h.report_must_check,
-                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker, filter, contact
+                invoice_name, invoice_id, invoice_addr_tel, invoice_bank, worker, filter, contact, emergency_tel
                 from hospital as h inner join account as a on h.hospital_id = a.hospital_id
                 where h.hospital_id = :hospital_id and a.type = 1 limit 1';
         $param = [':hospital_id' => $hospitalId];

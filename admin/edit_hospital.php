@@ -17,6 +17,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $type = isset($_POST['type']) ? $_POST['type'] : '';
     $level = isset($_POST['level']) ? $_POST['level'] : '';
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
+    $emergencyTel = !isset($_POST['emergency_tel']) ? '' : $_POST['emergency_tel'];
     $province = isset($_POST['province']) ? $_POST['province'] : '';
     $city = isset($_POST['city']) ? $_POST['city'] : '';
     $county = isset($_POST['county']) ? $_POST['county'] : '';
@@ -85,7 +86,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         $ret = DbiAdmin::getDbi()->editHospital($hospitalId, $hospitalName, $type, $level, $hospitalTel, $province, $city, $county,
                 $hospitalAddress, $parentFlag, $loginUser, $messageTel, $agency, $salesman, $comment, $contractFlag, 
                 $deviceSale, $serviceCharge, $displayCheck, $reportMustCheck, $invoiceName, $invoiceId, $invoiceAddressTel, 
-                $invoiceBank, $worker, $filter, $contact);
+                $invoiceBank, $worker, $filter, $contact, $emergencyTel);
     }
     
     if (isset($_POST['del'])) {
@@ -144,6 +145,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     $county = $hospitalInfo['county'];
     $address = $hospitalInfo['address'];
     $tel = $hospitalInfo['tel'];
+    $emergencyTel = $hospitalInfo['emergency_tel'];
     $loginUser = $hospitalInfo['login_name'];
     $messageTel = $hospitalInfo['sms_tel'];
     $agency = $hospitalInfo['agency_id'];
@@ -291,6 +293,12 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
     <label for="hospital_tel" class="col-sm-2 control-label">电话<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="hospital_tel" name="hospital_tel" value="$tel">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="emergency_tel" class="col-sm-2 control-label">报警联系(值班)电话</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="emergency_tel" name="emergency_tel" value="$emergencyTel">
     </div>
   </div>
   <div class="form-group">

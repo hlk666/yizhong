@@ -16,6 +16,7 @@ if (isset($_POST['submit'])){
     $type = isset($_POST['type']) ? $_POST['type'] : '';
     $level = isset($_POST['level']) ? $_POST['level'] : '';
     $hospitalTel = !isset($_POST['hospital_tel']) ? null : $_POST['hospital_tel'];
+    $emergencyTel = !isset($_POST['emergency_tel']) ? '' : $_POST['emergency_tel'];
     $contact = !isset($_POST['contact']) ? null : $_POST['contact'];
     $province = isset($_POST['province']) ? $_POST['province'] : '';
     $city = isset($_POST['city']) ? $_POST['city'] : '';
@@ -87,7 +88,7 @@ if (isset($_POST['submit'])){
             $messageTel, $salesman, $comment, $analysisHospital, $reportHospital, $titleHospital, 
             $agency, $contractFlag, $deviceSale, $displayCheck, $reportMustCheck, 
             $invoiceName, $invoiceId, $invoiceAddressTel, $invoiceBank, $_SESSION['user'],
-            '0', array(), $contact);
+            '0', array(), $contact, '123456', $emergencyTel);
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -201,6 +202,12 @@ if (isset($_POST['submit'])){
     <label for="hospital_tel" class="col-sm-2 control-label">电话<font color="red">*</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="hospital_tel" name="hospital_tel" placeholder="请输入医院的联系电话" required>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="emergency_tel" class="col-sm-2 control-label">报警联系(值班)电话</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="emergency_tel" name="emergency_tel" placeholder="请输入医院的值班电话">
     </div>
   </div>
   <div class="form-group">
