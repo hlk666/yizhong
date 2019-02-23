@@ -235,6 +235,21 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
+    public function appUploadStart($guardianId)
+    {
+        $sql = "insert into app_upload(guardian_id, type) values ('$guardianId', 1)";
+        return $this->insertData($sql);
+    }
+    public function appUploadFailed($guardianId)
+    {
+        $sql = "insert into app_upload(guardian_id, type) values ('$guardianId', 3)";
+        return $this->insertData($sql);
+    }
+    public function appUploadSucceed($guardianId)
+    {
+        $sql = "insert into app_upload(guardian_id, type) values ('$guardianId', 2)";
+        return $this->insertData($sql);
+    }
     public function delAccount($doctorId)
     {
         $sql = "update account set hospital_id = 9999 where account_id = $doctorId";
@@ -412,6 +427,11 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         return true;
+    }
+    public function endRepeat($guardianId)
+    {
+        $sql = "update guardian set status = 2 where guardian_id = $guardianId";
+        return $this->updateData($sql);
     }
     public function existedDevice($deviceId)
     {
@@ -994,6 +1014,14 @@ class DbiAdmin extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
+    public function getNoticeRule($hospitals)
+    {
+        $sql = 'select hospital_id, invoice_bank as notice_rule from hospital where 1';
+        if (!empty($hospitals)) {
+            $sql .= " and hospital_id in ($hospitals)";
+        }
+        return $this->getDataAll($sql);
+    }
     public function getPatientDiagnosis($hospital, $diagnosis, $startTime, $endTime)
     {
         $sql = "select d.patient_id, d.diagnosis_id, d.create_time, h.hospital_id, h.hospital_name, h.tel as hospital_tel,
@@ -1218,6 +1246,11 @@ class DbiAdmin extends BaseDbi
         $sql = 'update guardian_data set status = :status where guardian_id = :id';
         $param = [':id' => $guardianId, ':status' => $status];
         return $this->updateData($sql, $param);
+    }
+    public function updateNoticeRule($hospitalId, $text)
+    {
+        $sql = "update hospital set invoice_bank = '$text' where hospital_id = '$hospitalId'";
+        return $this->updateData($sql);
     }
     public function updateQianyiData($guardianId)
     {

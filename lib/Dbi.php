@@ -375,11 +375,11 @@ class Dbi extends BaseDbi
     public function getGuardianError($hospital = 0)
     {
         if (empty($hospital)) {
-            $where = "notice_flag = 0";
+            $where = "e.notice_flag = 0";
         } else {
             $where = "regist_hospital_id = '$hospital'";
         }
-        $sql = "select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content, notice_flag
+        $sql = "select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content, e.notice_flag
                 from guardian_error as e inner join guardian as g on e.guardian_id = g.guardian_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
                 inner join patient as p on g.patient_id = p.patient_id
@@ -414,7 +414,8 @@ class Dbi extends BaseDbi
     {
         $sql = 'select hospital_id, hospital_name, tel, level, device_sale, type, create_time, h.agency_id, 
                 h.salesman_id, a.agency_name, s.salesman_name, need_follow, province, city, county, 
-                filter, need_follow_report, contact from hospital as h 
+                filter, need_follow_report, contact, invoice_bank as notice_rule, notice_flag
+                from hospital as h 
                 left join agency as a on h.agency_id = a.agency_id 
                 left join salesman as s on h.salesman_id = s.salesman_id';
         if (!empty($hospitals)) {

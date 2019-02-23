@@ -163,7 +163,7 @@ if (isset($_POST['submit'])){
     </div>
   </div>
   <div class="form-group">
-    <label for="emergency_tel" class="col-sm-2 control-label">报警联系(值班)电话</label>
+    <label for="emergency_tel" class="col-sm-2 control-label"><font color="red">报警联系(值班)电话</font></label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="emergency_tel" name="emergency_tel" placeholder="请输入医院的值班电话">
     </div>

@@ -1,5 +1,6 @@
 <?php
 require_once PATH_LIB . 'DbiAnalytics.php';
+require_once PATH_LIB . 'DbiAdmin.php';
 require_once PATH_LIB . 'Validate.php';
 //require_once PATH_ROOT . 'lib/tool/HpMessage.php';
 require_once PATH_LIB . 'ShortMessageService.php';
@@ -56,6 +57,10 @@ if (VALUE_DB_ERROR === $ret) {
 }
 
 if (1 == $deviceType) {
+    $ret = DbiAdmin::getDbi()->appUploadSucceed($guardianId);
+    if (VALUE_DB_ERROR === $ret) {
+        //api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+    }
     if (VALUE_DB_ERROR === $hospitalId || empty($hospitalId)) {
         //do nothing.
     } else {
