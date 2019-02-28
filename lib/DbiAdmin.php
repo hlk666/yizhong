@@ -46,6 +46,17 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
+    public function addCommunication($hospitalId, $type, $content, $creator, $deviceId)
+    {
+        $sql = "insert into communication (hospital_id, type, content, creator, device_id)
+        values ('$hospitalId', '$type', '$content', '$creator', '$deviceId')";
+        return $this->insertData($sql);
+    }
+    public function addProblem($guardianId, $text)
+    {
+        $sql = "insert into problem (guardian_id, text, user_id) values ('$guardianId', '$text', '1')";
+        return $this->insertData($sql);
+    }
     public function addDevice($hospital, $device, $user = '')
     {
         if ($this->existData('device', "device_id = '$device'")) {
@@ -249,6 +260,21 @@ class DbiAdmin extends BaseDbi
     {
         $sql = "insert into app_upload(guardian_id, type) values ('$guardianId', 2)";
         return $this->insertData($sql);
+    }
+    public function checkDeviceDelivery($deviceId)
+    {
+        $sql = "select device_id, hospital_id from device where device_id = '$deviceId' limit 1";
+        $ret = $this->getDataRow($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        if (empty($ret)) {
+            return 1;
+        }
+        if ($ret['hospital_id'] == '40') {
+            return 2;
+        }
+        return 0;
     }
     public function delAccount($doctorId)
     {
@@ -1086,6 +1112,11 @@ class DbiAdmin extends BaseDbi
                 where p.patient_name like '%$name%' order by p.patient_name, g.guardian_id desc";
         return $this->getDataAll($sql);
     }
+    public function getProblem()
+    {
+        $sql = 'select guardian_id as patient_id from problem where status = 1';
+        return $this->getDataAll($sql);
+    }
     public function getReportPatients($hospitalId)
     {
         $sql = "select g.guardian_id as patient_id, p.patient_name, start_time 
@@ -1151,27 +1182,6 @@ class DbiAdmin extends BaseDbi
         $sql = 'select user, password, type, hospital_id from user_diagnosis where user = :user limit 1';
         $param = [':user' => $user];
         return $this->getDataRow($sql, $param);
-    }
-    public function addCommunication($hospitalId, $type, $content, $creator, $deviceId)
-    {
-        $sql = "insert into communication (hospital_id, type, content, creator, device_id)
-                values ('$hospitalId', '$type', '$content', '$creator', '$deviceId')";
-        return $this->insertData($sql);
-    }
-    public function checkDeviceDelivery($deviceId)
-    {
-        $sql = "select device_id, hospital_id from device where device_id = '$deviceId' limit 1";
-        $ret = $this->getDataRow($sql);
-        if (VALUE_DB_ERROR === $ret) {
-            return VALUE_DB_ERROR;
-        }
-        if (empty($ret)) {
-            return 1;
-        }
-        if ($ret['hospital_id'] == '40') {
-            return 2;
-        }
-        return 0;
     }
     public function notDisplayFirst($guardianId)
     {
@@ -1250,6 +1260,11 @@ class DbiAdmin extends BaseDbi
     public function updateNoticeRule($hospitalId, $text)
     {
         $sql = "update hospital set invoice_bank = '$text' where hospital_id = '$hospitalId'";
+        return $this->updateData($sql);
+    }
+    public function updateProblem($problemId, $userId)
+    {
+        $sql = "update problem set update_time = now(), status = 2, user_id = '$user' where problem_id = '$problemId'";
         return $this->updateData($sql);
     }
     public function updateQianyiData($guardianId)
