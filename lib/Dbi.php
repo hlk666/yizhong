@@ -66,6 +66,11 @@ class Dbi extends BaseDbi
     
     //************************** query methods(public) **************************
     //********************************** start **********************************
+    public function getAuthcode($authcode)
+    {
+        $sql = "select * from authcode where authcode = '$authcode' limit 1";
+        return $this->getDataRow($sql);
+    }
     public function getAcount($loginName)
     {
         $sql = 'select account_id, real_name as name, type, password, hospital_id 
@@ -263,7 +268,7 @@ class Dbi extends BaseDbi
         $sql = 'select g.guardian_id, g.mode, g.status, g.mark, g.device_id, g.regist_hospital_id, 
                 p.patient_name, p.sex, p.birth_year, p.tel, g.start_time, g.end_time, 
                 g.blood_pressure, g.tentative_diagnose, g.medical_history, g.hospitalization_id, 
-                g.lead, g.regist_doctor_name as doctor_name, g.sickroom, g.display_first
+                g.lead, g.regist_doctor_name as doctor_name, g.sickroom, g.display_first, g.family_tel
                 from guardian as g left join patient as p on g.patient_id = p.patient_id ';
         if ($hospitalId === 0) {
             $sql .= ' where 1 ';

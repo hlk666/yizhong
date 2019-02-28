@@ -1114,7 +1114,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getProblem()
     {
-        $sql = 'select guardian_id as patient_id from problem where status = 1';
+        $sql = 'select problem_id, guardian_id as patient_id from problem where status = 1';
         return $this->getDataAll($sql);
     }
     public function getReportPatients($hospitalId)
