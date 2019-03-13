@@ -14,4 +14,4 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
-api_exit_success();
+api_exit(['code' => '0', 'message' => MESSAGE_SUCCESS, 'id' => $ret, 'patient_id' => $_POST['patient_id']]);

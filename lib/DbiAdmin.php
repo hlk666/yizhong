@@ -46,10 +46,10 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function addCommunication($hospitalId, $type, $content, $creator, $deviceId)
+    public function addCommunication($hospitalId, $type, $content, $creator, $deviceId, $patientId)
     {
-        $sql = "insert into communication (hospital_id, type, content, creator, device_id)
-        values ('$hospitalId', '$type', '$content', '$creator', '$deviceId')";
+        $sql = "insert into communication (hospital_id, type, content, creator, device_id, guardian_id)
+        values ('$hospitalId', '$type', '$content', '$creator', '$deviceId', '$patientId')";
         return $this->insertData($sql);
     }
     public function addProblem($guardianId, $text)
@@ -525,7 +525,7 @@ class DbiAdmin extends BaseDbi
                 order by convert(agency_name using gbk) collate gbk_chinese_ci asc";
         return $this->getDataAll($sql);
     }
-    public function getCommunication($hospitalId, $deviceId, $user)
+    public function getCommunication($hospitalId, $deviceId, $user, $patientId)
     {
         $sql = 'select * from communication where 1';
         if (!empty($hospitalId)) {
@@ -536,6 +536,9 @@ class DbiAdmin extends BaseDbi
         }
         if (!empty($user)) {
             $sql .= " and creator = '$user'";
+        }
+        if (!empty($patient)) {
+            $sql .= " and guardian_id = '$patientId'";
         }
         return $this->getDataAll($sql);
     }
@@ -837,7 +840,7 @@ class DbiAdmin extends BaseDbi
         if (empty($agency)) {
             return array();
         }
-        $sql = "select distinct hospital_id, hospital_name from hospital where type <> 1 and agency_id = $agency";
+        $sql = "select distinct hospital_id, hospital_name from hospital where type <> 1 and agency_id = '$agency'";
         return $this->getDataAll($sql);
     }
     public function getHospitalAgencyList()
@@ -1114,7 +1117,8 @@ class DbiAdmin extends BaseDbi
     }
     public function getProblem()
     {
-        $sql = 'select problem_id, guardian_id as patient_id from problem where status = 1';
+        $sql = 'select problem_id, guardian_id as patient_id, text, create_time, update_time, user_id as user, status, text
+                from problem where create_time > date_add(now(), interval -24 hour)';
         return $this->getDataAll($sql);
     }
     public function getReportPatients($hospitalId)
@@ -1262,9 +1266,10 @@ class DbiAdmin extends BaseDbi
         $sql = "update hospital set invoice_bank = '$text' where hospital_id = '$hospitalId'";
         return $this->updateData($sql);
     }
-    public function updateProblem($problemId, $userId)
+    public function updateProblem($problemId, $userId, $status)
     {
-        $sql = "update problem set update_time = now(), status = 2, user_id = '$user' where problem_id = '$problemId'";
+        $sql = "update problem set update_time = now(), user_id = '$user', status = '$status' 
+                where problem_id = '$problemId'";
         return $this->updateData($sql);
     }
     public function updateQianyiData($guardianId)
