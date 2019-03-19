@@ -48,6 +48,34 @@ class AppUploadData
                 Logger::write($this->logFile, 'failed to save file on ID of :' . $patientId);
                 return json_encode($this->error);
             }
+            if (filesize($file) == 120570) {
+                $fh = fopen($file, "rb");
+                $head = fread($fh, filesize($file));
+                fclose($fh);
+                
+                $arr = unpack("C*", $head);
+                $length = count($arr)/4019;
+                $index = ($length - 1) * 4019 + 1;
+                $phonePower = '-1';
+                $collectionPower = '-1';
+                $line = '-1';
+                $bluetooth = '-1';
+                for ($i = $index; $i < $index + 19; $i++) {
+                    if ($i - $index == 7) {
+                        $collectionPower = $arr[$i];
+                    }
+                    if ($i - $index == 17) {
+                        $line = ($arr[$i] == 1 ? '0' : '1');
+                    }
+                }
+                $deviceId = Dbi::getDbi()->getDeviceId($patientId);
+                if ($deviceId !== VALUE_DB_ERROR && !empty($deviceId)) {
+                    $ret = Dbi::getDbi()->addDeviceStatus($deviceId, $phonePower, $collectionPower, $bluetooth, $line);
+                    if (VALUE_DB_ERROR === $ret) {
+                        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+                    }
+                }
+            }
             
             $hospital = Dbi::getDbi()->getGuardianHospital($patientId);
             if (VALUE_DB_ERROR === $hospital) {
@@ -67,14 +95,16 @@ class AppUploadData
                 $cacheEcgDataFile = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'ecg_data' . DIRECTORY_SEPARATOR . $hospital . '.txt';
                 $cacheEcgData = file_get_contents($cacheEcgDataFile) . $patientId . ',' . $retDB . ',' . $alert . ',' . $time . ',' . $urlFile . ';';
                 file_put_contents($cacheEcgDataFile, $cacheEcgData);
+                
+                $cacheEcgDataFileAll = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'ecg_data' . DIRECTORY_SEPARATOR  . '1.txt';
+                $cacheEcgDataAll = file_get_contents($cacheEcgDataFileAll) . $patientId . ',' . $retDB . ',' . $alert . ',' . $time . ',' . $urlFile . ';';
+                file_put_contents($cacheEcgDataFileAll, $cacheEcgDataAll);
             }
             
             $hospitalInfo = Dbi::getDbi()->getHospitalByGuardian($patientId);
             if (VALUE_DB_ERROR !== $hospitalInfo) {
                 setNotice($hospitalInfo['guard_hospital_id'], 'ecg_notice', $patientId);
             }
-            
-            
         }
         return json_encode($this->retSuccess);
     }
