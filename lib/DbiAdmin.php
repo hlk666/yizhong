@@ -246,6 +246,15 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
+    public function addShift($userId, $type)
+    {
+        $sql = "insert into shift (user_id, type) values ('$userId', '$type')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
     public function appUploadStart($guardianId)
     {
         $sql = "insert into app_upload(guardian_id, type) values ('$guardianId', 1)";
@@ -476,6 +485,11 @@ class DbiAdmin extends BaseDbi
         return $this->existData('account', "login_name = '$loginName' and hospital_id <> $hospital");
     }
     
+    public function getAccountInfo($id)
+    {
+        $sql = "select * from account where account_id = '$id' limit 1";
+        return $this->getDataRow($sql);
+    }
     public function getAccountList($hospital)
     {
         $sql = "select account_id as doctor_id, real_name as doctor_name from account where hospital_id = '$hospital'";
@@ -537,7 +551,7 @@ class DbiAdmin extends BaseDbi
         if (!empty($user)) {
             $sql .= " and creator = '$user'";
         }
-        if (!empty($patient)) {
+        if (!empty($patientId)) {
             $sql .= " and guardian_id = '$patientId'";
         }
         return $this->getDataAll($sql);
@@ -734,6 +748,17 @@ class DbiAdmin extends BaseDbi
             $where = " and hospital_id in ($hospitals) ";
         }
         $sql = "select hospital_id, count(device_id) as quantity from device where hospital_id > 0 $where group by hospital_id";
+        return $this->getDataAll($sql);
+    }
+    public function getEcgMark($startTime = null, $endTime = null)
+    {
+        $sql = "select * from ecg where mark <> 0";
+        if (!empty($startTime)) {
+            $sql .= " and create_time >= '$startTime'";
+        }
+        if (!empty($endTime)) {
+            $sql .= " and create_time <= '$endTime'";
+        }
         return $this->getDataAll($sql);
     }
     public function getEcgs($startTime, $endTime, $exceptHospitalList)
