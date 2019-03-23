@@ -384,10 +384,11 @@ class Dbi extends BaseDbi
         } else {
             $where = "regist_hospital_id = '$hospital'";
         }
-        $sql = "select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content, e.notice_flag
+        $sql = "select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content, e.notice_flag, t.report_hospital
                 from guardian_error as e inner join guardian as g on e.guardian_id = g.guardian_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
                 inner join patient as p on g.patient_id = p.patient_id
+                left join hospital_tree as t on g.regist_hospital_id = t.hospital_id
                 where $where";
         return $this->getDataAll($sql);
     }
@@ -532,6 +533,11 @@ class Dbi extends BaseDbi
         $param = [':device_id' => $deviceId, ':phone_power' => $phonePower, ':collection_power' => $collectionPower,
                         ':bluetooth' => $bluetooth, ':line' => $line];
         return $this->insertData($sql, $param);
+    }
+    public function addDevicePosition($deviceId, $x, $y)
+    {
+        $sql = "update device set posX = '$x', posY = '$y' where device_id = '$deviceId'";
+        return $this->updateDate($sql);
     }
     public function addOrder($hospital, $name, $sex, $age, $tel, $sickRoom, $bloodPressure, $height, $weight, 
             $familyName, $familyTel, $tentativeDiagnosis, $medicalHistory, $hospitalization, $doctor)
