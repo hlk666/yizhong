@@ -82,7 +82,16 @@ if (isset($_POST['submit'])){
         } elseif (true === $isExisted) {
             user_back_after_delay("设备【 $deviceId 】已绑定其他医院。");
         }  else {
-            continue;
+            $ret = DbiAdmin::getDbi()->checkDeviceDelivery($deviceId);
+            if (VALUE_DB_ERROR === $ret) {
+                user_back_after_delay(MESSAGE_DB_ERROR);
+            } elseif ($ret == 1) {
+                user_back_after_delay("设备【 $deviceId 】的ID不存在。");
+            }  elseif ($ret == 2) {
+                user_back_after_delay("设备【 $deviceId 】在生产部。");
+            }  else {
+                continue;
+            }
         }
     }
     
