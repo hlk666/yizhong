@@ -1293,7 +1293,7 @@ class DbiAdmin extends BaseDbi
     }
     public function updateProblem($problemId, $userId, $status)
     {
-        $sql = "update problem set update_time = now(), user_id = '$user', status = '$status' 
+        $sql = "update problem set update_time = now(), user_id = '$userId', status = '$status' 
                 where problem_id = '$problemId'";
         return $this->updateData($sql);
     }
