@@ -55,7 +55,18 @@ class GeTui
     private static function checkResponse($rep)
     {
         if (isset($rep['result']) && $rep['result'] == 'ok') {
-            return true;
+            if (!isset($rep['status'])) {
+                Logger::write(self::$logFile, 'property of "status" is required.');
+                return false;
+            }
+            if ($rep['status'] == 'successed_online') {
+                return true;
+            } elseif ($rep['status'] == 'successed_offline') {
+                return false;
+            } else {
+                Logger::write(self::$logFile, 'property of "status" is required.');
+                return false;
+            }
         } else {
             if (is_array($rep) && !empty($rep)) {
                 $error = '';

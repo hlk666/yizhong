@@ -117,6 +117,8 @@ class Invigilator
             }
             $gt = GeTui::pushToSingle($clientId, 'READY');
             if (false === $gt) {
+                $deviceId = Dbi::getDbi()->getDeviceId($this->guardianId);
+                Logger::write('getui_fail.log', 'GeTui failed with device_id : ' . $deviceId);
                 return VALUE_GT_ERROR;
             }
             Logger::write($this->logFile, 'GeTui with id : ' . $clientId);

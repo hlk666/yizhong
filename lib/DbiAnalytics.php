@@ -141,6 +141,12 @@ class DbiAnalytics extends BaseDbi
         $sql = 'select t.*, h.report_must_check from hospital_tree as t inner join hospital as h on t.hospital_id = h.hospital_id';
         return $this->getDataAll($sql);
     }
+    public function getHospitals($hospitalId)
+    {
+        $sql = 'select distinct hospital_id from hospital_tree where report_hospital = :hospital';
+        $param = array(':hospital' => $hospitalId);
+        return $this->getDataAll($sql, $param);
+    }
     public function getPatient($guardianId)
     {
         $sql = 'select guardian_id as patient_id, start_time, end_time, patient_name as name, birth_year, sex, tel, reported
@@ -161,14 +167,6 @@ class DbiAnalytics extends BaseDbi
                 where pd.diagnosis_id in $diagnosisList order by pd.patient_id desc";
         return $this->getDataAll($sql);
     }
-    
-    public function getHospitals($hospitalId)
-    {
-        $sql = 'select distinct hospital_id from hospital_tree where report_hospital = :hospital';
-        $param = array(':hospital' => $hospitalId);
-        return $this->getDataAll($sql, $param);
-    }
-    
     public function getPatientLast($deviceId)
     {
         $sql = "select g.guardian_id, g.start_time, p.patient_name 
@@ -299,6 +297,13 @@ class DbiAnalytics extends BaseDbi
                 where g.guardian_id in ($guardianList) ";
         return $this->getDataAll($sql);
     }
+    public function getReportHospitalByPatient($guardianId)
+    {
+        $sql = "select t.report_hospital
+                from hospital_tree as t inner join guardian as g on t.hospital_id = g.regist_hospital_id
+                where g.guardian_id = '$guardianId'";
+        return $this->getDataString($sql);
+    }
     public function getTelContent($hospitalId, $guardianId, $startTime, $endTime)
     {
         $sql = "select t.guardian_id, t.hospital_name, p.patient_name, t.doctor_name, t.content, t.create_time 
@@ -338,7 +343,7 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = "select 1 from guardian as g inner join hospital_tree as t on g.regist_hospital_id = t.hospital_id
                 left join qianyi_data as q on g.guardian_id = q.guardian_id
-                where g.regist_hospital_id <> 3 and g.regist_time > '2018-01-01' and t.report_hospital = 3 
+                where g.regist_hospital_id <> 3 and g.regist_time > '2018-01-01' and t.title1 = 3 
                 and g.guardian_id = $guardianId and q.guardian_id is null limit 1";
         $ret = $this->getDataString($sql);
         if (!empty($ret)) {
