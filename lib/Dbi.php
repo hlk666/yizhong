@@ -73,7 +73,7 @@ class Dbi extends BaseDbi
     }
     public function getAcount($loginName)
     {
-        $sql = 'select account_id, real_name as name, type, password, hospital_id 
+        $sql = 'select account_id, real_name as name, type, password, hospital_id, creator as agency_id
                 from account where login_name = :user limit 1';
         $param = [':user' => $loginName];
         return $this->getDataRow($sql, $param);
