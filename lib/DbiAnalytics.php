@@ -204,7 +204,7 @@ class DbiAnalytics extends BaseDbi
                 left join account as a1 on d.hbi_doctor = a1.account_id
                 left join account as a2 on d.report_doctor = a2.account_id
                 left join account as a3 on d.download_doctor = a3.account_id
-                where (regist_hospital_id in ($hospitalIdList) or d.moved_hospital = $currentHospital) ";
+                where (regist_hospital_id in ($hospitalIdList) or d.moved_hospital = $currentHospital) and url <> '' ";
         if (!empty($text)) {
             $sql .= " and g.guardian_id not in ($text) ";
         }
@@ -330,7 +330,7 @@ class DbiAnalytics extends BaseDbi
     public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
         $status = $this->getDataStatus($guardianId);
-        if ($status == 4 || $status == 5) {
+        if ($status == 4 || $status == 5 || $status == 6 || $status == 8 || $status == 9) {
             $set = 'set url = :url, upload_time = now(), device_type = :device';
         } else {
             $set = 'set url = :url, upload_time = now(), device_type = :device, status = 2';
@@ -434,11 +434,7 @@ class DbiAnalytics extends BaseDbi
                 $set = 'set status = 4, report_time = now(), hbi_doctor = ' . $hbiDoctor;
             }
         } elseif ($statusName == 'report') {
-            if ($reportDoctor == '247' || $reportDoctor == '446') {
-                $set = 'set status = 5, report_time = now(), hbi_doctor = ' . $reportDoctor;
-            } else {
-                $set = 'set status = 5, report_time = now(), report_doctor = ' . $reportDoctor;
-            }
+            $set = 'set status = 5, report_time = now(), report_doctor = ' . $reportDoctor;
         } else {
             return VALUE_DB_ERROR;
         }
