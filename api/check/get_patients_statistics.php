@@ -86,7 +86,7 @@ if (empty($ret)) {
         $ret[$key]['sex'] = $row['sex'] == 1 ? '男' : '女';
         unset($ret[$key]['birth_year']);
         
-        if ($row['status'] > 3) {
+        if ($row['status'] == 4 || $row['status'] == 5 || $row['status'] == 8) {
             $ret[$key]['status'] = '已出报告';
         } else {
             $ret[$key]['status'] = '未出报告';
