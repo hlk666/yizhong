@@ -194,7 +194,13 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 //both of success and failing to send message to device
-setRegistNotice($guardHospital, $mode);
+if ($registHospital == '1' || $registHospital == '40') {
+    //not set cache.
+} else {
+    setRegistNotice($guardHospital, $mode);
+    setRegistNotice('1', $mode);
+}
+
 
 if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
