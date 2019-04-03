@@ -30,6 +30,7 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
+$idc = isset($_POST['idc']) ? $_POST['idc'] : '';
 $height = isset($_POST['height']) ? $_POST['height'] : '0';
 $weight = isset($_POST['weight']) ? $_POST['weight'] : '0';
 $bloodPressure = isset($_POST['bloodpress']) ? $_POST['bloodpress'] : '';
@@ -102,7 +103,7 @@ $startTime = isset($_POST['start_time']) ? $_POST['start_time'] : null;
 
 $guardianId = Dbi::getDbi()->flowGuardianAddUser($name, $sex, $age, $tel, $device, $registHospital, 
         $guardHospital, $mode, $hours, $lead, $doctorId, $sickRoom, $bloodPressure, $height, $weight,
-        $familyTel, $tentativeDiagnose, $medicalHistory, $doctorName, $hospitalizationId, $startTime);
+        $familyTel, $tentativeDiagnose, $medicalHistory, $doctorName, $hospitalizationId, $startTime, $idc);
 if (VALUE_DB_ERROR === $guardianId) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

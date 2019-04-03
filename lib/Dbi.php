@@ -663,7 +663,7 @@ class Dbi extends BaseDbi
     public function flowGuardianAddUser($patientName, $sex, $age, $tel, $device, $registHospital,
             $guardHospital, $mode, $hours, $lead, $doctor, $sickRoom, $bloodPressure, $height,
             $weight, $familyTel, $tentativeDiagnose, $medicalHistory, $registDoctorName, 
-            $hospitalizationId = '0', $startTime = null)
+            $hospitalizationId = '0', $startTime = null, $idc = '')
     {
         $birthYear = date('Y') - $age;
         $sql = 'select patient_id from patient
@@ -689,16 +689,16 @@ class Dbi extends BaseDbi
         $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id,
                     patient_id, mode, guardian_hours, lead, doctor_id, status,
                     sickroom, blood_pressure, height, weight, family_tel,
-                    tentative_diagnose, medical_history, regist_doctor_name, hospitalization_id)
+                    tentative_diagnose, medical_history, regist_doctor_name, hospitalization_id, idc)
                     values (:device, :regist_hospital, :guard_hospital, :patient, :mode,
                     :hours, :lead, :doctor_id, 1, :sickroom, :blood_pressure, :height,
-                    :weight, :family_tel, :ten_dia, :medical_history, :doctor_name, :hospitalization_id)';
+                    :weight, :family_tel, :ten_dia, :medical_history, :doctor_name, :hospitalization_id, :idc)';
         $param = [':device' => $device, ':regist_hospital' => $registHospital, ':guard_hospital' => $guardHospital,
                         ':patient' => $patientId, ':mode' => $mode, ':hours' => $hours, ':lead' => $lead,
                         ':doctor_id' => $doctor, ':sickroom' => $sickRoom, ':blood_pressure' => $bloodPressure,
                         ':height' => $height, ':weight' => $weight, ':family_tel' => $familyTel,
                         ':ten_dia' => $tentativeDiagnose, ':medical_history' => $medicalHistory,
-                        ':doctor_name' => $registDoctorName, ':hospitalization_id' => $hospitalizationId];
+                        ':doctor_name' => $registDoctorName, ':hospitalization_id' => $hospitalizationId, ':idc' => $idc];
         $guardianId = $this->insertData($sql, $param);
         if (VALUE_DB_ERROR === $guardianId) {
             $this->pdo->rollBack();
