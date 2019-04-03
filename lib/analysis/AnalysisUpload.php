@@ -1,7 +1,7 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_ROOT . 'lib/DbiAnalytics.php';
-require_once PATH_ROOT . 'lib/DbiChronic.php';
+//require_once PATH_ROOT . 'lib/DbiChronic.php';
 require_once PATH_LIB . 'ShortMessageService.php';
 
 class AnalysisUpload
@@ -53,6 +53,7 @@ class AnalysisUpload
             return json_encode($this->error);
         }
         
+        /*
         $url = URL_ROOT . 'report/' . $guardianId . '.pdf';
         $guardianForChronic = DbiAnalytics::getDbi()->getGuardianForChronic($guardianId);
         if (VALUE_DB_ERROR === $guardianForChronic || empty($guardianForChronic) || empty($guardianForChronic['patient_id'])) {
@@ -60,12 +61,15 @@ class AnalysisUpload
         } else {
             DbiChronic::getDbi()->addEcgExamination($guardianForChronic['patient_id'], $guardianId, $url, $guardianForChronic['result']);
         }
-        
+        */
         $message = isset($param['message']) ? $param['message'] : '0';
         $hbiDoctor = isset($param['hbi_doctor']) ? $param['hbi_doctor'] : '0';
         $reportDoctor = isset($param['report_doctor']) ? $param['report_doctor'] : '0';
         
-        //need check user and password here.
+        //message is 
+        //0:only save file.
+        //1:save file, update db, send message.
+        //2:save file, update db.
         if ($message == '1' || $message == '2') {
             $ret = DbiAnalytics::getDbi()->setDataStatus($guardianId, $type, $hbiDoctor, $reportDoctor);
             if (VALUE_DB_ERROR === $ret) {
@@ -82,9 +86,11 @@ class AnalysisUpload
                         ShortMessageService::send('13963896768', '有新的已分析数据，请审阅报告。');
                     }
                 }
+                /*
                 if ('report' == $type && in_array($param['report_doctor'], [233, 446])) {
                     setNotice('1', 'report', $guardianId);
                 }
+                */
                 if ('report' == $type && $tree['hospital_id'] != $tree['report_hospital']) {
                     setNotice($tree['hospital_id'], $type, $guardianId);
                 }
