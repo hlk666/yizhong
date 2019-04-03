@@ -539,7 +539,7 @@ class DbiAdmin extends BaseDbi
                 order by convert(agency_name using gbk) collate gbk_chinese_ci asc";
         return $this->getDataAll($sql);
     }
-    public function getCommunication($hospitalId, $deviceId, $user, $patientId)
+    public function getCommunication($hospitalId, $deviceId, $user, $patientId, $startTime, $endTime)
     {
         $sql = 'select * from communication where 1';
         if (!empty($hospitalId)) {
@@ -553,6 +553,12 @@ class DbiAdmin extends BaseDbi
         }
         if (!empty($patientId)) {
             $sql .= " and guardian_id = '$patientId'";
+        }
+        if (!empty($startTime)) {
+            $sql .= " and create_time >= '$startTime'";
+        }
+        if (!empty($endTime)) {
+            $sql .= " and create_time <= '$endTime'";
         }
         return $this->getDataAll($sql);
     }
