@@ -64,6 +64,24 @@ if ($type == '2') {
     fwrite($handle, $text);
     fclose($handle);
 }
+//fix bug happened when moved more than one time.start
+if ($type == '2') {
+    $file = PATH_ROOT . 'data' . DIRECTORY_SEPARATOR . 'move_data' . DIRECTORY_SEPARATOR . $hospitalTo . '.txt';
+    if (file_exists($file)) {
+        $text = file_get_contents($file);
+        if (strpos($text, $guardianId) === false) {
+            //not existed, do nothing.
+        } else {
+            $text = str_replace(',' . $guardianId, '', $text);
+            $text = str_replace($guardianId . ',', '', $text);
+            $text = str_replace($guardianId, '', $text);
+            file_put_contents($file, $text);
+        }
+    } else {
+        //do nothing.
+    }
+}
+//fix bug happened when moved more than one time.end
 
 setNotice($hospitalTo, 'move_data', $guardianId);
 
