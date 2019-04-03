@@ -299,10 +299,10 @@ class DbiAnalytics extends BaseDbi
     }
     public function getReportHospitalByPatient($guardianId)
     {
-        $sql = "select t.report_hospital
+        $sql = "select t.report_hospital, t.hospital_id
                 from hospital_tree as t inner join guardian as g on t.hospital_id = g.regist_hospital_id
                 where g.guardian_id = '$guardianId'";
-        return $this->getDataString($sql);
+        return $this->getDataRow($sql);
     }
     public function getTelContent($hospitalId, $guardianId, $startTime, $endTime)
     {

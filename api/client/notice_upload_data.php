@@ -71,14 +71,6 @@ if (1 == $deviceType) {
     if (VALUE_DB_ERROR === $tree || array() == $tree) {
         //do nothing.
     } else {
-        //add special action for WeiFangZhongYiYuan.
-        if ($tree['analysis_hospital'] == 114) {
-            ShortMessageService::send('13793616212', '有新的上传数据，请分析。');
-        }
-        if ($tree['analysis_hospital'] == 211) {
-            ShortMessageService::send('18531687224', '有新的上传数据，请分析。');
-        }
-        
         setNotice($tree['analysis_hospital'], 'upload_data', $guardianId);
         if ($tree['hospital_id'] != $tree['report_hospital']) {
             setNotice($tree['report_hospital'], 'upload_data', $guardianId);
@@ -86,22 +78,25 @@ if (1 == $deviceType) {
     }
 }
 
+moveData($guardianId);
+
 api_exit_success();
 
 function moveData($patientId)
 {
-    $hospital = DbiAnalytics::getDbi()->getReportHospitalByPatient($patientId);
-    if ($hospital === VALUE_DB_ERROR) {
+    $hospitalConfig = DbiAnalytics::getDbi()->getReportHospitalByPatient($patientId);
+    if ($hospitalConfig === VALUE_DB_ERROR) {
         Logger::write('move_data.log', 'db error when ' . $patientId);
         return;
     }
-    if (empty($hospital)) {
+    if (empty($hospitalConfig) || $hospitalConfig['report_hospital'] == $hospitalConfig['hospital_id']) {
         return;
     }
-    //message has been sent before.
-    if ($hospital == 114 or $hospital = 211) {
+    //滨医心内科
+    if ($hospitalConfig['hospital_id'] == '203') {
         return;
     }
+    $hospitalId = $hospitalConfig['report_hospital'];
     //format of file :1,4,10.current index is 1, 4 of 10 need be moved.
     $file = PATH_CONFIG . 'move_data' . DIRECTORY_SEPARATOR . $hospitalId . '.txt';
     if (!file_exists($file)) {
@@ -117,14 +112,14 @@ function moveData($patientId)
     $total = $config[2];
     
     if ($index <= $limit) {
-        $ret = DbiAnalytics::getDbi()->moveData($patientId, $hospital, '119', '1', '2');
+        $ret = DbiAnalytics::getDbi()->moveData($patientId, $hospitalId, '119', '1', '2');
         if (VALUE_DB_ERROR === $ret) {
             api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
         }
         
-        clearNotice($hospital, 'upload_data', $patientId);
+        clearNotice($hospitalId, 'upload_data', $patientId);
         
-        $file1 = PATH_ROOT . 'data' . DIRECTORY_SEPARATOR . 'move_data' . DIRECTORY_SEPARATOR . $hospital . '.txt';
+        $file1 = PATH_ROOT . 'data' . DIRECTORY_SEPARATOR . 'move_data' . DIRECTORY_SEPARATOR . $hospitalId . '.txt';
         
         if (file_exists($file1)) {
             $text = file_get_contents($file1);
@@ -152,4 +147,5 @@ function moveData($patientId)
     }
     $newConfig = $index . ',' . $limit . ',' . $total;
     file_put_contents($file, $newConfig);
+    Logger::write('move_data.log', 'data moved with ID: ' . $patientId);
 }
