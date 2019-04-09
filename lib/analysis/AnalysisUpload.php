@@ -65,13 +65,15 @@ class AnalysisUpload
         $message = isset($param['message']) ? $param['message'] : '0';
         $hbiDoctor = isset($param['hbi_doctor']) ? $param['hbi_doctor'] : '0';
         $reportDoctor = isset($param['report_doctor']) ? $param['report_doctor'] : '0';
+        $tutorDoctor = isset($param['tutor_doctor']) ? $param['tutor_doctor'] : '0';
+        $identity = isset($param['identity']) ? $param['identity'] : '2';  //only used in hbi case. '2' means common doctor.
         
         //message is 
         //0:only save file.
         //1:save file, update db, send message.
         //2:save file, update db.
         if ($message == '1' || $message == '2') {
-            $ret = DbiAnalytics::getDbi()->setDataStatus($guardianId, $type, $hbiDoctor, $reportDoctor);
+            $ret = DbiAnalytics::getDbi()->setDataStatus($guardianId, $type, $hbiDoctor, $reportDoctor, $tutorDoctor, $identity);
             if (VALUE_DB_ERROR === $ret) {
                 api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
             }

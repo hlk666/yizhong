@@ -424,14 +424,23 @@ class DbiAnalytics extends BaseDbi
         $param = [':guardian' => $guardianId];
         return $this->getDataString($sql, $param);
     }
-    public function setDataStatus($guardianId, $statusName, $hbiDoctor, $reportDoctor)
+    public function setDataStatus($guardianId, $statusName, $hbiDoctor, $reportDoctor, $tutorDoctor = '0', $identity = '2')
     {
         $status = $this->getDataStatus($guardianId);
         if ($statusName == 'hbi') {
             if ($status == 5) {
                 $set = 'set hbi_doctor = ' . $hbiDoctor;
             } else {
-                $set = 'set status = 4, report_time = now(), hbi_doctor = ' . $hbiDoctor;
+                //$set = 'set status = 4, report_time = now(), hbi_doctor = ' . $hbiDoctor;
+                if ($identity == '1') {
+                    $set = 'set status = 9, report_time = now(), hbi_doctor = ' . $hbiDoctor;
+                } elseif ($identity == '2') {
+                    $set = 'set status = 4, report_time = now(), hbi_doctor = ' . $hbiDoctor;
+                } elseif ($identity == '3') {
+                    $set = 'set status = 4, report_time = now(), tutor_doctor = ' . $hbiDoctor;
+                } else {
+                    return VALUE_DB_ERROR;
+                }
             }
         } elseif ($statusName == 'report') {
             $set = 'set status = 5, report_time = now(), report_doctor = ' . $reportDoctor;

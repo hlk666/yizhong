@@ -560,6 +560,7 @@ class DbiAdmin extends BaseDbi
         if (!empty($endTime)) {
             $sql .= " and create_time <= '$endTime'";
         }
+        $sql .= ' order by create_time';
         return $this->getDataAll($sql);
     }
     public function getCountyCount($county = '')
