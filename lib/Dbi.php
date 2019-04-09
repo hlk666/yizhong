@@ -420,7 +420,7 @@ class Dbi extends BaseDbi
     {
         $sql = 'select hospital_id, hospital_name, tel, level, device_sale, type, create_time, h.agency_id, 
                 h.salesman_id, a.agency_name, s.salesman_name, need_follow, province, city, county, 
-                filter, need_follow_report, contact, invoice_bank as notice_rule, notice_flag, vip_flag
+                filter, need_follow_report, contact, invoice_bank as notice_rule, notice_flag, vip_flag, guard_flag
                 from hospital as h 
                 left join agency as a on h.agency_id = a.agency_id 
                 left join salesman as s on h.salesman_id = s.salesman_id';
