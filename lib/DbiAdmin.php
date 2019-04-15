@@ -1163,6 +1163,11 @@ class DbiAdmin extends BaseDbi
     
         return $this->getDataAll($sql);
     }
+    public function getSalesmanAgency($id)
+    {
+        $sql = "select * from agency where salesman_id = '$id'";
+        return $this->getDataAll($sql);
+    }
     public function getSalesmanByName($name)
     {
         $sql = "select 1 from salesman where salesman_name = '$name' limit 1";
@@ -1212,6 +1217,21 @@ class DbiAdmin extends BaseDbi
         $sql = "select count(*) as total from guardian 
                 where regist_hospital_id in ($hospital) and regist_time >= '$startTime' and regist_time <= '$endTime'";
         return $this->getDataString($sql);
+    }
+    public function getTutorGuardian($tutorId, $startTime, $endTime)
+    {
+        $sql = "select g.guardian_id, g.device_id, g.regist_hospital_id, g.start_time, g.end_time, d.status,
+                p.patient_name, p.sex, p.birth_year, p.tel, g.regist_doctor_name as doctor_name
+                from guardian as g left join patient as p on g.patient_id = p.patient_id 
+                left join guardian_data as d on g.guardian_id = d.guardian_id
+                where d.tutor_doctor = '$tutorId'";
+        if (!empty($startTime)) {
+            $sql .= " and d.report_time >= '$startTime'";
+        }
+        if (!empty($endTime)) {
+            $sql .= " and d.report_time <= '$endTime'";
+        }
+        return $this->getDataAll($sql);
     }
     public function getUser($user)
     {
