@@ -327,6 +327,11 @@ class DbiAnalytics extends BaseDbi
         $sql = 'select guardian_id from guardian_data where is_heavy = 1 and report_time >= DATE_ADD(now(),INTERVAL -2 DAY)';
         return $this->getDataAll($sql);
     }
+    public function getTutorAction($tutorId, $patientId)
+    {
+        $sql = "select tutor_id, patient_id, url, create_time from tutor_action where tutor_id = '$tutorId' and patient_id = '$patientId'";
+        return $this->getDataAll($sql);
+    }
     public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
         $status = $this->getDataStatus($guardianId);
@@ -404,6 +409,11 @@ class DbiAnalytics extends BaseDbi
                         ':doctor' => $doctorName, ':content' => $content];
         return $this->insertData($sql, $param);
     }
+    public function setTutorAction($tutorId, $patientId, $url)
+    {
+        $sql = "insert into tutor_action (tutor_id, patient_id, url) values ('$tutorId', '$patientId', '$url')";
+        return $this->insertData($sql);
+    }
     public function uploadReport($guardianId, $file)
     {
         $sql = 'update guardian set reported = 1, report_file = :file where guardian_id = :guardian';
@@ -459,7 +469,7 @@ class DbiAnalytics extends BaseDbi
         if ($oldStatus == 5) {
             $set .= ', report_doctor = 0';
         }
-        if ($status == 6) {
+        if ($status == 6 || $status == 10) {
             $set .= ', download_doctor = ' . $user;
         }
         
