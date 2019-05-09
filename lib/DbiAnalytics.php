@@ -183,7 +183,7 @@ class DbiAnalytics extends BaseDbi
                 from guardian_data as d inner join guardian as g on d.guardian_id = g.guardian_id
                 inner join patient as p on g.patient_id = p.patient_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
-                where d.status in (2, 3, 4, 6) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
+                where d.status in (2, 3, 4, 6, 9) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
                 order by upload_time';
         return $this->getDataAll($sql);
     }
@@ -334,6 +334,10 @@ class DbiAnalytics extends BaseDbi
     }
     public function addGuardianData($guardianId, $url, $deviceType = 0)
     {
+        //20190418
+        $sql = "update guardian_error set notice_flag = 1 where guardian_id = '$guardianId'";
+        $this->updateData($sql);
+        //20190418
         $status = $this->getDataStatus($guardianId);
         if ($status == 4 || $status == 5 || $status == 6 || $status == 8 || $status == 9) {
             $set = 'set url = :url, upload_time = now(), device_type = :device';
