@@ -699,6 +699,18 @@ class DbiAdmin extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
+    public function getDeviceLastGuardian($deviceList)
+    {
+        $sql = "select device_id, max(regist_time) as last_time from guardian 
+        where device_id in ($deviceList) group by device_id";
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceLastHistory($hospital, $deviceList)
+    {
+        $sql = "select device_id, max(bk_time) as bind_time from history_device 
+        where hospital_id = $hospital and device_id in ($deviceList) group by device_id";
+        return $this->getDataAll($sql);
+    }
     public function getDeviceList($hospital, $offset = 0, $rows = null)
     {
         if (empty($hospital)) {
