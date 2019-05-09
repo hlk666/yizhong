@@ -67,6 +67,10 @@ if (!empty($patient)) {
         $uploadStatus = '问题数据';
     } elseif ($patient['upload_status'] == 8) {
         $uploadStatus = '已打印';
+    } elseif ($value['status'] == 9) {
+        $patients[$key]['status'] = '等待内部审核';
+    } elseif ($value['status'] == 10) {
+        $patients[$key]['status'] = '内部审核分配';
     } else {
         $uploadStatus = '未上传';
     }

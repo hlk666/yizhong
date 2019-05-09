@@ -256,6 +256,7 @@ if (isset($_POST['submit'])){
     </div>
     <label class="col-sm-6 control-label" id="device" style="text-align:left;color:red;"></label>
   </div>
+  <!--
   <div class="form-group">
     <label class="col-sm-2 control-label">发票名称</label>
     <div class="col-sm-10">
@@ -280,7 +281,7 @@ if (isset($_POST['submit'])){
       <input type="text" class="form-control" name="invoice_bank" placeholder="请输入开户行及账号">
     </div>
   </div>
-
+  -->
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10" style="text-align:center;">
       <button type="submit" class="btn btn-lg btn-success" name="submit">保存</button>
