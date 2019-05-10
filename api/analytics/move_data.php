@@ -60,9 +60,7 @@ if ($type == '2') {
     }
     $text .= $guardianId;
     
-    $handle = fopen($file, 'w');
-    fwrite($handle, $text);
-    fclose($handle);
+    file_put_contents($file, $text);
 }
 //fix bug happened when moved more than one time.start
 if ($type == '2') {
