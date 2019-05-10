@@ -99,10 +99,10 @@ class GeTui
             $rep = $igt->pushMessageToSingle($message, $target);
             $ret = self::checkResponse($rep);
             if (true === $ret) {
-                Logger::write(self::$logFile, date('Y-m-d H:i:s') . ' success.');
+                Logger::write(self::$logFile, date('Y-m-d H:i:s') . ' success.' . $clientId);
                 return true;
             } else {
-                Logger::write(self::$logFile, date('Y-m-d H:i:s') . ' fail.');
+                Logger::write(self::$logFile, date('Y-m-d H:i:s') . ' fail.' . $clientId);
                 return false;
             }
         } catch(RequestException $e) {
