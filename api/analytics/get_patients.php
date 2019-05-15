@@ -66,6 +66,10 @@ foreach ($patients as $key => $value) {
         $patients[$key]['status'] = '问题数据';
     } elseif ($value['status'] == 8) {
         $patients[$key]['status'] = '已打印';
+    } elseif ($value['status'] == 9) {
+        $patients[$key]['status'] = '等待内部审核';
+    } elseif ($value['status'] == 10) {
+        $patients[$key]['status'] = '内部审核分配';
     } else {
         $patients[$key]['status'] = '未上传';
     }

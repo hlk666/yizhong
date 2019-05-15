@@ -1018,7 +1018,7 @@ class DbiAdmin extends BaseDbi
     public function getHospitalListHigh($hospitalId)
     {
         $sql = 'select distinct hospital_id, hospital_name from hospital 
-                where type in (1,2) or hospital_id = :hospital';
+                where type in (1,2) or hospital_id = :hospital order by hospital_name';
         $param = [':hospital' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
