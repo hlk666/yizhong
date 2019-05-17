@@ -15,6 +15,12 @@ if (VALUE_DB_ERROR === $hospitalConfig) {
 if (empty($hospitalConfig)) {
     api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
 } else {
+    foreach ($hospitalConfig as $key => $value) {
+        if (strpos($value['title_hospital_name'], '签名用') !== false) {
+            $hospitalConfig[$key]['title_hospital_name'] = str_replace('(签名用)', '', $value['title_hospital_name']);
+        }
+    }
+    
     $ret['code'] = '0';
     $ret['message'] = MESSAGE_SUCCESS;
     $ret['list'] = $hospitalConfig;
