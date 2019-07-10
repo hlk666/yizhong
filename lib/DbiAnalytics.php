@@ -63,7 +63,7 @@ class DbiAnalytics extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel
+        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel, level
                 from hospital where hospital_id = :hospital_id limit 1';
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataRow($sql, $param);
@@ -178,12 +178,13 @@ class DbiAnalytics extends BaseDbi
     public function getPatientsNeedFollow()
     {
         $sql = 'select d.guardian_id as patient_id, p.patient_name, h.hospital_id, h.hospital_name, 
-                upload_time, download_end_time as download_time, d.moved_hospital,
-                case d.status when 2 then "已上传" when 3 then "已下载" when 4 then "已分析" when 6 then "已分配" else "" end as status
+                upload_time, download_end_time as download_time, d.moved_hospital, h.level,
+                case d.status when 2 then "已上传" when 3 then "已下载" when 4 then "已分析" when 6 then "已分配" 
+                when 7 then "问题数据" when 8 then "已打印" when 9 then "等待内部审核" when 10 then "内部审核分配" else "" end as status
                 from guardian_data as d inner join guardian as g on d.guardian_id = g.guardian_id
                 inner join patient as p on g.patient_id = p.patient_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
-                where d.status in (2, 3, 4, 6, 9) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
+                where d.status in (2, 3, 4, 6, 9, 10) and d.upload_time >= SUBDATE(now(),INTERVAL 7 DAY)
                 order by upload_time';
         return $this->getDataAll($sql);
     }
@@ -352,7 +353,7 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = "select 1 from guardian as g inner join hospital_tree as t on g.regist_hospital_id = t.hospital_id
                 left join qianyi_data as q on g.guardian_id = q.guardian_id
-                where g.regist_hospital_id <> 3 and g.regist_time > '2018-01-01' and t.title1 = 3 
+                where g.regist_hospital_id <> 3 and g.regist_time > '2018-01-01' and t.title1 in (3, 651) 
                 and g.guardian_id = $guardianId and q.guardian_id is null limit 1";
         $ret = $this->getDataString($sql);
         if (!empty($ret)) {
