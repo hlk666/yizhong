@@ -31,7 +31,7 @@ if ($type == '1') {
     if (VALUE_DB_ERROR === $ret) {
         api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
     }
-    $data[] = $userId . ',' . $ret['tel'];
+    $data[] = $userId . ',' . $ret['tel'] . ',' . date('Y-m-d H:i:s');
 } elseif ($type == '2') {
     //do nothing.
 } else {
