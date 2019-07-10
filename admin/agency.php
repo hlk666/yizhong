@@ -13,7 +13,8 @@ if (VALUE_DB_ERROR === $agencyList) {
 
 $html = '';
 foreach ($agencyList as $value) {
-    $html .= '<tr><td>' . $value['name'] . '</td><td>' . $value['agency_tel'] . '</td><td>' . $value['salesman_name']
+    $html .= '<tr><td>' . $value['agency_id'] . '</td><td>' . $value['name'] . '</td><td>' 
+            . $value['agency_tel'] . '</td><td>' . $value['salesman_name']
         . '</td><td><a href="edit_agency.php?id=' . $value['agency_id'] . '">点击编辑</a></td></tr>';
 }
 
@@ -23,6 +24,7 @@ echo <<<EOF
   <table class="table table-striped">
     <thead>
       <tr>
+        <th>ID</th>
         <th>代理商名</th>
         <th>电话</th>
         <th>业务员</th>
