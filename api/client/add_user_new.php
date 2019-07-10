@@ -36,7 +36,11 @@ $weight = isset($_POST['weight']) ? $_POST['weight'] : '0';
 $bloodPressure = isset($_POST['bloodpress']) ? $_POST['bloodpress'] : '';
 $sickRoom = isset($_POST['sickroom']) ? $_POST['sickroom'] : '';
 $familyTel = isset($_POST['family_tel']) ? $_POST['family_tel'] : '0';
-$hours = isset($_POST['guard_hours']) ? $_POST['guard_hours'] : 24;
+if ($registHospital == 203) {
+    $hours = isset($_POST['guard_hours']) ? $_POST['guard_hours'] : 36;
+} else {
+    $hours = isset($_POST['guard_hours']) ? $_POST['guard_hours'] : 24;
+}
 $hospitalizationId = isset($_POST['hospitalization_id']) ? $_POST['hospitalization_id'] : '0';
 
 $polycardiaHour = isset($_POST['polycardia_hour']) ? $_POST['polycardia_hour'] : '0';

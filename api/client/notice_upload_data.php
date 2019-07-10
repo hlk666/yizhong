@@ -103,6 +103,11 @@ if (!in_array($hospitalId, $hospitalNotMoveDate)) {
         if ($noticeHospital2 != '0') {
             setNotice($noticeHospital2, 'upload_data', $guardianId);
         }
+        if ($tree['report_hospital'] == '185') {
+            ShortMessageService::send('15131135005', '有新的上传数据，请分析。');
+            ShortMessageService::send('18503298563', '有新的上传数据，请分析。');
+            //ShortMessageService::send('13465596133', '有新的上传数据，请分析。');
+        }
     }
 } else {
     if ($noticeHospital1 != '0') {
@@ -146,7 +151,7 @@ function moveData($patientId)
     $total = $config[2];
     
     if ($index <= $limit) {
-        $ret = DbiAnalytics::getDbi()->moveData($patientId, $hospitalId, '119', '1', '2');
+        $ret = DbiAnalytics::getDbi()->moveData($patientId, $hospitalId, '132', '1', '2');
         if (VALUE_DB_ERROR === $ret) {
             return false;
         }
@@ -166,7 +171,7 @@ function moveData($patientId)
         $text .= $patientId;
         file_put_contents($file1, $text);
         
-        setNotice('119', 'move_data', $patientId);
+        setNotice('132', 'move_data', $patientId);
         $isNoticed = true;
     } else {
         //not move data
