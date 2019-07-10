@@ -67,6 +67,7 @@ if ($type == '2') {
     $file = PATH_ROOT . 'data' . DIRECTORY_SEPARATOR . 'move_data' . DIRECTORY_SEPARATOR . $hospitalTo . '.txt';
     if (file_exists($file)) {
         $text = file_get_contents($file);
+        $textOld = $text;
         if (strpos($text, $guardianId) === false) {
             //not existed, do nothing.
         } else {
@@ -78,9 +79,53 @@ if ($type == '2') {
     } else {
         //do nothing.
     }
+    if ($textOld != $text) {
+        $logTxt = "move from $hospitalFrom to $hospitalTo, clear config of hospital_to. old config is $textOld. new config is $text.";
+        Logger::write('debug_move_data.log', $logTxt);
+    }
 }
 //fix bug happened when moved more than one time.end
 
 setNotice($hospitalTo, 'move_data', $guardianId);
 
 api_exit_success();
+
+function checkLevel($hospitalId, $centerId)
+{
+    $hospitalInfo = DbiAnalytics::getDbi()->getHospitalInfo($hospitalId);
+    if (VALUE_DB_ERROR === $hospitalInfo) {
+        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+    }
+    $levelHospital = $hospitalInfo['level'];
+    $levelCenter = 0;
+    
+    //zhanghailing.kongyutian
+    if ($centerId == 132) {
+        $levelCenter = 3;
+    }
+    
+    //zhangyuanze
+    if ($centerId == 139) {
+        $levelCenter = 3;
+    }
+    //not used
+    if ($centerId == 140) {
+        //do nothing.
+    }
+    
+    //liuhuan
+    if ($centerId == 141) {
+        //do nothing.
+    }
+    
+    //common
+    if ($centerId == 119) {
+        $levelCenter = 3;
+    }
+    
+    if ($levelCenter >= $levelHospital) {
+        return true;
+    } else {
+        return false;
+    }
+}
