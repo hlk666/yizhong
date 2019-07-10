@@ -3,7 +3,7 @@ require_once PATH_LIB . 'Logger.php';
 
 class ShortMessageService
 {
-    private static $url = "http://dx.qxtsms.cn/sms.aspx?action=send&userid=5031&account=yizhongyiliao&password=05356395321&sendTime=&checkcontent=0";
+    private static $url = "http://dx.qxtsms.com/sms.aspx?action=send&userid=5031&account=yizhongyiliao&password=05356395321&sendTime=&checkcontent=0";
     private static $log = 'sms.log';
     
     public static function send($mobile, $content)
