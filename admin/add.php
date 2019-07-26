@@ -103,8 +103,8 @@ if (isset($_POST['submit'])){
             $analysisHospital = 417;
             $reportHospital = 313;
         } else {
-            $analysisHospital = 119;
-            $reportHospital = 119;
+            $analysisHospital = 141;
+            $reportHospital = 132;
         }
     }
     
