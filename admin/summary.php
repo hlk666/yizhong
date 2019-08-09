@@ -90,17 +90,18 @@ $noticeDevice = '<tr><td>' . $device['deviceTotal']
     . '</td><td>' . $device['deviceUsed']
     . '</td><td>' . $deviceUsedRate . '%</td></tr>';
 $hr = '<hr style="border-top:1px ridge #428bca;" />';
+$defaultDate = date('Y-m-d');
 echo <<<EOF
 <div style="background-color:#428bca;"><h3>期间范围数据(勿频繁查询):</h3></div>
 <form class="form-horizontal" role="form" method="post" action="summary_condition.php">
 <div class="row">
   <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
     <label for="start_time" class="control-label"><font color="red">*</font>开始日：</label>
-    <input type="text" name="start_time" onclick="SelectDate(this,'yyyy-MM-dd')" />
+    <input type="date" name="start_time" value="$defaultDate" />
   </div>
   <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
     <label for="end_time" class="control-label"><font color="red">*</font>结束日：</label>
-    <input type="text" name="end_time" onclick="SelectDate(this,'yyyy-MM-dd')" />
+    <input type="date" name="end_time" value="$defaultDate" />
   </div>
   <div class="col-xs-12 col-sm-3">
     <button type="submit" class="btn btn-sm btn-info" name="query">日期范围内查询</button>
@@ -156,7 +157,6 @@ $hr
     </thead>
     <tbody>$noticeDevice</tbody>
   </table>
-<script type="text/javascript" src="js/adddate.js"></script>
 EOF;
 require 'tpl/footer.tpl';
 

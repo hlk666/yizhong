@@ -6,8 +6,8 @@ if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
 }
 
-$status = isset($_POST['status']) ? $_POST['status'] : '6';
-$user = isset($_POST['user']) ? $_POST['user'] : '0';
+$status = isset($_POST['status']) && !empty($_POST['status']) ? $_POST['status'] : '6';
+$user = isset($_POST['user']) && !empty($_POST['user']) ? $_POST['user'] : '0';
 
 $ret = DbiAnalytics::getDbi()->setPool($_POST['patient_id'], $status, $user);
 if (VALUE_DB_ERROR === $ret) {
