@@ -823,6 +823,11 @@ class Dbi extends BaseDbi
         $sql = "insert into file_size(guardian_id, device_id, size) values ('$guardianId', '$deviceId', '$size')";
         return $this->insertData($sql);
     }
+    public function updateDoctorType($id, $type)
+    {
+        $sql = "update account set type = '$type' where account_id = '$id'";
+        return $this->updateData($sql);
+    }
     public function updatePassword($user, $newPwd)
     {
         $sql = 'update account set password = :pwd where login_name = :user';

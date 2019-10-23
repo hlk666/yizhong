@@ -108,6 +108,14 @@ class DbiAdmin extends BaseDbi
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
         }
+        
+        $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id, content) 
+                values ('$device', 40, '1', 0, '创建新设备号')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        
         return true;
     }
     public function addHospital($name, $type, $level, $tel, $province, $city, $county, $address, $parentFlag, $parentHospital, 
@@ -597,6 +605,21 @@ class DbiAdmin extends BaseDbi
                 where g.guardian_id = 20791';
         return $this->getDataAll($sql);
     }
+    public function getDataForZhongda()
+    {
+        $sql = 'select g.guardian_id, h1.hospital_name as hospital_parent, "123" as doctor_idc, a.real_name as doctor_name, 
+                h2.hospital_name as hospital_child, p.patient_name, p.birth_year, p.sex as patient_sex, d.report_time
+                from guardian as g
+                inner join guardian_data as d on g.guardian_id = d.guardian_id
+                inner join account as a on d.report_doctor = a.account_id
+                inner join hospital as h1 on a.hospital_id = h1.hospital_id
+                inner join patient as p on g.patient_id = p.patient_id
+                inner join hospital as h2 on g.regist_hospital_id = h2.hospital_id
+                where g.guardian_id = 20791 and d.status = 5';
+                //from zhongda_data as z inner join guardian as g on z.guardian_id = g.guardian_id
+                //where z.send_time is null';
+        return $this->getDataAll($sql);
+    }
     public function getDepartment()
     {
         $sql = 'select d.department_id, d.hospital_id, h1.hospital_name as department_name, h2.hospital_name as hospital_name
@@ -635,6 +658,14 @@ class DbiAdmin extends BaseDbi
                 left join salesman as s on d.salesman_id = s.salesman_id
                 left join hospital as h on d.hospital_id = h.hospital_id  
                 where d.device_id like '%$id'";
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceCommunication($device, $startTime)
+    {
+        $sql = "select g.guardian_id as patient_id, g.start_time, g.end_time, g.device_id, c.content, c.create_time
+                from guardian as g left join communication as c on c.guardian_id = g.guardian_id
+                where g.device_id = '$device' and g.regist_time > '$startTime'
+                order by g.guardian_id desc, c.create_time desc";
         return $this->getDataAll($sql);
     }
     public function getDeviceFault($device, $fault, $time)
@@ -1122,7 +1153,7 @@ class DbiAdmin extends BaseDbi
         return $this->getDataAll($sql);
     }
     public function getPatientFuzy($name) {
-        $sql = "select patient_id, patient_name from patient where patient_name like '%$name%'";
+        $sql = "select patient_id, patient_name from patient where patient_name like '%$name%' order by create_time desc";
         return $this->getDataAll($sql);
     }
     public function getPatientStatus($patient = '0', $guardian = '0') {
@@ -1134,7 +1165,7 @@ class DbiAdmin extends BaseDbi
         }
         $sql = "select g.guardian_id, p.patient_name, h1.hospital_id, h1.hospital_name, g.start_time, g.end_time, g.device_id, g.`mode`, 
                 d.`status` as upload_status, h2.hospital_name as moved_hospital_name, d.type as moved_type, d.report_time, 
-                a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor_name
+                a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor_name, d.url
                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
                 inner join hospital as h1 on g.regist_hospital_id = h1.hospital_id
                 inner join guardian_data as d on g.guardian_id = d.guardian_id
@@ -1339,6 +1370,11 @@ class DbiAdmin extends BaseDbi
     public function updateQianyiData($guardianId)
     {
         $sql = "update qianyi_data set send_time = now() where guardian_id = $guardianId";
+        return $this->updateData($sql);
+    }
+    public function updateZhongdaData($guardianId)
+    {
+        $sql = "update zhongda_data set send_time = now() where guardian_id = $guardianId";
         return $this->updateData($sql);
     }
     /*
