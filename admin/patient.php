@@ -86,6 +86,7 @@ if (!empty($patient)) {
     $hbiDoctor = $patient['hbi_doctor'];
     $reportDoctor = $patient['report_doctor'];
     $downloadDoctor = $patient['download_doctor_name'];
+    $url = $patient['url'];
     $htmlTable = "
 <table class='table table-striped'>
   <thead>
@@ -110,6 +111,7 @@ if (!empty($patient)) {
     <tr><td>分析医生</td><td>$hbiDoctor</td></tr>
     <tr><td>审核医生</td><td>$reportDoctor</td></tr>
     <tr><td>数据分配医生</td><td>$downloadDoctor</td></tr>
+    <tr><td>上传URL(gz后缀是手机上传)</td><td>$url</td></tr>
   </tbody>
 </table>";
 } else {
