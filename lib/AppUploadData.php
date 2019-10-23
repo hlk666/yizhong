@@ -58,7 +58,7 @@ class AppUploadData
                 $index = ($length - 1) * 4019 + 1;
                 $phonePower = '-1';
                 $collectionPower = '-1';
-                $line = '-1';
+                $line = '1';
                 $bluetooth = '-1';
                 for ($i = $index; $i < $index + 19; $i++) {
                     if ($i - $index == 6) {
