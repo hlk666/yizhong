@@ -99,6 +99,20 @@ class AnalysisUpload
             }
         }
         
+        //special action for zhongda start.
+        if ($type == 'report') {
+            $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
+            if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
+                if (in_array($tree['report_hospital'], [132])) {
+                    $ret = DbiAnalytics::getDbi()->setZhongdaData($guardianId);
+                    if (VALUE_DB_ERROR === $ret) {
+                        Logger::write('zhongda.log', "zhongda error.");
+                    }
+                }
+            }
+        }
+        //special action for zhongda end.
+        
         return json_encode($this->retSuccess);
     }
     
