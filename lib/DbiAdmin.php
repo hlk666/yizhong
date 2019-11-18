@@ -652,7 +652,8 @@ class DbiAdmin extends BaseDbi
         if (empty($id)) {
             return array();
         }
-        $sql = "select ifnull(hospital_name, '') as hospital_name, device_id, a.agency_name as agency, s.salesman_name as salesman
+        $sql = "select ifnull(hospital_name, '') as hospital_name, device_id, a.agency_name as agency, 
+                s.salesman_name as salesman, ver_phone, ver_embedded, ver_app, ver_pcb, ver_box
                 from device as d
                 left join agency as a on d.agency_id = a.agency_id
                 left join salesman as s on d.salesman_id = s.salesman_id
@@ -747,7 +748,8 @@ class DbiAdmin extends BaseDbi
         if (empty($hospital)) {
             return array();
         }
-        $sql = "select hospital_name, device_id, '' as agency, '' as salesman from device as d
+        $sql = "select hospital_name, device_id, '' as agency, '' as salesman, ver_phone, ver_embedded, ver_app, ver_pcb, ver_box
+                from device as d
                 inner join hospital as h on d.hospital_id = h.hospital_id  where d.hospital_id = $hospital";
         if (null !== $rows) {
             $sql .= " limit $offset, $rows";
@@ -759,7 +761,8 @@ class DbiAdmin extends BaseDbi
         if (empty($agency)) {
             return array();
         }
-        $sql = "select '-' as hospital_name, device_id, a.agency_name as agency, s.salesman_name as salesman
+        $sql = "select '-' as hospital_name, device_id, a.agency_name as agency, s.salesman_name as salesman, 
+                ver_phone, ver_embedded, ver_app, ver_pcb, ver_box
                 from device as d
                 left join agency as a on d.agency_id = a.agency_id
                 left join salesman as s on d.salesman_id = s.salesman_id
@@ -771,7 +774,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getDeviceListPD()
     {
-        $sql = "select device_id, iccid from device where hospital_id = 40";
+        $sql = "select device_id, iccid from device where hospital_id = 40 order by device_id desc";
         return $this->getDataAll($sql);
     }
     public function getDeviceNotUsed($count)
@@ -923,6 +926,13 @@ class DbiAdmin extends BaseDbi
         $sql = 'select h.hospital_id, h.hospital_name, a.agency_name 
                 from hospital as h left join agency as a on h.agency_id = a.agency_id 
                 where h.type <> 1';
+        return $this->getDataAll($sql);
+    }
+    public function getHospitalArea($province)
+    {
+        $sql = "select h.hospital_id, h.hospital_name, a.agency_name
+                from hospital as h left join agency as a on h.agency_id = a.agency_id
+                where h.type <> 1 and h.province = '$province'";
         return $this->getDataAll($sql);
     }
     public function getHospitalDevice($startTime, $endTime, $province)
@@ -1292,7 +1302,7 @@ class DbiAdmin extends BaseDbi
         $sql = "update hospital set need_follow = 0 where hospital_id = $hospitalId";
         return $this->updateData($sql);
     }
-    public function pdDelete($deviceId, $user, $version, $iccid)
+    public function pdDelete($deviceId, $user, $iccid, $vPhone, $vEmbedded, $vApp, $vPcb, $vBox)
     {
         $sql = "insert into history_device (device_id, user, unbind_hospital_id, content) values ('$deviceId', '$user', 40, '注销设备号')";
         $ret = $this->insertData($sql);
@@ -1307,7 +1317,7 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function pdAbandon($deviceId, $user, $version, $iccid)
+    public function pdAbandon($deviceId, $user, $iccid, $vPhone, $vEmbedded, $vApp, $vPcb, $vBox)
     {
         $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id, content) 
                 values ('$deviceId', 9999, '$user', 40, '移入废品库')";
@@ -1323,7 +1333,7 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function pdWarehouse($deviceId, $user, $version, $iccid)
+    public function pdWarehouse($deviceId, $user, $iccid, $vPhone, $vEmbedded, $vApp, $vPcb, $vBox)
     {
         $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id, content) 
                 values ('$deviceId', 1, '$user', 40, '移入成品库')";
@@ -1332,7 +1342,9 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
     
-        $sql = "update device set hospital_id = 1, version = '$version', iccid = '$iccid' where device_id = '$deviceId'";
+        $sql = "update device set hospital_id = 1, iccid = '$iccid', ver_phone = '$vPhone', 
+                ver_embedded = '$vEmbedded', ver_app = '$vApp', ver_pcb = '$vPcb', ver_box = '$vBox'
+                where device_id = '$deviceId'";
         $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
@@ -1377,97 +1389,4 @@ class DbiAdmin extends BaseDbi
         $sql = "update zhongda_data set send_time = now() where guardian_id = $guardianId";
         return $this->updateData($sql);
     }
-    /*
-    public function existedLoginName($loginName)
-    {
-        return $this->existData('account', 'login_name = "' . $loginName . '"');
-    }
-    
-    public function getAcount($loginName)
-    {
-        $sql = 'select account_id, real_name as name, type, password, hospital_id 
-                from account where login_name = :user limit 1';
-        $param = [':user' => $loginName];
-        return $this->getDataRow($sql, $param);
-    }
-    public function getDoctorInfo($doctorId)
-    {
-        $sql = 'select account_id as doctor_id, login_name, real_name as doctor_name
-                from account where account_id = :acount_id limit 1';
-        $param = [':acount_id' => $doctorId];
-        return $this->getDataRow($sql, $param);
-    }
-    public function getDoctorList($hospitalId)
-    {
-        $sql = 'select account_id as doctor_id, login_name as user, real_name as doctor_name, type
-                from account where hospital_id = :hospital_id';
-        $param = [':hospital_id' => $hospitalId];
-        return $this->getDataAll($sql, $param);
-    }
-    public function getHospitlAdminInfo($hospitalId)
-    {
-        $sql = 'select h.hospital_id, h.hospital_name, h.address, h.tel, a.login_name, a.password
-                from hospital as h inner join account as a on h.hospital_id = a.hospital_id
-                where h.hospital_id = :hospital_id and a.type = 1 limit 1';
-        $param = [':hospital_id' => $hospitalId];
-        return $this->getDataRow($sql, $param);
-    }
-    public function getPatient($patientId)
-    {
-        $sql = 'select patient_id, patient_name, sex, birth_year, tel, address
-                from patient where patient_id = :patient_id limit 1';
-        $param = [':patient_id' => $patientId];
-        return $this->getDataRow($sql, $param);
-    }
-    public function getPatientList($hospitalId, $offset = 0, $rows = null, $where = '')
-    {
-        if ('' != $where) {
-            $where = ' and ' . $where;
-        }
-        $sql = 'select g.patient_id, g.guardian_id, g.status, g.device_id,
-                p.patient_name, p.sex, p.birth_year, p.tel,
-                g.start_time, g.end_time, g.regist_doctor_name, g.sickroom
-                from guardian as g left join patient as p on g.patient_id = p.patient_id
-                where regist_hospital_id = :hospital ' . $where . 'order by guardian_id desc';
-        if ($rows != null) {
-            $sql .= " limit $offset, $rows";
-        }
-        $param = [':hospital' => $hospitalId];
-        return $this->getDataAll($sql, $param);
-    }
-    public function getPatientListDistinct($where, $offset = 0, $rows = null)
-    {
-        $sql = "select distinct g.patient_id, p.patient_name, p.sex, p.birth_year, p.tel
-        from guardian as g left join patient as p on g.patient_id = p.patient_id
-        where $where order by guardian_id desc";
-        if ($rows != null) {
-        $sql .= " limit $offset, $rows";
-        }
-        return $this->getDataAll($sql);
-    }
-    
-    public function addAccount($loginName, $realName, $password, $type, $hospitalId, $creator)
-    {
-        $sql = 'insert into account (login_name, real_name, password, type, hospital_id, creator)
-                values (:login_name, :real_name, :password, :type, :hospital_id, :creator)';
-        $param = [':login_name' => $loginName, ':real_name' => $realName, ':password' => $password,
-                        ':type' => $type, ':hospital_id' => $hospitalId,':creator' => $creator ];
-        return $this->insertData($sql, $param);
-    }
-    public function editAccount($accountId, array $data)
-    {
-        return $this->updateTableByKey('account', 'account_id', $accountId, $data);
-    }
-    public function editGuardian($guardianId, array $data)
-    {
-        return $this->updateTableByKey('guardian', 'guardian_id', $guardianId, $data);
-    }
-    public function editHospital($hospitalId, array $data)
-    {
-        return $this->updateTableByKey('hospital', 'hospital_id', $hospitalId, $data);
-    }
-    public function editPatient($patientId, array $data)
-    {
-        return $this->updateTableByKey('patient', 'patient_id', $patientId, $data);
-    }*/
 }
