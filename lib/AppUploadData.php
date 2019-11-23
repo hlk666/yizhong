@@ -58,7 +58,7 @@ class AppUploadData
                 $index = ($length - 1) * 4019 + 1;
                 $phonePower = '-1';
                 $collectionPower = '-1';
-                $line = '1';
+                $line = '-1';
                 $bluetooth = '-1';
                 for ($i = $index; $i < $index + 19; $i++) {
                     if ($i - $index == 6) {
@@ -71,12 +71,33 @@ class AppUploadData
                         $line = ($arr[$i] == 1 ? '0' : '1');
                     }
                 }
+                
+                for ($i = 0; $i < $length; $i++) {
+                    for ($j = $i * 4019 + 20; $j < $i * 4019 + 4020; $j++) {
+                        $temp .= pack('C*', $arr[$j]);
+                    }
+                }
+                file_put_contents($file, $temp);
+                
                 $deviceId = Dbi::getDbi()->getDeviceId($patientId);
                 if ($deviceId !== VALUE_DB_ERROR && !empty($deviceId)) {
                     $ret = Dbi::getDbi()->addDeviceStatus($deviceId, $phonePower, $collectionPower, $bluetooth, $line);
                     if (VALUE_DB_ERROR === $ret) {
                         api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
                     }
+                    
+                    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'device_status' . DIRECTORY_SEPARATOR . $deviceId . '.php';
+                    
+                    $template = "<?php\n";
+                    $template .= '$phone_power = \'' . $phonePower . "';\n";
+                    $template .= '$collection_power = \'' . $collectionPower . "';\n";
+                    $template .= '$bluetooth = \'' . $bluetooth . "';\n";
+                    $template .= '$line = \'' . $line . "';\n";
+                    $template .= '$time = \'' . date('Y-m-d H:i:s') . "';\n";
+                    
+                    $handle = fopen($file, 'w');
+                    fwrite($handle, $template);
+                    fclose($handle);
                 }
             }
             
