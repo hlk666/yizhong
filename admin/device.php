@@ -56,6 +56,11 @@ foreach ($deviceList as $value) {
     $htmlDevices .= '<tr><td>'
         . $value['hospital_name'] . '</td><td>'
         . $value['device_id'] . '</td><td>'
+        . $value['ver_phone'] . '</td><td>'
+        . $value['ver_embedded'] . '</td><td>'
+        . $value['ver_app'] . '</td><td>'
+        . $value['ver_pcb'] . '</td><td>'
+        . $value['ver_box'] . '</td><td>'
         . $value['agency'] . '</td><td>'
         . $value['salesman'] . '</td></tr>';
         //. $buttonTxt . '</td></tr>';
@@ -123,6 +128,11 @@ echo <<<EOF
       <tr>
         <th>医院名</th>
         <th>设备ID</th>
+        <th>手机</th>
+        <th>嵌入式</th>
+        <th>app</th>
+        <th>电路板</th>
+        <th>采集盒</th>
         <th>代理商</th>
         <th>业务员</th>
       </tr>
