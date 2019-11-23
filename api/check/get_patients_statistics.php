@@ -8,6 +8,7 @@ $hospitalTime = isset($_GET['hospital_time']) && !empty($_GET['hospital_time']) 
 $sTime = isset($_GET['start_time']) && !empty($_GET['start_time']) ? $_GET['start_time'] : null;
 $eTime = isset($_GET['end_time']) && !empty($_GET['end_time']) ? $_GET['end_time'] . ' 23:59:59' : null;
 $hospitalId = isset($_GET['hospital_id']) && !empty($_GET['hospital_id']) ? $_GET['hospital_id'] : null;
+$province = isset($_GET['province']) && !empty($_GET['province']) ? $_GET['province'] : null;
 
 $hospitalList = '';
 if (!empty($agency)) {
@@ -54,6 +55,20 @@ if (!empty($agency)) {
     }
 } elseif (!empty($hospitalTime)) {
     $ret = DbiAdmin::getDbi()->getHospitalTime($hospitalTime);
+    if (VALUE_DB_ERROR === $ret) {
+        api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+    }
+    if (empty($ret)) {
+        api_exit(['code' => '4', 'message' => MESSAGE_DB_NO_DATA]);
+    }
+    foreach ($ret as $row) {
+        $hospitalList .= $row['hospital_id'] . ',';
+    }
+    if ($hospitalList != '') {
+        $hospitalList = substr($hospitalList, 0, -1);
+    }
+} elseif (!empty($province)) {
+    $ret = DbiAdmin::getDbi()->getHospitalArea($province);
     if (VALUE_DB_ERROR === $ret) {
         api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
     }

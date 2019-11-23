@@ -101,7 +101,16 @@ if ('2' == $mode) {
     $stopbeat = PARAM_STOPBEAT;//$_POST['stopbeat'];
     $sthigh = PARAM_STHIGH;//$_POST['sthigh'];
     $stlow = PARAM_STLOW;//$_POST['stlow'];
-    $twave = PARAM_TWAVE;//$_POST['twave'];
+    
+    if ($registHospital == 480 || $registHospital == 199 || $registHospital == 40) {
+        $twave = 'off';
+    } else {
+        $twave = PARAM_TWAVE;
+    }
+    if ($device > 80600000) {
+        $twave = 'off';
+    }
+    //$twave = PARAM_TWAVE;//$_POST['twave'];
     
     $sEarlyBeat = 'on';//$_POST['s_early_beat'];
     $vEarlyBeat = 'on';//$_POST['v_early_beat'];
