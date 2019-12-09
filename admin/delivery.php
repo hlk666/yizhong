@@ -55,8 +55,7 @@ if (isset($_POST['submit'])){
         } elseif ($ret == 1) {
             user_back_after_delay("设备【 $deviceId 】的ID不存在，不能发货/调配。");
         }  elseif ($ret == 2) {
-            //user_back_after_delay("设备【 $deviceId 】在生产部，不能发货/调配。");
-            //not check 20191025
+            user_back_after_delay("设备【 $deviceId 】在生产部，不能发货/调配。");
         }  else {
             //do nothing.
         }

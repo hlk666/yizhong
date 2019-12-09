@@ -30,11 +30,11 @@ if (VALUE_DB_ERROR === $deviceList) {
 $htmlDevices = '';
 $optionVersionPhone = '<option value="0">请选择</option>' 
         . '<option value="红米5A">红米5A</option>'
-        . '<option value="红米5A">红米7A</option>'
+        . '<option value="红米7A">红米7A</option>'
         . '<option value="联想A5">联想A5</option>';
 $optionVersionEmbedded = '<option value="3.0(调整写卡看门狗)">调整写卡看门狗</option>';
 //'<option value="0">请选择</option>' . '<option value="3.0(调整写卡看门狗)">3.0(调整写卡看门狗)</option>';
-$optionVersionApp = '<option value="20.0">20.0</option>';
+$optionVersionApp = '<option value="21.0">21.0</option>';
 //'<option value="0">请选择</option>' . '<option value="0.1(test)">0.1(test)</option>';
 $optionVersionPcb = '<option value="0">请选择</option>'
         . '<option value="20180801">20180801</option>'
