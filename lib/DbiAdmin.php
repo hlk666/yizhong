@@ -605,19 +605,35 @@ class DbiAdmin extends BaseDbi
                 where g.guardian_id = 20791';
         return $this->getDataAll($sql);
     }
-    public function getDataForZhongda()
+    public function getDataForZhongdaDoctor($list)
     {
-        $sql = 'select g.guardian_id, h1.hospital_name as hospital_parent, "123" as doctor_idc, a.real_name as doctor_name, 
-                h2.hospital_name as hospital_child, p.patient_name, p.birth_year, p.sex as patient_sex, d.report_time
+        $sql = "select account_id as doctor_id, real_name as doctor_name, tel as doctor_tel, idc as  doctor_idc
+                from account where account_id in ($list)";
+        return $this->getDataAll($sql);
+    }
+    public function getDataForZhongdaHospital($list)
+    {
+        $sql = "select hospital_id, hospital_name, contact, tel as hospital_tel from hospital where hospital_id in ($list)";
+        return $this->getDataAll($sql);
+    }
+    public function getDataForZhongdaRegist()
+    {
+        $sql = 'select g.guardian_id, g.regist_hospital_id as hospital_id, p.patient_name, p.birth_year, p.sex, 
+                p.tel as patient_tel, g.idc as patient_idc, g.start_time
+                from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                inner join zhongda_data as z on z.guardian_id = g.guardian_id
+                where z.status = 0';
+        return $this->getDataAll($sql);
+    }
+    public function getDataForZhongdaReport()
+    {
+        $sql = 'select g.guardian_id, a.hospital_id as report_hospital_id, a.account_id as doctor_id, 
+                d.report_time, ifnull(g.guardian_result, "") as diagnosis
                 from guardian as g
                 inner join guardian_data as d on g.guardian_id = d.guardian_id
                 inner join account as a on d.report_doctor = a.account_id
-                inner join hospital as h1 on a.hospital_id = h1.hospital_id
-                inner join patient as p on g.patient_id = p.patient_id
-                inner join hospital as h2 on g.regist_hospital_id = h2.hospital_id
-                where g.guardian_id = 20791 and d.status = 5';
-                //from zhongda_data as z inner join guardian as g on z.guardian_id = g.guardian_id
-                //where z.send_time is null';
+                inner join zhongda_data as z on z.guardian_id = g.guardian_id
+                where z.status = 2';
         return $this->getDataAll($sql);
     }
     public function getDepartment()
@@ -1384,9 +1400,9 @@ class DbiAdmin extends BaseDbi
         $sql = "update qianyi_data set send_time = now() where guardian_id = $guardianId";
         return $this->updateData($sql);
     }
-    public function updateZhongdaData($guardianId)
+    public function updateZhongdaData($guardianId, $status)
     {
-        $sql = "update zhongda_data set send_time = now() where guardian_id = $guardianId";
+        $sql = "update zhongda_data set status = '$status' where guardian_id = '$guardianId'";
         return $this->updateData($sql);
     }
 }

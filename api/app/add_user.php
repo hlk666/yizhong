@@ -130,6 +130,14 @@ $guardianId = Dbi::getDbi()->flowGuardianAddUser($name, $sex, $age, $tel, $devic
 if (VALUE_DB_ERROR === $guardianId) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
+//special action for zhongda start.
+if (in_array($registHospital, [1,40])) {
+    $zhongda = Dbi::getDbi()->addZhongdaData($guardianId);
+    if (VALUE_DB_ERROR === $guardianId) {
+        Logger::write('zhongda_msg.log', 'failed to add zhongda_data.');
+    }
+}
+//special action for zhongda end.
 $invigilator = new Invigilator($guardianId, $hours);
 $param = array();
 if ('1' == $mode) {

@@ -553,6 +553,10 @@ class Dbi extends BaseDbi
         }
         return $orderId;
     }
+    public function addZhongdaData($guardianId) {
+        $sql = "insert into zhongda_data (guardian_id) values ($guardianId)";
+        return $this->insertData($sql);
+    }
     public function changeOrderStatus($hospital, $name)
     {
         $sql = "update `order` set status = 2 where hospital_id = $hospital and status = 1 and name = '$name'";

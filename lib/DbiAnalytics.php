@@ -483,12 +483,7 @@ class DbiAnalytics extends BaseDbi
     }
     public function setZhongdaData($guardianId)
     {
-        $sql = "delete from zhongda_data where guardian_id = '$guardianId'";
-        $ret = $this->deleteData($sql);
-        if (VALUE_DB_ERROR === $ret) {
-            return VALUE_DB_ERROR;
-        }
-        $sql = "insert into zhongda_data (guardian_id) values ('$guardianId')";
-        return $this->insertData($sql);
+        $sql = "update zhongda_data set status = 2 where guardian_id = '$guardianId'";
+        return $this->updateData($sql);
     }
 }
