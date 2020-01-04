@@ -111,6 +111,11 @@ class AnalysisUpload
                     if (VALUE_DB_ERROR === $ret) {
                         Logger::write('zhongda.log', "zhongda error.");
                     }
+                    $file = PATH_ROOT . 'zhongda_report' . DIRECTORY_SEPARATOR . $guardianId . '.pdf';
+                    $ret = file_put_contents($file, $data);
+                    if (false === $ret) {
+                        Logger::write('zhongda.log', "faied to save file to zhongda dir.");
+                    }
                 }
                 //special action for zhongda end.
             }

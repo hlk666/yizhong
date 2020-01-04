@@ -20,6 +20,9 @@ $file = PATH_DATA . 'shift.txt';
 $userList = explode(';', file_get_contents($file));
 $data = array();
 foreach ($userList as $user) {
+    if (empty($user)) {
+        continue;
+    }
     $tmp = explode(',', $user);
     if (isset($tmp[0]) && $tmp[0] != $userId) {
         $data[] = $user;

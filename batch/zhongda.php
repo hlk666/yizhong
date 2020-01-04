@@ -1,8 +1,9 @@
 <?php
 require 'common.php';
 
-$baseUrl = 'http://101.200.174.235/test.php?id=';
-$token = 'yizhong123456789';
+$baseUrl = 'http://172.81.254.132:9099/hospital/';
+//$baseUrl = 'http://101.200.174.235/test.php?id=';
+$token = 'dndxfszdyy';
 
 //hospital data start
 $hospitalFile = PATH_DATA . 'zhongda' . DIRECTORY_SEPARATOR . 'hospital.txt';
@@ -23,14 +24,14 @@ if (!file_exists($hospitalFile)) {
             Logger::write('zhongda_msg.log', 'can not get hospital data from db.');
         } else {
             foreach ($hospitalList as $row) {
-                $data = array('token' => $token);
-                $data['hospital_id'] = $row['hospital_id'];
-                $data['hospital_name'] = $row['hospital_name'];
+                $data = array();
+                $data['hosopitalId'] = $row['hospital_id'];
+                $data['hospitalName'] = $row['hospital_name'];
                 $data['contact'] = $row['contact'];
-                $data['hospital_tel'] = $row['hospital_tel'];
+                $data['hospitalTel'] = $row['hospital_tel'];
                 
-                $url = $baseUrl . 'hospital';
-                $ret = request($url, $data);
+                $url = $baseUrl . 'addHospitalInfo';
+                $ret = request($url, create_data($token, $data));
                 $retArray = json_decode($ret, true);
                 if (isset($retArray['code']) && $retArray['code'] == '0') {
                     Logger::write('zhongda_msg.log', 'hospital-success-' . $data['hospital_id']);
@@ -62,14 +63,14 @@ if (!file_exists($doctorFile)) {
             Logger::write('zhongda_msg.log', 'can not get doctor data from db.');
         } else {
             foreach ($doctorList as $row) {
-                $data = array('token' => $token);
-                $data['doctor_id'] = $row['doctor_id'];
-                $data['doctor_name'] = $row['doctor_name'];
-                $data['doctor_tel'] = $row['doctor_tel'];
-                $data['doctor_idc'] = $row['doctor_idc'];
+                $data = array();
+                $data['doctorId'] = $row['doctor_id'];
+                $data['doctorName'] = $row['doctor_name'];
+                $data['doctorTel'] = $row['doctor_tel'];
+                $data['doctorIdc'] = $row['doctor_idc'];
 
-                $url = $baseUrl . 'doctor';
-                $ret = request($url, $data);
+                $url = $baseUrl . 'addDoctorInfo';
+                $ret = request($url, create_data($token, $data));
                 $retArray = json_decode($ret, true);
                 if (isset($retArray['code']) && $retArray['code'] == '0') {
                     Logger::write('zhongda_msg.log', 'doctor-success-' . $data['doctor_id']);
@@ -93,18 +94,18 @@ if (empty($ret)) {
 }
 
 foreach ($ret as $row) {
-    $data = array('token' => $token);
-    $data['guardian_id'] = $row['guardian_id'];
-    $data['hospital_id'] = $row['hospital_id'];
-    $data['patient_name'] = $row['patient_name'];
-    $data['birth_year'] = $row['birth_year'];
+    $data = array();
+    $data['guardianId'] = $row['guardian_id'];
+    $data['hospitalId'] = $row['hospital_id'];
+    $data['patientName'] = $row['patient_name'];
+    $data['birthYear'] = $row['birth_year'];
     $data['sex'] = $row['sex'];
-    $data['patient_tel'] = $row['patient_tel'];
-    $data['patient_idc'] = $row['patient_idc'];
-    $data['start_time'] = $row['start_time'];
+    $data['patientTel'] = $row['patient_tel'];
+    $data['patientIdc'] = $row['patient_idc'];
+    $data['startTime'] = $row['start_time'];
     
-    $url = $baseUrl . 'regist';
-    $ret = request($url, $data);
+    $url = $baseUrl . 'addPatientInfo';
+    $ret = request($url, create_data($token, $data));
     $retArray = json_decode($ret, true);
     if (isset($retArray['code']) && $retArray['code'] == '0') {
         $update = DbiAdmin::getDbi()->updateZhongdaData($row['guardian_id'], '1');
@@ -139,22 +140,26 @@ foreach ($ret as $row) {
         Logger::write('zhongda_msg.log', 'pdf not exists -' . $row['guardian_id']);
         continue;
     }
-    $data = array('token' => $token);
-    $data['guardian_id'] = $row['guardian_id'];
-    $data['report_hospital_id'] = $row['report_hospital_id'];
-    $data['doctor_id'] = $row['doctor_id'];
-    $data['report_time'] = $row['report_time'];
-    $data['pdf_binary'] = file_get_contents($file);
+    $data = array();
+    $data['guardianId'] = $row['guardian_id'];
+    $data['reportHospitalId'] = $row['report_hospital_id'];
+    $data['doctorId'] = $row['doctor_id'];
+    $data['reportTime'] = $row['report_time'];
+    $data['pdfUrl'] = 'http://101.200.174.235/zhongda_report/' . $row['guardian_id'] . '.pdf';
     $diagnosis = $row['diagnosis'];
     
     $isRightFormat = preg_match($pattern, $diagnosis, $matches);
     if ($isRightFormat === false || empty($matches)) {
-        $data['diagnosis'] = $diagnosis;
+        $data['diagnosisi'] = $diagnosis;
     } else {
-        $data['diagnosis'] = $matches[2];
+        $data['diagnosisi'] = $matches[2];
     }
-    $url = $baseUrl . 'report';
-    $ret = request($url, $data);
+    $data['diagnosisi'] = str_replace('%', '%25', $data['diagnosisi']);
+    $url = $baseUrl . 'addReportInfo';
+    $ret = request($url, create_data($token, $data));
+    //$data1 = array('token' => $token, 'entryList' => [$data]);
+    //file_put_contents(date('YmdHis') . '.log', json_encode($data1));
+    //$ret = request1($url, $data1);
     $retArray = json_decode($ret, true);
     if (isset($retArray['code']) && $retArray['code'] == '0') {
         $update = DbiAdmin::getDbi()->updateZhongdaData($row['guardian_id'], '3');
@@ -171,3 +176,28 @@ foreach ($ret as $row) {
 
 //echo 'ok';
 exit(0);
+
+function create_data($token, $data)
+{
+    $ret = '{"tocken":"' . $token . '","entryList":[{';
+    foreach ($data as $key => $value) {
+        $ret .= '"' . $key . '":"' . $value . '",';
+    }
+    $ret = substr($ret, 0, -1);
+    $ret .= '}]}';
+    //file_put_contents(date('YmdHis') . '.log', $ret);
+    return $ret;
+}
+function request1($url, $post)
+{
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Content-Length:' . strlen(json_encode($post))));
+    
+    $data = curl_exec($ch);
+    curl_close($ch);
+    return $data;
+}
