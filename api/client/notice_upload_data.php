@@ -56,6 +56,86 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
+$patient = DbiAnalytics::getDbi()->getPatientForHenan($guardianId);
+if (VALUE_DB_ERROR === $patient) {
+    Logger::write('henan_agency.log', 'db error : ' . $guardianId);
+    $agency = -1;
+} elseif (empty($patient)) {
+    Logger::write('henan_agency.log', 'no patient : ' . $guardianId);
+    $agency = -1;
+} else {
+    $agency = $patient['agency_id'];
+}
+
+if ($agency == 499) {
+    Logger::write('henan_agency.log', 'start: ' . $guardianId);
+    $client = new SoapClient('http://holter-test.hnecg.com/services/apiservice.asmx?WSDL');
+    if ($client) {
+        $client->soap_defencoding = 'utf-8';
+        $client->decode_utf8 = false;
+        $client->xml_encoding = 'utf-8';
+        
+        $param = array();
+        $param['id'] = $guardianId;
+        $param['patientName'] = $patient['name'];
+        $param['gender'] = ($patient['sex'] == '1') ? true : false;
+        $param['patientId'] = '';
+        $param['cardNo'] = '';
+        $param['bedNo'] = '';
+        $param['outpatientNo'] = '';
+        $param['inpatientNo'] = '';
+        $param['pacemaker'] = false;
+        $param['age'] = date('Y') - $patient['birth_year'];
+        $param['ageUnit'] = 'Y';
+        $param['applyNo'] = '';
+        $param['dataSource'] = '';
+        $param['applyDept'] = '';
+        $param['applyDoctor'] = '';
+        $param['applyDate'] = $patient['end_time'];
+        $param['telephone'] = '';
+        $param['operatorName'] = '';
+        $param['recordDate'] = $patient['start_time'];
+        $param['clinicDiag'] = '';
+        $param['hospital'] = $patient['hospital_name'];
+        $param['status'] = 2;
+        $param['dataPath'] = '';
+        $param['reportPath'] = '';
+        $param['result'] = '';
+        $param['diagDoctor'] = '';
+        $param['diagDoctorId'] = '00000000-0000-0000-0000-000000000000';
+        $param['diagDate'] = '';
+        $param['approveDoctor'] = '';
+        $param['approveDoctorId'] = '00000000-0000-0000-0000-000000000000';
+        $param['publishStatus'] = 1;
+        $param['dataType'] = 5;
+        $param['diagFlag'] = '';
+        $param['objectName'] = $url;
+        $param['appKey'] = '';
+        $param['timestamp'] = 0;
+        $param['appSign'] = '';
+        try {
+            $result = $client->__soapCall('SaveExamYZ', array('parameters' => $param));
+            if ($result->SaveExamYZResult === true) {
+                //echo 'ok';
+                Logger::write('henan_agency.log', 'success : ' . $guardianId);
+            } elseif ($result->SaveExamYZResult === false) {
+                //echo 'ng';
+                Logger::write('henan_agency.log', 'fail : ' . $guardianId);
+                Logger::write('henan_agency_failed.log', $guardianId);
+            } else {
+                //echo 'other';
+                Logger::write('henan_agency_other.log', $guardianId);
+            }
+            //var_dump($result);
+        } catch (Exception $e) {
+            Logger::write('henan_agency.log', $e->getMessage());
+        }
+    } else {
+        Logger::write('henan_agency.log', 'failed to new soap client.');
+    }
+    Logger::write('henan_agency.log', 'end: ' . $guardianId);
+}
+
 $noticeHospital1 = '0';
 $noticeHospital2 = '0';
 $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
@@ -104,8 +184,9 @@ if (!in_array($hospitalId, $hospitalNotMoveDate)) {
             setNotice($noticeHospital2, 'upload_data', $guardianId);
         }
         if ($tree['report_hospital'] == '185') {
-            ShortMessageService::send('15131135005', '有新的上传数据，请分析。');
-            ShortMessageService::send('18503298563', '有新的上传数据，请分析。');
+            //20200102from zhangshengyun
+            //ShortMessageService::send('15131135005', '有新的上传数据，请分析。');
+            //ShortMessageService::send('18503298563', '有新的上传数据，请分析。');
             //ShortMessageService::send('13465596133', '有新的上传数据，请分析。');
         }
     }
