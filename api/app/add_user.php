@@ -17,7 +17,7 @@ $guardHospital = $_POST['guard_hospital'];
 $tentativeDiagnose = isset($_POST['tentative_diagnose']) ? $_POST['tentative_diagnose'] : '';
 $medicalHistory = isset($_POST['medical_history']) ? $_POST['medical_history'] : '';
 
-check_mode($mode, $guardHospital);
+//check_mode($mode, $guardHospital);
 
 $hospitalInfo = Dbi::getDbi()->getHospitalByDevice($device);
 if (VALUE_DB_ERROR === $hospitalInfo) {
@@ -32,10 +32,13 @@ if (empty($registHospital)) {
 }
 
 check_device($device, $registHospital);
-
+/*
 $ret = Dbi::getDbi()->changeOrderStatus($registHospital, $name);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+}*/
+if (in_array($registHospital, [729, 735])) {
+    $mode = 1;
 }
 
 //$registHospital = $_POST['regist_hospital'];

@@ -67,7 +67,7 @@ if (VALUE_DB_ERROR === $patient) {
     $agency = $patient['agency_id'];
 }
 
-if ($agency == 499) {
+if ($agency == 113) {
     Logger::write('henan_agency.log', 'start: ' . $guardianId);
     $client = new SoapClient('http://holter-test.hnecg.com/services/apiservice.asmx?WSDL');
     if ($client) {
