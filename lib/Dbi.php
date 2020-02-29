@@ -495,6 +495,12 @@ class Dbi extends BaseDbi
         $param = [':device_id' => $deviceId];
         return $this->getDataRow($sql, $param);
     }
+    public function getPhoneType($deviceId)
+    {
+        $sql = "select device_id, case ver_phone when '红米7A' then 1 when '红米8A' then 2 else 0 end as ver_phone
+                from device where device_id in ($deviceId)";
+        return $this->getDataAll($sql);
+    }
     public function getRegistInfo($guardianId)
     {
         $sql = 'select g.mode, g.lead, p.patient_name as name, p.birth_year, p.sex, p.tel,
