@@ -560,7 +560,7 @@ class DbiAdmin extends BaseDbi
             $sql .= " and creator = '$user'";
         }
         if (!empty($patientId)) {
-            $sql .= " and guardian_id = '$patientId'";
+            $sql .= " and guardian_id in ($patientId)";
         }
         if (!empty($startTime)) {
             $sql .= " and create_time >= '$startTime'";
@@ -819,6 +819,12 @@ class DbiAdmin extends BaseDbi
         $sql = "select hospital_id, count(device_id) as quantity from device where hospital_id > 0 $where group by hospital_id";
         return $this->getDataAll($sql);
     }
+    public function getEcgLast($guardians)
+    {
+        $sql = "select guardian_id, max(create_time) as alert_time from ecg 
+                where guardian_id in ($guardians) group by guardian_id";
+        return $this->getDataAll($sql);
+    }
     public function getEcgMark($startTime = null, $endTime = null)
     {
         $sql = "select * from ecg where mark <> 0";
@@ -877,6 +883,12 @@ class DbiAdmin extends BaseDbi
         $sql .= " order by g.guardian_id desc";
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataAll($sql, $param);
+    }
+    public function getGuardiansOn()
+    {
+        $sql = 'select guardian_id, mode from guardian 
+                where status = 1 and regist_hospital_id not in (1,40) and regist_time > date_add(now(), interval -3 day)';
+        return $this->getDataAll($sql);
     }
     public function getGuardiansStatistics($hospitalList, $sTime = null, $eTime = null, $hospitalId = null)
     {

@@ -37,8 +37,12 @@ $ret = Dbi::getDbi()->changeOrderStatus($registHospital, $name);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }*/
-if (in_array($registHospital, [729, 735])) {
-    $mode = 1;
+$file = PATH_CONFIG . 'hospital_mode.txt';
+if (file_exists($file)) {
+    $config = explode(',', file_get_contents($file));
+    if (in_array($registHospital, $config)) {
+        $mode = 1;
+    }
 }
 
 //$registHospital = $_POST['regist_hospital'];
@@ -226,6 +230,7 @@ if ($registHospital == '1' || $registHospital == '40') {
     setRegistNotice('1', $mode);
 }
 
+updateWorkPool($guardianId);
 
 if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
@@ -307,4 +312,23 @@ function check_mode($mode, $hospital)
             api_exit(['code' => '17', 'message' => '请选择异常模式(当前选择的是单次模式)。']);
         }
     }
+}
+
+function updateWorkPool($guardianId)
+{
+    $file = '';
+    $count = 9999;
+    $path = PATH_DATA . 'guardian_on' . DIRECTORY_SEPARATOR;
+    $fileList = scandir($path);
+    foreach ($fileList as $f) {
+        if ($f != '.' && $f != '..') {
+            $guardianTxt = file_get_contents($path . $f);
+            $guardianCount = count(explode(',', $guardianTxt));
+            if ($count > $guardianCount) {
+                $count = $guardianCount;
+                $file = $path . $f;
+            }
+        }
+    }
+    file_put_contents($file, file_get_contents($file) . ',' . $guardianId);
 }
