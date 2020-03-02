@@ -242,7 +242,7 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel, g.device_id, g.guardian_id as patient_id, 
                 g.start_time, g.end_time, blood_pressure, tentative_diagnose, medical_history, guardian_result, 
-                patient_name as name, birth_year, sex, p.tel, reported, d.advice
+                patient_name as name, birth_year, sex, p.tel, reported, d.advice, g.mode
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join guardian_data as d on g.guardian_id = d.guardian_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id

@@ -35,8 +35,29 @@ $ret = $invigilator->create(['new_mode' => $newMode]);
 if (VALUE_PARAM_ERROR === $ret) {
     api_exit(['code' => '1', 'message' => MESSAGE_PARAM]);
 }
+
+updateMode($guardianId, $newMode);
+
 if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
 }
 
 api_exit_success();
+
+function updateMode($id, $mode)
+{
+    $file = PATH_DATA . 'mode.txt';
+    $list = explode(';', file_get_contents($file));
+    $data = array();
+    foreach ($list as $item) {
+        if (empty($item)) {
+            continue;
+        }
+        $tmp = explode(',', $item);
+        if (isset($tmp[0]) && $tmp[0] != $id) {
+            $data[] = $item;
+        }
+    }
+    $data[] = $id . ',' . $mode;
+    file_put_contents($file, implode(';', $data));
+}
