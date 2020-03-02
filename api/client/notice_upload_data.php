@@ -61,7 +61,7 @@ if (VALUE_DB_ERROR === $patient) {
     Logger::write('henan_agency.log', 'db error : ' . $guardianId);
     $agency = -1;
 } elseif (empty($patient)) {
-    Logger::write('henan_agency.log', 'no patient : ' . $guardianId);
+    //Logger::write('henan_agency.log', 'no patient : ' . $guardianId);
     $agency = -1;
 } else {
     $agency = $patient['agency_id'];
@@ -69,7 +69,8 @@ if (VALUE_DB_ERROR === $patient) {
 
 if ($agency == 113) {
     Logger::write('henan_agency.log', 'start: ' . $guardianId);
-    $client = new SoapClient('http://holter-test.hnecg.com/services/apiservice.asmx?WSDL');
+    //$client = new SoapClient('http://holter-test.hnecg.com/services/apiservice.asmx?WSDL');
+    $client = new SoapClient('http://holter.hnecg.com/services/apiservice.asmx?WSDL');
     if ($client) {
         $client->soap_defencoding = 'utf-8';
         $client->decode_utf8 = false;

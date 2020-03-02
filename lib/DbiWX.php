@@ -77,7 +77,7 @@ class DbiWX extends BaseDbi
     }
     public function getPatientEcg($hospitalId)
     {
-        $sql = "select guardian_id, patient_name, sex, birth_year, regist_time
+        $sql = "select guardian_id, patient_name, sex, birth_year, regist_time, mode
                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
                 where g.status = 1 and (regist_hospital_id in (
                    select h.hospital_id from hospital as h
