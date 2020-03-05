@@ -151,3 +151,31 @@ function request($url, $post)
     curl_close($ch);
     return $data;
 }
+
+function refreshCacheFile($file, $separator, $id, $outerSeparator = '', $text = '')
+{
+    $data = array();
+    if (empty($outerSeparator)) {
+        $list = explode($separator, file_get_contents($file));
+        foreach ($list as $item) {
+            if (!empty($item) && $item != $id) {
+                $data[] = $item;
+            }
+        }
+        $data[] = $id;
+        file_put_contents($file, implode($separator, $data));
+    } else {
+        $list = explode($outerSeparator, file_get_contents($file));
+        foreach ($list as $item) {
+            if (empty($item)) {
+                continue;
+            }
+            $detail = explode($separator, $item);
+            if (isset($detail[0]) && $detail[0] != $id) {
+                $data[] = $item;
+            }
+        }
+        $data[] = $text;
+        file_put_contents($file, implode($outerSeparator, $data));
+    }
+}

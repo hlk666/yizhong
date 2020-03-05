@@ -26,6 +26,18 @@ function check_guardian($id)
     if ($info['end_time'] != '' && time() >= $info['end_time']) {
         $invigilator = new Invigilator($id);
         $ret = $invigilator->create(['action' => 'end']);
+        
+        $path = PATH_DATA . 'guardian_on' . DIRECTORY_SEPARATOR;
+        $fileList = scandir($path);
+        foreach ($fileList as $f) {
+            if ($f != '.' && $f != '..') {
+                $text = file_get_contents($path . $f);
+                if (strstr($text, $id) !== false) {
+                    refreshCacheFile($path . $f, ',', $id);
+                }
+            }
+        }
+        
         return;
     }
     
