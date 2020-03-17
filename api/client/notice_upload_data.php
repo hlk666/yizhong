@@ -21,6 +21,7 @@ if (false === Validate::checkRequired($_POST['patient_id'])) {
 if (false === Validate::checkRequired($_POST['upload_url']) && false === Validate::checkRequired($_POST['fail_flag'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'upload_url.']);
 }
+$length = isset($_POST['length']) ? $_POST['length'] : null;
 /*
 if (false === Validate::checkRequired($_POST['device_type'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'device_type.']);
@@ -51,11 +52,20 @@ if (1 == $failFlag) {
         clearNotice($hospitalId, 'upload_data_fail', $guardianId);
     }
 }
-$ret = DbiAnalytics::getDbi()->addGuardianData($guardianId, $url, $deviceType);
+$status = '2';
+$fileTimeLength = PATH_CONFIG . 'time_length.php';
+if (file_exists($fileTimeLength)) {
+    include $fileTimeLength;
+    if (isset($timeLength[$hospitalId]) && !empty($timeLength[$hospitalId]) 
+            && !empty($length) && $length < $timeLength[$hospitalId]) {
+        $status = '7';
+        Logger::write('time_length.log', 'length: ' . $length . '.config length:' . $timeLength[$hospitalId]);
+    }
+}
+$ret = DbiAnalytics::getDbi()->addGuardianData($guardianId, $url, $deviceType, $status);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
-
 $patient = DbiAnalytics::getDbi()->getPatientForHenan($guardianId);
 if (VALUE_DB_ERROR === $patient) {
     Logger::write('henan_agency.log', 'db error : ' . $guardianId);
@@ -150,6 +160,21 @@ if (VALUE_DB_ERROR === $tree || array() == $tree) {
         $noticeHospital2 = $tree['report_hospital'];
     }
 }
+//20200317 start
+if ($deviceType == '1') {
+    $file2 = PATH_ROOT . 'data' . DIRECTORY_SEPARATOR . 'move_data' . DIRECTORY_SEPARATOR . $tree['report_hospital'] . '.txt';
+    if (file_exists($file2)) {
+        $text = file_get_contents($file2);
+        if (!empty($text)) {
+            $text .= ',';
+        }
+    } else {
+        $text = '';
+    }
+    $text .= $guardianId;
+    file_put_contents($file2, $text);
+}
+//20200317 end
 /*
 if (1 == $deviceType) {
     $ret = DbiAdmin::getDbi()->appUploadSucceed($guardianId);

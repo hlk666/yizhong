@@ -242,7 +242,7 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel, g.device_id, g.guardian_id as patient_id, 
                 g.start_time, g.end_time, blood_pressure, tentative_diagnose, medical_history, guardian_result, 
-                patient_name as name, birth_year, sex, p.tel, reported, d.advice, g.mode
+                patient_name as name, birth_year, sex, p.tel, reported, d.advice, g.mode, family_tel
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join guardian_data as d on g.guardian_id = d.guardian_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id
@@ -341,7 +341,7 @@ class DbiAnalytics extends BaseDbi
         $sql = "select tutor_id, patient_id, url, create_time from tutor_action where tutor_id = '$tutorId' and patient_id = '$patientId'";
         return $this->getDataAll($sql);
     }
-    public function addGuardianData($guardianId, $url, $deviceType = 0)
+    public function addGuardianData($guardianId, $url, $deviceType = 0, $status1 = '2')
     {
         //20190418
         $sql = "update guardian_error set notice_flag = 1 where guardian_id = '$guardianId'";
@@ -349,13 +349,15 @@ class DbiAnalytics extends BaseDbi
         //20190418
         $status = $this->getDataStatus($guardianId);
         if ($status == 4 || $status == 5 || $status == 6 || $status == 8 || $status == 9) {
-            $set = 'set url = :url, upload_time = now(), device_type = :device';
+            $set = "set url = '$url', upload_time = now(), device_type = '$deviceType'";
         } else {
-            $set = 'set url = :url, upload_time = now(), device_type = :device, status = 2';
+            $set = "set url = '$url', upload_time = now(), device_type = '$deviceType', status = '$status1'";
         }
-        $sql = "update guardian_data $set where guardian_id = :guardian_id";
-        $param = [':guardian_id' => $guardianId, ':url' => $url, ':device' => $deviceType];
-        return $this->updateData($sql, $param);
+        if ($deviceType == '1') {
+            $set .= ', moved_hospital = 119, type = 2';
+        }
+        $sql = "update guardian_data $set where guardian_id = '$guardianId'";
+        return $this->updateData($sql);
     }
     public function isQianyi($guardianId)
     {
