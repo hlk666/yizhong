@@ -30,16 +30,11 @@ if (isset($_POST['login'])) {
     } else {
         $_SESSION['login'] = true;
         $_SESSION['user'] = $_POST['user'];
-        if ($_POST['user'] == 'yzl' || $_POST['user'] == 'yzhl' || $_POST['user'] == 'lily' || $_POST['user'] == 'wangting1') {
-            header('location:pd.php');
+        if ($ret['type'] == '0') {
+            header('location:hospital.php');
         } else {
-            if ($ret['type'] == '0') {
-                header('location:summary.php');
-            } else {
-                header('location:add.php');
-            }
+            header('location:add.php');
         }
-        
     }
     exit;
 } else {

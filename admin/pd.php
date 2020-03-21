@@ -31,13 +31,18 @@ $htmlDevices = '';
 $optionVersionPhone = '<option value="0">请选择</option>' 
         . '<option value="红米5A">红米5A</option>'
         . '<option value="红米7A">红米7A</option>'
+        . '<option value="红米8A">红米8A</option>'
         . '<option value="联想A5">联想A5</option>';
 $optionVersionEmbedded = '<option value="3.0(调整写卡看门狗)">调整写卡看门狗</option>';
 //'<option value="0">请选择</option>' . '<option value="3.0(调整写卡看门狗)">3.0(调整写卡看门狗)</option>';
-$optionVersionApp = '<option value="21.0">21.0</option>';
-//'<option value="0">请选择</option>' . '<option value="0.1(test)">0.1(test)</option>';
+$optionVersionApp = '<option value="0">请选择</option>'
+        . '<option value="21.0">21.0</option>'
+        . '<option value="22.0">22.0</option>'
+        . '<option value="23.0">23.0</option>'
+        . '<option value="24.0">24.0</option>';
 $optionVersionPcb = '<option value="0">请选择</option>'
         . '<option value="20180801">20180801</option>'
+        . '<option value="20191228">20191228</option>'
         . '<option value="返修">返修</option>';
 $optionVersionBox = '<option value="YZXD801-2">YZXD801-2</option>';
 //'<option value="0">请选择</option>' . '<option value="白盒方形">白盒方形</option>';

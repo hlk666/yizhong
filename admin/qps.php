@@ -53,10 +53,10 @@ EOF;
     $last = count($requestMonth) - 1;
     $first = count($requestMonth) >= 24 ? count($requestMonth) - 24 : 0;
     for ($i = $last; $i >= $first; $i--) {
-        if ($requestMonth[$keys[$i]]['maxRequest'] >= 20) {
+        if ($requestMonth[$keys[$i]]['maxRequest'] >= 50) {
             $maxRequest = '<font style="color:red;font-weight:bold;">' 
                     . $requestMonth[$keys[$i]]['maxRequest'] . '</font>';
-        } elseif ($requestMonth[$keys[$i]]['maxRequest'] >= 10) {
+        } elseif ($requestMonth[$keys[$i]]['maxRequest'] >= 20) {
             $maxRequest = '<font style="color:red;">' . $requestMonth[$keys[$i]]['maxRequest'] . '</font>';
         } else {
             $maxRequest = $requestMonth[$keys[$i]]['maxRequest'];

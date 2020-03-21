@@ -266,6 +266,13 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         $style = 'info';
     }
     
+    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx'])) {
+        $authEditHospitalSubmit = '<button type="submit" class="btn btn-lg btn-' 
+                . $style . '" name="' . $action . '">' . $button . '</button>';
+    } else {
+        $authEditHospitalSubmit = '';
+    }
+    
     echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
   <input type="hidden" name="hospital_id" value="$hospitalId">
@@ -415,7 +422,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
   </div>
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-      <button type="submit" class="btn btn-lg btn-$style" name="$action">$button</button>
+      $authEditHospitalSubmit
       <button type="button" class="btn btn-lg btn-primary" style="margin-left:50px"
         onclick="javascript:history.back();">返回</button>
     </div>

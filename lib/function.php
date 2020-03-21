@@ -152,7 +152,7 @@ function request($url, $post)
     return $data;
 }
 
-function refreshCacheFile($file, $separator, $id, $outerSeparator = '', $text = '')
+function refreshCacheFile($isAdd, $file, $separator, $id, $outerSeparator = '', $text = '')
 {
     $data = array();
     if (empty($outerSeparator)) {
@@ -162,7 +162,9 @@ function refreshCacheFile($file, $separator, $id, $outerSeparator = '', $text = 
                 $data[] = $item;
             }
         }
-        $data[] = $id;
+        if ($isAdd) {
+            $data[] = $id;
+        }
         file_put_contents($file, implode($separator, $data));
     } else {
         $list = explode($outerSeparator, file_get_contents($file));
@@ -175,7 +177,9 @@ function refreshCacheFile($file, $separator, $id, $outerSeparator = '', $text = 
                 $data[] = $item;
             }
         }
-        $data[] = $text;
+        if ($isAdd) {
+            $data[] = $text;
+        }
         file_put_contents($file, implode($outerSeparator, $data));
     }
 }

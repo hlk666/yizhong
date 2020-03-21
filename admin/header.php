@@ -41,33 +41,54 @@ if (isset($isHideSider) && true === $isHideSider) {
       <div style="margin-top:10px;margin-bottom:10px;text-align:center;"><h2>$title</h2></div>
 EOF;
 } else {
-    echo <<<EOF
-      <div class="col-sm-2 blog-main" style="font-size:18px;">
-        <ul class="nav nav-sidebar">
+    $user = $_SESSION['user'];
+    if (in_array($user, ['hp', 'wxy', 'whl'])) {
+        $siteSummary = '<ul class="nav nav-sidebar">
           <li><a href="summary.php">前 日 统 计 信 息</a></li>
           <li><a href="qps.php"> 24 小 时 并 发</a></li>
-        </ul>
+          <li><a href="hospital_device.php">医院开单数据</a></li>
+          <li><a href="salesman_data.php">查询业务员开单</a></li>
+        </ul>';
+    } else {
+        $siteSummary = '';
+    }
+    if (in_array($user, ['hp', 'wxy', 'whl'])) {
+        $sitePd = '<ul class="nav nav-sidebar">
+          <li><a href="pd.php">生产部</a></li>
+        </ul>';
+    } else {
+        $sitePd = '';
+    }
+    if (in_array($user, ['hp', 'wxy', 'xks1', 'whl', 'pangx'])) {
+        $siteDevice = '<ul class="nav nav-sidebar">
+          <li><a href="device.php">设 备 基 本 信 息</a></li>
+          <li><a href="delivery.php">调配设备</a></li>
+        </ul>';
+    } else {
+        $siteDevice = '';
+    }
+    if (in_array($user, ['hp', 'wxy', 'xks1', 'whl', 'pangx'])) {
+        $siteMember = '<ul class="nav nav-sidebar">
+          <li><a href="agency.php">代理商列表</a></li>
+          <li><a href="add_salesman.php">添加 业务员</a></li>
+        </ul>';
+    } else {
+        $siteMember = '';
+    }
+    echo <<<EOF
+      <div class="col-sm-2 blog-main" style="font-size:18px;margin-top:20px;">
+        $siteSummary
+        $sitePd
         <ul class="nav nav-sidebar">
           <li><a href="hospital.php">医 院 基 本 信 息</a></li>
           <li><a href="add_hospital.php">添 加 新 的 医 院</a></li>
         </ul>
+        $siteDevice
+        $siteMember
         <ul class="nav nav-sidebar">
-          <li><a href="device.php">设 备 基 本 信 息</a></li>
-          <li><a href="delivery.php">发货(调配设备)</a></li>
-          <!--<li><a href="app_set_update.php">更 新 设 备 版 本</a></li>-->
-        </ul>
-        <ul class="nav nav-sidebar">
-          <li><a href="agency.php">代理商列表</a></li>
-          <li><a href="add_salesman.php">添加 业务员</a></li>
-        </ul>
-        <ul class="nav nav-sidebar">
-          <li><a href="hospital_device.php">医院开单数据</a></li>
-          <li><a href="salesman_data.php">查询业务员开单</a></li>
-        </ul>
-        <ul class="nav nav-sidebar">
-          <li><a href="remote_check_log.php">远程查房跟踪</a></li>
-          <li><a href="invoice.php">发票开单日期</a></li>
-          <li><a href="patient.php">查询监护详细信息</a></li>
+          <!--<li><a href="remote_check_log.php">远程查房跟踪</a></li>
+          <li><a href="invoice.php">发票开单日期</a></li>-->
+          <li><a href="patient.php">监护详细信息</a></li>
         </ul>
         <ul class="nav nav-sidebar">
           <li><a href="logout.php">注 销 本 次 登 录</a></li>

@@ -51,16 +51,23 @@ foreach ($hospitalList as $value) {
 
 $htmlDevices = '';
 foreach ($deviceList as $value) {
+    if ($value['hospital_id'] == '0') {
+        $deviceUsed = '-';
+    } else {
+        $deviceUsed = '<a href="device_guardian.php?hospital=' . $value['hospital_id'] . '&device=' . $value['device_id'] . '">查看</a>';
+    }
     $buttonTxt = $value['hospital_name'] == '羿中医疗生产部' ? '' 
             : '<button type="button" class="btn btn-xs btn-info" onclick="javascript:unbindDevice('. $value['device_id'] . ')">点击退回设备</button>';
     $htmlDevices .= '<tr><td>'
         . $value['hospital_name'] . '</td><td>'
         . $value['device_id'] . '</td><td>'
+        . $deviceUsed . '</td><td>'
         . $value['ver_phone'] . '</td><td>'
         . $value['ver_embedded'] . '</td><td>'
         . $value['ver_app'] . '</td><td>'
         . $value['ver_pcb'] . '</td><td>'
         . $value['ver_box'] . '</td><td>'
+        . $value['device_sale'] . '</td><td>'
         . $value['agency'] . '</td><td>'
         . $value['salesman'] . '</td></tr>';
         //. $buttonTxt . '</td></tr>';
@@ -128,11 +135,13 @@ echo <<<EOF
       <tr>
         <th>医院名</th>
         <th>设备ID</th>
+        <th>使用情况</th>
         <th>手机</th>
         <th>嵌入式</th>
         <th>app</th>
         <th>电路板</th>
         <th>采集盒</th>
+        <th>销售政策</th>
         <th>代理商</th>
         <th>业务员</th>
       </tr>

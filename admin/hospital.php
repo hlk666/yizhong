@@ -60,19 +60,33 @@ foreach ($ret as $value) {
     } else {
         $link = '<a href="hospital_device.php?hospital=' . $value['hospital_id'] . '">' . $value['quantity'] . '</a>';
     }
+    
+    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx'])) {
+        $authHospitalEditHospital = '<button type="button" class="btn btn-xs btn-warning" onclick="javascript:editHospital(' 
+                . $value['hospital_id'] . ')">修改</button></td><td>';
+        $authHospitalEditRelation = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editRelation(' 
+                . $value['hospital_id'] . ')">配置</button></td><td>';
+        $authHospitalEditTree = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editTree(' 
+                . $value['hospital_id'] . ')">配置</button></td><td>';
+        $authHospitalDelete = '<button type="button" class="btn btn-xs btn-danger" onclick="javascript:deleteHospital(' 
+                . $value['hospital_id'] . ')">删除</button></td>';
+        $authHospitalHeader = '<th>删除医院</th>';
+    } else {
+        $authHospitalEditHospital = '<button type="button" class="btn btn-xs btn-warning" onclick="javascript:editHospital('
+                . $value['hospital_id'] . ')">查看</button></td><td>';
+        $authHospitalEditRelation = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editRelation(' 
+                . $value['hospital_id'] . ')">查看</button></td><td>';
+        $authHospitalEditTree = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editTree(' 
+                . $value['hospital_id'] . ')">查看</button></td><td>';
+        $authHospitalDelete = '';
+    }
+    
     $htmlHospitals .= '<tr><td>' 
             . $value['hospital_id'] . '</td><td>'
             . $value['hospital_name'] . '</td><td>'
             . $value['login_name'] . '</td><td>'
             . $link . '</td><td>'
-            . '<button type="button" class="btn btn-xs btn-warning" onclick="javascript:editHospital(' 
-                . $value['hospital_id'] . ')">修改</button></td><td>'
-            . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editRelation(' 
-                . $value['hospital_id'] . ')">配置</button></td><td>'
-            . '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editTree(' 
-                . $value['hospital_id'] . ')">配置</button></td><td>'
-            . '<button type="button" class="btn btn-xs btn-danger" onclick="javascript:deleteHospital(' 
-                . $value['hospital_id'] . ')">删除</button></td></tr>';
+            . $authHospitalEditHospital . $authHospitalEditRelation . $authHospitalEditTree . $authHospitalDelete . '</tr>';
 }
 
 $currentPage = "hospital.php?type=$type&level=$level&salesman=$salesman&name=$name";
@@ -127,7 +141,7 @@ echo <<<EOF
     <th>基本信息</th>
     <th>上级医院</th>
     <th>长程分析</th>
-    <th>删除医院</th>
+    $authHospitalHeader
   </tr>
 </thead>
 <tbody>$htmlHospitals</tbody>

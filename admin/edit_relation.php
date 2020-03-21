@@ -69,6 +69,14 @@ if (isset($_POST['save']) || isset($_POST['add'])){
         $htmlHospitalParentList .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
     }
     
+    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx'])) {
+        $authEditRelationSubmitEdit = '<button type="submit" class="btn btn-lg btn-info" name="save">保存修改</button>';
+        $authEditRelationSubmitAdd = '<button type="submit" class="btn btn-lg btn-info" name="add">添加新的上级医院</button>';
+    } else {
+        $authEditRelationSubmitEdit = '';
+        $authEditRelationSubmitAdd = '';
+    }
+    
     if (!empty($hospitalParent)) {
         echo <<<EOF
 <form class="form-horizontal" role="form" method="post">
@@ -76,7 +84,7 @@ if (isset($_POST['save']) || isset($_POST['add'])){
   <div class="form-group"><h3>上级医院信息：</h3>$htmlHospitalParent</div>
   <div class="form-group">
     <div class="col-sm-offset-4 col-sm-2">
-      <button type="submit" class="btn btn-lg btn-info" name="save">保存修改</button>
+      $authEditRelationSubmitEdit
     </div>
   </div>
 </form>
@@ -94,10 +102,16 @@ EOF;
       </select>
     </div>
     <div class="col-sm-6">
-      <button type="submit" class="btn btn-lg btn-info" name="add">添加新的上级医院</button>
+      $authEditRelationSubmitAdd
     </div>
   </h4></div>
 </form>
+<hr style="border-top:1px ridge red;" />
+<div class="form-group">
+  <div class="col-sm-offset-4 col-sm-2">
+    <button type="button" class="btn btn-lg btn-primary" onclick="javascript:history.back();">返回</button>
+  </div>
+</div>
 EOF;
 }
 
