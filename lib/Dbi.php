@@ -246,6 +246,23 @@ class Dbi extends BaseDbi
         $param = [':guardian' => $guardianId];
         return $this->getDataAll($sql, $param);
     }
+    public function getFileSize($patientId, $deviceId, $startTime, $endTime)
+    {
+        $sql = "select * from file_size where 1";
+        if (!empty($patientId)) {
+            $sql .= " and guardian_id = '$patientId'";
+        }
+        if (!empty($deviceId)) {
+            $sql .= " and device_id = '$deviceId'";
+        }
+        if (!empty($startTime)) {
+            $sql .= " and create_time >= '$startTime'";
+        }
+        if (!empty($endTime)) {
+            $sql .= " and create_time <= '$endTime'";
+        }
+        return $this->getDataAll($sql);
+    }
     public function getGuardianByDevice($deviceId)
     {
         $sql = 'select guardian_id, patient_id, status from guardian
@@ -830,9 +847,10 @@ class Dbi extends BaseDbi
         $param = [':id' => $guardianId];
         return $this->updateData($sql, $param);
     }
-    public function saveFileSize($guardianId, $deviceId, $size)
+    public function saveFileSize($guardianId, $deviceId, $fileSize, $leftSize, $totalSize)
     {
-        $sql = "insert into file_size(guardian_id, device_id, size) values ('$guardianId', '$deviceId', '$size')";
+        $sql = "insert into file_size(guardian_id, device_id, file_size, left_size, total_size) 
+                values ('$guardianId', '$deviceId', '$fileSize', '$leftSize', '$totalSize')";
         return $this->insertData($sql);
     }
     public function updateDoctorType($id, $type)
