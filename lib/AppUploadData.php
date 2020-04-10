@@ -120,9 +120,19 @@ class AppUploadData
                 $cacheEcgData = file_get_contents($cacheEcgDataFile) . $patientId . ',' . $retDB . ',' . $alert . ',' . $time . ',' . $urlFile . ';';
                 file_put_contents($cacheEcgDataFile, $cacheEcgData);
                 
-                $cacheEcgDataFileAll = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'ecg_data' . DIRECTORY_SEPARATOR  . '1.txt';
-                $cacheEcgDataAll = file_get_contents($cacheEcgDataFileAll) . $patientId . ',' . $retDB . ',' . $alert . ',' . $time . ',' . $urlFile . ';';
-                file_put_contents($cacheEcgDataFileAll, $cacheEcgDataAll);
+                $fileShift = PATH_DATA . 'shift.txt';
+                $userList = explode(';', file_get_contents($fileShift));
+                foreach ($userList as $user) {
+                    if (empty($user)) {
+                        continue;
+                    }
+                    $tmp = explode(',', $user);
+                    if (isset($tmp[0]) && !empty($tmp[0])) {
+                        $cacheEcgDataFileAll = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'ecg_data' . DIRECTORY_SEPARATOR . '1_' . $tmp[0] . '.txt';
+                        $cacheEcgDataAll = file_get_contents($cacheEcgDataFileAll) . $patientId . ',' . $retDB . ',' . $alert . ',' . $time . ',' . $urlFile . ';';
+                        file_put_contents($cacheEcgDataFileAll, $cacheEcgDataAll);
+                    }
+                }
             }
             
             $hospitalInfo = Dbi::getDbi()->getHospitalByGuardian($patientId);
@@ -166,7 +176,7 @@ class AppUploadData
             }
         } else {
             if ($len != $size) {
-                $this->setError(5, $patientId . ' : Data size is wrong.');
+                $this->setError(5, $patientId . ' : length is ' . $len . ', size is ' . $size);
                 return false;
             }
         }
