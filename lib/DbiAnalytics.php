@@ -177,7 +177,7 @@ class DbiAnalytics extends BaseDbi
     }
     public function getPatientLast($deviceId)
     {
-        $sql = "select g.guardian_id, g.start_time, p.patient_name 
+        $sql = "select g.guardian_id, g.start_time, p.patient_name, device_id 
                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
                 where device_id = $deviceId order by guardian_id desc limit 1";
         return $this->getDataRow($sql);
@@ -242,7 +242,7 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel, g.device_id, g.guardian_id as patient_id, 
                 g.start_time, g.end_time, blood_pressure, tentative_diagnose, medical_history, guardian_result, 
-                patient_name as name, birth_year, sex, p.tel, reported, d.advice, g.mode, family_tel
+                patient_name as name, birth_year, sex, p.tel, reported, d.advice, g.mode, family_tel, hospitalization_id
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join guardian_data as d on g.guardian_id = d.guardian_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id
@@ -354,7 +354,7 @@ class DbiAnalytics extends BaseDbi
             $set = "set url = '$url', upload_time = now(), device_type = '$deviceType', status = '$status1'";
         }
         if ($deviceType == '1') {
-            $set .= ', moved_hospital = 119, type = 2';
+            //$set .= ', moved_hospital = 119, type = 2';
         }
         $sql = "update guardian_data $set where guardian_id = '$guardianId'";
         return $this->updateData($sql);
