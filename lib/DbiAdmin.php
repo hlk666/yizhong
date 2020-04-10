@@ -34,6 +34,25 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
+    public function addAnswer($deviceId, $questionId, $text, $user, $status)
+    {
+        $this->beginTran();
+        $sql = "insert into device_answer (question_id, text, creator) 
+                values ('$questionId', '$text', '$user')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        $sql = "update device set status = '$status' where device_id = '$deviceId'";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        $this->commit();
+        return true;
+    }
     public function addCountyHospital($county, $count)
     {
         if ($this->existData('county_hospital', " county = '$county'")) {
@@ -57,6 +76,7 @@ class DbiAdmin extends BaseDbi
         $sql = "insert into problem (guardian_id, text, user_id) values ('$guardianId', '$text', '1')";
         return $this->insertData($sql);
     }
+    /*
     public function addDevice($hospital, $device, $user = '')
     {
         if ($this->existData('device', "device_id = '$device'")) {
@@ -77,7 +97,7 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         return true;
-    }
+    }*/
     public function addDeviceFault($device, $fault, $content)
     {
         $sql = "insert into device_fault (device_id, fault, content) values ('$device', '$fault', '$content')";
@@ -96,7 +116,7 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
-    public function addDevicePD($device)
+    public function addDevicePD($device, $user)
     {
         if($this->existData('device', "device_id = '$device'")) {
             $sql = "update device set hospital_id = 40 where device_id = '$device'";
@@ -110,12 +130,31 @@ class DbiAdmin extends BaseDbi
         }
         
         $sql = "insert into history_device (device_id, hospital_id, user, unbind_hospital_id, content) 
-                values ('$device', 40, '1', 0, '创建新设备号')";
+                values ('$device', 40, '$user', 0, '创建新设备号')";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
         }
         
+        return true;
+    }
+    public function addQuestion($deviceId, $hospitalId, $text, $user)
+    {
+        $this->beginTran();
+        $sql = "insert into device_question (device_id, hospital_id, text, creator) 
+                values ('$deviceId', '$hospitalId', '$text', '$user')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        $sql = "update device set status = 1 where device_id = '$deviceId'";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        $this->commit();
         return true;
     }
     public function addHospital($name, $type, $level, $tel, $province, $city, $county, $address, $parentFlag, $parentHospital, 
@@ -258,6 +297,19 @@ class DbiAdmin extends BaseDbi
     {
         $sql = "insert into shift (user_id, type) values ('$userId', '$type')";
         $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            return VALUE_DB_ERROR;
+        }
+        return true;
+    }
+    public function addSolution($id, $question, $answer)
+    {
+        if (empty($id)) {
+            $sql = "insert into solution (question, answer) values ('$question', '$answer')";
+        } else {
+            $sql = "update solution set answer = '$answer' where id = '$id'";
+        }
+        $ret = $this->updateData($sql);
         if (VALUE_DB_ERROR === $ret) {
             return VALUE_DB_ERROR;
         }
@@ -547,6 +599,17 @@ class DbiAdmin extends BaseDbi
                 order by convert(agency_name using gbk) collate gbk_chinese_ci asc";
         return $this->getDataAll($sql);
     }
+    public function getCloudData()
+    {
+        $sql = "select d.guardian_id, d.upload_time, d.`status`, a.real_name, d.report_time, h.hospital_name, d.type
+                from guardian_data as d inner join guardian as g on d.guardian_id = g.guardian_id
+                left join hospital as h on d.moved_hospital = h.hospital_id
+                left join account as a on d.report_doctor = a.account_id
+                where moved_hospital in (119, 132, 139, 140, 141)
+                and g.regist_time > concat(DATE_FORMAT(date_add(now(), INTERVAL -1 DAY),'%Y-%m-%d'), ' 00:00:00')
+                and g.regist_time < concat(DATE_FORMAT(now(),'%Y-%m-%d'), ' 00:00:00')";
+        return $this->getDataAll($sql);
+    }
     public function getCommunication($hospitalId, $deviceId, $user, $patientId, $startTime, $endTime)
     {
         $sql = 'select * from communication where 1';
@@ -658,6 +721,15 @@ class DbiAdmin extends BaseDbi
                 where hospital_id = 0 $and";
         return $this->getDataAll($sql);
     }
+    public function getDeviceAnswer($questionId)
+    {
+        $sql = "select q.device_id, q.text as question, a.text as answer, answer_time, ac.real_name, 
+                timestampdiff(HOUR, q.question_time, a.answer_time) as time_diff
+                from device_answer as a inner join device_question as q on a.question_id = q.question_id
+                left join account as ac on a.creator = ac.account_id
+                where a.question_id = '$questionId'";
+        return $this->getDataAll($sql);
+    }
     public function getDeviceBloc()
     {
         $sql = 'select distinct hospital_id, city from device order by city, hospital_id';
@@ -668,12 +740,15 @@ class DbiAdmin extends BaseDbi
         if (empty($id)) {
             return array();
         }
-        $sql = "select ifnull(hospital_name, '') as hospital_name, device_id, a.agency_name as agency, 
-                s.salesman_name as salesman, ver_phone, ver_embedded, ver_app, ver_pcb, ver_box
+        $sql = "select ifnull(hospital_name, '-') as hospital_name, device_id, d.hospital_id,
+                ifnull(a.agency_name, a1.agency_name) as agency, ifnull(s.salesman_name, s1.salesman_name) as salesman, 
+                ver_phone, ver_embedded, ver_app, ver_pcb, ver_box
                 from device as d
                 left join agency as a on d.agency_id = a.agency_id
                 left join salesman as s on d.salesman_id = s.salesman_id
-                left join hospital as h on d.hospital_id = h.hospital_id  
+                left join hospital as h on d.hospital_id = h.hospital_id
+                left join agency as a1 on h.agency_id = a1.agency_id
+                left join salesman as s1 on h.salesman_id = s1.salesman_id
                 where d.device_id like '%$id'";
         return $this->getDataAll($sql);
     }
@@ -698,6 +773,18 @@ class DbiAdmin extends BaseDbi
         $whereHospital = empty($hospitalId) ? '' : " and hospital_id = '$hospitalId' ";
         $whereTime = empty($createTime) ? '' : " and create_time >= '$createTime' ";
         $sql = "select hospital_id, feedback, create_time from device_feedback where 1 $whereHospital $whereTime";
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceHistory($device)
+    {
+        $sql = "select d.device_id, d.bk_time, d.content, ac.real_name, 
+                ifnull(h.hospital_name,ifnull(a.agency_name,ifnull(s.salesman_name,'不明'))) as position
+                from history_device as d 
+                left join hospital as h on d.hospital_id = h.hospital_id
+                left join agency as a on d.agency_id = a.agency_id
+                left join salesman as s on d.salesman_id = s.salesman_id
+                left join account as ac on d.user = ac.login_name
+                where d.device_id = '$device'";
         return $this->getDataAll($sql);
     }
     public function getDeviceHospital($device)
@@ -764,9 +851,14 @@ class DbiAdmin extends BaseDbi
         if (empty($hospital)) {
             return array();
         }
-        $sql = "select hospital_name, device_id, '' as agency, '' as salesman, ver_phone, ver_embedded, ver_app, ver_pcb, ver_box
+        $sql = "select hospital_name, device_id, a.agency_name as agency, s.salesman_name as salesman, 
+                ver_phone, ver_embedded, ver_app, ver_pcb, ver_box, d.hospital_id,
+                case h.device_sale when 1 then '投放' when 2 then '销售' when 3 then '押金' else '其他' end as device_sale
                 from device as d
-                inner join hospital as h on d.hospital_id = h.hospital_id  where d.hospital_id = $hospital";
+                inner join hospital as h on d.hospital_id = h.hospital_id 
+                left join agency as a on h.agency_id = a.agency_id
+                left join salesman as s on h.salesman_id = s.salesman_id
+                where d.hospital_id = $hospital";
         if (null !== $rows) {
             $sql .= " limit $offset, $rows";
         }
@@ -778,7 +870,7 @@ class DbiAdmin extends BaseDbi
             return array();
         }
         $sql = "select '-' as hospital_name, device_id, a.agency_name as agency, s.salesman_name as salesman, 
-                ver_phone, ver_embedded, ver_app, ver_pcb, ver_box
+                ver_phone, ver_embedded, ver_app, ver_pcb, ver_box, '-' as device_sale, '0' as hospital_id
                 from device as d
                 left join agency as a on d.agency_id = a.agency_id
                 left join salesman as s on d.salesman_id = s.salesman_id
@@ -799,6 +891,27 @@ class DbiAdmin extends BaseDbi
             return array();
         }
         $sql = "select device_id from device where hospital_id = 1 limit $count";
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceQuestion($device)
+    {
+        $sql = "select question_id, device_id, text, question_time, a.real_name, h.hospital_name
+                from device_question as q inner join account as a on q.creator = a.account_id
+                inner join hospital as h on q.hospital_id = h.hospital_id
+                where q.device_id = '$device'";
+        return $this->getDataAll($sql);
+    }
+    public function getDeviceByStatus($status)
+    {
+        $sql = "select hospital_name, d.device_id, a.agency_name as agency, s.salesman_name as salesman, 
+                ver_phone, ver_embedded, ver_app, ver_pcb, ver_box, d.hospital_id,
+                case h.device_sale when 1 then '投放' when 2 then '销售' when 3 then '押金' else '其他' end as device_sale
+                from device as d
+                inner join device_question as q on d.device_id = q.device_id
+                left join hospital as h on q.hospital_id = h.hospital_id 
+                left join agency as a on h.agency_id = a.agency_id
+                left join salesman as s on h.salesman_id = s.salesman_id
+                where d.status = '$status'";
         return $this->getDataAll($sql);
     }
     public function getDeviceSum($exceptHospitalList)
@@ -1164,6 +1277,23 @@ class DbiAdmin extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
+    public function getGuardianByReportKeyword($keyword, $startTime, $endTime)
+    {
+        $sql = "select g.guardian_id as patient_id, p.patient_name, d.report_time, a.real_name as doctor_name, 
+                regist_hospital_id as hospital_id
+                from guardian as g
+                inner join guardian_data as d on g.guardian_id = d.guardian_id
+                inner join patient as p on g.patient_id = p.patient_id
+                left join account as a on d.report_doctor = a.account_id
+                where guardian_result like '%$keyword%' ";
+        if (!empty($startTime)) {
+            $sql .= " and d.report_time >= '$startTime' ";
+        }
+        if (!empty($endTime)) {
+            $sql .= " and d.report_time <= '$endTime' ";
+        }
+        return $this->getDataAll($sql);
+    }
     public function getPatientDiagnosis($hospital, $diagnosis, $startTime, $endTime)
     {
         $sql = "select d.patient_id, d.diagnosis_id, d.create_time, h.hospital_id, h.hospital_name, h.tel as hospital_tel,
@@ -1291,6 +1421,11 @@ class DbiAdmin extends BaseDbi
     {
         $sql = "select salesman_id, salesman_name as `name` from salesman
                 order by convert(salesman_name using gbk) collate gbk_chinese_ci asc";
+        return $this->getDataAll($sql);
+    }
+    public function getSolution()
+    {
+        $sql = "select * from solution";
         return $this->getDataAll($sql);
     }
     public function getTotalDiagnosis($hospital, $startTime, $endTime)

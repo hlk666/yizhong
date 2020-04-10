@@ -15,7 +15,7 @@ if (isset($_POST['submit'])){
     } elseif (true === $isExisted) {
         user_back_after_delay("设备【 $deviceId 】已绑定其他医院或代理商/业务员，请从【发货/调配】页面操作。");
     } else {
-        $ret = DbiAdmin::getDbi()->addDevicePD($deviceId);
+        $ret = DbiAdmin::getDbi()->addDevicePD($deviceId, $_SESSION['user']);
         if (VALUE_DB_ERROR === $ret) {
             user_back_after_delay(MESSAGE_DB_ERROR);
         }
@@ -64,7 +64,6 @@ foreach ($deviceList as $value) {
 }
 
 echo <<<EOF
-<h4>将设备添加到生产部(新品)。</h4>
 <form class="form-horizontal" role="form" method="post">
 <div class="row">
   <div class="col-xs-12 col-sm-3" style="margin-bottom:3px;">
@@ -75,6 +74,9 @@ echo <<<EOF
   </div>
   <div class="col-xs-12 col-sm-3">
     <button type="submit" class="btn btn-sm btn-info" name="submit">添加到生产部</button>
+  </div>
+  <div class="col-xs-12 col-sm-3">
+    <a href="device.php"><h3>返回主页</h3></a>
   </div>
 </div>
 </form>
