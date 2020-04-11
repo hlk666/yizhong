@@ -80,7 +80,7 @@ class AppUploadData
                 file_put_contents($file, $temp);
                 
                 $deviceId = Dbi::getDbi()->getDeviceId($patientId);
-                if ($deviceId !== VALUE_DB_ERROR && !empty($deviceId)) {
+                if ($deviceId !== VALUE_DB_ERROR && !empty($deviceId) && $phonePower != '16') {
                     $ret = Dbi::getDbi()->addDeviceStatus($deviceId, $phonePower, $collectionPower, $bluetooth, $line);
                     if (VALUE_DB_ERROR === $ret) {
                         api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
