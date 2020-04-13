@@ -841,11 +841,10 @@ class Dbi extends BaseDbi
     {
         return $this->updateTableByKey('guardian_data', 'guardian_id', $guardianId, $data);
     }
-    public function noticeGuardianError($guardianId)
+    public function noticeGuardianError($guardianId, $result)
     {
-        $sql = 'update guardian_error set notice_flag = 1 where guardian_id = :id';
-        $param = [':id' => $guardianId];
-        return $this->updateData($sql, $param);
+        $sql = "update guardian_error set notice_flag = 1, result = '$result' where guardian_id = '$guardianId'";
+        return $this->updateData($sql);
     }
     public function saveFileSize($guardianId, $deviceId, $fileSize, $leftSize, $totalSize)
     {
