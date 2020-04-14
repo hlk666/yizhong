@@ -9,7 +9,7 @@ if (false === Validate::checkRequired($_POST['answer'])) {
 $id = isset($_POST['id']) && !empty($_POST['id']) ? $_POST['id'] : null;
 $question = isset($_POST['question']) && !empty($_POST['question']) ? $_POST['question'] : null;
 
-$ret = DbiAdmin::getDbi()->addSolution($id, $question, $answer);
+$ret = DbiAdmin::getDbi()->addSolution($id, $question, $_POST['answer']);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
