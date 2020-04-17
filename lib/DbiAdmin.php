@@ -587,6 +587,18 @@ class DbiAdmin extends BaseDbi
     {
         return $this->existData('agency', "agency_name = '$name' and agency_id <> $id");
     }
+    public function getAgencyGuardian()
+    {
+        $sql = "select h.agency_id, ifnull(a.agency_name, '未知代理商') as agency_name, count(g.guardian_id) as qty
+                from guardian as g inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                left join agency as a on h.agency_id = a.agency_id
+                where g.regist_time > concat(DATE_FORMAT(date_add(now(), INTERVAL -1 DAY),'%Y-%m-%d'), ' 00:00:00')
+                and g.regist_time < concat(DATE_FORMAT(now(),'%Y-%m-%d'), ' 00:00:00')
+                and regist_hospital_id not in (1,40)
+                group by h.agency_id, a.agency_name
+                order by a.agency_name";
+        return $this->getData($sql);
+    }
     public function getAgencyInfo($id)
     {
         $sql = "select agency_name, agency_tel, salesman_id from agency where agency_id = $id limit 1";
@@ -1138,6 +1150,17 @@ class DbiAdmin extends BaseDbi
         $sql .= ' order by regist_time desc';
         $param = [':hospital' => $hospital, ':device' => $device];
         return $this->getDataAll($sql, $param);
+    }
+    public function getHospitalGuardianAgency($agencyId)
+    {
+        $sql = "select h.hospital_name, count(g.guardian_id) as qty
+                from guardian as g inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                where g.regist_time > concat(DATE_FORMAT(date_add(now(), INTERVAL -1 DAY),'%Y-%m-%d'), ' 00:00:00')
+                and g.regist_time < concat(DATE_FORMAT(now(),'%Y-%m-%d'), ' 00:00:00')
+                and regist_hospital_id not in (1,40)
+                and h.agency_id = '$agencyId'
+                group by h.hospital_name";
+        return $this->getData($sql);
     }
     public function getHospitalInfo($hospitalId)
     {

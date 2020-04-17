@@ -46,8 +46,9 @@ EOF;
         $siteSummary = '<ul class="nav nav-sidebar">
           <li><a href="summary.php">前 日 统 计 信 息</a></li>
           <li><a href="qps.php"> 24 小 时 并 发</a></li>
-          <li><a href="hospital_device.php">医院开单数据</a></li>
-          <li><a href="salesman_data.php">查询业务员开单</a></li>
+          <li><a href="agency_guardian.php">代理商开单统计</a></li>
+          <!--<li><a href="hospital_device.php">医院开单数据</a></li>
+          <!--<li><a href="salesman_data.php">查询业务员开单</a></li>-->
         </ul>';
     } else {
         $siteSummary = '';
@@ -59,7 +60,7 @@ EOF;
     } else {
         $sitePd = '';
     }
-    if (in_array($user, ['hp', 'wxy', 'xks1', 'whl', 'pangx'])) {
+    if (in_array($user, ['hp', 'wxy', 'xks1', 'whl', 'pangx', 'fanzp'])) {
         $siteDevice = '<ul class="nav nav-sidebar">
           <li><a href="device.php">设 备 基 本 信 息</a></li>
           <li><a href="delivery.php">调配设备</a></li>
@@ -67,7 +68,7 @@ EOF;
     } else {
         $siteDevice = '';
     }
-    if (in_array($user, ['hp', 'wxy', 'xks1', 'whl', 'pangx'])) {
+    if (in_array($user, ['hp', 'wxy', 'xks1', 'whl', 'pangx', 'fanzp'])) {
         $siteMember = '<ul class="nav nav-sidebar">
           <li><a href="agency.php">代理商列表</a></li>
           <li><a href="add_salesman.php">添加 业务员</a></li>
