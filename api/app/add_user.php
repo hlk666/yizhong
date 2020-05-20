@@ -55,7 +55,7 @@ $weight = isset($_POST['weight']) ? $_POST['weight'] : '0';
 $bloodPressure = isset($_POST['blood_pressure']) ? $_POST['blood_pressure'] : '';
 $sickRoom = isset($_POST['sickroom']) ? $_POST['sickroom'] : '';
 $familyTel = isset($_POST['family_tel']) ? $_POST['family_tel'] : '0';
-if ($registHospital == 203) {
+if ($registHospital == 203 || $registHospital == 486) {
     $hours = isset($_POST['guard_hours']) ? $_POST['guard_hours'] : 36;
 } else {
     $hours = isset($_POST['guard_hours']) ? $_POST['guard_hours'] : 24;
@@ -138,7 +138,7 @@ if (VALUE_DB_ERROR === $guardianId) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 //special action for zhongda start.
-if (in_array($registHospital, [9999])) {
+if (in_array($registHospital, [99999])) {
     Logger::write('zhongda_msg.log', 'regist hospital:' . $registHospital);
     $zhongda = Dbi::getDbi()->addZhongdaData($guardianId);
     if (VALUE_DB_ERROR === $guardianId) {

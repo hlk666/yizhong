@@ -79,10 +79,6 @@ if ($type == '2') {
     } else {
         //do nothing.
     }
-    if ($textOld != $text) {
-        $logTxt = "move from $hospitalFrom to $hospitalTo, clear config of hospital_to. old config is $textOld. new config is $text.";
-        Logger::write('debug_move_data.log', $logTxt);
-    }
 }
 //fix bug happened when moved more than one time.end
 

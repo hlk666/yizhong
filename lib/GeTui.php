@@ -84,7 +84,6 @@ class GeTui
     
     public static function pushToSingle($clientId, $text)
     {
-        Logger::write('debug0510.txt', $clientId . '-' . $text);
         if (empty($clientId)) {
             Logger::write(self::$logFile, 'clientID is required.');
             return false;

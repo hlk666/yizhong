@@ -135,10 +135,7 @@ class AppUploadData
                 }
             }
             
-            $hospitalInfo = Dbi::getDbi()->getHospitalByGuardian($patientId);
-            if (VALUE_DB_ERROR !== $hospitalInfo) {
-                setNotice($hospitalInfo['guard_hospital_id'], 'ecg_notice', $patientId);
-            }
+            setNotice($hospital, 'ecg_notice', $patientId);
         }
         return json_encode($this->retSuccess);
     }

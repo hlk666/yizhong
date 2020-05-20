@@ -43,6 +43,15 @@ class DbiBatch extends BaseDbi
                 from guardian where regist_time < date_add(now(), interval -30 day);';
         return $this->getDataString($sql);
     }
+    public function  getHospitalTreeByGuardian($guardian)
+    {
+        $sql = "select g.regist_hospital_id, ifnull(analysis_hospital,0) as analysis_hospital, ifnull(report_hospital,0) as report_hospital,
+                d.moved_hospital, d.type
+                from guardian as g left join hospital_tree as t on g.regist_hospital_id = t.hospital_id
+                left join guardian_data as d on g.guardian_id = d.guardian_id
+                where g.guardian_id = '$guardian'";
+        return $this->getDataRow($sql);
+    }
     public function moveData($tableFrom, $tableTo, $field, $fieldFrom, $fieldTo)
     {
         $this->pdo->beginTransaction();
@@ -71,6 +80,13 @@ class DbiBatch extends BaseDbi
         
         $this->pdo->commit();
         return true;
+    }
+    
+    public function returnData($guardian, $hospital)
+    {
+        $sql = "update guardian_data set moved_hospital = '$hospital', type = 0, status = 2, download_doctor = 0 
+                where guardian_id = '$guardian'";
+        return $this->updateData($sql);
     }
     /*
     public function existedDeviceHospital($deviceId, $hospitalId)

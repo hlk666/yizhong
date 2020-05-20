@@ -33,7 +33,7 @@ function check_guardian($id)
             if ($f != '.' && $f != '..') {
                 $text = file_get_contents($path . $f);
                 if (strstr($text, $id) !== false) {
-                    refreshCacheFile($path . $f, ',', $id);
+                    refreshCacheFile(false, $path . $f, ',', $id);
                 }
             }
         }

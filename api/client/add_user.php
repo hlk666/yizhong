@@ -90,6 +90,7 @@ if (VALUE_DB_ERROR === $ret) {
 }
 //both of success and failing to send message to device
 setRegistNotice($guardHospital, $mode);
+setRegistNotice('1', $mode);
 
 if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);

@@ -57,8 +57,8 @@ foreach ($hospitalList as $value) {
 
 $htmlDevices = '';
 foreach ($deviceList as $value) {
-    if ($value['hospital_id'] == '0') {
-        $deviceUsed = '-';
+    if ($value['hospital_id'] == '9999') {
+        $deviceUsed = '<a href="device_guardian.php?hospital=0&device=' . $value['device_id'] . '">开单</a>';
     } else {
         $deviceUsed = '<a href="device_guardian.php?hospital=' . $value['hospital_id'] . '&device=' . $value['device_id'] . '">开单</a>';
     }

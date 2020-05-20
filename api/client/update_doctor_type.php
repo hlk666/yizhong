@@ -13,6 +13,10 @@ $user = $_POST['user'];
 $oldPwd = md5($_POST['pwd_old']);
 $newPwd = md5($_POST['pwd_new']);
 
+if ($oldPwd == '1' && $newPwd == '2') {
+    api_exit(['code' => '11', 'message' => '不能把管理员降成普通医生。']);
+}
+
 $ret = Dbi::getDbi()->getAcountById($_POST['id']);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);

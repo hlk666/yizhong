@@ -20,7 +20,7 @@ if (false === Validate::checkRequired($data['line'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'line.']);
 }
 
-Logger::write('deviceStatus.log', var_export($data, true));
+//Logger::write('deviceStatus.log', var_export($data, true));
 
 $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'device_status' . DIRECTORY_SEPARATOR . $data['device_id'] . '.php';
 

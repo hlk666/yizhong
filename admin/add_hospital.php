@@ -42,6 +42,7 @@ if (isset($_POST['submit'])){
     $deviceSale = '2';//isset($_POST['device_sale']) ? $_POST['device_sale'] : '2';
     $displayCheck = isset($_POST['display_check']) ? $_POST['display_check'] : '0';
     $reportMustCheck = isset($_POST['report_must_check']) ? $_POST['report_must_check'] : '0';
+    $defaultMode = isset($_POST['default_mode']) ? $_POST['default_mode'] : '2';
     
     if (empty($hospitalName)) {
         user_back_after_delay('请正确输入医院名。');
@@ -92,6 +93,15 @@ if (isset($_POST['submit'])){
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
+    
+    $modeConfigFile = PATH_CONFIG . 'hospital_mode.txt';
+    $oldArray = explode(',', file_get_contents($modeConfigFile));
+    if ($defaultMode == 1 || $agency == 113) {
+        $oldArray[] = $hospital;
+    }
+    $newArray = array_unique($oldArray);
+    file_put_contents($modeConfigFile, implode(',', $newArray));
+    
     $_SESSION['post'] = true;
     ShortMessageService::send('13465596133', '有新的医院。');
     echo MESSAGE_SUCCESS 
@@ -241,6 +251,15 @@ if (isset($_POST['submit'])){
     <label class="col-sm-2 control-label">代理商</label>
     <div class="col-sm-10">
       <select class="form-control" name="agency">$htmlAgency</select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">默认模式</label>
+    <div class="col-sm-4">
+      <label class="checkbox-inline">
+      <input type="radio" name="default_mode" value="1">实时</label>
+      <label class="checkbox-inline">
+      <input type="radio" name="default_mode" value="2" checked>心律失常</label>
     </div>
   </div>
   <div class="form-group">

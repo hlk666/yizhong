@@ -5,15 +5,6 @@ require_once PATH_LIB . 'Validate.php';
 //require_once PATH_ROOT . 'lib/tool/HpMessage.php';
 require_once PATH_LIB . 'ShortMessageService.php';
 
-//2017/04/20
-/*
-if (isset($_POST['device_type']) && $_POST['device_type'] == '1') {
-    if ($_POST['fail_flag'] == '0') {
-        setNotice(1, 'phone_data', $_POST['upload_url']);
-    }
-    api_exit_success();
-}
-*/
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
 }
@@ -37,6 +28,24 @@ $deviceType = isset($_POST['device_type']) ? $_POST['device_type'] : 0;
 $failFlag = isset($_POST['fail_flag']) ? $_POST['fail_flag'] : 0;
 
 $hospitalId = DbiAnalytics::getDbi()->getHospitalByPatient($guardianId);
+
+//2020/03/19
+/*
+if ($deviceType == '1') {
+    $filePhoneUpload = PATH_DATA . 'phone_upload.txt';
+    if (file_exists($filePhoneUpload)) {
+        $hospitalPhoneUpload = explode(',', file_get_contents($filePhoneUpload));
+        if (!in_array($hospitalId, $hospitalPhoneUpload)) {
+            if ($_POST['fail_flag'] == '0') {
+                setNotice(1, 'phone_data', $_POST['upload_url']);
+            }
+            api_exit(['code' => '3', 'message' => '当前医院不允许手机上传数据。请联系管理员。']);
+        }
+    }
+}
+*/
+//2020/03/19
+
 if (1 == $failFlag) {
     /*
     if (VALUE_DB_ERROR === $hospitalId || empty($hospitalId)) {
@@ -161,6 +170,7 @@ if (VALUE_DB_ERROR === $tree || array() == $tree) {
     }
 }
 //20200317 start
+/*
 if ($deviceType == '1') {
     $file2 = PATH_ROOT . 'data' . DIRECTORY_SEPARATOR . 'move_data' . DIRECTORY_SEPARATOR . $tree['report_hospital'] . '.txt';
     if (file_exists($file2)) {
@@ -174,6 +184,7 @@ if ($deviceType == '1') {
     $text .= $guardianId;
     file_put_contents($file2, $text);
 }
+*/
 //20200317 end
 /*
 if (1 == $deviceType) {

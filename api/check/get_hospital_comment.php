@@ -16,6 +16,6 @@ if (file_exists($file)) {
 $result = array();
 $result['code'] = '0';
 $result['message'] = MESSAGE_SUCCESS;
-$result['text'] = $text
+$result['text'] = $text;
 
 api_exit($result);

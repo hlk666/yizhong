@@ -10,6 +10,8 @@ if (!isset($_GET['entry']) || empty($_GET['entry'])) {
 
 $_GET['entry'] = str_replace('test_', 'client_', $_GET['entry']);
 
+//addApiCounter($_GET['entry']);
+
 if ($_GET['entry'] == 'special_get_patients'
         || $_GET['entry'] == 'sms'
         || $_GET['entry'] == 'clear_real_time_file') {
@@ -139,4 +141,32 @@ function clearNotice($hospital, $type, $guardianId)
     $handle = fopen($file, 'w');
     fwrite($handle, $template);
     fclose($handle);
+}
+
+function addApiCounter($entry)
+{
+    if ($entry == 'app_upload_data' 
+            || $entry == 'client_get_patients'
+            || $entry == 'clear_real_time_file'
+            || $entry == 'client_get_device_status'
+            || $entry == 'check_get_ecg_by_guard_hospital'
+            || $entry == 'analytics_get_patients_by_id'
+            || $entry == 'analytics_get_patients'
+            || $entry == 'analytics_get_hospital_config_list'
+            || $entry == 'client_check_new') {
+        return;
+    }
+    $file = PATH_DATA . 'api_counter' . DIRECTORY_SEPARATOR . date('Ymd') . '.php';
+    include $file;
+    if (isset($api[$entry])) {
+        $api[$entry] = $api[$entry] + 1;
+    } else {
+        $api[$entry] = 1;
+    }
+    $template = "<?php\n";
+    $template .= '$api = array();' . "\n";
+    foreach ($api as $key => $value) {
+        $template .= "\$api['$key'] = $value;\n";
+    }
+    file_put_contents($file, $template);
 }

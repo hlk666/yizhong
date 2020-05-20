@@ -148,9 +148,8 @@ class Dbi extends BaseDbi
     }
     public function getDeviceId($guardianId)
     {
-        $sql = 'select device_id from guardian where guardian_id = :guardian_id limit 1';
-        $param = [':guardian_id' => $guardianId];
-        return $this->getDataString($sql, $param);
+        $sql = "select device_id from guardian where guardian_id = '$guardianId' limit 1";
+        return $this->getDataString($sql, [], false);
     }
     public function getDeviceList($hospitalId)
     {
@@ -322,8 +321,7 @@ class Dbi extends BaseDbi
             $sql .= " and g.regist_doctor_name = '$doctorName' ";
         }
         $sql .= " order by g.guardian_id desc limit $offset, $rows";
-        $param = [':hospital_id' => $hospitalId];
-        return $this->getDataAll($sql, $param);
+        return $this->getDataAll($sql, [], false);
     }
     public function getGuardiansByRegist($hospitalId, $offset, $rows, $mode = null, $status = null,
             $name = null, $tel = null, $sTime = null, $eTime = null, $device = null, $doctorName = null)
@@ -361,8 +359,7 @@ class Dbi extends BaseDbi
             $sql .= " and g.regist_doctor_name = $doctorName ";
         }
         $sql .= " order by g.guardian_id desc limit $offset, $rows";
-        $param = [':hospital_id' => $hospitalId];
-        return $this->getDataAll($sql, $param);
+        return $this->getDataAll($sql, [], false);
     }
     public function getGuardiansByRegistCount($hospitalId, $offset, $rows, $mode = null, $status = null,
             $name = null, $tel = null, $sTime = null, $eTime = null, $device = null, $doctorName = null)
@@ -414,18 +411,12 @@ class Dbi extends BaseDbi
     public function getGuardianHospital($guardianId)
     {
         $sql = "select guard_hospital_id from guardian where guardian_id = $guardianId limit 1;";
-        return $this->getDataString($sql);
+        return $this->getDataString($sql, [], false);
     }
     public function getHospitalByDevice($diviceId)
     {
         $sql = 'select hospital_id from device where device_id = :device limit 1';
         $param = [':device' => $diviceId];
-        return $this->getDataRow($sql, $param);
-    }
-    public function getHospitalByGuardian($guardianId)
-    {
-        $sql = 'select guard_hospital_id from guardian where guardian_id = :guardian limit 1';
-        $param = [':guardian' => $guardianId];
         return $this->getDataRow($sql, $param);
     }
     public function getHospitalInfo($hospitalId)
@@ -450,11 +441,10 @@ class Dbi extends BaseDbi
     }
     public function getHospitalChild($hospitalId)
     {
-        $sql = 'select h.hospital_id, hospital_name from hospital as h
+        $sql = "select h.hospital_id, hospital_name from hospital as h
                 inner join hospital_relation as r on h.hospital_id = r.hospital_id
-                where r.parent_hospital_id = :hospital_id';
-        $param = [':hospital_id' => $hospitalId];
-        return $this->getDataAll($sql, $param);
+                where r.parent_hospital_id = '$hospitalId'";
+        return $this->getDataAll($sql, [], false);
     }
     public function getHospitalParent($hospitalId)
     {
@@ -506,11 +496,10 @@ class Dbi extends BaseDbi
     }
     public function getPatientByDevice($deviceId)
     {
-        $sql = 'select guardian_id, patient_name, mode
+        $sql = "select guardian_id, patient_name, mode
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
-                where device_id = :device_id and status < 2 order by guardian_id desc limit 1';
-        $param = [':device_id' => $deviceId];
-        return $this->getDataRow($sql, $param);
+                where device_id = '$deviceId' and status < 2 order by guardian_id desc limit 1";
+        return $this->getDataRow($sql);
     }
     public function getPhoneType($deviceId)
     {
@@ -557,7 +546,7 @@ class Dbi extends BaseDbi
                 values (:device_id, :phone_power, :collection_power, :bluetooth, :line)';
         $param = [':device_id' => $deviceId, ':phone_power' => $phonePower, ':collection_power' => $collectionPower,
                         ':bluetooth' => $bluetooth, ':line' => $line];
-        return $this->insertData($sql, $param);
+        return $this->insertData($sql, $param, false);
     }
     public function addDevicePosition($deviceId, $x, $y)
     {
@@ -679,9 +668,9 @@ class Dbi extends BaseDbi
     }
     public function flowGuardianAddEcg($guardianId, $alertFlag, $time, $dataPath)
     {
-        $sql = 'insert into ecg(guardian_id, alert_flag, create_time, data_path) values(:guardian, :alert, :time, :path)';
-        $param = [':guardian' => $guardianId, ':alert' => $alertFlag, ':time' => $time, ':path' => $dataPath];
-        return $this->insertData($sql, $param);
+        $sql = "insert into ecg(guardian_id, alert_flag, create_time, data_path) 
+                values('$guardianId', '$alertFlag', '$time', '$dataPath')";
+        return $this->insertData($sql);
     }
     public function flowGuardianAddResult($guardianId, $result)
     {

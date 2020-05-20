@@ -30,6 +30,7 @@ if (isset($_POST['login'])) {
     } else {
         $_SESSION['login'] = true;
         $_SESSION['user'] = $_POST['user'];
+        $_SESSION['user_id'] = $ret['account_id'];
         if ($ret['type'] == '0') {
             header('location:hospital.php');
         } else {

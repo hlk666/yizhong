@@ -138,6 +138,12 @@ class DbiAdmin extends BaseDbi
         
         return true;
     }
+    public function addDeviceResult($questionId, $result, $user)
+    {
+        $sql = "update device_question set result = '$result', result_user = '$user', result_time = now() 
+                where question_id = '$questionId'";
+        return $this->updateData($sql);
+    }
     public function addQuestion($deviceId, $hospitalId, $text, $user)
     {
         $this->beginTran();
@@ -263,7 +269,7 @@ class DbiAdmin extends BaseDbi
         }
         
         $this->pdo->commit();
-        return true;
+        return $hospitalId;
     }
     public function addHospitalParent($hospitalId, $parentHospital)
     {
@@ -617,7 +623,7 @@ class DbiAdmin extends BaseDbi
                 from guardian_data as d inner join guardian as g on d.guardian_id = g.guardian_id
                 left join hospital as h on d.moved_hospital = h.hospital_id
                 left join account as a on d.report_doctor = a.account_id
-                where moved_hospital in (119, 132, 139, 140, 141)
+                where moved_hospital in (119, 132, 139, 140, 141, 743)
                 and g.regist_time > concat(DATE_FORMAT(date_add(now(), INTERVAL -1 DAY),'%Y-%m-%d'), ' 00:00:00')
                 and g.regist_time < concat(DATE_FORMAT(now(),'%Y-%m-%d'), ' 00:00:00')";
         return $this->getDataAll($sql);
@@ -926,6 +932,14 @@ class DbiAdmin extends BaseDbi
                 where d.status = '$status'";
         return $this->getDataAll($sql);
     }
+    public function getDeviceQuestionAnswer()
+    {
+        $sql = "select q.question_id, q.hospital_id, q.device_id, d.`status`, q.text as question, q.question_time, 
+                a.text as answer, a.answer_time, q.result, q.result_time
+                from device_question as q left join device_answer as a on q.question_id = a.question_id
+                left join device as d on q.device_id = d.device_id";
+        return $this->getData($sql);
+    }
     public function getDeviceSum($exceptHospitalList)
     {
         $sql = 'select count(device_id) as total from device where 1 ';
@@ -963,14 +977,13 @@ class DbiAdmin extends BaseDbi
     }
     public function getEcgs($startTime, $endTime, $exceptHospitalList)
     {
-        $sql = 'select ecg_id, e.guardian_id, alert_flag, create_time
+        $sql = "select ecg_id, e.guardian_id, alert_flag, create_time
                 from ecg as e left join guardian as g on e.guardian_id = g.guardian_id
-                where create_time >= :start and create_time <= :end ';
+                where create_time >= '$startTime' and create_time <= '$endTime' ";
         if (!empty($exceptHospitalList)) {
             $sql .= " and regist_hospital_id not in ($exceptHospitalList)";
         }
-        $param = [':start' => $startTime, ':end' => $endTime];
-        return $this->getDataAll($sql, $param);
+        return $this->getDataAll($sql);
     }
     public function getEcgActive()
     {
@@ -1135,12 +1148,13 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalGuardian($hospital, $device, $startTime, $endTime)
     {
-        if (empty($hospital) || empty($device)) {
-            return array();
-        }
-        $sql = 'select g.device_id, g.regist_time, p.patient_name, g.regist_doctor_name
+        $sql = "select h.hospital_name, g.device_id, g.regist_time, p.patient_name, g.regist_doctor_name, g.guardian_id
                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
-                where g.regist_hospital_id = :hospital and device_id = :device ';
+                left join hospital as h on g.regist_hospital_id = h.hospital_id
+                where device_id = '$device' ";
+        if (!empty($hospital)) {
+            $sql .= " and regist_hospital_id = '$hospital' ";
+        }
         if (null !== $startTime) {
             $sql .= " and regist_time >= '$startTime' ";
         }
@@ -1148,8 +1162,7 @@ class DbiAdmin extends BaseDbi
             $sql .= " and regist_time <= '$endTime' ";
         }
         $sql .= ' order by regist_time desc';
-        $param = [':hospital' => $hospital, ':device' => $device];
-        return $this->getDataAll($sql, $param);
+        return $this->getDataAll($sql);
     }
     public function getHospitalGuardianAgency($agencyId)
     {

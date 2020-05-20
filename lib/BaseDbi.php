@@ -106,12 +106,14 @@ class BaseDbi
             return false;
         }
     }
-    protected function getDataAll($sql, array $param = array())
+    protected function getDataAll($sql, array $param = array(), $isWriteSql = true)
     {
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
-            Logger::write($this->sqlLog, $stmt->queryString);
+            if ($isWriteSql) {
+                Logger::write($this->sqlLog, $stmt->queryString);
+            }
             $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
@@ -123,12 +125,14 @@ class BaseDbi
             return VALUE_DB_ERROR;
         }
     }
-    protected function getDataRow($sql, array $param = array())
+    protected function getDataRow($sql, array $param = array(), $isWriteSql = true)
     {
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
-            Logger::write($this->sqlLog, $stmt->queryString);
+            if ($isWriteSql) {
+                Logger::write($this->sqlLog, $stmt->queryString);
+            }
             $ret = $stmt->fetch(PDO::FETCH_ASSOC);
             if (false === $ret) {
                 return array();
@@ -140,12 +144,14 @@ class BaseDbi
             return VALUE_DB_ERROR;
         }
     }
-    protected function getDataString($sql, array $param = array())
+    protected function getDataString($sql, array $param = array(), $isWriteSql = true)
     {
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
-            Logger::write($this->sqlLog, $stmt->queryString);
+            if ($isWriteSql) {
+                Logger::write($this->sqlLog, $stmt->queryString);
+            }
             $ret = $stmt->fetchColumn();
             if (null === $ret || false === $ret) {
                 return '';
@@ -157,12 +163,14 @@ class BaseDbi
             return VALUE_DB_ERROR;
         }
     }
-    protected function insertData($sql, array $param = array())
+    protected function insertData($sql, array $param = array(), $isWriteSql = true)
     {
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($param);
-            Logger::write($this->sqlLog, $stmt->queryString);
+            if ($isWriteSql) {
+                Logger::write($this->sqlLog, $stmt->queryString);
+            }
             return $this->pdo->lastInsertId();
         } catch (Exception $e) {
             Logger::write($this->logFile, $e->getMessage() . ".\r\n$sql\r\nTrace : " . $e->getTraceAsString());

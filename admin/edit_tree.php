@@ -106,7 +106,7 @@ if (isset($_POST['edit'])){
             $htmlTitle2 .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
         }
     }
-    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx'])) {
+    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx', 'fanzp'])) {
         $authEditTreeSubmit = '<button type="submit" class="btn btn-lg btn-info" name="edit">修改</button>';
     } else {
         $authEditTreeSubmit = '';
