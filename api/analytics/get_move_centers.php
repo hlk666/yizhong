@@ -7,12 +7,14 @@ $hospital3 = ['hospital_id' => '139', 'hospital_name' => '羿中云平台-张元
 $hospital4 = ['hospital_id' => '140', 'hospital_name' => '羿中云平台4'];
 $hospital5 = ['hospital_id' => '141', 'hospital_name' => '羿中云平台2'];
 $hospital6 = ['hospital_id' => '743', 'hospital_name' => '羿中云平台5'];
+$hospital7 = ['hospital_id' => '785', 'hospital_name' => '羿中云平台-刘宁'];
 $ret['hospitals'][] = $hospital1;
 $ret['hospitals'][] = $hospital2;
 $ret['hospitals'][] = $hospital3;
 $ret['hospitals'][] = $hospital4;
 $ret['hospitals'][] = $hospital5;
 $ret['hospitals'][] = $hospital6;
+$ret['hospitals'][] = $hospital7;
 
 analytics_exit($ret);
 
