@@ -97,8 +97,9 @@ if (isset($_POST['submit'])){
     $modeConfigFile = PATH_CONFIG . 'hospital_mode.txt';
     $oldArray = explode(',', file_get_contents($modeConfigFile));
     if ($defaultMode == 1 || $agency == 113) {
-        $oldArray[] = $hospital;
+        $oldArray[] = $ret;
     }
+    var_dump($oldArray);
     $newArray = array_unique($oldArray);
     file_put_contents($modeConfigFile, implode(',', $newArray));
     
