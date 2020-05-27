@@ -558,7 +558,8 @@ class DbiAdmin extends BaseDbi
     }
     public function getAccountList($hospital)
     {
-        $sql = "select account_id as doctor_id, real_name as doctor_name from account where hospital_id = '$hospital'";
+        $sql = "select account_id as doctor_id, real_name as doctor_name from account 
+        where hospital_id in ($hospital)";
         return $this->getDataAll($sql);
     }
     public function getAccountForAnalytics($doctorList, $startTime, $endTime, $isReportTime = false)
@@ -569,7 +570,8 @@ class DbiAdmin extends BaseDbi
             $and = "and g.regist_time >= '$startTime' and g.regist_time <= '$endTime'";
         }
         $sql = "select d.guardian_id as patient_id, p.patient_name, regist_hospital_id as hospital_id, d.report_time,
-                g.start_time, g.end_time, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor
+                g.start_time, g.end_time, d.status, a1.real_name as hbi_doctor, a2.real_name as report_doctor, 
+                d.upload_time, d.download_end_time, d.report_time
                 from guardian_data as d left join guardian as g on d.guardian_id = g.guardian_id
                 left join patient as p on g.patient_id = p.patient_id
                 left join account as a1 on d.hbi_doctor = a1.account_id
