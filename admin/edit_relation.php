@@ -69,7 +69,7 @@ if (isset($_POST['save']) || isset($_POST['add'])){
         $htmlHospitalParentList .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
     }
     
-    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx'])) {
+    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx', 'fanzp'])) {
         $authEditRelationSubmitEdit = '<button type="submit" class="btn btn-lg btn-info" name="save">保存修改</button>';
         $authEditRelationSubmitAdd = '<button type="submit" class="btn btn-lg btn-info" name="add">添加新的上级医院</button>';
     } else {
