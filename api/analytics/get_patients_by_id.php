@@ -7,13 +7,20 @@ if (empty($_GET['patient_list'])) {
 
 $patientIdList = $_GET['patient_list'];
 $arrayId = explode(',', $patientIdList);
+$newPatientList = array();
 foreach ($arrayId as $id) {
     if (!is_numeric($id)) {
         analytics_exit(['code' => '1', 'message' => 'ID列表必须为数字。']);
     }
+    if ($id < 30000) {
+        $newPatientList[] = $id + 65536;
+    } else {
+        $newPatientList[] = $id;
+    }
 }
+$newPatientString = implode(',', $newPatientList);
 
-$patients = DbiAnalytics::getDbi()->getPatientsByIdForAnalytics($patientIdList);
+$patients = DbiAnalytics::getDbi()->getPatientsByIdForAnalytics($newPatientString);
 if (VALUE_DB_ERROR === $patients) {
     analytics_exit(['code' => '3', 'message' => MESSAGE_DB_ERROR]);
 }
