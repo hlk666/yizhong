@@ -71,6 +71,31 @@ class DbiAdmin extends BaseDbi
         values ('$hospitalId', '$type', '$content', '$creator', '$deviceId', '$patientId')";
         return $this->insertData($sql);
     }
+    public function addCommuTitleContent($agencyId, $hospitalId, $titleId, $title, $content, $nextTime, $status)
+    {
+        $this->beginTran();
+        if (empty($titleId)) {
+            $sql = "insert into commu_title (agency_id, hospital_id, title, next_time)
+                    values ('$agencyId', '$hospitalId', '$title', '$nextTime')";
+            $innerTitleId = $this->insertData($sql);
+            if (VALUE_DB_ERROR === $innerTitleId) {
+                $this->rollBack();
+                return VALUE_DB_ERROR;
+            }
+        } else {
+            $sql = "update commu_title set next_time = '$nextTime', status = '$status' where title_id = '$titleId'";
+            $ret = $this->updateData($sql);
+            if (VALUE_DB_ERROR === $ret) {
+                $this->rollBack();
+                return VALUE_DB_ERROR;
+            }
+            $innerTitleId = $titleId;
+        }
+        $sql = "insert into commu_content (content, title_id) values ('$content', '$innerTitleId')";
+        $ret = $this->insertData($sql);
+        $this->commit();
+        return $innerTitleId;
+    }
     public function addProblem($guardianId, $text)
     {
         $sql = "insert into problem (guardian_id, text, user_id) values ('$guardianId', '$text', '1')";
@@ -654,6 +679,36 @@ class DbiAdmin extends BaseDbi
         $sql .= ' order by create_time';
         return $this->getDataAll($sql);
     }
+    public function getCommuTitle($agencyId, $hospital, $title, $status)
+    {
+        $sql = "select title_id, a.agency_name, h.hospital_name, title, t.create_time, t.next_time, t.status
+                from commu_title as t left join agency as a on t.agency_id = a.agency_id
+                left join hospital as h on t.hospital_id = h.hospital_id where 1 ";
+        if (!empty($agencyId)) {
+            $sql .= " and t.agency_id = '$agencyId' ";
+        }
+        if (!empty($hospital)) {
+            //$sql .= " and h.hospital_name like '%$hospital%' ";
+            $sql .= "and t.hospital_id = '$hospital'";
+        }
+        if (!empty($title)) {
+            $sql .= " and t.title_id = '$title' ";
+        }
+        if (!empty($status)) {
+            $sql .= " and t.status = '$status' ";
+        }
+        return $this->getDataAll($sql);
+    }
+    public function getCommuTitleContent($id)
+    {
+        $sql = "select t.title_id, t.title, t.create_time as title_time, t.next_time, t.`status`, 
+                c.create_time as content_time, c.content, a.agency_name, h.hospital_name
+                from commu_title as t inner join commu_content as c on t.title_id = c.title_id
+                left join agency as a on t.agency_id = a.agency_id
+                left join hospital as h on t.hospital_id = h.hospital_id
+                where t.title_id = '$id'";
+        return $this->getDataAll($sql);
+    }
     public function getCountyCount($county = '')
     {
         if (empty($county)) {
@@ -717,6 +772,18 @@ class DbiAdmin extends BaseDbi
                 inner join account as a on d.report_doctor = a.account_id
                 inner join zhongda_data as z on z.guardian_id = g.guardian_id
                 where z.status = 2';
+        return $this->getDataAll($sql);
+    }
+    public function getDataNotUpload()
+    {
+        $sql = 'select g.guardian_id as patient_id, h.hospital_name, p.patient_name, g.start_time, g.end_time
+                from guardian_data as d 
+                inner join guardian as g on d.guardian_id = g.guardian_id
+                inner join patient as p on g.patient_id = p.patient_id
+                inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                where d.status < 2 and g.`status` = 2 and g.end_time > date_add(now(), interval -2 day)
+                and g.end_time < date_add(now(), interval -1 day) 
+                and g.guardian_id not in (select guardian_id from guardian_error where notice_flag = 1)';
         return $this->getDataAll($sql);
     }
     public function getDepartment()
@@ -1238,7 +1305,7 @@ class DbiAdmin extends BaseDbi
     public function getHospitalListHigh($hospitalId)
     {
         $sql = 'select distinct hospital_id, hospital_name from hospital 
-                where type in (1,2) or hospital_id = :hospital order by hospital_name';
+                where type in (1,2) or hospital_id = :hospital';
         $param = [':hospital' => $hospitalId];
         return $this->getDataAll($sql, $param);
     }
@@ -1400,6 +1467,15 @@ class DbiAdmin extends BaseDbi
     {
         $sql = 'select problem_id, guardian_id as patient_id, text, create_time, update_time, user_id as user, status, text
                 from problem where create_time > date_add(now(), interval -24 hour)';
+        return $this->getDataAll($sql);
+    }
+    public function getRelation()
+    {
+        $sql = 'select r1.hospital_id as h1, r1.parent_hospital_id as h2, r2.parent_hospital_id as h3, r3.parent_hospital_id as h4
+                from hospital_relation as r1
+                left join hospital_relation as r2 on r1.parent_hospital_id = r2.hospital_id
+                left join hospital_relation as r3 on r2.parent_hospital_id = r3.hospital_id
+                order by r1.hospital_id;';
         return $this->getDataAll($sql);
     }
     public function getReportPatients($hospitalId)
