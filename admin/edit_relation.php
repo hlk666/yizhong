@@ -31,7 +31,9 @@ if (isset($_POST['save']) || isset($_POST['add'])){
         
         $ret = DbiAdmin::getDbi()->addHospitalParent($hospitalId, $parentHospital);
     }
-    
+    //@todo
+    //refresh data and cache
+    //send a message to device which is belong to the hospital
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
