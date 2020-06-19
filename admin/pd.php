@@ -44,6 +44,7 @@ $optionVersionPcb = '<option value="0">请选择</option>'
         . '<option value="20180801">20180801</option>'
         . '<option value="20191228">20191228</option>'
         . '<option value="20200427">20200427</option>'
+        . '<option value="20200527">20200527</option>'
         . '<option value="返修">返修</option>';
 $optionVersionBox = '<option value="YZXD801-2">YZXD801-2</option>';
 //'<option value="0">请选择</option>' . '<option value="白盒方形">白盒方形</option>';
