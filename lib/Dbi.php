@@ -415,9 +415,10 @@ class Dbi extends BaseDbi
     }
     public function getHospitalByDevice($diviceId)
     {
-        $sql = 'select hospital_id from device where device_id = :device limit 1';
-        $param = [':device' => $diviceId];
-        return $this->getDataRow($sql, $param);
+        $sql = "select d.hospital_id, h.hospital_name, h.tel as hospital_tel
+                from device as d left join hospital as h on d.hospital_id = h.hospital_id
+                where device_id = '$diviceId' limit 1";
+        return $this->getDataRow($sql);
     }
     public function getHospitalInfo($hospitalId)
     {

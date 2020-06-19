@@ -158,7 +158,8 @@ class DbiAnalytics extends BaseDbi
     }
     public function getPatientForHenan($guardianId)
     {
-        $sql = "select start_time, end_time, patient_name as name, birth_year, sex, h.hospital_name, h.agency_id
+        $sql = "select start_time, end_time, patient_name as name, birth_year, sex, h.hospital_name, 
+                h.agency_id, g.regist_hospital_id
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id
                 where guardian_id = '$guardianId'";
