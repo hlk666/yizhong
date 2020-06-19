@@ -99,7 +99,6 @@ if (isset($_POST['submit'])){
     if ($defaultMode == 1 || $agency == 113) {
         $oldArray[] = $ret;
     }
-    var_dump($oldArray);
     $newArray = array_unique($oldArray);
     file_put_contents($modeConfigFile, implode(',', $newArray));
     
