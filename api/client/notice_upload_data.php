@@ -88,8 +88,13 @@ if (VALUE_DB_ERROR === $patient) {
 
 if ($agency == 113) {
     Logger::write('henan_agency.log', 'start: ' . $guardianId);
-    //$client = new SoapClient('http://holter-test.hnecg.com/services/apiservice.asmx?WSDL');
-    $client = new SoapClient('http://holter.hnecg.com/services/apiservice.asmx?WSDL');
+    if ($patient['regist_hospital_id'] == 746) {
+        $client = new SoapClient('http://120.194.75.148:8008/services/apiservice.asmx?WSDL');
+    } elseif ($patient['regist_hospital_id'] == 802) {
+        $client = new SoapClient('http://218.28.211.1:8008/services/apiservice.asmx?WSDL');
+    } else {
+        $client = new SoapClient('http://holter.hnecg.com/services/apiservice.asmx?WSDL');
+    }
     if ($client) {
         $client->soap_defencoding = 'utf-8';
         $client->decode_utf8 = false;

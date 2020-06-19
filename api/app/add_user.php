@@ -30,6 +30,9 @@ $registHospital = $hospitalInfo['hospital_id'];
 if (empty($registHospital)) {
     api_exit(['code' => '1', '设备未绑定。']);
 }
+if ($guardHospital == 'hospitalID') {
+    $guardHospital = $registHospital;
+}
 
 check_device($device, $registHospital);
 /*
