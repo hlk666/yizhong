@@ -88,8 +88,8 @@ echo <<<EOF
   </div>
   <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
     <select class="form-control" name="status">
-        <option value="0">全部</option>
-        <option value="1" selected>进行中</option>
+        <option value="0" selected>全部</option>
+        <option value="1">进行中</option>
         <option value="2">已关闭</option>
     </select>
   </div>

@@ -37,8 +37,18 @@ if (isset($_POST['submit'])){
     $id = isset($_GET['title_id']) ? $_GET['title_id'] : '0';
     if (empty($id)) {
         $data = array();
-        $htmlAgency = '<input type="text" class="form-control" name="agency" required>';
-        $htmlHospital = '<input type="text" class="form-control" name="hospital" required>';
+        
+        $ret = DbiAdmin::getDbi()->getAgencyList();
+        if (VALUE_DB_ERROR === $ret) {
+            $ret = array();
+        }
+        $htmlAgency = '<select class="form-control" name="agency"><option value="0">请选择代理商</option>';
+        foreach ($ret as $value) {
+            $htmlAgency .= '<option value="' . $value['agency_id'] . '">' . $value['name'] . '(' . $value['agency_tel'] . ')</option>';
+        }
+        $htmlAgency .= '</select>';
+        //$htmlAgency = '<input type="text" class="form-control" name="agency" required>';
+        $htmlHospital = '<input type="text" class="form-control" name="hospital">';
         $htmlTitle = '<input type="text" class="form-control" name="title" required>';
         //$htmlTitleTime = '';
         $htmlNextTime = '<input type="date" name="next_time" value="" />';
@@ -54,7 +64,12 @@ if (isset($_POST['submit'])){
         $htmlTitle = '<label class="control-label">' . $data[0]['title'] . '</label>';
         //$htmlTitleTime = '<label class="control-label">' . $data[0]['title_time'] . '</label>';
         $htmlNextTime = '<input type="date" name="next_time" value="' . substr($data[0]['next_time'], 0, 10) . '" />';
-        $htmlStatus = '<select class="form-control" name="status"><option value="1">进行中</option><option value="2" >已关闭</option></select>';
+        if ($data[0]['status'] == '1') {
+            $optionStatus = '<option value="1" selected>进行中</option><option value="2" >已关闭</option>';
+        } else {
+            $optionStatus = '<option value="1">进行中</option><option value="2" selected>已关闭</option>';
+        }
+        $htmlStatus = '<select class="form-control" name="status">' . $optionStatus . '</select>';
         $htmlData = '<table class="table table-striped"><thead><tr><th>时间</th><th>沟通内容</th></tr></thead><tbody>';
         foreach ($data as $item) {
             $htmlData .= '<tr><td>' . $item['content_time'] . '</td><td>' . $item['content'] . '</td></tr>';

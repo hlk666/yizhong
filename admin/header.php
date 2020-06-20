@@ -53,6 +53,13 @@ EOF;
     } else {
         $siteSummary = '';
     }
+    if (in_array($user, ['hp', 'wxy', 'whl', 'fanzp'])) {
+        $siteCommu = '<ul class="nav nav-sidebar">
+          <li><a href="commu_title.php">沟通管理</a></li>
+        </ul>';
+    } else {
+        $siteCommu = '';
+    }
     if (in_array($user, ['hp', 'wxy', 'whl'])) {
         $sitePd = '<ul class="nav nav-sidebar">
           <li><a href="pd.php">生产部</a></li>
@@ -79,6 +86,7 @@ EOF;
     echo <<<EOF
       <div class="col-sm-2 blog-main" style="font-size:18px;margin-top:20px;">
         $siteSummary
+        $siteCommu
         $sitePd
         <ul class="nav nav-sidebar">
           <li><a href="hospital.php">医 院 基 本 信 息</a></li>
