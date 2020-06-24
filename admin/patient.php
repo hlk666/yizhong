@@ -147,7 +147,7 @@ echo <<<EOF
     <label for="guardian" class="control-label">监护ID</label>
   </div>
   <div class="col-xs-12 col-sm-4" style="margin-bottom:3px;">
-    <input type="text" class="form-control" name="guardian" id="guardian" value="$guardian">
+    <input type="number" class="form-control" name="guardian" id="guardian" value="$guardian">
   </div>
   <div class="col-xs-12 col-sm-2">
     <button type="submit" class="btn btn-sm btn-info" onclick="return display();">查看</button>
