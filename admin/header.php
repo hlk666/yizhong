@@ -7,6 +7,9 @@ if (false === stripos($_SERVER['REQUEST_URI'], 'index.php')) {
         exit;
     }
 }
+
+$auth_super = ['hp', 'wxy', 'whl'];
+$auth_level1 = ['hp', 'wxy', 'whl', 'pangx', 'fanzp']
 ?>
 <!DOCTYPE html>
   <head>
@@ -42,7 +45,7 @@ if (isset($isHideSider) && true === $isHideSider) {
 EOF;
 } else {
     $user = $_SESSION['user'];
-    if (in_array($user, ['hp', 'wxy', 'whl'])) {
+    if (in_array($user, $auth_super)) {
         $siteSummary = '<ul class="nav nav-sidebar">
           <li><a href="summary.php">前 日 统 计 信 息</a></li>
           <li><a href="qps.php"> 24 小 时 并 发</a></li>
@@ -53,21 +56,21 @@ EOF;
     } else {
         $siteSummary = '';
     }
-    if (in_array($user, ['hp', 'wxy', 'whl', 'fanzp'])) {
+    if (in_array($user, $auth_level1)) {
         $siteCommu = '<ul class="nav nav-sidebar">
           <li><a href="commu_title.php">沟通管理</a></li>
         </ul>';
     } else {
         $siteCommu = '';
     }
-    if (in_array($user, ['hp', 'wxy', 'whl'])) {
+    if (in_array($user, $auth_super)) {
         $sitePd = '<ul class="nav nav-sidebar">
           <li><a href="pd.php">生产部</a></li>
         </ul>';
     } else {
         $sitePd = '';
     }
-    if (in_array($user, ['hp', 'wxy', 'xks1', 'whl', 'pangx', 'fanzp'])) {
+    if (in_array($user, $auth_level1)) {
         $siteDevice = '<ul class="nav nav-sidebar">
           <li><a href="device.php">设 备 基 本 信 息</a></li>
           <li><a href="delivery.php">调配设备</a></li>
@@ -75,7 +78,7 @@ EOF;
     } else {
         $siteDevice = '';
     }
-    if (in_array($user, ['hp', 'wxy', 'xks1', 'whl', 'pangx', 'fanzp'])) {
+    if (in_array($user, $auth_level1)) {
         $siteMember = '<ul class="nav nav-sidebar">
           <li><a href="agency.php">代理商列表</a></li>
           <li><a href="add_salesman.php">添加 业务员</a></li>

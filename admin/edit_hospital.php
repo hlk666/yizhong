@@ -266,7 +266,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         $style = 'info';
     }
     
-    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx', 'fanzp'])) {
+    if (in_array($_SESSION['user'], $auth_level1)) {
         $authEditHospitalSubmit = '<button type="submit" class="btn btn-lg btn-' 
                 . $style . '" name="' . $action . '">' . $button . '</button>';
     } else {

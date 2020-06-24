@@ -61,7 +61,7 @@ foreach ($ret as $value) {
         $link = '<a href="hospital_device.php?hospital=' . $value['hospital_id'] . '">' . $value['quantity'] . '</a>';
     }
     
-    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx', 'fanzp'])) {
+    if (in_array($_SESSION['user'], $auth_level1)) {
         $authHospitalEditHospital = '<button type="button" class="btn btn-xs btn-warning" onclick="javascript:editHospital(' 
                 . $value['hospital_id'] . ')">修改</button></td><td>';
         $authHospitalEditRelation = '<button type="button" class="btn btn-xs btn-info" onclick="javascript:editRelation(' 
