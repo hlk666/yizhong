@@ -296,6 +296,16 @@ class DbiAdmin extends BaseDbi
         $this->pdo->commit();
         return $hospitalId;
     }
+    public function addExamQuestion($id, $type, $level, $url)
+    {
+        if (empty($id)) {
+            $sql = "insert into exam_question (type, level, url) values ('$type', '$level', '$url')";
+        } else {
+            $sql = "update exam_question set type = '$type', level = '$level', url = '$url' where id = '$id'";
+        }
+        
+        return $this->updateData($sql);
+    }
     public function addHospitalParent($hospitalId, $parentHospital)
     {
         $sql = 'insert into hospital_relation(hospital_id, parent_hospital_id)
@@ -1057,6 +1067,20 @@ class DbiAdmin extends BaseDbi
     public function getEcgActive()
     {
         $sql = 'select guardian_id, max(create_time) as alert_time from ecg where create_time > date_add(now(), interval -1 hour) group by guardian_id';
+        return $this->getDataAll($sql);
+    }
+    public function getExamQuestion($count, $type, $level)
+    {
+        $sql = "select * from exam_question where 1 ";
+        if (!empty($type)) {
+            $sql .= " and type = '$type' ";
+        }
+        if (!empty($level)) {
+            $sql .= " and level = '$level' ";
+        }
+        if (!empty($count)) {
+            $sql .= " order by rand() limit $count";
+        }
         return $this->getDataAll($sql);
     }
     public function getGuardiansByRegistTime($startTime, $endTime, $exceptHospitalList)
