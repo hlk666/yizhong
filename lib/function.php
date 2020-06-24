@@ -86,7 +86,7 @@ function get_rows_by_resolution($height, $webView, $noticeRow = 0)
 //only for admin folder because using path:tpl/***.
 function user_back_after_delay($message, $delayTime = 2000, $url = null)
 {
-    echo '<font color="#eb9316" size="5px">' . $message . '<br>' . ($delayTime / 1000) . '秒后自动跳转页面。</font>';
+    echo '<font color="#eb9316" size="5px">' . $message . '</font><br>' . ($delayTime / 1000) . '秒后自动跳转页面。';
     if (null == $url) {
         echo '<script language="javascript">setTimeout("history.back()", ' . $delayTime . ');</script>';
     } else {
