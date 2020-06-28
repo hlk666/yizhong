@@ -440,6 +440,7 @@ class Dbi extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
+    /*
     public function getHospitalChild($hospitalId)
     {
         $sql = "select h.hospital_id, hospital_name from hospital as h
@@ -447,6 +448,7 @@ class Dbi extends BaseDbi
                 where r.parent_hospital_id = '$hospitalId'";
         return $this->getDataAll($sql, [], false);
     }
+    */
     public function getHospitalParent($hospitalId)
     {
         $sql = 'select h.hospital_id, hospital_name from hospital as h

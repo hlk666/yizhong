@@ -31,9 +31,13 @@ if (isset($_POST['save']) || isset($_POST['add'])){
         
         $ret = DbiAdmin::getDbi()->addHospitalParent($hospitalId, $parentHospital);
     }
-    //@todo
-    //refresh data and cache
-    //send a message to device which is belong to the hospital
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, 'http://101.200.174.235/batch/refresh_relation.php');
+    $data = curl_exec($ch);
+    curl_close($ch);
+    //@todo send a message to device which is belong to the hospital
+    
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
@@ -71,7 +75,7 @@ if (isset($_POST['save']) || isset($_POST['add'])){
         $htmlHospitalParentList .= '<option value="' . $value['hospital_id'] . '">' . $value['hospital_name'] . '</option>';
     }
     
-    if (in_array($_SESSION['user'], ['hp', 'wxy', 'xks1', 'whl', 'pangx', 'fanzp'])) {
+    if (in_array($_SESSION['user'], $auth_level1)) {
         $authEditRelationSubmitEdit = '<button type="submit" class="btn btn-lg btn-info" name="save">保存修改</button>';
         $authEditRelationSubmitAdd = '<button type="submit" class="btn btn-lg btn-info" name="add">添加新的上级医院</button>';
     } else {

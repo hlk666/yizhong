@@ -1499,7 +1499,18 @@ class DbiAdmin extends BaseDbi
                 from hospital_relation as r1
                 left join hospital_relation as r2 on r1.parent_hospital_id = r2.hospital_id
                 left join hospital_relation as r3 on r2.parent_hospital_id = r3.hospital_id
-                order by r1.hospital_id;';
+                order by r1.hospital_id';
+        return $this->getDataAll($sql);
+    }
+    public function getRelationChild()
+    {
+        $sql = 'select parent_hospital_id, GROUP_CONCAT(hospital_id) as child from hospital_relation
+                group by parent_hospital_id ';
+        return $this->getDataAll($sql);
+    }
+    public function getRelationChildName($id)
+    {
+        $sql = "select hospital_id, hospital_name from hospital where hospital_id in ($id)";
         return $this->getDataAll($sql);
     }
     public function getReportPatients($hospitalId)
