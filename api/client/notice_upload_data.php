@@ -4,6 +4,7 @@ require_once PATH_LIB . 'DbiAdmin.php';
 require_once PATH_LIB . 'Validate.php';
 //require_once PATH_ROOT . 'lib/tool/HpMessage.php';
 require_once PATH_LIB . 'ShortMessageService.php';
+require PATH_LIB . 'Mqtt.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
@@ -174,6 +175,10 @@ if (VALUE_DB_ERROR === $tree || array() == $tree) {
         $noticeHospital2 = $tree['report_hospital'];
     }
 }
+$mqtt = new Mqtt();
+$data = [['type' => 'holter', 'id' => $tree['analysis_hospital'], 'event'=>'upload_24h', 
+                'message'=>"id=$guardianId,url=$url,device_type=$deviceType"]];
+$mqtt->publish($data);
 //20200317 start
 /*
 if ($deviceType == '1') {
@@ -245,6 +250,8 @@ api_exit_success();
 
 function moveData($patientId)
 {
+    return false;
+    
     $isNoticed = false;
     $hospitalConfig = DbiAnalytics::getDbi()->getReportHospitalByPatient($patientId);
     if ($hospitalConfig === VALUE_DB_ERROR) {
