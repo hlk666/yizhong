@@ -97,8 +97,8 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
     //it is simple to edit code here for erp.2018-03-22 start.
+    /*
     $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'erp' . DIRECTORY_SEPARATOR . 'changed_hospital.txt';
-    
     if (!file_exists($file)) {
         file_put_contents($file, $hospitalId);
     } else {
@@ -107,6 +107,7 @@ if (isset($_POST['edit']) || isset($_POST['del'])){
         $newArray = array_unique($oldArray);
         file_put_contents($file, implode(',', $newArray));
     }
+    */
     //2018-03-22 end.
     
     $_SESSION['post'] = true;
