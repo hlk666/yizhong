@@ -93,6 +93,8 @@ if ($agency == 113) {
         $client = new SoapClient('http://120.194.75.148:8008/services/apiservice.asmx?WSDL');
     } elseif ($patient['regist_hospital_id'] == 802) {
         $client = new SoapClient('http://218.28.211.1:8008/services/apiservice.asmx?WSDL');
+    } elseif ($patient['regist_hospital_id'] == 793) {
+        $client = new SoapClient('http://117.158.59.210:8008/services/apiservice.asmx?WSDL');
     } else {
         $client = new SoapClient('http://holter.hnecg.com/services/apiservice.asmx?WSDL');
     }
@@ -160,6 +162,7 @@ if ($agency == 113) {
         Logger::write('henan_agency.log', 'failed to new soap client.');
     }
     Logger::write('henan_agency.log', 'end: ' . $guardianId);
+    api_exit_success();
 }
 
 $noticeHospital1 = '0';
@@ -175,9 +178,22 @@ if (VALUE_DB_ERROR === $tree || array() == $tree) {
         $noticeHospital2 = $tree['report_hospital'];
     }
 }
+
+$dbPatient = DbiAnalytics::getDbi()->getPatientWhenUploadData($guardianId);
+if (VALUE_DB_ERROR === $dbPatient || empty($dbPatient)) {
+    //do nothing.
+} else {
+    setPatient($guardianId, $dbPatient);
+}
+$mqttMessage = 'patient_id=' . $guardianId 
+                . ',url=' . $dbPatient['url']
+                . ',upload_time=' . $dbPatient['upload_time']
+                . ',device_type=' . $dbPatient['device_type']
+                . ',data_status=' . $dbPatient['data_status']
+                . ',moved_hospital=' . $dbPatient['moved_hospital']
+                . ',moved_hospital_name=' . $dbPatient['moved_hospital_name'];
 $mqtt = new Mqtt();
-$data = [['type' => 'holter', 'id' => $tree['analysis_hospital'], 'event'=>'upload_24h', 
-                'message'=>"id=$guardianId,url=$url,device_type=$deviceType"]];
+$data = [['type' => 'holter', 'id' => $tree['analysis_hospital'], 'event'=>'upload_24h', 'message'=>$mqttMessage]];
 $mqtt->publish($data);
 //20200317 start
 /*

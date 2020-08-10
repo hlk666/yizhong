@@ -1,6 +1,7 @@
 <?php
 require_once PATH_LIB . 'Validate.php';
 require PATH_ROOT . 'lib/DbiAnalytics.php';
+require PATH_LIB . 'Mqtt.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
@@ -83,6 +84,28 @@ if ($type == '2') {
 //fix bug happened when moved more than one time.end
 
 setNotice($hospitalTo, 'move_data', $guardianId);
+
+$dbPatient = DbiAnalytics::getDbi()->getPatientWhenUploadData($guardianId);
+if (VALUE_DB_ERROR === $dbPatient || empty($dbPatient)) {
+    //do nothing.
+} else {
+    setPatient($guardianId, $dbPatient);
+}
+$mqtt = new Mqtt();
+
+$mqttMessageFrom = 'patient_id=' . $guardianId;
+$mqttMessageTo = 'patient_id=' . $guardianId 
+                . ',url=' . $dbPatient['url']
+                . ',upload_time=' . $dbPatient['upload_time']
+                . ',device_type=' . $dbPatient['device_type']
+                . ',data_status=' . $dbPatient['data_status']
+                . ',moved_hospital=' . $dbPatient['moved_hospital']
+                . ',moved_hospital_name=' . $dbPatient['moved_hospital_name'];
+$data = [
+            ['type' => 'holter', 'id' => $hospitalFrom, 'event'=>'move_from', 'message'=>$mqttMessageFrom],
+            ['type' => 'holter', 'id' => $hospitalTo, 'event'=>'move_to', 'message'=>$mqttMessageTo]
+];
+$mqtt->publish($data);
 
 api_exit_success();
 

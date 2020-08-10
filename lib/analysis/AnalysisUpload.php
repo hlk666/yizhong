@@ -3,6 +3,7 @@ require_once PATH_LIB . 'Logger.php';
 require_once PATH_ROOT . 'lib/DbiAnalytics.php';
 //require_once PATH_ROOT . 'lib/DbiChronic.php';
 require_once PATH_LIB . 'ShortMessageService.php';
+require PATH_LIB . 'Mqtt.php';
 
 class AnalysisUpload
 {
@@ -79,46 +80,78 @@ class AnalysisUpload
             }
         }
         
+        $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
+        if (VALUE_DB_ERROR === $tree || empty($tree)) {
+            return json_encode($this->retSuccess);
+        }
         if ('1' == $message) {
-            $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
-            if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
-                if ('hbi' == $type) {
-                    setNotice($tree['report_hospital'], $type, $guardianId);
-                    if ($tree['report_hospital'] == 175) {
-                        ShortMessageService::send('13963896768', '有新的已分析数据，请审阅报告。');
-                    }
+            if ('hbi' == $type) {
+                setNotice($tree['report_hospital'], $type, $guardianId);
+                if ($tree['report_hospital'] == 175) {
+                    ShortMessageService::send('13963896768', '有新的已分析数据，请审阅报告。');
                 }
-                /*
-                if ('report' == $type && in_array($param['report_doctor'], [233, 446])) {
-                    setNotice('1', 'report', $guardianId);
-                }
-                */
-                if ('report' == $type && $tree['hospital_id'] != $tree['report_hospital']) {
-                    setNotice($tree['hospital_id'], $type, $guardianId);
-                }
+            }
+            if ('report' == $type && $tree['hospital_id'] != $tree['report_hospital']) {
+                setNotice($tree['hospital_id'], $type, $guardianId);
             }
         }
         
-        if ($type == 'report') {
-            $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
-            if (VALUE_DB_ERROR !== $tree && array() !== $tree) {
-                clearNotice($tree['analysis_hospital'], 'upload_data', $guardianId);
-                clearNotice($tree['report_hospital'], 'upload_data', $guardianId);
-                
-                //special action for zhongda start.
-                if (in_array($tree['report_hospital'], [132])) {
-                    $ret = DbiAnalytics::getDbi()->setZhongdaData($guardianId);
-                    if (VALUE_DB_ERROR === $ret) {
-                        Logger::write('zhongda.log', "zhongda error.");
-                    }
-                    $file = PATH_ROOT . 'zhongda_report' . DIRECTORY_SEPARATOR . $guardianId . '.pdf';
-                    $ret = file_put_contents($file, $data);
-                    if (false === $ret) {
-                        Logger::write('zhongda.log', "faied to save file to zhongda dir.");
-                    }
-                }
-                //special action for zhongda end.
+        if ($type == 'hbi' && $tree['analysis_hospital'] != $tree['report_hospital']) {
+            $dbPatient = DbiAnalytics::getDbi()->getPatientWhenUploadReport($guardianId);
+            if (VALUE_DB_ERROR === $dbPatient || empty($dbPatient)) {
+                //do nothing.
+            } else {
+                setPatient($guardianId, $dbPatient);
             }
+            $mqttMessage = 'patient_id=' . $guardianId
+                . ',data_status=' . $dbPatient['data_status']
+                . ',report_time=' . $dbPatient['report_time']
+                . ',hbi_doctor=' . $dbPatient['hbi_doctor']
+                . ',hbi_doctor_name=' . $dbPatient['hbi_doctor_name']
+                . ',report_doctor=' . $dbPatient['report_doctor']
+                . ',report_doctor_name=' . $dbPatient['report_doctor_name'];
+            $mqtt = new Mqtt();
+            $data = [['type' => 'holter', 'id' => $tree['report_hospital'], 'event'=>'upload_hbi', 'message'=>$mqttMessage]];
+            $mqtt->publish($data);
+        }
+        if ($type == 'report' && $tree['hospital_id'] != $tree['report_hospital']) {
+            $dbPatient = DbiAnalytics::getDbi()->getPatientWhenUploadReport($guardianId);
+            if (VALUE_DB_ERROR === $dbPatient || empty($dbPatient)) {
+                //do nothing.
+            } else {
+                setPatient($guardianId, $dbPatient);
+            }
+            $mqttMessage = 'patient_id=' . $guardianId
+                . ',data_status=' . $dbPatient['data_status']
+                . ',report_time=' . $dbPatient['report_time']
+                . ',hbi_doctor=' . $dbPatient['hbi_doctor']
+                . ',hbi_doctor_name=' . $dbPatient['hbi_doctor_name']
+                . ',report_doctor=' . $dbPatient['report_doctor']
+                . ',report_doctor_name=' . $dbPatient['report_doctor_name'];
+            $mqtt = new Mqtt();
+            $data = [['type' => 'online', 'id' => $tree['hospital_id'], 'event'=>'upload_report', 'message'=>$mqttMessage]];
+            $mqtt->publish($data);
+        }
+        
+        if ($type == 'report') {
+            clearNotice($tree['analysis_hospital'], 'upload_data', $guardianId);
+            clearNotice($tree['report_hospital'], 'upload_data', $guardianId);
+            
+            //special action for zhongda start.
+            /*
+            if (in_array($tree['report_hospital'], [132])) {
+                $ret = DbiAnalytics::getDbi()->setZhongdaData($guardianId);
+                if (VALUE_DB_ERROR === $ret) {
+                    Logger::write('zhongda.log', "zhongda error.");
+                }
+                $file = PATH_ROOT . 'zhongda_report' . DIRECTORY_SEPARATOR . $guardianId . '.pdf';
+                $ret = file_put_contents($file, $data);
+                if (false === $ret) {
+                    Logger::write('zhongda.log', "faied to save file to zhongda dir.");
+                }
+            }
+            */
+            //special action for zhongda end.
         }
         
         return json_encode($this->retSuccess);

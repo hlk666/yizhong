@@ -422,16 +422,16 @@ class Dbi extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = 'select hospital_id, hospital_name, address, tel, parent_flag, sms_tel, upload_flag, type
-                from hospital where hospital_id = :hospital_id limit 1';
-        $param = [':hospital_id' => $hospitalId];
-        return $this->getDataRow($sql, $param);
+        $sql = "select hospital_id, hospital_name, address, tel, parent_flag, sms_tel, upload_flag, type, vip_flag
+                from hospital where hospital_id = '$hospitalId' limit 1";
+        return $this->getDataRow($sql);
     }
     public function getHospitalList($hospitals)
     {
         $sql = 'select hospital_id, hospital_name, tel, level, device_sale, type, create_time, h.agency_id, 
                 h.salesman_id, a.agency_name, s.salesman_name, need_follow, province, city, county, 
-                filter, need_follow_report, contact, invoice_bank as notice_rule, notice_flag, vip_flag, guard_flag
+                filter, need_follow_report, contact, invoice_bank as notice_rule, notice_flag, vip_flag, 
+                guard_flag, relation_level
                 from hospital as h 
                 left join agency as a on h.agency_id = a.agency_id 
                 left join salesman as s on h.salesman_id = s.salesman_id';

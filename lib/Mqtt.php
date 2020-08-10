@@ -5,7 +5,8 @@ require_once PATH_ROOT . 'vendor\\emqx\\phpMQTT.php';
 
 class Mqtt
 {
-    private $logFile = 'mqtt.log';
+    private $logFile = 'mqtt_logic.log';
+    private $logFileError = 'mqtt_error.log';
     private $server = '39.106.71.114';
     private $port = 1883;
     private $user = 'yizhong';
@@ -19,7 +20,7 @@ class Mqtt
                 $this->mqtt = new phpMQTT($this->server, $this->port, uniqid());
             }
         } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
+            Logger::writeByHour($this->logFileError, $e->getMessage());
         }
     }
     
@@ -33,7 +34,7 @@ class Mqtt
         $qos = 0;
         $retain = 0;
         if (!is_array($data) || empty($data)) {
-            Logger::write($this->logFile, 'topic or message param is wrong.');
+            Logger::write($this->logFileError, 'topic or message param is wrong.');
             return false;
         }
         $topicList = array();
@@ -41,17 +42,22 @@ class Mqtt
         foreach ($data as $row) {
             if (!is_array($row) || !isset($row['type']) || !isset($row['id'])
                 || !isset($row['event']) || !isset($row['message'])) {
-                    Logger::write($this->logFile, 'topic or message param is wrong.');
+                    Logger::write($this->logFileError, 'format error.');
                     return false;
                 }
                 if ($row['type'] == 'online') {
                     $topic = $row['type'] . '/';
                     $relationFile = PATH_DATA . 'relation' . DIRECTORY_SEPARATOR . $row['id'] . '.txt';
-                    $topic .= file_get_contents($relationFile) . '/' . $row['event'];
+                    if (file_exists($relationFile)) {
+                        $idLevel = file_get_contents($relationFile);
+                    } else {
+                        $idLevel = $row['id'] . '/' . $row['id'] . '/' . $row['id'] . '/' . $row['id'];
+                    }
+                    $topic .= $idLevel . '/' . $row['event'];
                 } elseif ($row['type'] == 'holter') {
                     $topic = $row['type'] . '/' . $row['id'] . '/' . $row['event'];
                 } else {
-                    Logger::write($this->logFile, 'type is wrong.');
+                    Logger::write($this->logFileError, 'type is wrong.');
                     return false;
                 }
                 
@@ -68,11 +74,11 @@ class Mqtt
                 $this->mqtt->close();
                 return true;
             } else {
-                Logger::write($this->logFile, 'connect failed');
+                Logger::write($this->logFileError, 'connect failed');
                 return false;
             }
         } catch (Exception $e) {
-            Logger::write($this->logFile, $e->getMessage());
+            Logger::write($this->logFileError, $e->getMessage());
             return false;
         }
     }

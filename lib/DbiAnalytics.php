@@ -156,6 +156,39 @@ class DbiAnalytics extends BaseDbi
         $param = array(':guardian_id' => $guardianId);
         return $this->getDataRow($sql, $param);
     }
+    public function getPatientBase($guardianId)
+    {
+        $sql = "select g.guardian_id, g.device_id, g.start_time, g.end_time,
+                g.regist_hospital_id, h.hospital_name as regist_hospital_name, h.vip_flag,
+                p.patient_name, (year(now())-birth_year) as age, p.sex,
+                d.url, d.upload_time, d.device_type, d.`status` as data_status, d.report_time,
+                d.hbi_doctor, d.report_doctor,
+                d.moved_hospital, h1.hospital_name as moved_hospital_name
+                from guardian as g inner join patient as p on g.patient_id = p.patient_id
+                inner join hospital as h on g.regist_hospital_id = h.hospital_id
+                inner join guardian_data as d on g.guardian_id = d.guardian_id
+                left join hospital as h1 on d.moved_hospital = h1.hospital_id
+                where g.guardian_id = '$guardianId' limit 1";
+        return $this->getDataRow($sql);
+    }
+    public function getPatientWhenUploadData($guardianId)
+    {
+        $sql = "select d.guardian_id, d.url, d.upload_time, d.device_type, d.`status` as data_status, 
+                d.moved_hospital, h.hospital_name as moved_hospital_name
+                from guardian_data as d left join hospital as h on d.moved_hospital = h.hospital_id
+                where d.guardian_id = '$guardianId' limit 1";
+        return $this->getDataRow($sql);
+    }
+    public function getPatientWhenUploadReport($guardianId)
+    {
+        $sql = "select d.guardian_id, d.`status` as data_status, d.report_time, 
+                d.hbi_doctor, a1.real_name as hbi_doctor_name, 
+                d.report_doctor, a2.real_name as report_doctor_name
+                from guardian_data as d left join account as a1 on d.hbi_doctor = a1.account_id
+                left join account as a2 on d.report_doctor = a2.account_id
+                where d.guardian_id = '$guardianId' limit 1";
+        return $this->getDataRow($sql);
+    }
     public function getPatientForHenan($guardianId)
     {
         $sql = "select start_time, end_time, patient_name as name, birth_year, sex, h.hospital_name, 

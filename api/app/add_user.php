@@ -3,6 +3,7 @@ require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Invigilator.php';
 //require_once PATH_LIB . 'ShortMessageService.php';
+require PATH_LIB . 'Mqtt.php';
 
 validate_add_user($_POST);
 
@@ -233,7 +234,46 @@ if ($registHospital == '1' || $registHospital == '40') {
     setRegistNotice('1', $mode);
 }
 
+$cacheData = array();
+$cacheData['guardian_id'] = $guardianId;
+$cacheData['regist_hospital_id'] = $registHospital;
+$cacheHospital = Dbi::getDbi()->getHospitalInfo($registHospital);
+if (VALUE_DB_ERROR === $cacheHospital) {
+    $cacheData['regist_hospital_name'] = '';
+    $cacheData['vip_flag'] = '';
+} else {
+    $cacheData['regist_hospital_name'] = $cacheHospital['hospital_name'];
+    $cacheData['vip_flag'] = $cacheHospital['vip_flag'];
+}
+
+$cacheData['patient_name'] = $name;
+$cacheData['age'] = $age;
+$cacheData['sex'] = $sex;
+$cacheData['device_id'] = $device;
+$cacheData['start_time'] = date('Y-m-d H:i:s');
+setPatient($guardianId, $cacheData);
+
 updateWorkPool($guardianId);
+
+$mqttMessage = 'patient_id=' . $guardianId
+. ',mode=' . $mode
+. ',device=' . $device
+. ',patient_name=' . $name
+. ',sex=' . $sex
+. ',age=' . $age
+. ',tel=' . $tel
+. ',start_time=' . $cacheData['start_time']
+. ',blood_pressure=' . $bloodPressure
+. ',tentative_diagnose=' . $tentativeDiagnose
+. ',medical_history=' . $medicalHistory
+. ',hospitalization_id=' . $hospitalizationId
+. ',regist_doctor_name=' . $doctorName
+. ',sickroom=' . $sickRoom
+. ',family_tel=' . $familyTel;
+
+$mqtt = new Mqtt();
+$data = [['type' => 'online', 'id' => $registHospital, 'event'=>'add_user', 'message'=>$mqttMessage]];
+$mqtt->publish($data);
 
 if (VALUE_GT_ERROR === $ret) {
     api_exit(['code' => '3', 'message' => MESSAGE_GT_ERROR]);
