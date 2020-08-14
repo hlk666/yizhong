@@ -296,12 +296,15 @@ class DbiAdmin extends BaseDbi
         $this->pdo->commit();
         return $hospitalId;
     }
-    public function addExamQuestion($id, $type, $level, $url)
+    public function addExamQuestion($id, $type, $miniType, $level, $url)
     {
         if (empty($id)) {
-            $sql = "insert into exam_question (type, level, url) values ('$type', '$level', '$url')";
+            $sql = "insert into exam_question (type, mini_type, level, url) 
+                    values ('$type', '$miniType', '$level', '$url')";
         } else {
-            $sql = "update exam_question set type = '$type', level = '$level', url = '$url' where id = '$id'";
+            $sql = "update exam_question 
+                    set type = '$type', mini_type = '$miniType', level = '$level', url = '$url' 
+                    where id = '$id'";
         }
         
         return $this->updateData($sql);
@@ -416,6 +419,11 @@ class DbiAdmin extends BaseDbi
             return VALUE_DB_ERROR;
         }
         return true;
+    }
+    public function delExamQuestion($id)
+    {
+        $sql = "delete from exam_question where id = '$id'";
+        return $this->deleteData($sql);
     }
     public function delHospital($hospitalId)
     {
@@ -1083,6 +1091,15 @@ class DbiAdmin extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
+    public function getExamQuestionQty($type)
+    {
+        if ($type == 'type') {
+            $sql = 'select type, count(id) as qty from exam_question group by type';
+        } else {
+            $sql = 'select type, mini_type, count(id) as qty from exam_question group by type, mini_type';
+        }
+        return $this->getDataAll($sql);
+    }
     public function getGuardiansByRegistTime($startTime, $endTime, $exceptHospitalList)
     {
         $sql = 'select guardian_id, device_id, regist_hospital_id, guard_hospital_id, mode, p.patient_name, 
@@ -1409,7 +1426,7 @@ class DbiAdmin extends BaseDbi
     public function getGuardianByReportKeyword($keyword, $startTime, $endTime)
     {
         $sql = "select g.guardian_id as patient_id, p.patient_name, d.report_time, a.real_name as doctor_name, 
-                regist_hospital_id as hospital_id
+                regist_hospital_id as hospital_id, a.hospital_id as report_hospital_id
                 from guardian as g
                 inner join guardian_data as d on g.guardian_id = d.guardian_id
                 inner join patient as p on g.patient_id = p.patient_id
@@ -1521,6 +1538,20 @@ class DbiAdmin extends BaseDbi
                 where d.status = 5 and g.regist_hospital_id = '$hospitalId' 
                 and g.start_time > date_add(now(), interval -7 day) order by g.guardian_id desc";
     
+        return $this->getDataAll($sql);
+    }
+    public function getReportResult($hospital, $startTime, $endTime)
+    {
+        $sql = "select g.guardian_id, g.guardian_result, d.report_time, a.real_name as doctor
+                from guardian as g inner join guardian_data as d on g.guardian_id = d.guardian_id
+                inner join account as a on d.report_doctor = a.account_id
+                where d.`status` in (5, 8) and a.hospital_id in ($hospital)";
+        if (!empty($startTime)) {
+            $sql .= " and d.report_time > '$startTime' ";
+        }
+        if (!empty($endTime)) {
+            $sql .= " and d.report_time < '$endTime' ";
+        }
         return $this->getDataAll($sql);
     }
     public function getSalesmanAgency($id)
