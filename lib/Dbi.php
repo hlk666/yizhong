@@ -422,7 +422,7 @@ class Dbi extends BaseDbi
     }
     public function getHospitalInfo($hospitalId)
     {
-        $sql = "select hospital_id, hospital_name, address, tel, parent_flag, sms_tel, upload_flag, type, vip_flag
+        $sql = "select hospital_id, hospital_name, address, tel, parent_flag, sms_tel, upload_flag, type, vip_flag, relation_level
                 from hospital where hospital_id = '$hospitalId' limit 1";
         return $this->getDataRow($sql);
     }

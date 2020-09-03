@@ -80,4 +80,5 @@ if (VALUE_DB_ERROR === $ret) {
 $result['hospital_name'] = $ret['hospital_name'];
 $result['upload_flag'] = $ret['upload_flag'];
 $result['hospital_type'] = $ret['type'];
+$result['relation_level'] = $ret['relation_level'];
 api_exit($result);
