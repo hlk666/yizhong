@@ -236,7 +236,7 @@ class DbiAnalytics extends BaseDbi
             $startTime = null, $endTime = null, $status = null, $hbiDoctor = null, $reportDoctor = null, $text = null)
     {
         $sql = "select h.hospital_id, h.hospital_name, h.tel as hospital_tel,
-                d.status, d.upload_time, d.type, 
+                d.status, d.upload_time, d.type, d.device_type,
                 a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor, 
                 g.guardian_id as patient_id, start_time, end_time, g.device_id, sickroom, hospitalization_id, 
                 regist_doctor_name as doctor_name, a1.account_id as hbi_doctor_id, a2.account_id as report_doctor_id,
@@ -390,6 +390,13 @@ class DbiAnalytics extends BaseDbi
         }
         if ($deviceType == '1') {
             //$set .= ', moved_hospital = 119, type = 2';
+            //20201019 from honglei
+            if ($status > 1) {
+                $sqlGuardian = "update guardian set start_time = DATE_ADD(start_time,INTERVAL 1 SECOND) 
+                where guardian_id = '$guardianId'";
+                $this->updateData($sqlGuardian);
+            }
+            //20201019 from honglei
         }
         $sql = "update guardian_data $set where guardian_id = '$guardianId'";
         return $this->updateData($sql);
