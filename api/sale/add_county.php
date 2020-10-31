@@ -1,5 +1,5 @@
 <?php
-require_once PATH . 'db/DbiSale.php';
+require_once PATH_LIB . 'db/DbiSale.php';
 require_once PATH_LIB . 'Validate.php';
 
 if (false === Validate::checkRequired($_POST['county_id'])) {

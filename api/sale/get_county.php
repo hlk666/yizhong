@@ -2,12 +2,10 @@
 require_once PATH_LIB . 'db/DbiSale.php';
 require_once PATH_LIB . 'Validate.php';
 
-$hospitalId = isset($_GET['hospital_id']) && !empty($_GET['hospital_id']) ? $_GET['hospital_id'] : null;
+$county = isset($_GET['county']) && !empty($_GET['county']) ? $_GET['county'] : null;
 $agencyId = isset($_GET['agency_id']) && !empty($_GET['agency_id']) ? $_GET['agency_id'] : null;
-$startTime = isset($_GET['start_time']) && !empty($_GET['start_time']) ? $_GET['start_time'] : null;
-$endTime = isset($_GET['end_time']) && !empty($_GET['end_time']) ? $_GET['end_time'] : null;
 
-$ret = DbiSale::getDbi()->getBid($hospitalId, $agencyId, $startTime, $endTime);
+$ret = DbiSale::getDbi()->getCounty($county, $agencyId);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
