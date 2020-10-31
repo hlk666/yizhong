@@ -7,7 +7,7 @@ $data = file_get_contents('php://input');
 $upload = new AnalysisUpload();
 $param = array_merge($_GET, $_POST);
 $exec = $upload->run($param, $data, 'report');
-
+/*
 $guardianId = $param['patient_id'];
 if (!empty($guardianId)) {
     $isQianyi = DbiAnalytics::getDbi()->isQianyi($guardianId);
@@ -15,5 +15,5 @@ if (!empty($guardianId)) {
         DbiAnalytics::getDbi()->saveQianyiData($guardianId);
     }
 }
-
+*/
 echo $exec;
