@@ -9,7 +9,8 @@ validate_add_user($_POST);
 
 $device = $_POST['device_id'];
 $mode = $_POST['mode'];
-$name = $_POST['name'];
+//$name = $_POST['name'];
+$name = str_replace('\'', '', $_POST['name']);
 $age = $_POST['age'];
 $sex = $_POST['sex'];
 $tel = $_POST['tel'];
@@ -258,6 +259,9 @@ updateWorkPool($guardianId);
 $mqttMessage = 'patient_id=' . $guardianId
 . ',mode=' . $mode
 . ',device=' . $device
+. ',hospital_id=' . $cacheHospital['hospital_id']
+. ',hospital_name=' . $cacheHospital['hospital_name']
+. ',hospital_tel=' . $cacheHospital['tel']
 . ',patient_name=' . $name
 . ',sex=' . $sex
 . ',age=' . $age
