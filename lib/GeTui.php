@@ -6,7 +6,8 @@ class GeTui
 {
     private static $logFile = 'logGeTui.txt';
     private static $expireTime = 43200000;
-    private static $host = 'http://sdk.open.api.igexin.com/apiex.htm';
+    //private static $host = 'http://sdk.open.api.igexin.com/apiex.htm';
+    private static $host = 'http://api.getui.com/apiex.htm';
     private static $appKey = 'RpokWausp66vOTjzldNdL6';
     private static $appID = 'TX020LLatZ8GVs77HXktx4';
     private static $masterSecret = 'fWnMdJQ9lt8D89ft5f9Qh8';
