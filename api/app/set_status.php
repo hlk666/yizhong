@@ -2,6 +2,7 @@
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_LIB . 'Dbi.php';
+require PATH_LIB . 'Mqtt.php';
 
 $data = array_merge($_GET, $_POST);
 if (false === Validate::checkRequired($data['device_id'])) {
@@ -40,5 +41,14 @@ $ret = Dbi::getDbi()->addDeviceStatus($data['device_id'],
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
+
+$mqttMessage = 'device_id=' . $data['device_id'] 
+    . ',phone_power=' . $data['phone_power']
+    . ',collection_power=' . $data['collection_power']
+    . ',bluetooth=' . $data['bluetooth']
+    . ',line=' . $data['line'];
+$mqtt = new Mqtt();
+$data = [['type' => 'online', 'id' => '1', 'event'=>'phone_status', 'message'=>$mqttMessage]];
+$mqtt->publish($data);
 
 api_exit_success();
