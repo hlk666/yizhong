@@ -126,7 +126,7 @@ class DbiAnalytics extends BaseDbi
     {
         $sql = "select t.hospital_id, analysis_hospital, report_hospital, title1 as title_hospital,
                 h1.hospital_name as title_hospital_name, h1.comment, h1.display_check, h1.report_must_check,
-                0 as `double`, title2, h2.hospital_name as title2_name, h.vip_flag
+                0 as `double`, title2, h2.hospital_name as title2_name, h.vip_flag, t.requirement
                 from hospital_tree as t inner join hospital as h on t.hospital_id = h.hospital_id
                 left join hospital as h1 on t.title1 = h1.hospital_id
                 left join hospital as h2 on t.title2 = h2.hospital_id
