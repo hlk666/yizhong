@@ -844,6 +844,11 @@ class Dbi extends BaseDbi
                 values ('$guardianId', '$deviceId', '$fileSize', '$leftSize', '$totalSize')";
         return $this->insertData($sql);
     }
+    public function saveLoginExe($accountId, $name, $exe)
+    {
+        $sql = "insert into login_exe(account_id, account_name, exe) values ('$accountId', '$name', '$exe')";
+        return $this->insertData($sql);
+    }
     public function updateDoctorType($id, $type)
     {
         $sql = "update account set type = '$type' where account_id = '$id'";
