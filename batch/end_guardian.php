@@ -2,6 +2,7 @@
 require 'common.php';
 require_once PATH_LIB . 'Invigilator.php';
 require_once PATH_LIB . 'Dbi.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 $files = scandir(PATH_CACHE_CMD);
 foreach ($files as $file) {
@@ -40,12 +41,12 @@ function check_guardian($id)
         }
         $patient = setPatientBatch($id, ['end_time' => date('Y-m-d H:i:s')]);
         
-        $mqttMessage = 'patient_id=' . $id;
         if (empty($patient) || !isset($patient['regist_hospital_id'])) {
             $hospitalId = Dbi::getDbi()->getGuardianHospital($id);
         } else {
             $hospitalId = $patient['regist_hospital_id'];
         }
+        $mqttMessage = 'patient_id=' . $id . ',hospital_id=' . $hospitalId;
         $mqtt = new Mqtt();
         $data = [['type' => 'online', 'id' => $hospitalId, 'event'=>'end', 'message'=>$mqttMessage]];
         $mqtt->publish($data);
