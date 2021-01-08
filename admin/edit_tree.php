@@ -2,6 +2,7 @@
 require '../config/config.php';
 require '../lib/function.php';
 require '../lib/DbiAdmin.php';
+require_once '../lib/Logger.php';
 
 $title = '配置长程分析医院';
 require 'header.php';
@@ -31,10 +32,12 @@ if (isset($_POST['edit'])){
     }
     
     $ret = DbiAdmin::getDbi()->editTree($hospitalId, $analysisHospital, $reportHospital, $title1, $title2);
-    
     if (VALUE_DB_ERROR === $ret) {
         user_back_after_delay(MESSAGE_DB_ERROR);
     }
+    
+    Logger::write('edit_tree.log', $_SESSION['user'] . '。' . var_export($_POST, true));
+    
     $_SESSION['post'] = true;
     echo MESSAGE_SUCCESS
     . '<br /><button type="button" class="btn btn-lg btn-info" style="margin-top:50px;" '
