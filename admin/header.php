@@ -9,7 +9,7 @@ if (false === stripos($_SERVER['REQUEST_URI'], 'index.php')) {
 }
 
 $auth_super = ['hp', 'wxy', 'whl'];
-$auth_level1 = ['hp', 'wxy', 'whl', 'pangx', 'fanzp']
+$auth_level1 = ['hp', 'wxy', 'whl', 'pangx', 'fanzp'];
 ?>
 <!DOCTYPE html>
   <head>
