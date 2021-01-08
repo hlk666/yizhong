@@ -8,9 +8,9 @@ $city = isset($_GET['city']) && !empty($_GET['city']) ? $_GET['city'] : null;
 $county = isset($_GET['county']) && !empty($_GET['county']) ? $_GET['county'] : null;
 $agency = isset($_GET['agency']) && !empty($_GET['agency']) ? $_GET['agency'] : null;
 $user = isset($_GET['user']) && !empty($_GET['user']) ? $_GET['user'] : null;
-$intension = isset($_GET['intension']) && !empty($_GET['intension']) ? $_GET['intension'] : null;
+$successRate = isset($_GET['success_rate']) && !empty($_GET['success_rate']) ? $_GET['success_rate'] : null;
 
-$ret = DbiSale::getDbi()->getHospitalList($name, $province, $city, $county, $agency, $user, $intension);
+$ret = DbiSale::getDbi()->getHospitalList($name, $province, $city, $county, $agency, $user, $successRate);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }

@@ -26,7 +26,7 @@ $agencyProvince = isset($_POST['agency_province']) && !empty($_POST['agency_prov
 $agencyCity = isset($_POST['agency_city']) && !empty($_POST['agency_city']) ? $_POST['agency_city'] : '';
 $agencyCounty = isset($_POST['agency_county']) && !empty($_POST['agency_county']) ? $_POST['agency_county'] : '';
 $address = isset($_POST['address']) && !empty($_POST['address']) ? $_POST['address'] : '';
-$type = isset($_POST['type']) && !empty($_POST['type']) ? $_POST['type'] : '';
+$type = isset($_POST['type']) && !empty($_POST['type']) ? $_POST['type'] : '0';
 $intension = isset($_POST['intension']) && !empty($_POST['intension']) ? $_POST['intension'] : '';
 $totalBidTimes = isset($_POST['total_bid_times']) && !empty($_POST['total_bid_times']) ? $_POST['total_bid_times'] : '0';
 $content = isset($_POST['content']) && !empty($_POST['content']) ? $_POST['content'] : '';
@@ -45,6 +45,11 @@ $ret = DbiSale::getDbi()->addAgency($name, $_POST['contact'], $_POST['tel'], $st
         $agencyProvince, $agencyCity, $agencyCounty, $address, $type, $intension, $content, $source, $userId, $totalBidTimes);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
+}
+
+if (isset($_POST['operator']) && !empty($_POST['operator'])) {
+    $file = PATH_DATA . 'sale_operation.txt';
+    file_put_contents($file, 'agency,' . $ret . ',' . $_POST['operator'] . ';', FILE_APPEND);
 }
 
 api_exit_success();

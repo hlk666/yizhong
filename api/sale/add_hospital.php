@@ -46,4 +46,9 @@ if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 
+if (isset($_POST['operator']) && !empty($_POST['operator'])) {
+    $file = PATH_DATA . 'sale_operation.txt';
+    file_put_contents($file, 'hospital,' . $ret . ',' . $_POST['operator'] . ';', FILE_APPEND);
+}
+
 api_exit_success();

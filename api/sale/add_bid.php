@@ -28,9 +28,10 @@ $amount = isset($_POST['amount']) && !empty($_POST['amount']) ? $_POST['amount']
 $bidTime = isset($_POST['bid_time']) && !empty($_POST['bid_time']) ? $_POST['bid_time'] : '';
 $content = isset($_POST['content']) && !empty($_POST['content']) ? $_POST['content'] : '';
 $source = isset($_POST['source']) && !empty($_POST['source']) ? $_POST['source'] : '';
+$level = isset($_POST['level']) && !empty($_POST['level']) ? $_POST['level'] : '0';
 
 $ret = DbiSale::getDbi()->addBid($_POST['hospital_id'], $_POST['agency_id'], 
-        $product, $amount, $bidTime, $content, $source);
+        $product, $amount, $bidTime, $content, $source, $level);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
