@@ -46,7 +46,8 @@ $mqttMessage = 'device_id=' . $data['device_id']
     . ',phone_power=' . $data['phone_power']
     . ',collection_power=' . $data['collection_power']
     . ',bluetooth=' . $data['bluetooth']
-    . ',line=' . $data['line'];
+    . ',line=' . $data['line']
+    . ',time=' . date('Y-m-d H:i:s');
 $mqtt = new Mqtt();
 $data = [['type' => 'online', 'id' => '1', 'event'=>'phone_status', 'message'=>$mqttMessage]];
 $mqtt->publish($data);
