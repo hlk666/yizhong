@@ -103,7 +103,7 @@ if (isset($_POST['submit'])){
     file_put_contents($modeConfigFile, implode(',', $newArray));
     
     $_SESSION['post'] = true;
-    ShortMessageService::send('13465596133', '有新的医院。');
+    //ShortMessageService::send('13465596133', '有新的医院。');
     echo MESSAGE_SUCCESS 
         . '<br /><button type="button" class="btn btn-lg btn-info" style="margin-top:50px;" ' 
         . ' onclick="javascript:location.href=\'hospital.php\';">查看医院列表</button>';
