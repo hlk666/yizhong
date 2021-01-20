@@ -89,9 +89,10 @@ if (VALUE_DB_ERROR === $patient) {
 
 if ($agency == 113) {
     Logger::write('henan_agency.log', 'start: ' . $guardianId);
-    if ($patient['regist_hospital_id'] == 746) {
+    /*if ($patient['regist_hospital_id'] == 746) {
         $client = new SoapClient('http://120.194.75.148:8008/services/apiservice.asmx?WSDL');
-    } elseif ($patient['regist_hospital_id'] == 802) {
+    } else */
+    if ($patient['regist_hospital_id'] == 802) {
         $client = new SoapClient('http://218.28.211.1:8008/services/apiservice.asmx?WSDL');
     } elseif ($patient['regist_hospital_id'] == 793) {
         $client = new SoapClient('http://117.158.59.210:8008/services/apiservice.asmx?WSDL');
@@ -171,8 +172,10 @@ $tree = DbiAnalytics::getDbi()->getHospitalTree($guardianId);
 if (VALUE_DB_ERROR === $tree || array() == $tree) {
     //do nothing.
 } else {
-    //setNotice($tree['analysis_hospital'], 'upload_data', $guardianId);
-    $noticeHospital1 = $tree['analysis_hospital'];
+    if ($tree['hospital_id'] != $tree['analysis_hospital']) {
+        //setNotice($tree['analysis_hospital'], 'upload_data', $guardianId);
+        $noticeHospital1 = $tree['analysis_hospital'];
+    }
     if ($tree['hospital_id'] != $tree['report_hospital']) {
         //setNotice($tree['report_hospital'], 'upload_data', $guardianId);
         $noticeHospital2 = $tree['report_hospital'];
@@ -193,7 +196,10 @@ $mqttMessage = 'patient_id=' . $guardianId
                 . ',moved_hospital=' . $dbPatient['moved_hospital']
                 . ',moved_hospital_name=' . $dbPatient['moved_hospital_name'];
 $mqtt = new Mqtt();
-$data = [['type' => 'holter', 'id' => $tree['analysis_hospital'], 'event'=>'upload_24h', 'message'=>$mqttMessage]];
+//fix bug start
+$mqttHospitalId = empty($tree) ? $hospitalId : $tree['analysis_hospital'];
+//fix bug end
+$data = [['type' => 'holter', 'id' => $mqttHospitalId, 'event'=>'upload_24h', 'message'=>$mqttMessage]];
 $mqtt->publish($data);
 //20200317 start
 /*
@@ -238,13 +244,28 @@ if (1 == $deviceType) {
 
 $hospitalNotMoveDate = [630, 631, 632];
 if (!in_array($hospitalId, $hospitalNotMoveDate)) {
-    $isNoticed = moveData($guardianId);
+    //$isNoticed = moveData($guardianId);
+    $isNoticed = false;
     if (!$isNoticed) {
         if ($noticeHospital1 != '0') {
-            setNotice($noticeHospital1, 'upload_data', $guardianId);
+            //20200916 from wanghonglei start
+            if ($noticeHospital1 == 678 && $deviceType == 1) {
+                setNotice('1', 'upload_data', $guardianId);
+            } else {
+                setNotice($noticeHospital1, 'upload_data', $guardianId);
+            }
+            //20200916 from wanghonglei end
+            //setNotice($noticeHospital1, 'upload_data', $guardianId);
         }
         if ($noticeHospital2 != '0') {
-            setNotice($noticeHospital2, 'upload_data', $guardianId);
+            //20200916 from wanghonglei start
+            if ($noticeHospital2 == 678 && $deviceType == 1) {
+                setNotice('1', 'upload_data', $guardianId);
+            } else {
+                setNotice($noticeHospital2, 'upload_data', $guardianId);
+            }
+            //20200916 from wanghonglei end
+            //setNotice($noticeHospital2, 'upload_data', $guardianId);
         }
         if ($tree['report_hospital'] == '185') {
             //20200102from zhangshengyun
