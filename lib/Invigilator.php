@@ -2,6 +2,7 @@
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'GeTui.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 class Invigilator
 {
@@ -26,6 +27,7 @@ class Invigilator
     private $file = '';
     private $logFile = 'cmdLog.txt';
     private $guardianId;
+    private $deviceId;
     
     public function __construct($guardianId, $hours = 24)
     {
@@ -38,6 +40,8 @@ class Invigilator
         } else {
             $this->setDefaultInfo($hours);
         }
+        
+        $this->deviceId = Dbi::getDbi()->getDeviceId($guardianId);
     }
     
     private function validate()
@@ -53,11 +57,10 @@ class Invigilator
     
     private function getClientId()
     {
-        $deviceId = Dbi::getDbi()->getDeviceId($this->guardianId);
-        if (empty($deviceId)) {
+        if (empty($this->deviceId)) {
             return '';
         }
-        $file = PATH_CACHE_CLIENT . $deviceId . '.php';
+        $file = PATH_CACHE_CLIENT . $this->deviceId . '.php';
         if (file_exists($file)) {
             include $file;
             return $clientId;
@@ -109,6 +112,17 @@ class Invigilator
         $handle = fopen($this->file, 'w');
         fwrite($handle, $template);
         fclose($handle);
+        
+        if (isset($data['action'])) {
+            $mqtt = new Mqtt();
+            $data = [['type' => 'device', 'id' => $this->deviceId, 'event'=>$data['action'], 'message'=>'patient_id=' . $this->guardianId]];
+            $mqtt->publish($data);
+        }
+        if (isset($data['check_info'])) {
+            $mqtt = new Mqtt();
+            $data = [['type' => 'device', 'id' => $this->deviceId, 'event'=>'check_info', 'message'=>'patient_id=' . $this->guardianId]];
+            $mqtt->publish($data);
+        }
         
         if ($this->gtFlag) {
             $clientId = $this->getClientId();

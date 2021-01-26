@@ -1,6 +1,7 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_LIB . 'Dbi.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 class AppUploadData
 {
@@ -98,6 +99,17 @@ class AppUploadData
                     $handle = fopen($file, 'w');
                     fwrite($handle, $template);
                     fclose($handle);
+                    
+                    
+                    $mqttMessage1 = 'device_id=' . $deviceId
+                        . ',phone_power=' . $phonePower
+                        . ',collection_power=' . $collectionPower
+                        . ',bluetooth=' . $bluetooth
+                        . ',line=' . $line
+                        . ',time=' . date('Y-m-d H:i:s');
+                    $mqtt1 = new Mqtt();
+                    $data1 = [['type' => 'online', 'id' => '1', 'event'=>'phone_status', 'message'=>$mqttMessage1]];
+                    $mqtt1->publish($data1);
                 }
             }
             
@@ -136,6 +148,15 @@ class AppUploadData
             }
             
             setNotice($hospital, 'ecg_notice', $patientId);
+            
+            $mqttMessage = 'patient_id=' . $patientId
+                . ',ecg_id=' . $retDB
+                . ',ecg_type=' . $alert
+                . ',ecg_time=' . $time
+                . ',url_file=' . $urlFile;
+            $mqtt = new Mqtt();
+            $data = [['type' => 'online', 'id' => '1', 'event'=>'ecg', 'message'=>$mqttMessage]];
+            $mqtt->publish($data);
         }
         return json_encode($this->retSuccess);
     }
