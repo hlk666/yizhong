@@ -145,15 +145,7 @@ function clearNotice($hospital, $type, $guardianId)
 
 function addApiCounter($entry)
 {
-    if ($entry == 'app_upload_data' 
-            || $entry == 'client_get_patients'
-            || $entry == 'clear_real_time_file'
-            || $entry == 'client_get_device_status'
-            || $entry == 'check_get_ecg_by_guard_hospital'
-            || $entry == 'analytics_get_patients_by_id'
-            || $entry == 'analytics_get_patients'
-            || $entry == 'analytics_get_hospital_config_list'
-            || $entry == 'client_check_new') {
+    if ($entry == 'app_upload_data1') {
         return;
     }
     $file = PATH_DATA . 'api_counter' . DIRECTORY_SEPARATOR . date('Ymd') . '.php';
@@ -169,4 +161,33 @@ function addApiCounter($entry)
         $template .= "\$api['$key'] = $value;\n";
     }
     file_put_contents($file, $template);
+}
+
+function setPatient($id, array $data)
+{
+    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'patient' . DIRECTORY_SEPARATOR . $id . '.php';
+    if (file_exists($file)) {
+        include_once $file;
+    } else {
+        $patient = array();
+    }
+    foreach ($data as $key => $value) {
+        $patient[$key] = $value;
+    }
+    $template = "<?php\n";
+    $template .= "\$patient = array();\n";
+    foreach ($patient as $key => $value) {
+        $template .= "\$patient['$key'] = '$value';\n";
+    }
+    file_put_contents($file, $template);
+}
+function getPatient($id)
+{
+    $file = PATH_ROOT . 'cache' . DIRECTORY_SEPARATOR . 'patient' . DIRECTORY_SEPARATOR . $id . '.php';
+    if (file_exists($file)) {
+        include $file;
+    } else {
+        $patient = array();
+    }
+    return $patient;
 }
