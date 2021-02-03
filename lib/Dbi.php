@@ -61,6 +61,10 @@ class Dbi extends BaseDbi
     {
         return $this->existData('guardian', " guardian_id = $guardianId and mode = $oldMode ");
     }
+    public function isAnzhongChild($hospitalId)
+    {
+        return $this->existData('hospital_tree', " hospital_id = '$hospitalId' and report_hospital = 872 ");
+    }
     //************************* existed methods(public) *************************
     //*********************************** end ***********************************
     

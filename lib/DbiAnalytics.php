@@ -45,6 +45,15 @@ class DbiAnalytics extends BaseDbi
         $sql = "update guardian_data set $set where guardian_id = $patientId";
         return $this->updateData($sql);
     }
+    public function addEmergency($guardianId, $reporterId)
+    {
+        if ($this->existData('emergency', "guardian_id = $guardianId")) {
+            return 1;
+        }
+        $sql = "insert into emergency (guardian_id, reporter_id) values ('$guardianId', '$reporterId')";
+        return $this->insertData($sql);
+    }
+    
     public function getCheckText($guardianId)
     {
         $sql = "select check_text from guardian_data where guardian_id = $guardianId limit 1";
@@ -192,10 +201,11 @@ class DbiAnalytics extends BaseDbi
     public function getPatientForHenan($guardianId)
     {
         $sql = "select start_time, end_time, patient_name as name, birth_year, sex, h.hospital_name, 
-                h.agency_id, g.regist_hospital_id
+                h.agency_id, g.regist_hospital_id, d.url
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 left join hospital as h on g.regist_hospital_id = h.hospital_id
-                where guardian_id = '$guardianId'";
+                left join guardian_data as d on g.guardian_id = d.guardian_id
+                where g.guardian_id = '$guardianId'";
         return $this->getDataRow($sql);
     }
     public function getPatientOneData($guardianId)

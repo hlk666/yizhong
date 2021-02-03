@@ -546,6 +546,36 @@ class DbiAdmin extends BaseDbi
         }
         return true;
     }
+    public function editRegist($guardianId, $hospitalId)
+    {
+        $this->beginTran();
+        $sql = "select analysis_hospital from hospital_tree where hospital_id = '$hospitalId' limit 1";
+        $analysisHospital = $this->getDataString($sql);
+        if (VALUE_DB_ERROR === $analysisHospital) {
+            $this->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        if (empty($analysisHospital)) {
+            $analysisHospital = $hospitalId;
+        }
+        
+        $sql = "update guardian set regist_hospital_id  = '$hospitalId', guard_hospital_id = '$hospitalId'
+                where guardian_id = '$guardianId'";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->rollBack();
+            return VALUE_DB_ERROR;
+        }
+    
+        $sql = "update guardian_data set moved_hospital = '$analysisHospital' where guardian_id = '$guardianId'";
+        $ret = $this->updateData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        $this->commit();
+        return true;
+    }
     public function editTree($hospitalId, $analysisHospital, $reportHospital, $title1, $title2)
     {
         if ($this->existData('hospital_tree', 'hospital_id = ' . $hospitalId)) {
@@ -1077,6 +1107,17 @@ class DbiAdmin extends BaseDbi
         $sql = 'select guardian_id, max(create_time) as alert_time from ecg where create_time > date_add(now(), interval -1 hour) group by guardian_id';
         return $this->getDataAll($sql);
     }
+    public function getEmergency($status)
+    {
+        $sql = "select id as emergency_id, guardian_id, reporter_id, a1.real_name as reporter_name, 
+                e.create_time, e.status, e.user_id, a2.real_name as user_name, e.update_time, handle
+                from emergency as e left join account as a1 on e.reporter_id = a1.account_id
+                left join account as a2 on e.user_id = a2.account_id; where 1 ";
+        if (!empty($status)) {
+            $sql .= " and status in ($status)";
+        }
+        return $this->getDataAll($sql);
+    }
     public function getExamQuestion($count, $type, $level)
     {
         $sql = "select * from exam_question where 1 ";
@@ -1303,7 +1344,8 @@ class DbiAdmin extends BaseDbi
     }
     public function getHospitalName($code)
     {
-        $sql = "select hospital_id, hospital_name from hospital where `code` = '$code' limit 1";
+        //$sql = "select hospital_id, hospital_name from hospital where `code` = '$code' limit 1";
+        $sql = "select hospital_id, hospital_name from hospital where hospital_id = '$code' limit 1";
         return $this->getDataRow($sql);
     }
     public function getHospitalLevel($level)
@@ -1491,8 +1533,9 @@ class DbiAdmin extends BaseDbi
         return $this->getDataRow($sql);
     }
     public function getPatientStatusByName($name) {
-        $sql = "select g.guardian_id, p.patient_name, h1.hospital_id, h1.hospital_name, g.start_time, g.end_time, g.device_id, g.`mode`,
-                d.`status` as upload_status, h2.hospital_name as moved_hospital_name, d.type as moved_type, d.report_time,
+        $sql = "select g.guardian_id, h1.hospital_id, h1.hospital_name, g.start_time, g.end_time, g.device_id, g.`mode`,
+                d.`status` as upload_status, h2.hospital_name as moved_hospital_name, d.type as moved_type, d.report_time, d.device_type,
+                p.patient_name, p.birth_year, p.sex,
                 a1.real_name as hbi_doctor, a2.real_name as report_doctor, a3.real_name as download_doctor_name
                 from guardian as g inner join patient as p on g.patient_id = p.patient_id
                 inner join hospital as h1 on g.regist_hospital_id = h1.hospital_id
@@ -1710,6 +1753,12 @@ class DbiAdmin extends BaseDbi
         $sql = 'update guardian_data set status = :status where guardian_id = :id';
         $param = [':id' => $guardianId, ':status' => $status];
         return $this->updateData($sql, $param);
+    }
+    public function updateEmergency($id, $user, $handle)
+    {
+        $sql = "update emergency set user_id = '$user', handle = '$handle', update_time = now(), status = 1 
+                where id = '$id'";
+        return $this->updateData($sql);
     }
     public function updateNoticeRule($hospitalId, $text)
     {
