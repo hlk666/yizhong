@@ -33,10 +33,10 @@ class DbiSale extends BaseDbi
         }
         return $id;
     }
-    public function addBid($hospitalId, $agencyId, $product, $amount, $bidTime, $content, $source)
+    public function addBid($hospitalId, $agencyId, $product, $amount, $bidTime, $content, $source, $level)
     {
-        $sql = "insert into bid (hospital_id, agency_id, product, amount, bid_time, content, source)
-                values ('$hospitalId', '$agencyId', '$product', '$amount', '$bidTime', '$content', '$source')";
+        $sql = "insert into bid (hospital_id, agency_id, product, amount, bid_time, content, source, level)
+                values ('$hospitalId', '$agencyId', '$product', '$amount', '$bidTime', '$content', '$source', '$level')";
         $id = $this->insertData($sql);
         if (VALUE_DB_ERROR === $id) {
             return VALUE_DB_ERROR;
@@ -136,9 +136,18 @@ class DbiSale extends BaseDbi
     {
         $sql = 'select a.agency_id, agency_name, agency_contact, agency_tel, agency_province, agency_city, agency_county, 
                 a.address, a.status, a.type, total_bid_times, a.content, a.source, u.user_name, agency_intension, 
-                a.create_time, total_bid_times
+                a.create_time, total_bid_times,
+                p.plan_text, p.dead_line, p.create_time as plan_time, 
+                r.record_text, r.record_time,  r.yuanzhang, r.fenguanyuanzhang, r.xinneike, r.xindiantushi
                 from agency as a
                 left join `user` as u on a.user_id = u.user_id
+                left join (select p.plan_text, p.dead_line, p.create_time, p.agency_id from plan as p inner join 
+                (select max(plan_id) as id, agency_id from plan group by agency_id) as tp on p.plan_id = tp.id) as p 
+                on a.agency_id = p.agency_id
+                left join (select r.record_text, r.record_time, r.yuanzhang, r.fenguanyuanzhang, r.xinneike, r.xindiantushi, r.agency_id 
+                from record as r inner join 
+                (select max(record_id) as id, agency_id from record group by agency_id) as tr on r.record_id = tr.id) as r 
+                on a.agency_id = r.agency_id
                 where 1';
         if (!empty($name)) {
             $sql .= " and (agency_name like '%$name%' or agency_contact like '%$name%')";
@@ -161,6 +170,11 @@ class DbiSale extends BaseDbi
         if (empty($type)) {
             $sql .= " and a.type = '0'";
         }
+        return $this->getDataAll($sql);
+    }
+    public function getAgency1($idList)
+    {
+        $sql = "select agency_id, agency_tel, agency_contact, content from agency where agency_id in ($idList)";
         return $this->getDataAll($sql);
     }
     public function getBid($hospitalId, $agencyId, $startTime, $endTime)
@@ -194,7 +208,7 @@ class DbiSale extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
-    public function getHospitalList($name, $province, $city, $county, $agency, $user, $intension)
+    public function getHospitalList($name, $province, $city, $county, $agency, $user, $successRate)
     {
         /*
         $sql = 'select hospital_id, hospital_name, hospital_contact, hospital_tel, province, city, county,
@@ -235,8 +249,8 @@ class DbiSale extends BaseDbi
         if (!empty($user)) {
             $sql .= " and u.user_name = '$user'";
         }
-        if (!empty($intension)) {
-            $sql .= " and hospital_intension >= '$intension'";
+        if (!empty($successRate)) {
+            $sql .= " and success_rate >= '$successRate'";
         }
         return $this->getDataAll($sql);
     }
@@ -279,7 +293,7 @@ class DbiSale extends BaseDbi
         if ($endTime != null) {
             $sql .= " and p.create_time <= '$endTime' ";
         }
-        $sql .= ' order by p.plan_id desc';
+        //$sql .= ' order by p.plan_id desc';
         return $this->getDataAll($sql);
     }
     public function getRecord($hospitalId, $agencyId, $userId, $startTime, $endTime, $planId)
@@ -298,7 +312,7 @@ class DbiSale extends BaseDbi
             $sql .= " and r.user_id = '$userId' ";
         }
         if ($planId != null) {
-            $sql .= " and r.plan_id = '$planId' ";
+            $sql .= " and r.plan_id in ($planId) ";
         }
         if ($startTime != null) {
             $sql .= " and record_time >= '$startTime' ";
@@ -306,7 +320,6 @@ class DbiSale extends BaseDbi
         if ($endTime != null) {
             $sql .= " and record_time <= '$endTime' ";
         }
-        $sql .= ' order by r.record_id desc';
         return $this->getDataAll($sql);
     }
     public function getRelation($hospitalId, $agencyId)
