@@ -56,7 +56,7 @@ class DbiBatch extends BaseDbi
     {
         $this->pdo->beginTransaction();
         
-        $sql = "insert into `$tableTo` select * from `$tableFrom` where $field > $fieldFrom and $field $filed <= $fieldTo";
+        $sql = "insert into `$tableTo` select * from `$tableFrom` where $field > $fieldFrom and $field <= $fieldTo";
         $ret = $this->insertData($sql);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
@@ -71,7 +71,7 @@ class DbiBatch extends BaseDbi
             return VALUE_DB_ERROR;
         }
         
-        $sql = "delete from $tableFrom where $field > $fieldFrom and $field $filed <= $fieldTo";
+        $sql = "delete from $tableFrom where $field > $fieldFrom and $field <= $fieldTo";
         $ret = $this->deleteData($sql);
         if (VALUE_DB_ERROR === $ret) {
             $this->pdo->rollBack();
