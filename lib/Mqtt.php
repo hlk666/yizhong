@@ -43,6 +43,7 @@ class Mqtt
             if (!is_array($row) || !isset($row['type']) || !isset($row['id'])
                 || !isset($row['event']) || !isset($row['message'])) {
                     Logger::write($this->logFileError, 'format error.');
+                    Logger::write($this->logFileError, var_export($row, true));
                     return false;
                 }
                 if ($row['type'] == 'online') {
@@ -54,7 +55,7 @@ class Mqtt
                         $idLevel = $row['id'] . '/' . $row['id'] . '/' . $row['id'] . '/' . $row['id'];
                     }
                     $topic .= $idLevel . '/' . $row['event'];
-                } elseif ($row['type'] == 'holter') {
+                } elseif ($row['type'] == 'holter' || $row['type'] == 'device') {
                     $topic = $row['type'] . '/' . $row['id'] . '/' . $row['event'];
                 } else {
                     Logger::write($this->logFileError, 'type is wrong.');
