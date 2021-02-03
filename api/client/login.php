@@ -15,7 +15,7 @@ $pwd = md5($_GET['pwd']);
 $authcode = isset($_GET['authcode']) ? $_GET['authcode'] : '';
 
 $authData = Dbi::getDbi()->getAuthcode($authcode);
-if (VALUE_DB_ERROR === $ret) {
+if (VALUE_DB_ERROR === $authData) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
 $ret = Dbi::getDbi()->getAcount($user);
@@ -62,6 +62,10 @@ if (empty($authcode)) {
         default:
             api_exit(['code' => '99', 'message' => '系统错误。']);
     }
+}
+
+if (isset($_GET['exe']) && !empty($_GET['exe'])) {
+    Dbi::getDbi()->saveLoginExe($ret['account_id'], $ret['name'], $_GET['exe']);
 }
 
 $result = array();
