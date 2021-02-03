@@ -2,6 +2,7 @@
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Invigilator.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
@@ -35,6 +36,17 @@ $ret = $invigilator->create(['new_mode' => $newMode]);
 if (VALUE_PARAM_ERROR === $ret) {
     api_exit(['code' => '1', 'message' => MESSAGE_PARAM]);
 }
+
+$patient = getPatient($guardianId);
+if (empty($patient) || !isset($patient['regist_hospital_id'])) {
+    $hospitalId = Dbi::getDbi()->getGuardianHospital($guardianId);
+} else {
+    $hospitalId = $patient['regist_hospital_id'];
+}
+$mqttMessage = 'patient_id=' . $guardianId . ',old_mode=' . $oldMode . ',new_mode=' . $newMode;
+$mqtt = new Mqtt();
+$data = [['type' => 'online', 'id' => $hospitalId, 'event'=>'change_mode', 'message'=>$mqttMessage]];
+$mqtt->publish($data);
 
 updateMode($guardianId, $newMode);
 

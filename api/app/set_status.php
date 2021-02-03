@@ -2,7 +2,7 @@
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_LIB . 'Dbi.php';
-require PATH_LIB . 'Mqtt.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 $data = array_merge($_GET, $_POST);
 if (false === Validate::checkRequired($data['device_id'])) {

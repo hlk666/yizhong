@@ -1,10 +1,11 @@
 <?php
 require_once PATH_LIB . 'DbiAnalytics.php';
 require_once PATH_LIB . 'DbiAdmin.php';
+require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 //require_once PATH_ROOT . 'lib/tool/HpMessage.php';
 require_once PATH_LIB . 'ShortMessageService.php';
-require PATH_LIB . 'Mqtt.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
@@ -188,6 +189,17 @@ if (VALUE_DB_ERROR === $dbPatient || empty($dbPatient)) {
 } else {
     setPatient($guardianId, $dbPatient);
 }
+
+//for anzhong start
+if (Dbi::getDbi()->isAnzhongChild($tree['hospital_id'])) {
+    include_once PATH_LIB . 'AnZhong.php';
+    $isSuccess = AnZhong::upload($guardianId);
+    if (!$isSuccess) {
+        ShortMessageService::send('13465596133', '安徽中医院上传24h数据，但是调用接口失败，病人id：' . $guardianId);
+    }
+}
+//for anzhong end
+
 $mqttMessage = 'patient_id=' . $guardianId 
                 . ',url=' . $dbPatient['url']
                 . ',upload_time=' . $dbPatient['upload_time']

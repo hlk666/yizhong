@@ -1,7 +1,7 @@
 <?php
 require_once PATH_LIB . 'Validate.php';
-require PATH_ROOT . 'lib/DbiAnalytics.php';
-require PATH_LIB . 'Mqtt.php';
+require_once PATH_ROOT . 'lib/DbiAnalytics.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);

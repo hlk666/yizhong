@@ -3,7 +3,7 @@ require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Invigilator.php';
 require_once PATH_LIB . 'function.php';
-require PATH_LIB . 'Mqtt.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
@@ -34,13 +34,13 @@ foreach ($fileList as $f) {
 }
 setPatient($guardianId, ['end_time' => date('Y-m-d H:i:s')]);
 
-$mqttMessage = 'patient_id=' . $guardianId;
 $patient = getPatient($guardianId);
 if (empty($patient) || !isset($patient['regist_hospital_id'])) {
     $hospitalId = Dbi::getDbi()->getGuardianHospital($guardianId);
 } else {
     $hospitalId = $patient['regist_hospital_id'];
 }
+$mqttMessage = 'patient_id=' . $guardianId . ',hospital_id=' . $hospitalId;
 $mqtt = new Mqtt();
 $data = [['type' => 'online', 'id' => $hospitalId, 'event'=>'end', 'message'=>$mqttMessage]];
 $mqtt->publish($data);

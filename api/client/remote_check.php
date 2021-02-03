@@ -1,6 +1,7 @@
 <?php
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Invigilator.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);

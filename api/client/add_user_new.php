@@ -2,14 +2,15 @@
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Invigilator.php';
-//require_once PATH_LIB . 'ShortMessageService.php';
-require PATH_LIB . 'Mqtt.php';
+require_once PATH_LIB . 'ShortMessageService.php';
+require_once PATH_LIB . 'Mqtt.php';
 
 validate_add_user($_POST);
 
 $device = $_POST['device_id'];
 $mode = $_POST['mode'];
-$name = $_POST['name'];
+//$name = $_POST['name'];
+$name = str_replace('\'', '', $_POST['name']);
 $age = $_POST['age'];
 $sex = $_POST['sex'];
 $tel = $_POST['tel'];
@@ -211,15 +212,30 @@ if (VALUE_DB_ERROR === $cacheHospital) {
 $cacheData['patient_name'] = $name;
 $cacheData['age'] = $age;
 $cacheData['sex'] = $sex;
+$cacheData['patient_tel'] = $tel;
+$cacheData['regist_doctor_name'] = $doctorName;
 $cacheData['device_id'] = $device;
 $cacheData['start_time'] = date('Y-m-d H:i:s');
 setPatient($guardianId, $cacheData);
 
 updateWorkPool($guardianId);
 
+//for anzhong start
+if (Dbi::getDbi()->isAnzhongChild($registHospital)) {
+    include_once PATH_LIB . 'AnZhong.php';
+    $isSuccess = AnZhong::regist($guardianId);
+    if (!$isSuccess) {
+        ShortMessageService::send('13465596133', '安徽中医院开单，但是调用接口失败，病人姓名：' . $name);
+    }
+}
+//for anzhong end
+
 $mqttMessage = 'patient_id=' . $guardianId
 . ',mode=' . $mode
 . ',device=' . $device
+. ',hospital_id=' . $cacheHospital['hospital_id']
+. ',hospital_name=' . $cacheHospital['hospital_name']
+. ',hospital_tel=' . $cacheHospital['tel']
 . ',patient_name=' . $name
 . ',sex=' . $sex
 . ',age=' . $age
@@ -402,5 +418,7 @@ function updateWorkPool($guardianId)
             }
         }
     }
-    file_put_contents($file, file_get_contents($file) . ',' . $guardianId);
+    if (!empty($file)) {
+        file_put_contents($file, file_get_contents($file) . ',' . $guardianId);
+    }
 }

@@ -389,5 +389,7 @@ function updateWorkPool($guardianId)
             }
         }
     }
-    file_put_contents($file, file_get_contents($file) . ',' . $guardianId);
+    if (!empty($file)) {
+        file_put_contents($file, file_get_contents($file) . ',' . $guardianId);
+    }
 }
