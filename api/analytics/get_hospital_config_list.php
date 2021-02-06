@@ -5,7 +5,8 @@ require_once PATH_LIB . 'Validate.php';
 if (false === Validate::checkRequired($_GET['hospitals'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'hospitals.']);
 }
-$hospitals = $_GET['hospitals'];
+//$hospitals = $_GET['hospitals'];
+$hospitals = str_replace(',,', ',', $_GET['hospitals'])
 
 $hospitalConfig = DbiAnalytics::getDbi()->getHospitalConfigList($hospitals);
 if (VALUE_DB_ERROR === $hospitalConfig) {
