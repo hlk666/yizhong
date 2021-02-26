@@ -8,7 +8,7 @@ if (false === stripos($_SERVER['REQUEST_URI'], 'index.php')) {
     }
 }
 
-$auth_super = ['hp', 'wxy', 'whl'];
+$auth_super = ['hp', 'wxy', 'whl','fanzp'];
 $auth_level1 = ['hp', 'wxy', 'whl', 'pangx', 'fanzp'];
 ?>
 <!DOCTYPE html>
@@ -52,6 +52,7 @@ EOF;
           <li><a href="agency_guardian.php">代理商开单统计</a></li>
           <!--<li><a href="hospital_device.php">医院开单数据</a></li>
           <!--<li><a href="salesman_data.php">查询业务员开单</a></li>-->
+          <li><a href="edit_regist.php">纠正错误开单</a></li>
         </ul>';
     } else {
         $siteSummary = '';
