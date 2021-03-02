@@ -503,7 +503,7 @@ class Dbi extends BaseDbi
     }
     public function getPatientByDevice($deviceId)
     {
-        $sql = "select guardian_id, patient_name, mode
+        $sql = "select guardian_id, patient_name, mode, regist_hospital_id
                 from guardian as g left join patient as p on g.patient_id = p.patient_id
                 where device_id = '$deviceId' and status < 2 order by guardian_id desc limit 1";
         return $this->getDataRow($sql);
@@ -677,7 +677,7 @@ class Dbi extends BaseDbi
     {
         $sql = "insert into ecg(guardian_id, alert_flag, create_time, data_path) 
                 values('$guardianId', '$alertFlag', '$time', '$dataPath')";
-        return $this->insertData($sql);
+        return $this->insertData($sql, [], false);
     }
     public function flowGuardianAddResult($guardianId, $result)
     {
