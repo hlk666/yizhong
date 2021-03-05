@@ -1049,12 +1049,21 @@ class DbiAdmin extends BaseDbi
                 where d.status = '$status'";
         return $this->getDataAll($sql);
     }
-    public function getDeviceQuestionAnswer()
+    public function getDeviceQuestionAnswer($startTime, $endTime, $keyword)
     {
         $sql = "select q.question_id, q.hospital_id, q.device_id, d.`status`, q.text as question, q.question_time, 
                 a.text as answer, a.answer_time, q.result, q.result_time
                 from device_question as q left join device_answer as a on q.question_id = a.question_id
-                left join device as d on q.device_id = d.device_id";
+                left join device as d on q.device_id = d.device_id where 1 ";
+        if (!empty($startTime)) {
+            $sql .= " and q.question_time >= '$startTime'";
+        }
+        if (!empty($endTime)) {
+            $sql .= " and q.question_time <= '$endTime'";
+        }
+        if (!empty($keyword)) {
+            $sql .= " and q.text like '%$keyword%'";
+        }
         return $this->getData($sql);
     }
     public function getDeviceSum($exceptHospitalList)

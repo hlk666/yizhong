@@ -6,11 +6,12 @@ $hospitalId = isset($_GET['hospital_id']) ? $_GET['hospital_id'] : 0;
 $patientId = isset($_GET['patient_id']) ? $_GET['patient_id'] : 0;
 $deviceId = isset($_GET['device_id']) ? $_GET['device_id'] : 0;
 $user = isset($_GET['user']) ? $_GET['user'] : 0;
-
+*/
 $startTime = isset($_GET['start_time']) && !empty($_GET['start_time']) ? $_GET['start_time'] : null;
 $endTime = isset($_GET['end_time']) && !empty($_GET['end_time']) ? $_GET['end_time'] : null;
-*/
-$ret = DbiAdmin::getDbi()->getDeviceQuestionAnswer();
+$keyword = isset($_GET['keyword']) && !empty($_GET['keyword']) ? $_GET['keyword'] : null;
+
+$ret = DbiAdmin::getDbi()->getDeviceQuestionAnswer($startTime, $endTime, $keyword);
 if (VALUE_DB_ERROR === $ret) {
     api_exit(['code' => '2', 'message' => MESSAGE_DB_ERROR]);
 }
