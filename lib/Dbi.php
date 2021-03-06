@@ -397,7 +397,7 @@ class Dbi extends BaseDbi
         $param = [':hospital_id' => $hospitalId];
         return $this->getDataString($sql, $param);
     }
-    public function getGuardianError($hospital = 0)
+    public function getGuardianError($hospital, $notice, $startTime, $endTime)
     {
         if (empty($hospital)) {
             $where = "e.notice_flag = 0";
@@ -409,7 +409,19 @@ class Dbi extends BaseDbi
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
                 inner join patient as p on g.patient_id = p.patient_id
                 left join hospital_tree as t on g.regist_hospital_id = t.hospital_id
-                where $where";
+                where 1";
+        if (!empty($hospital)) {
+            $sql .= " regist_hospital_id = '$hospital'";
+        }
+        if (!empty($notice)) {
+            $sql .= " e.notice_flag = '$notice'";
+        }
+        if (!empty($startTime)) {
+            $sql .= " e.create_time >= '$startTime'";
+        }
+        if (!empty($endTime)) {
+            $sql .= " e.create_time <= '$endTime'";
+        }
         return $this->getDataAll($sql);
     }
     public function getGuardianHospital($guardianId)

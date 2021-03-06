@@ -824,7 +824,7 @@ class DbiAdmin extends BaseDbi
     }
     public function getDataNotUpload()
     {
-        $sql = 'select g.guardian_id as patient_id, h.hospital_name, p.patient_name, g.start_time, g.end_time
+        $sql = 'select g.guardian_id as patient_id, h.hospital_name, h.agency_id, p.patient_name, g.start_time, g.end_time
                 from guardian_data as d 
                 inner join guardian as g on d.guardian_id = g.guardian_id
                 inner join patient as p on g.patient_id = p.patient_id
