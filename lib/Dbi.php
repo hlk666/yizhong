@@ -411,16 +411,16 @@ class Dbi extends BaseDbi
                 left join hospital_tree as t on g.regist_hospital_id = t.hospital_id
                 where 1";
         if (!empty($hospital)) {
-            $sql .= " regist_hospital_id = '$hospital'";
+            $sql .= " and regist_hospital_id = '$hospital'";
         }
         if (!empty($notice)) {
-            $sql .= " e.notice_flag = '$notice'";
+            $sql .= " and e.notice_flag = '$notice'";
         }
         if (!empty($startTime)) {
-            $sql .= " e.create_time >= '$startTime'";
+            $sql .= " and e.create_time >= '$startTime'";
         }
         if (!empty($endTime)) {
-            $sql .= " e.create_time <= '$endTime'";
+            $sql .= " and e.create_time <= '$endTime'";
         }
         return $this->getDataAll($sql);
     }
