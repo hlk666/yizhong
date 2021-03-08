@@ -69,7 +69,9 @@ class Mqtt
             if ($this->mqtt->connect(true, null, $this->user, $this->password)) {
                 for ($i = 0; $i < count($topicList); $i++) {
                     $this->mqtt->publish($topicList[$i], $messageList[$i], $qos, $retain);
-                    Logger::write($this->logFile, 'publish topic : ' . $topicList[$i] . ' with message : ' . $messageList[$i]);
+                    if (strpos($topicList[$i], 'ecg') === false && strpos($topicList[$i], 'phone_status') === false) {
+                        Logger::write($this->logFile, 'publish topic : ' . $topicList[$i] . ' with message : ' . $messageList[$i]);
+                    }
                 }
                 
                 $this->mqtt->close();
