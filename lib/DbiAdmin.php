@@ -1494,6 +1494,11 @@ class DbiAdmin extends BaseDbi
         }
         return $this->getDataAll($sql);
     }
+    public function getNoReport($guardianList)
+    {
+        $sql = "select guardian_id, content, result from guardian_error where guardian_id in ($guardianList);";
+        return $this->getDataAll($sql);
+    }
     public function getPatientDiagnosis($hospital, $diagnosis, $startTime, $endTime)
     {
         $sql = "select d.patient_id, d.diagnosis_id, d.create_time, h.hospital_id, h.hospital_name, h.tel as hospital_tel,
