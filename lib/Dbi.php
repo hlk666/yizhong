@@ -404,7 +404,8 @@ class Dbi extends BaseDbi
         } else {
             $where = "regist_hospital_id = '$hospital'";
         }
-        $sql = "select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content, e.notice_flag, t.report_hospital
+        $sql = "select h.hospital_name, p.patient_name, e.guardian_id, e.create_time, content, e.notice_flag, e.result,
+                t.report_hospital
                 from guardian_error as e inner join guardian as g on e.guardian_id = g.guardian_id
                 inner join hospital as h on g.regist_hospital_id = h.hospital_id
                 inner join patient as p on g.patient_id = p.patient_id
@@ -413,7 +414,7 @@ class Dbi extends BaseDbi
         if (!empty($hospital)) {
             $sql .= " and regist_hospital_id = '$hospital'";
         }
-        if (!empty($notice)) {
+        if ($notice !== null) {
             $sql .= " and e.notice_flag = '$notice'";
         }
         if (!empty($startTime)) {
@@ -431,7 +432,7 @@ class Dbi extends BaseDbi
     }
     public function getHospitalByDevice($diviceId)
     {
-        $sql = "select d.hospital_id, h.hospital_name, h.tel as hospital_tel
+        $sql = "select d.hospital_id, h.hospital_name, h.tel as hospital_tel, h.agency_id
                 from device as d left join hospital as h on d.hospital_id = h.hospital_id
                 where device_id = '$diviceId' limit 1";
         return $this->getDataRow($sql);
@@ -703,49 +704,54 @@ class Dbi extends BaseDbi
             $hospitalizationId = '0', $startTime = null, $idc = '')
     {
         $birthYear = date('Y') - $age;
-        $sql = 'select patient_id from patient
-                where patient_name = :name and birth_year = :birth and tel = :tel limit 1';
-        $param = [':name' => $patientName, ':birth' => $birthYear, ':tel' => $tel];
-        $patientId = $this->getDataString($sql, $param);
+        $sql = "select patient_id from patient
+                where patient_name = '$patientName' and birth_year = '$birthYear' and tel = '$tel' limit 1";
+        $patientId = $this->getDataString($sql);
         if (VALUE_DB_ERROR === $patientId) {
             return VALUE_DB_ERROR;
         }
+        
+        $sql = "select analysis_hospital from hospital_tree where hospital_id = '$registHospital' limit 1";
+        $analysisHospital = $this->getDataString($sql);
+        if (VALUE_DB_ERROR === $analysisHospital) {
+            return VALUE_DB_ERROR;
+        }
+        if (empty($analysisHospital)) {
+            $analysisHospital = $registHospital;
+        }
+        
         $this->pdo->beginTransaction();
         //if patient not existed, add to patient table.
         if ('' == $patientId) {
-            $sql = 'insert into patient(patient_name, sex, birth_year, tel, address)
-                    values(:name, :sex, :birth, :tel, :address)';
-            $param = [':name' => $patientName, ':sex' => $sex, ':birth' => $birthYear,
-                            ':tel' => $tel, ':address' => $sickRoom];
-            $patientId = $this->insertData($sql, $param);
+            $sql = "insert into patient(patient_name, sex, birth_year, tel, address)
+                    values('$patientName', '$sex', '$birthYear', '$tel', '$sickRoom')";
+            $patientId = $this->insertData($sql);
             if (VALUE_DB_ERROR === $patientId) {
                 $this->pdo->rollBack();
                 return VALUE_DB_ERROR;
             }
         }
-        $sql = 'insert into guardian(device_id, regist_hospital_id, guard_hospital_id,
-                    patient_id, mode, guardian_hours, lead, doctor_id, status,
-                    sickroom, blood_pressure, height, weight, family_tel,
-                    tentative_diagnose, medical_history, regist_doctor_name, hospitalization_id, idc)
-                    values (:device, :regist_hospital, :guard_hospital, :patient, :mode,
-                    :hours, :lead, :doctor_id, 1, :sickroom, :blood_pressure, :height,
-                    :weight, :family_tel, :ten_dia, :medical_history, :doctor_name, :hospitalization_id, :idc)';
-        $param = [':device' => $device, ':regist_hospital' => $registHospital, ':guard_hospital' => $guardHospital,
-                        ':patient' => $patientId, ':mode' => $mode, ':hours' => $hours, ':lead' => $lead,
-                        ':doctor_id' => $doctor, ':sickroom' => $sickRoom, ':blood_pressure' => $bloodPressure,
-                        ':height' => $height, ':weight' => $weight, ':family_tel' => $familyTel,
-                        ':ten_dia' => $tentativeDiagnose, ':medical_history' => $medicalHistory,
-                        ':doctor_name' => $registDoctorName, ':hospitalization_id' => $hospitalizationId, ':idc' => $idc];
-        $guardianId = $this->insertData($sql, $param);
+        $sql = "insert into guardian (device_id, regist_hospital_id, guard_hospital_id, patient_id, mode, guardian_hours, lead, doctor_id, status,
+                    sickroom, blood_pressure, height, weight, family_tel, tentative_diagnose, medical_history, regist_doctor_name, hospitalization_id, idc)
+                    values ('$device', '$registHospital', '$guardHospital', '$patientId', '$mode', '$hours', '$lead', '$doctor', 1, 
+                    '$sickRoom', '$bloodPressure', '$height', '$weight', '$familyTel', '$tentativeDiagnose', '$medicalHistory', 
+                    '$registDoctorName', '$hospitalizationId', '$idc')";
+        $guardianId = $this->insertData($sql);
         if (VALUE_DB_ERROR === $guardianId) {
             $this->pdo->rollBack();
             return VALUE_DB_ERROR;
         }
         
+        $sql = "insert into guardian_data (guardian_id, moved_hospital) values ('$guardianId', '$analysisHospital')";
+        $ret = $this->insertData($sql);
+        if (VALUE_DB_ERROR === $ret) {
+            $this->pdo->rollBack();
+            return VALUE_DB_ERROR;
+        }
+        
         if ($startTime != null) {
-            $sql = 'update guardian set start_time = :start_time where guardian_id = :guardian_id';
-            $param = [':start_time' => $startTime, ':guardian_id' => $guardianId];
-            $ret = $this->updateData($sql, $param);
+            $sql = "update guardian set start_time = '$startTime' where guardian_id = '$guardianId'";
+            $ret = $this->updateData($sql);
             if (VALUE_DB_ERROR === $ret) {
                 $this->pdo->rollBack();
                 return VALUE_DB_ERROR;

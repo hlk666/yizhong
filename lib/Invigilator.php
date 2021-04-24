@@ -2,7 +2,7 @@
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_LIB . 'Dbi.php';
 require_once PATH_LIB . 'GeTui.php';
-require_once PATH_LIB . 'Mqtt.php';
+//require_once PATH_LIB . 'Mqtt.php';
 
 class Invigilator
 {
@@ -123,6 +123,11 @@ class Invigilator
             $data = [['type' => 'device', 'id' => $this->deviceId, 'event'=>'check_info', 'message'=>'patient_id=' . $this->guardianId]];
             $mqtt->publish($data);
         }
+        if (isset($data['new_mode'])) {
+            $mqtt = new Mqtt();
+            $data = [['type' => 'device', 'id' => $this->deviceId, 'event'=>'change_mode', 'message'=>'patient_id=' . $this->guardianId]];
+            $mqtt->publish($data);
+        }
         
         if ($this->gtFlag) {
             $clientId = $this->getClientId();
@@ -227,10 +232,12 @@ class Invigilator
             $this->info['start_time'] = time();
             $this->info['end_time'] = $this->info['start_time']
                 + $this->info['all_time'] * 3600;
+            /*
             $ret = Dbi::getDbi()->flowGuardianStartGuard($this->guardianId);
             if (VALUE_DB_ERROR === $ret) {
                 return VALUE_DB_ERROR;
             }
+            */
         }
         if ($action == 'end') {
             $ret = $this->setEnd();

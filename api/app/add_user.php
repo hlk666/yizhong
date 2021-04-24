@@ -4,6 +4,7 @@ require_once PATH_LIB . 'Validate.php';
 require_once PATH_LIB . 'Invigilator.php';
 require_once PATH_LIB . 'ShortMessageService.php';
 require_once PATH_LIB . 'Mqtt.php';
+require_once PATH_LIB . 'QinFangKangJian.php';
 
 validate_add_user($_POST);
 
@@ -29,6 +30,7 @@ if (empty($hospitalInfo)) {
     api_exit(['code' => '1', 'message' => MESSAGE_PARAM]);
 }
 $registHospital = $hospitalInfo['hospital_id'];
+$agency = $hospitalInfo['agency_id'];
 if (empty($registHospital)) {
     api_exit(['code' => '1', '设备未绑定。']);
 }
@@ -151,6 +153,17 @@ if (in_array($registHospital, [99999])) {
     }
 }
 //special action for zhongda end.
+//special action for hebei start.
+if ($agency == 139) {
+    $obj = new QinFangKangJian();
+    $retHebei = $obj->regist($guardianId);
+    if ($retHebei === false) {
+        ShortMessageService::send('13465596133', '河北省二院开单，但是调用接口失败，病人id：' . $guardianId);
+    } else {
+        ShortMessageService::send('13465596133', '河北省二院开单，传输数据成功，病人id：' . $guardianId);
+    }
+}
+//special action for hebei end.
 $invigilator = new Invigilator($guardianId, $hours);
 $param = array();
 if ('1' == $mode) {

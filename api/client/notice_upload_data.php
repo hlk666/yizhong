@@ -6,6 +6,7 @@ require_once PATH_LIB . 'Validate.php';
 //require_once PATH_ROOT . 'lib/tool/HpMessage.php';
 require_once PATH_LIB . 'ShortMessageService.php';
 require_once PATH_LIB . 'Mqtt.php';
+require_once PATH_LIB . 'QinFangKangJian.php';
 
 if (false === Validate::checkRequired($_POST['patient_id'])) {
     api_exit(['code' => '1', 'message' => MESSAGE_REQUIRED . 'patient_id.']);
@@ -121,7 +122,7 @@ if ($agency == 113) {
         $param['dataSource'] = '';
         $param['applyDept'] = '';
         $param['applyDoctor'] = '';
-        $param['applyDate'] = $patient['end_time'];
+        $param['applyDate'] = $patient['start_time'];
         $param['telephone'] = '';
         $param['operatorName'] = '';
         $param['recordDate'] = $patient['start_time'];
@@ -166,6 +167,17 @@ if ($agency == 113) {
     Logger::write('henan_agency.log', 'end: ' . $guardianId);
     api_exit_success();
 }
+//special action for hebei start.
+if ($agency == 139) {
+    $obj = new QinFangKangJian();
+    $retHebei = $obj->upload($guardianId);
+    if ($retHebei === false) {
+        ShortMessageService::send('13465596133', '河北省二院上传数据，但是调用接口失败，病人id：' . $guardianId);
+    } else {
+        ShortMessageService::send('13465596133', '河北省二院上传数据，传输数据成功，病人id：' . $guardianId);
+    }
+}
+//special action for hebei end.
 
 $noticeHospital1 = '0';
 $noticeHospital2 = '0';

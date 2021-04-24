@@ -1,9 +1,11 @@
 <?php
 require_once PATH_LIB . 'Logger.php';
 require_once PATH_ROOT . 'lib/DbiAnalytics.php';
+require_once PATH_ROOT . 'lib/Dbi.php';
 //require_once PATH_ROOT . 'lib/DbiChronic.php';
 require_once PATH_LIB . 'ShortMessageService.php';
-require PATH_LIB . 'Mqtt.php';
+require_once PATH_LIB . 'Mqtt.php';
+require_once PATH_LIB . 'QinFangKangJian.php';
 
 class AnalysisUpload
 {
@@ -68,6 +70,7 @@ class AnalysisUpload
         $reportDoctor = isset($param['report_doctor']) ? $param['report_doctor'] : '0';
         $tutorDoctor = isset($param['tutor_doctor']) ? $param['tutor_doctor'] : '0';
         $identity = isset($param['identity']) ? $param['identity'] : '2';  //only used in hbi case. '2' means common doctor.
+        $isHebei = isset($param['is_hebei']) ? '1' : '0';
         
         //message is 
         //0:only save file.
@@ -96,13 +99,45 @@ class AnalysisUpload
             }
         }
         
-        if ($type == 'hbi' && $tree['analysis_hospital'] != $tree['report_hospital']) {
-            $dbPatient = DbiAnalytics::getDbi()->getPatientWhenUploadReport($guardianId);
-            if (VALUE_DB_ERROR === $dbPatient || empty($dbPatient)) {
-                //do nothing.
-            } else {
-                setPatient($guardianId, $dbPatient);
+        $dbPatient = DbiAnalytics::getDbi()->getPatientWhenUploadReport($guardianId);
+        if (VALUE_DB_ERROR === $dbPatient || empty($dbPatient)) {
+            //do nothing.
+        } else {
+            //for anzhong.
+            if ($tree['report_hospital'] == '872') {
+                $dbPatient['diagnosis'] = isset($param['diagnosis']) ? $param['diagnosis'] : '';
             }
+            setPatient($guardianId, $dbPatient);
+        }
+        
+        //for anzhong start
+        if (Dbi::getDbi()->isAnzhongChild($tree['hospital_id'])) {
+            include_once PATH_LIB . 'AnZhong.php';
+            $isSuccess = AnZhong::report($guardianId);
+            if (!$isSuccess) {
+                ShortMessageService::send('13465596133', '安徽中医院上传报告，但是调用接口失败，病人id：' . $guardianId);
+            }
+        }
+        //for anzhong end
+        //special action for hebei start.
+        if ($isHebei == '1') {
+            $obj = new QinFangKangJian();
+            
+            $retFile = rename($file, PATH_ROOT . 'hebei' . DIRECTORY_SEPARATOR . $obj->getReportFile($guardianId));
+            if (false === $retFile) {
+                ShortMessageService::send('13465596133', '河北省二院出报告，但是文件重命名失败，病人id：' . $guardianId);
+            }
+            $diagnosis = isset($param['diagnosis']) ? $param['diagnosis'] : '';
+            $retHebei = $obj->report($guardianId, $param['report_doctor'], $diagnosis);
+            if ($retHebei === false) {
+                ShortMessageService::send('13465596133', '河北省二院出报告，但是调用接口失败，病人id：' . $guardianId);
+            } else {
+                ShortMessageService::send('13465596133', '河北省二院出报告，传输数据成功，病人id：' . $guardianId);
+            }
+        }
+        //special action for hebei end.
+        
+        if ($type == 'hbi' && $tree['analysis_hospital'] != $tree['report_hospital']) {
             $mqttMessage = 'patient_id=' . $guardianId
                 . ',data_status=' . $dbPatient['data_status']
                 . ',report_time=' . $dbPatient['report_time']
@@ -115,12 +150,6 @@ class AnalysisUpload
             $mqtt->publish($data);
         }
         if ($type == 'report' && $tree['hospital_id'] != $tree['report_hospital']) {
-            $dbPatient = DbiAnalytics::getDbi()->getPatientWhenUploadReport($guardianId);
-            if (VALUE_DB_ERROR === $dbPatient || empty($dbPatient)) {
-                //do nothing.
-            } else {
-                setPatient($guardianId, $dbPatient);
-            }
             $mqttMessage = 'patient_id=' . $guardianId
                 . ',data_status=' . $dbPatient['data_status']
                 . ',report_time=' . $dbPatient['report_time']
